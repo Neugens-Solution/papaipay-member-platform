@@ -4,15 +4,15 @@ import { memberProfile } from "@/lib/memberMockData";
 const navItems = [
   ["Dashboard", "/member/dashboard"],
   ["Opportunities", "/member/opportunities"],
-  ["My Participations", "#"],
-  ["Active Projects", "#"],
-  ["Completed Projects", "#"],
-  ["Distributions", "#"],
-  ["Notifications", "#"],
-  ["Announcements", "#"],
-  ["Profile & KYC", "#"],
-  ["Reports", "#"],
-  ["Settings", "#"],
+  ["My Participations", "/member/participations"],
+  ["Active Projects", "/member/projects/active"],
+  ["Completed Projects", "/member/projects/completed"],
+  ["Distributions", "/member/distributions"],
+  ["Notifications", "/member/notifications"],
+  ["Announcements", "/member/announcements"],
+  ["Profile & KYC", "/member/profile/kyc"],
+  ["Reports", "/member/reports"],
+  ["Settings", "/member/settings"],
 ];
 
 export function MemberShell({ children }: { children: React.ReactNode }) {
@@ -43,8 +43,8 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                 <h1 className="text-2xl font-bold">Welcome back, {memberProfile.firstName}</h1>
               </div>
               <div className="flex items-center gap-3">
-                <Link href="#" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Notifications</Link>
-                <Link href="#" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Announcements</Link>
+                <Link href="/member/notifications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Notifications</Link>
+                <Link href="/member/announcements" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Announcements</Link>
                 <div className="flex items-center gap-3 rounded-full bg-papaipay-mint px-3 py-2">
                   <div className="grid size-9 place-items-center rounded-full bg-papaipay-green text-sm font-bold text-white">AR</div>
                   <div className="hidden text-sm sm:block"><p className="font-semibold">{memberProfile.firstName} {memberProfile.lastName}</p><p className="text-slate-600">{memberProfile.memberNumber}</p></div>

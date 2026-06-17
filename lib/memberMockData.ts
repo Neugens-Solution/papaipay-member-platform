@@ -136,3 +136,42 @@ export const dashboardMetrics = [
   { label: "Completed Projects", value: "7", helper: "Historical outcomes" },
   { label: "Total Distribution", value: "$6,840", helper: "Paid and scheduled" },
 ];
+
+export const memberSections = {
+  participations: [
+    { title: "Greenview Residences", meta: "145 units requested", status: "under review", body: "Participation interest is being reviewed against campaign availability and member eligibility." },
+    { title: "Summit Medical Plaza", meta: "20 units drafted", status: "draft", body: "Draft participation details are ready for member review before submission." },
+  ],
+  activeProjects: [
+    { title: "Cedar Row Townhomes", meta: "Next milestone: exterior upgrades", status: "on track", body: "Renovation sequencing continues with monthly project commentary available to members." },
+    { title: "Northline Retail Center", meta: "Distribution preview: July 2026", status: "active", body: "Tenant improvement work is complete and lease-up progress remains within plan." },
+  ],
+  completedProjects: [
+    { title: "Lakeside Storage Portfolio", meta: "Completed March 2026", status: "complete", body: "Final outcome summary and distribution history are archived for member reporting." },
+    { title: "West Park Flats", meta: "Completed January 2026", status: "complete", body: "Project lifecycle records are available for historical review." },
+  ],
+  distributions: [
+    { title: "Cedar Row Townhomes", meta: "$1,240 scheduled", status: "scheduled", body: "Projected distribution is scheduled for July 12, 2026 through the member distribution channel." },
+    { title: "Lakeside Storage Portfolio", meta: "$2,850 paid", status: "paid", body: "Final distribution was recorded with reference PP-DIST-7782." },
+  ],
+  notifications: [
+    { title: "Opportunity status update", meta: "2026-06-16", status: "unread", body: "Harbor Point Logistics is approaching its campaign close date with limited units remaining." },
+    { title: "Profile review complete", meta: "2026-06-09", status: "read", body: "Your mock KYC profile remains approved for available member opportunities." },
+  ],
+  announcements: [
+    { title: "Member portal preview", meta: "2026-06-14", status: "published", body: "Dashboard and opportunity discovery pages are available for member portal review." },
+    { title: "Scheduled maintenance notice", meta: "2026-06-08", status: "published", body: "A future maintenance window will be announced before any production release activity." },
+  ],
+  profileKyc: [
+    { title: "Amina Rahman", meta: "PPM-10482", status: "approved", body: "Member profile, contact details, and KYC status are represented with mock data only." },
+    { title: "Document checklist", meta: "Identity and address", status: "complete", body: "Required verification checklist items are marked complete for prototype navigation." },
+  ],
+  reports: [
+    { title: "Member participation statement", meta: "Q2 2026", status: "available", body: "Mock statement summarizes participation activity and can be used for UI review." },
+    { title: "Distribution history report", meta: "Year to date", status: "available", body: "Mock report record shows distribution totals and related project references." },
+  ],
+  settings: [
+    { title: "Communication preferences", meta: "Email enabled", status: "active", body: "Preference controls are represented as read-only mock records for this foundation." },
+    { title: "Display settings", meta: "Default workspace", status: "active", body: "Member workspace display defaults are shown without persistence or backend storage." },
+  ],
+};
