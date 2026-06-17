@@ -5,8 +5,8 @@ export default function Page() {
   return (
     <MemberSectionPage
       eyebrow="Participations"
-      title="My Participations"
-      description="Review mock participation records and statuses without backend workflow logic."
+      title="Portfolio"
+      description="Review mock auction property participation records and statuses without backend workflow logic."
       items={memberSections.participations}
     />
   );

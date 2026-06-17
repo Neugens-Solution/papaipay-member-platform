@@ -9,7 +9,7 @@ export function generateStaticParams() {
 export default function OpportunityDetailPage({ params }: { params: { slug: string } }) {
   const opportunity = opportunities.find((item) => item.slug === params.slug);
   if (!opportunity) notFound();
-  const progress = Math.round((opportunity.fundedAmount / opportunity.targetAmount) * 100);
+  const progress = Math.round((opportunity.participationAmount / opportunity.targetAmount) * 100);
 
   return (
     <div className="space-y-8">
@@ -29,8 +29,8 @@ export default function OpportunityDetailPage({ params }: { params: { slug: stri
           <ContentCard><h2 className="text-xl font-bold">Media Gallery</h2><div className="mt-4 grid gap-3 sm:grid-cols-3">{opportunity.gallery.map((item) => <div key={item} className="grid h-28 place-items-center rounded-md border border-slate-100 bg-slate-50 p-4 text-center text-sm font-semibold text-slate-700">{item}</div>)}</div></ContentCard>
         </div>
         <aside className="space-y-5 xl:sticky xl:top-24 xl:self-start">
-          <ContentCard><h2 className="text-xl font-bold">Campaign Information</h2><div className="mt-5 space-y-3"><Info label="Unit Price" value={`RM ${opportunity.unitPrice.toLocaleString()}`} /><Info label="Target Amount" value={`RM ${opportunity.targetAmount.toLocaleString()}`} /><Info label="Available Units" value={`${opportunity.availableUnits} of ${opportunity.totalUnits}`} /><Info label="Campaign End Date" value={new Intl.DateTimeFormat("en", { month: "long", day: "numeric", year: "numeric" }).format(new Date(opportunity.closeDate))} /></div></ContentCard>
-          <ContentCard><h2 className="text-xl font-bold">Funding Progress</h2><div className="mt-4 flex justify-between text-sm font-semibold"><span>RM {opportunity.fundedAmount.toLocaleString()} funded</span><span>{progress}%</span></div><div className="mt-3"><ProgressBar value={progress} /></div></ContentCard>
+          <ContentCard><h2 className="text-xl font-bold">Campaign Information</h2><div className="mt-5 space-y-3"><Info label="Minimum Participation" value={`RM ${opportunity.minimumParticipation.toLocaleString()}`} /><Info label="Maximum Participation" value={`RM ${opportunity.maximumParticipation.toLocaleString()}`} /><Info label="Total Participation" value={`RM ${opportunity.targetAmount.toLocaleString()}`} /><Info label="Campaign End Date" value={new Intl.DateTimeFormat("en", { month: "long", day: "numeric", year: "numeric" }).format(new Date(opportunity.closeDate))} /></div></ContentCard>
+          <ContentCard><h2 className="text-xl font-bold">Campaign Progress</h2><div className="mt-4 flex justify-between text-sm font-semibold"><span>RM {opportunity.participationAmount.toLocaleString()} participating</span><span>{progress}%</span></div><div className="mt-3"><ProgressBar value={progress} /></div></ContentCard>
           <ContentCard className="border-papaipay-ink bg-papaipay-ink text-white"><h2 className="text-xl font-bold">Participation Interest</h2><p className="mt-3 text-sm leading-6 text-white/75">Mock participation call-to-action only. No payments, backend, authentication, or API routes are created.</p><button className="mt-5 min-h-12 w-full rounded-md bg-white px-5 py-3 text-sm font-bold text-papaipay-ink transition hover:bg-slate-50">Review Participation Interest</button></ContentCard>
         </aside>
       </section>

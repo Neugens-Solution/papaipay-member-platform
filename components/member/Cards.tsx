@@ -24,7 +24,7 @@ export function ProgressBar({ value }: { value: number }) {
 }
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
-  const progress = Math.round((opportunity.fundedAmount / opportunity.targetAmount) * 100);
+  const progress = Math.round((opportunity.participationAmount / opportunity.targetAmount) * 100);
   return (
     <Link href={`/member/opportunities/${opportunity.slug}`} className="group overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300">
       <div className="h-44 bg-cover bg-center sm:h-48" style={{ backgroundImage: `url(${opportunity.imageUrl})` }} />
@@ -37,8 +37,8 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <StatusBadge status={opportunity.status} />
         </div>
         <p className="text-sm leading-6 text-slate-600">{opportunity.summary}</p>
-        <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2"><Info label="Auction Type" value={opportunity.propertyType} /><Info label="Tenure" value={opportunity.tenure} /><Info label="Unit Price" value={`RM ${opportunity.unitPrice.toLocaleString()}`} /><Info label="Available Units" value={opportunity.availableUnits.toString()} /></div>
-        <div><div className="mb-2 flex justify-between text-sm font-bold"><span>Funding Progress</span><span>{progress}%</span></div><ProgressBar value={progress} /></div>
+        <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2"><Info label="Auction Type" value={opportunity.propertyType} /><Info label="Tenure" value={opportunity.tenure} /><Info label="Minimum Participation" value={`RM ${opportunity.minimumParticipation.toLocaleString()}`} /><Info label="Maximum Participation" value={`RM ${opportunity.maximumParticipation.toLocaleString()}`} /></div>
+        <div><div className="mb-2 flex justify-between text-sm font-bold"><span>Campaign Progress</span><span>{progress}%</span></div><ProgressBar value={progress} /></div>
         <p className="text-sm font-semibold text-slate-500">Campaign ends {new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(opportunity.closeDate))}</p>
       </div>
     </Link>
