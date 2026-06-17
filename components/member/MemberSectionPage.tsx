@@ -25,7 +25,7 @@ export function MemberSectionPage({
 }) {
   return (
     <div className="space-y-6">
-      <section className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] sm:p-8">
+      <section className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-8">
         <p className="text-xs font-bold uppercase tracking-[0.26em] text-papaipay-green">
           {eyebrow}
         </p>
@@ -33,7 +33,7 @@ export function MemberSectionPage({
         <p className="mt-3 max-w-3xl leading-7 text-slate-600">{description}</p>
         <Link
           href={actionHref}
-          className="mt-6 inline-flex min-h-11 items-center rounded-2xl bg-papaipay-ink px-5 py-3 text-sm font-bold text-white transition hover:bg-papaipay-green"
+          className="mt-6 inline-flex min-h-11 items-center rounded-lg bg-papaipay-ink px-5 py-3 text-sm font-bold text-white transition hover:bg-papaipay-green"
         >
           {actionLabel}
         </Link>
