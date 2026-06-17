@@ -4,10 +4,10 @@ import { memberSections } from "@/lib/memberMockData";
 export default function Page() {
   return (
     <MemberSectionPage
-      eyebrow="Active Projects"
-      title="Active Projects"
-      description="Follow mock active project milestones, status summaries, and upcoming distribution context."
-      items={memberSections.activeProjects}
+      eyebrow="Active Properties"
+      title="Active Properties"
+      description="Follow mock auction property milestones, status summaries, and upcoming distribution context."
+      items={memberSections.activeProperties}
     />
   );
 }
