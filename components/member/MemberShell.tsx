@@ -17,42 +17,61 @@ const navItems = [
 
 export function MemberShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f6f8f4] text-papaipay-ink">
+    <div className="min-h-screen bg-[#f8faf7] text-papaipay-ink">
       <div className="lg:flex">
-        <aside className="border-b border-emerald-950/10 bg-papaipay-ink text-white lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0">
-          <div className="flex items-center justify-between px-6 py-5 lg:block">
-            <Link href="/member/dashboard" className="block">
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-emerald-200">PAPAIPAY</p>
-              <p className="mt-1 text-xl font-bold">Member Portal</p>
-            </Link>
-            <div className="rounded-full bg-emerald-400/15 px-3 py-1 text-xs font-semibold text-emerald-100 lg:mt-6 lg:inline-block">KYC Approved</div>
+        <aside className="border-b border-slate-200/80 bg-white/95 shadow-[0_1px_0_rgba(15,23,42,0.04)] backdrop-blur lg:sticky lg:top-0 lg:h-screen lg:w-72 lg:border-b-0 lg:border-r lg:border-slate-200/80 lg:bg-white">
+          <div className="px-4 py-4 sm:px-6 lg:px-5 lg:py-6">
+            <div className="flex items-center justify-between gap-4 lg:block">
+              <Link href="/member/dashboard" className="block rounded-2xl focus:outline-none focus:ring-2 focus:ring-papaipay-green/30">
+                <p className="text-[0.7rem] font-bold uppercase tracking-[0.32em] text-papaipay-green">PAPAIPAY</p>
+                <p className="mt-1 text-lg font-bold tracking-tight text-papaipay-ink sm:text-xl">Member Portal</p>
+              </Link>
+              <div className="rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700 lg:mt-6 lg:inline-flex">
+                KYC Approved
+              </div>
+            </div>
+
+            <details className="group mt-4 lg:hidden">
+              <summary className="flex min-h-12 cursor-pointer list-none items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-800 transition hover:bg-white">
+                Member navigation
+                <span className="text-papaipay-green transition group-open:rotate-180">⌄</span>
+              </summary>
+              <nav className="mt-3 grid gap-2 rounded-3xl border border-slate-200 bg-white p-2 shadow-sm">
+                {navItems.map(([label, href]) => (
+                  <Link key={label} href={href} className="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-papaipay-green">
+                    {label}
+                  </Link>
+                ))}
+              </nav>
+            </details>
           </div>
-          <nav className="flex gap-2 overflow-x-auto px-4 pb-5 lg:block lg:space-y-1 lg:overflow-visible">
+
+          <nav className="hidden px-4 pb-6 lg:block lg:space-y-1">
             {navItems.map(([label, href]) => (
-              <Link key={label} href={href} className="whitespace-nowrap rounded-2xl px-4 py-3 text-sm font-medium text-white/75 transition hover:bg-white/10 hover:text-white lg:block">
+              <Link key={label} href={href} className="block rounded-2xl px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-emerald-50 hover:text-papaipay-green">
                 {label}
               </Link>
             ))}
           </nav>
         </aside>
         <div className="min-w-0 flex-1">
-          <header className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/85 px-5 py-4 backdrop-blur lg:px-8">
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <header className="sticky top-0 z-10 border-b border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur sm:px-6 lg:px-8">
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.25em] text-papaipay-green">Member Workspace</p>
-                <h1 className="text-2xl font-bold">Welcome back, {memberProfile.firstName}</h1>
+                <p className="text-xs font-bold uppercase tracking-[0.24em] text-papaipay-green">Member Workspace</p>
+                <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-3xl">Welcome back, {memberProfile.firstName}</h1>
               </div>
-              <div className="flex items-center gap-3">
-                <Link href="/member/notifications" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Notifications</Link>
-                <Link href="/member/announcements" className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold shadow-sm">Announcements</Link>
-                <div className="flex items-center gap-3 rounded-full bg-papaipay-mint px-3 py-2">
-                  <div className="grid size-9 place-items-center rounded-full bg-papaipay-green text-sm font-bold text-white">AR</div>
-                  <div className="hidden text-sm sm:block"><p className="font-semibold">{memberProfile.firstName} {memberProfile.lastName}</p><p className="text-slate-600">{memberProfile.memberNumber}</p></div>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <Link href="/member/notifications" className="min-h-11 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-papaipay-green/30 hover:text-papaipay-green">Notifications</Link>
+                <Link href="/member/announcements" className="min-h-11 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 shadow-sm transition hover:border-papaipay-green/30 hover:text-papaipay-green">Announcements</Link>
+                <div className="flex min-h-11 items-center gap-3 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-2 sm:px-3">
+                  <div className="grid size-9 shrink-0 place-items-center rounded-full bg-papaipay-green text-sm font-bold text-white">AR</div>
+                  <div className="hidden text-sm sm:block"><p className="font-bold leading-tight">{memberProfile.firstName} {memberProfile.lastName}</p><p className="text-slate-500">{memberProfile.memberNumber}</p></div>
                 </div>
               </div>
             </div>
           </header>
-          <main className="px-5 py-8 lg:px-8">{children}</main>
+          <main className="px-4 py-6 sm:px-6 lg:px-8 lg:py-8">{children}</main>
         </div>
       </div>
     </div>

@@ -25,15 +25,15 @@ export function MemberSectionPage({
 }) {
   return (
     <div className="space-y-6">
-      <section className="rounded-[2.5rem] bg-white p-8 shadow-soft">
-        <p className="text-sm font-semibold uppercase tracking-[0.3em] text-papaipay-green">
+      <section className="rounded-3xl border border-slate-200/80 bg-white p-5 shadow-[0_14px_40px_rgba(15,23,42,0.06)] sm:p-8">
+        <p className="text-xs font-bold uppercase tracking-[0.26em] text-papaipay-green">
           {eyebrow}
         </p>
-        <h2 className="mt-3 text-4xl font-bold tracking-tight">{title}</h2>
+        <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h2>
         <p className="mt-3 max-w-3xl leading-7 text-slate-600">{description}</p>
         <Link
           href={actionHref}
-          className="mt-6 inline-flex rounded-2xl bg-papaipay-ink px-5 py-3 text-sm font-bold text-white"
+          className="mt-6 inline-flex min-h-11 items-center rounded-2xl bg-papaipay-ink px-5 py-3 text-sm font-bold text-white transition hover:bg-papaipay-green"
         >
           {actionLabel}
         </Link>
@@ -41,7 +41,7 @@ export function MemberSectionPage({
       <section className="grid gap-4 lg:grid-cols-2">
         {items.map((item) => (
           <ContentCard key={item.title}>
-            <div className="flex items-start justify-between gap-4">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div>
                 <p className="text-sm font-semibold text-papaipay-green">{item.meta}</p>
                 <h3 className="mt-2 text-xl font-bold">{item.title}</h3>
