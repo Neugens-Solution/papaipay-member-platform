@@ -130,3 +130,145 @@ export const memberSections = {
   ],
   notifications: [], announcements: [], profileKyc: [], activeProperties: [], completedProperties: []
 };
+
+export type PortfolioStatus =
+  | "Open Campaign"
+  | "Property Secured"
+  | "Renovation In Progress"
+  | "Listed For Sale"
+  | "Under Offer"
+  | "Distribution Processing"
+  | "Completed";
+
+export type DistributionState = "Pending" | "Processing" | "Completed";
+
+export type PortfolioRecord = {
+  slug: string;
+  propertyName: string;
+  location: string;
+  participationAmount: number;
+  status: PortfolioStatus;
+  latestUpdate: string;
+  distributionStatus: DistributionState;
+  distributionReceived?: number;
+  paidDate?: string;
+  updates: { date: string; title: string }[];
+  property: {
+    propertyType: string;
+    tenure: string;
+    bumiStatus: string;
+    targetAmount: number;
+    collectedAmount: number;
+    currentParticipants: number;
+  };
+};
+
+export const portfolioRecords: PortfolioRecord[] = [
+  {
+    slug: "kajang-terrace-house",
+    propertyName: "Kajang Terrace House",
+    location: "Kajang, Selangor",
+    participationAmount: 10000,
+    status: "Renovation In Progress",
+    latestUpdate: "Renovation 60% completed",
+    distributionStatus: "Pending",
+    updates: [
+      { date: "12 Jun 2026", title: "Valuation report uploaded" },
+      { date: "18 Jun 2026", title: "Legal review completed" },
+      { date: "24 Jun 2026", title: "Renovation progress updated" },
+    ],
+    property: { propertyType: "Terrace House", tenure: "Freehold", bumiStatus: "Non-Bumi Lot", targetAmount: 600000, collectedAmount: 420000, currentParticipants: 128 },
+  },
+  {
+    slug: "shah-alam-terrace-house",
+    propertyName: "Shah Alam Terrace House",
+    location: "Shah Alam, Selangor",
+    participationAmount: 32000,
+    status: "Open Campaign",
+    latestUpdate: "Campaign collection reached 85%",
+    distributionStatus: "Pending",
+    updates: [
+      { date: "04 Jun 2026", title: "Auction documents reviewed" },
+      { date: "11 Jun 2026", title: "Campaign opened for members" },
+      { date: "17 Jun 2026", title: "Collection progress refreshed" },
+    ],
+    property: { propertyType: "Terrace House", tenure: "Leasehold", bumiStatus: "Open Market", targetAmount: 720000, collectedAmount: 612000, currentParticipants: 146 },
+  },
+  {
+    slug: "ampang-terrace-house",
+    propertyName: "Ampang Terrace House",
+    location: "Ampang, Selangor",
+    participationAmount: 18000,
+    status: "Property Secured",
+    latestUpdate: "Title search completed",
+    distributionStatus: "Pending",
+    updates: [
+      { date: "02 Jun 2026", title: "Campaign closed after target review" },
+      { date: "09 Jun 2026", title: "Auction bid confirmed" },
+      { date: "16 Jun 2026", title: "Title search completed" },
+    ],
+    property: { propertyType: "Terrace House", tenure: "Freehold", bumiStatus: "Open Market", targetAmount: 560000, collectedAmount: 302400, currentParticipants: 94 },
+  },
+  {
+    slug: "cheras-apartment",
+    propertyName: "Cheras Apartment",
+    location: "Cheras, Kuala Lumpur",
+    participationAmount: 12500,
+    status: "Listed For Sale",
+    latestUpdate: "Sale listing published",
+    distributionStatus: "Pending",
+    updates: [
+      { date: "28 May 2026", title: "Repair works completed" },
+      { date: "06 Jun 2026", title: "Agent viewing schedule confirmed" },
+      { date: "14 Jun 2026", title: "Sale listing published" },
+    ],
+    property: { propertyType: "Apartment", tenure: "Leasehold", bumiStatus: "Non-Bumi Lot", targetAmount: 360000, collectedAmount: 360000, currentParticipants: 88 },
+  },
+  {
+    slug: "seremban-semi-d",
+    propertyName: "Seremban Semi-D",
+    location: "Seremban, Negeri Sembilan",
+    participationAmount: 24000,
+    status: "Distribution Processing",
+    latestUpdate: "Distribution batch approved",
+    distributionStatus: "Processing",
+    updates: [
+      { date: "25 May 2026", title: "Buyer balance payment received" },
+      { date: "03 Jun 2026", title: "Completion statement prepared" },
+      { date: "15 Jun 2026", title: "Distribution batch approved" },
+    ],
+    property: { propertyType: "Semi-D", tenure: "Freehold", bumiStatus: "Open Market", targetAmount: 820000, collectedAmount: 820000, currentParticipants: 164 },
+  },
+  {
+    slug: "bangi-terrace-house",
+    propertyName: "Bangi Terrace House",
+    location: "Bangi, Selangor",
+    participationAmount: 8000,
+    status: "Completed",
+    latestUpdate: "Distribution paid to member account",
+    distributionStatus: "Completed",
+    distributionReceived: 9600,
+    paidDate: "15 Aug 2026",
+    updates: [
+      { date: "18 Jul 2026", title: "Sale completed" },
+      { date: "05 Aug 2026", title: "Distribution processing completed" },
+      { date: "15 Aug 2026", title: "Distribution paid to member account" },
+    ],
+    property: { propertyType: "Terrace House", tenure: "Freehold", bumiStatus: "Non-Bumi Lot", targetAmount: 540000, collectedAmount: 540000, currentParticipants: 112 },
+  },
+  {
+    slug: "subang-condominium",
+    propertyName: "Subang Condominium",
+    location: "Subang Jaya, Selangor",
+    participationAmount: 20500,
+    status: "Under Offer",
+    latestUpdate: "Buyer offer accepted pending legal review",
+    distributionStatus: "Pending",
+    updates: [
+      { date: "30 May 2026", title: "Viewing completed with shortlisted buyers" },
+      { date: "10 Jun 2026", title: "Buyer offer received" },
+      { date: "19 Jun 2026", title: "Buyer offer accepted pending legal review" },
+    ],
+    property: { propertyType: "Condominium", tenure: "Leasehold", bumiStatus: "Open Market", targetAmount: 650000, collectedAmount: 650000, currentParticipants: 139 },
+  },
+];
