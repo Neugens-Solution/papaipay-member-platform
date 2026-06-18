@@ -18,34 +18,34 @@ const bottomNavItems = [
 
 export function MemberShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#f8faf7] text-papaipay-ink">
+    <div className="min-h-screen bg-[#f7f8f5] text-papaipay-ink">
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
-        <aside className="hidden border-r border-slate-200 bg-white/95 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-64 lg:flex-none">
-          <div className="px-5 py-6">
+        <aside className="hidden border-r border-slate-200/70 bg-white/90 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-52 lg:flex-none">
+          <div className="px-5 py-7">
             <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-papaipay-green/30">
-              <p className="text-[0.68rem] font-bold uppercase tracking-[0.28em] text-papaipay-green">PAPAIPAY</p>
-              <p className="mt-1 text-base font-bold tracking-tight text-papaipay-ink">Member Portal</p>
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-papaipay-green">PAPAIPAY</p>
+              <p className="mt-1.5 text-sm font-semibold tracking-tight text-papaipay-ink">Member Portal</p>
             </Link>
           </div>
-          <nav className="space-y-1 px-4 pb-6">
+          <nav className="space-y-1.5 px-3 pb-6">
             {navItems.map(([label, href]) => (
-              <Link key={label} href={href} className="block rounded-md px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-papaipay-green">
+              <Link key={label} href={href} className="block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium text-slate-500 transition hover:bg-slate-50 hover:text-papaipay-green">
                 {label}
               </Link>
             ))}
           </nav>
         </aside>
         <div className="min-w-0 flex-1 lg:h-screen lg:overflow-y-auto">
-          <header className="sticky top-0 z-20 border-b border-slate-200 bg-white/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
               <Link href="/member/dashboard" className="rounded-md lg:hidden">
                 <p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
-                <Link href="/member/notifications" aria-label="Notifications" className="grid min-h-10 min-w-10 place-items-center rounded-md border border-slate-200 text-base text-slate-700 transition hover:border-papaipay-green/30 hover:text-papaipay-green">🔔</Link>
-                <Link href="/member/announcements" aria-label="Announcements" className="grid min-h-10 min-w-10 place-items-center rounded-md border border-slate-200 text-base text-slate-700 transition hover:border-papaipay-green/30 hover:text-papaipay-green">📣</Link>
+                <Link href="/member/notifications" aria-label="Notifications" className="grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-base text-slate-600 transition hover:border-papaipay-green/30 hover:text-papaipay-green">🔔</Link>
+                <Link href="/member/announcements" aria-label="Announcements" className="grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-base text-slate-600 transition hover:border-papaipay-green/30 hover:text-papaipay-green">📣</Link>
                 <details className="group relative">
-                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-bold text-white transition hover:bg-papaipay-green">AR</summary>
+                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">AR</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
                     <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
                       My Profile
@@ -58,7 +58,7 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
               </div>
             </div>
           </header>
-          <main className="px-4 py-6 pb-24 sm:px-6 lg:px-8 lg:py-8 lg:pb-8">{children}</main>
+          <main className="px-4 py-7 pb-24 sm:px-6 lg:px-10 lg:py-10 lg:pb-10">{children}</main>
         </div>
       </div>
       <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden">
