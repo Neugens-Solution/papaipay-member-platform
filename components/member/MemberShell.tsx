@@ -6,7 +6,6 @@ const navItems = [
   ["Portfolio", "/member/portfolio"],
   ["Distributions", "/member/distributions"],
   ["Reports", "/member/reports"],
-  ["Settings", "/member/settings"],
 ];
 
 const bottomNavItems = [
@@ -16,7 +15,6 @@ const bottomNavItems = [
   ["Distributions", "/member/distributions", "RM"],
 ];
 
-const profileItems = ["Personal Information", "Bank Account", "Security", "KYC"];
 
 export function MemberShell({ children }: { children: React.ReactNode }) {
   return (
@@ -49,11 +47,12 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                 <details className="group relative">
                   <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-bold text-white transition hover:bg-papaipay-green">AR</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
-                    {profileItems.map((item) => (
-                      <Link key={item} href="/member/profile/kyc" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
-                        {item}
-                      </Link>
-                    ))}
+                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
+                      My Profile
+                    </Link>
+                    <Link href="/" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
+                      Logout
+                    </Link>
                   </div>
                 </details>
               </div>
@@ -73,7 +72,6 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
             <summary className="flex min-h-14 cursor-pointer list-none flex-col items-center justify-center rounded-md px-1 text-[0.68rem] font-bold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green"><span className="text-base leading-none">⋯</span><span className="mt-1">More</span></summary>
             <div className="absolute bottom-16 right-0 w-44 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
               <Link href="/member/reports" className="block rounded-md px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">Reports</Link>
-              <Link href="/member/settings" className="block rounded-md px-3 py-3 text-sm font-semibold text-slate-600 hover:bg-slate-50">Settings</Link>
             </div>
           </details>
         </div>
