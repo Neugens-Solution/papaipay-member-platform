@@ -4,8 +4,9 @@ import { dashboardMetrics } from "@/lib/memberMockData";
 export default function MemberDashboardPage() {
   return (
     <div className="mx-auto w-full max-w-7xl space-y-8">
-      <header>
+      <header className="max-w-2xl">
         <h1 className="text-2xl font-semibold tracking-[-0.03em] text-papaipay-ink sm:text-3xl">Dashboard</h1>
+        <p className="mt-2 text-sm leading-6 text-slate-500">View your participation summary and distribution activity.</p>
       </header>
 
       <section aria-label="Member performance summary" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

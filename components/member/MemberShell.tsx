@@ -9,7 +9,7 @@ const navItems = [
   ["Listings", "/member/opportunities"],
   ["Portfolio", "/member/portfolio"],
   ["Distributions", "/member/distributions"],
-  ["Reports", "/member/reports"],
+  ["Profile", "/member/profile"],
 ];
 
 const bottomNavItems = [
