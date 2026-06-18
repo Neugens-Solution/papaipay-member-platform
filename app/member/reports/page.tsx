@@ -1,8 +1,7 @@
-import Link from "next/link";
 import { ContentCard, StatusBadge } from "@/components/member/Cards";
 import { reportRecords } from "@/lib/memberMockData";
 
-const categories = ["Participation Statements", "Distribution Statements", "Annual Summaries", "Receipts"];
+const categories = ["Participation Statements", "Distribution Statements", "Annual Summaries"];
 
 export default function Page() {
   return (
@@ -11,7 +10,7 @@ export default function Page() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">Reports</h1>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-3">
         {categories.map((category) => (
           <div key={category} className="rounded-lg border border-slate-200 bg-white p-4">
             <p className="text-sm font-bold text-papaipay-ink">{category}</p>
@@ -36,7 +35,7 @@ export default function Page() {
                 <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 lg:hidden">Status</p>
                 <StatusBadge status={report.status} />
               </div>
-              <Link href={`/member/reports/${report.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green transition hover:bg-papaipay-green hover:text-white">View</Link>
+              <button className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green transition hover:bg-papaipay-green hover:text-white">View</button>
               <button className="min-h-10 rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Download</button>
             </div>
           ))}

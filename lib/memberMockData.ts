@@ -323,7 +323,7 @@ export const distributionRecords: DistributionRecord[] = [
     status: "Paid",
     paidDate: "28 May 2026",
     referenceNumber: "PP-DIST-2026-0528",
-    notes: "Receipt is available for this completed payment record.",
+    notes: "Payment confirmation is available for this completed distribution record.",
   },
   {
     slug: "kajang-terrace-house-pending",
@@ -345,7 +345,7 @@ export const distributionRecords: DistributionRecord[] = [
     status: "Completed",
     paidDate: "10 Apr 2026",
     referenceNumber: "PP-DIST-2026-0410",
-    notes: "Distribution and receipt records have been marked completed.",
+    notes: "Distribution records have been marked completed.",
   },
 ];
 
@@ -394,7 +394,7 @@ export const reportRecords: ReportRecord[] = [
       participationAmount: 12500,
       participationRecords: 1,
       distributionAmount: 2850,
-      distributionNote: "One paid distribution receipt is available.",
+      distributionNote: "One paid distribution record is available.",
       propertyRecords: ["Cheras Terrace House"],
     },
   },
@@ -411,21 +411,6 @@ export const reportRecords: ReportRecord[] = [
       distributionAmount: 8500,
       distributionNote: "Distribution records include paid and completed payments only.",
       propertyRecords: ["Bangi Terrace House", "Cheras Terrace House", "Ipoh Terrace House"],
-    },
-  },
-  {
-    slug: "receipt-bangi-terrace-house-aug-2026",
-    reportName: "Receipt Bangi Terrace House",
-    reportType: "Receipts",
-    period: "Aug 2026",
-    generatedDate: "15 Aug 2026",
-    status: "Available",
-    content: {
-      participationAmount: 8000,
-      participationRecords: 1,
-      distributionAmount: 2200,
-      distributionNote: "Receipt generated for the completed distribution payment.",
-      propertyRecords: ["Bangi Terrace House"],
     },
   },
 ];

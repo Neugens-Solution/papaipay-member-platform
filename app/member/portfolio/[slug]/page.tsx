@@ -21,6 +21,7 @@ export default function PortfolioDetailPage({ params }: { params: { slug: string
   const currentIndex = timeline.findIndex((item) => item === record.status);
   return (
     <div className="space-y-5">
+      <Link href="/member/portfolio" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Portfolio</Link>
       <header className="rounded-lg border border-slate-200 bg-white p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
           <div><h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">{record.propertyName}</h1><p className="mt-1 text-sm text-slate-500">{record.location}</p></div>
@@ -35,7 +36,7 @@ export default function PortfolioDetailPage({ params }: { params: { slug: string
         </div>
         <aside className="space-y-5">
           <ContentCard><h2 className="text-lg font-bold">Distribution Summary</h2><div className="mt-4 space-y-3"><Info label="Status" value={record.distributionStatus} />{record.distributionStatus === "Completed" ? <><Info label="Participation Amount" value={formatRM(record.participationAmount)} /><Info label="Distribution Received" value={formatRM(record.distributionReceived ?? 0)} /><Info label="Paid Date" value={record.paidDate ?? "-"} /></> : null}</div></ContentCard>
-          <ContentCard><h2 className="text-lg font-bold">Property Summary</h2><div className="mt-4 grid gap-3"><Info label="Property Type" value={record.property.propertyType} /><Info label="Tenure" value={record.property.tenure} /><Info label="Bumi Status" value={record.property.bumiStatus} /><Info label="Target Amount" value={formatRM(record.property.targetAmount)} /><Info label="Collected Amount" value={formatRM(record.property.collectedAmount)} /><Info label="Current Participants" value={`${record.property.currentParticipants}`} /></div><Link href={`/member/opportunities/${record.slug}`} className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white hover:bg-papaipay-green/90">View Original Listing</Link></ContentCard>
+          <ContentCard><h2 className="text-lg font-bold">Property Summary</h2><div className="mt-4 grid gap-3"><Info label="Property Type" value={record.property.propertyType} /><Info label="Tenure" value={record.property.tenure} /><Info label="Bumi Status" value={record.property.bumiStatus} /><Info label="Target Amount" value={formatRM(record.property.targetAmount)} /><Info label="Collected Amount" value={formatRM(record.property.collectedAmount)} /><Info label="Current Participants" value={`${record.property.currentParticipants}`} /></div><Link href="/member/opportunities" className="mt-5 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white hover:bg-papaipay-green/90">View Original Listing</Link><Link href="/member/portfolio" className="mt-3 inline-flex min-h-11 w-full items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-papaipay-green hover:text-papaipay-green">Back to Portfolio</Link></ContentCard>
         </aside>
       </section>
     </div>
