@@ -51,6 +51,7 @@ export const memberProfileDetails = {
   },
   verification: {
     status: "Verified",
+    verifiedDate: "12 June 2026",
   },
   bank: {
     bankName: "Maybank",
