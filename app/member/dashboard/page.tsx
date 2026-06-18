@@ -4,13 +4,12 @@ import { announcements, dashboardMetrics, myProperties, recentUpdates } from "@/
 
 export default function MemberDashboardPage() {
   return (
-    <div className="space-y-7">
+    <div className="space-y-6">
       <header className="max-w-3xl">
         <h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">Dashboard</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600 sm:text-base">A compact snapshot of your auction property participation activity.</p>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
         {dashboardMetrics.map((metric) => <MetricCard key={metric.label} {...metric} />)}
       </section>
 

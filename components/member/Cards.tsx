@@ -11,10 +11,10 @@ export function ContentCard({ children, className = "" }: { children: React.Reac
 
 export function MetricCard({ label, value, helper }: { label: string; value: string; helper: string }) {
   return (
-    <ContentCard className="">
-      <p className="text-sm font-bold text-slate-500">{label}</p>
-      <p className="mt-3 text-2xl font-bold tracking-tight text-papaipay-ink">{value}</p>
-      <p className="mt-2 text-sm leading-6 text-slate-500">{helper}</p>
+    <ContentCard className="p-4 sm:p-4">
+      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
+      <p className="mt-2 text-xl font-bold tracking-tight text-papaipay-ink">{value}</p>
+      <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
     </ContentCard>
   );
 }
@@ -24,27 +24,59 @@ export function ProgressBar({ value }: { value: number }) {
 }
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
-  const progress = Math.round((opportunity.participationAmount / opportunity.targetAmount) * 100);
+  const progress = Math.round((opportunity.collectedAmount / opportunity.targetAmount) * 100);
+  const daysRemaining = Math.max(0, Math.ceil((new Date(opportunity.closeDate).getTime() - new Date("2026-06-17").getTime()) / 86400000));
+  const detailHref = `/member/opportunities/${opportunity.slug}`;
+  const statusLabel = opportunity.status.replace(/\b\w/g, (char) => char.toUpperCase());
+
   return (
-    <Link href={`/member/opportunities/${opportunity.slug}`} className="group overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300">
-      <div className="h-44 bg-cover bg-center sm:h-48" style={{ backgroundImage: `url(${opportunity.imageUrl})` }} />
-      <div className="space-y-4 p-5">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h3 className="text-lg font-bold tracking-tight group-hover:text-papaipay-green">{opportunity.title}</h3>
-            <p className="mt-1 text-sm text-slate-500">{opportunity.location}</p>
-          </div>
-          <StatusBadge status={opportunity.status} />
+    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300">
+      <Link href={detailHref} className="group block">
+        <div className="relative h-44 bg-cover bg-center sm:h-48" style={{ backgroundImage: `url(${opportunity.imageUrl})` }}>
+          <span className="absolute left-3 top-3 rounded-md bg-white/95 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">{statusLabel}</span>
         </div>
-        <p className="text-sm leading-6 text-slate-600">{opportunity.summary}</p>
-        <div className="grid grid-cols-1 gap-3 text-sm sm:grid-cols-2"><Info label="Auction Type" value={opportunity.propertyType} /><Info label="Tenure" value={opportunity.tenure} /><Info label="Minimum Participation" value={`RM ${opportunity.minimumParticipation.toLocaleString()}`} /><Info label="Maximum Participation" value={`RM ${opportunity.maximumParticipation.toLocaleString()}`} /></div>
-        <div><div className="mb-2 flex justify-between text-sm font-bold"><span>Campaign Progress</span><span>{progress}%</span></div><ProgressBar value={progress} /></div>
-        <p className="text-sm font-semibold text-slate-500">Campaign ends {new Intl.DateTimeFormat("en", { month: "short", day: "numeric", year: "numeric" }).format(new Date(opportunity.closeDate))}</p>
+      </Link>
+      <div className="space-y-4 p-5">
+        <div>
+          <Link href={detailHref} className="group">
+            <h3 className="text-lg font-bold tracking-tight group-hover:text-papaipay-green">{opportunity.title}</h3>
+          </Link>
+          <p className="mt-1 text-sm text-slate-500">{opportunity.location}</p>
+        </div>
+
+        <div>
+          <ProgressBar value={progress} />
+          <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
+            <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
+            <p>{progress}% Campaign Progress</p>
+          </div>
+        </div>
+
+        <dl className="space-y-2 text-sm">
+          <DetailRow label="Participants" value={`${opportunity.participants} Participants`} />
+          <DetailRow label="Days Remaining" value={`${daysRemaining} Days Remaining`} />
+          <DetailRow label="Participation Range" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
+          <DetailRow label="Property Type" value={opportunity.propertyType} />
+          <DetailRow label="Tenure" value={opportunity.tenure} />
+        </dl>
+
+        <Link href={detailHref} className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
+          View Details
+        </Link>
       </div>
-    </Link>
+    </article>
+  );
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
+      <dt className="text-slate-500">{label}</dt>
+      <dd className="text-right font-semibold text-slate-800">{value}</dd>
+    </div>
   );
 }
 
 export function Info({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-lg border border-slate-100 bg-slate-50/80 p-3"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 font-bold text-slate-800">{value}</p></div>;
+  return <div className="rounded-md border border-slate-100 bg-slate-50/80 p-3"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 font-bold text-slate-800">{value}</p></div>;
 }
