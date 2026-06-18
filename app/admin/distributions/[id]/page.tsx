@@ -1,2 +1,47 @@
-import { BackLink, Badge, Card, InfoGrid, PageHeader } from "@/components/admin/AdminUI";import { distributions } from "@/lib/adminMockData";
-export default function DistributionDetailPage(){const d=distributions[0];return <div className="mx-auto max-w-5xl space-y-6"><BackLink href="/admin/distributions"/><PageHeader eyebrow={d.id} title="Distribution Detail" description="Campaign, member and distribution information with placeholder status controls."/><section className="grid gap-4 lg:grid-cols-2"><Card><h2 className="font-bold">Campaign Information</h2><InfoGrid items={[{label:"Campaign",value:d.campaign},{label:"Participation",value:d.participation}]}/></Card><Card><h2 className="font-bold">Member Information</h2><InfoGrid items={[{label:"Member",value:d.member},{label:"Member ID",value:"PPM-10482"}]}/></Card><Card><h2 className="font-bold">Distribution Information</h2><InfoGrid items={[{label:"Amount",value:d.amount},{label:"Paid Date",value:d.paid},{label:"Reference",value:d.id}]}/></Card><Card><h2 className="font-bold">Update Status</h2><div className="mt-4"><Badge>{d.status}</Badge></div><select className="mt-4 min-h-11 w-full rounded-lg border border-slate-200 px-3"><option>Pending</option><option>Processing</option><option>Completed</option></select><button className="mt-3 rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Update Status</button></Card></section><Card><h2 className="font-bold">Status Timeline</h2>{["Distribution record created","Batch queued for processing","Payment reference recorded"].map((x,i)=><p key={x} className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">Step {i+1}: {x}</p>)}</Card></div>}
+import { BackLink, Badge, Card, InfoGrid, PageHeader } from "@/components/admin/AdminUI";
+import { distributions } from "@/lib/adminMockData";
+
+const steps = ["Pending", "Processing", "Completed"];
+
+export default function DistributionDetailPage() {
+  const distribution = distributions[0];
+  const currentIndex = steps.indexOf(distribution.status);
+
+  return (
+    <div className="mx-auto max-w-5xl space-y-6">
+      <BackLink href="/admin/distributions" />
+      <PageHeader eyebrow={distribution.id} title="Distribution Detail" description="Campaign, member and distribution information with a prototype workflow status experience." />
+
+      <Card>
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+          {steps.map((step, index) => {
+            const active = index <= currentIndex;
+            return (
+              <div key={step} className="flex flex-1 items-center gap-3">
+                <div className={`grid h-11 w-11 flex-none place-items-center rounded-full text-sm font-bold ring-1 ${active ? "bg-papaipay-green text-white ring-papaipay-green" : "bg-white text-slate-400 ring-slate-200"}`}>{index + 1}</div>
+                <div>
+                  <p className="text-sm font-bold text-papaipay-ink">{step}</p>
+                  <p className="text-xs text-slate-500">{active ? "Reached" : "Awaiting"}</p>
+                </div>
+                {index < steps.length - 1 ? <div className="hidden h-px flex-1 bg-slate-200 sm:block" /> : null}
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <Card><h2 className="font-bold">Campaign Information</h2><InfoGrid items={[{ label: "Campaign", value: distribution.campaign }, { label: "Participation", value: distribution.participation }]} /></Card>
+        <Card><h2 className="font-bold">Member Information</h2><InfoGrid items={[{ label: "Member", value: distribution.member }, { label: "Member ID", value: "PPM-10482" }]} /></Card>
+        <Card><h2 className="font-bold">Distribution Information</h2><InfoGrid items={[{ label: "Amount", value: distribution.amount }, { label: "Paid Date", value: distribution.paid }, { label: "Reference", value: distribution.id }]} /></Card>
+        <Card>
+          <h2 className="font-bold">Prototype Status Controls</h2>
+          <div className="mt-4"><Badge>{distribution.status}</Badge></div>
+          <div className="mt-4 grid gap-2 sm:grid-cols-3">{steps.map((step) => <button key={step} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:border-papaipay-green hover:text-papaipay-green">Mark {step}</button>)}</div>
+        </Card>
+      </section>
+
+      <Card><h2 className="font-bold">Status Timeline</h2>{["Distribution record created", "Batch queued for processing", "Payment reference recorded"].map((item, index) => <p key={item} className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">Step {index + 1}: {item}</p>)}</Card>
+    </div>
+  );
+}

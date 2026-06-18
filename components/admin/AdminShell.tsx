@@ -10,6 +10,7 @@ const navItems = [
   ["Distributions", "/admin/distributions"],
   ["Reports", "/admin/reports"],
   ["Announcements", "/admin/announcements"],
+  ["Activity Log", "/admin/activity-log"],
   ["Admin Users", "/admin/admin-users"],
 ] as const;
 
