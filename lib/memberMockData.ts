@@ -51,6 +51,7 @@ export const memberProfileDetails = {
   },
   verification: {
     status: "Verified",
+    verifiedDate: "12 June 2026",
   },
   bank: {
     bankName: "Maybank",
@@ -120,12 +121,14 @@ export const opportunities: Opportunity[] = [
 }));
 
 export const dashboardMetrics = [
-  { label: "Total Participation", value: "RM125,000", helper: "Across member records" },
-  { label: "Active Properties", value: "4", helper: "Open or in progress" },
-  { label: "Completed Properties", value: "2", helper: "Completed records" },
-  { label: "Distribution Received", value: "RM8,500", helper: "Recorded to date" },
-  { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion" },
-  { label: "Distribution Processing", value: "RM3,200", helper: "Scheduled processing" },
+  { label: "Total Participation", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
+  { label: "Active Properties", value: "4", helper: "Currently active records", trend: "+1 property this month" },
+  { label: "Completed Properties", value: "2", helper: "Completed participation records", trend: "+1 this quarter" },
+  { label: "Distribution Received", value: "RM8,500", helper: "Recorded to date", trend: "+RM850 this month" },
+  { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion", trend: "2 records pending" },
+  { label: "Distribution Processing", value: "RM3,200", helper: "Scheduled processing", trend: "Next cycle in review" },
+  { label: "This Month Distribution", value: "RM850", helper: "June distribution activity", trend: "+8.2% month over month" },
+  { label: "Average Estimated Outcome", value: "7.8%", helper: "Illustrative, not guaranteed", trend: "Portfolio estimate" },
 ];
 
 export const myProperties = [

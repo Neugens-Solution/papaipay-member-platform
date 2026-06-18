@@ -16,7 +16,7 @@ export default function Page() {
         <h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">Distributions</h1>
       </header>
 
-      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
         {distributionStats.map((stat) => (
           <MetricCard key={stat.label} {...stat} />
         ))}

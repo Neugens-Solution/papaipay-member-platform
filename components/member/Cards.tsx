@@ -6,16 +6,17 @@ export function StatusBadge({ status }: { status: string }) {
 }
 
 export function ContentCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
-  return <section className={`rounded-lg border border-slate-200 bg-white p-5 sm:p-6 ${className}`}>{children}</section>;
+  return <section className={`rounded-xl border border-slate-200/70 bg-white p-5 sm:p-6 ${className}`}>{children}</section>;
 }
 
-export function MetricCard({ label, value, helper }: { label: string; value: string; helper: string }) {
+export function MetricCard({ label, value, helper, trend }: { label: string; value: string; helper: string; trend?: string }) {
   return (
-    <ContentCard className="p-4 sm:p-4">
-      <p className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</p>
-      <p className="mt-2 text-xl font-bold tracking-tight text-papaipay-ink">{value}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
-    </ContentCard>
+    <article className="min-w-0 rounded-2xl border border-slate-200/60 bg-white/85 p-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-slate-300/80 sm:p-5">
+      <p className="truncate text-[0.65rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</p>
+      <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink sm:text-3xl">{value}</p>
+      <p className="mt-2 text-xs leading-5 text-slate-500 sm:text-sm">{helper}</p>
+      {trend ? <p className="mt-4 inline-flex rounded-full bg-emerald-50 px-2 py-1 text-[0.68rem] font-semibold text-papaipay-green">{trend}</p> : null}
+    </article>
   );
 }
 
