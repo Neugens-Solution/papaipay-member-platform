@@ -68,12 +68,6 @@ export const memberProfileDetails = {
     passwordStatus: "Active",
     lastLogin: "18 Jun 2026, 09:24 AM",
   },
-  communicationPreferences: [
-    { label: "Campaign Updates", enabled: true },
-    { label: "Progress Updates", enabled: true },
-    { label: "Distribution Notifications", enabled: true },
-    { label: "Announcements", enabled: false },
-  ],
 };
 
 export const opportunities: Opportunity[] = [
@@ -128,7 +122,7 @@ export const dashboardMetrics = [
   { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion", trend: "2 records pending" },
   { label: "Distribution Processing", value: "RM3,200", helper: "Scheduled processing", trend: "Next cycle in review" },
   { label: "This Month Distribution", value: "RM850", helper: "June distribution activity", trend: "+8.2% month over month" },
-  { label: "Average Estimated Outcome", value: "7.8%", helper: "Illustrative, not guaranteed", trend: "Portfolio estimate" },
+  { label: "Estimated Outcome Range", value: "7.8%", helper: "Illustrative, not guaranteed", trend: "Portfolio estimate" },
 ];
 
 export const myProperties = [
@@ -165,7 +159,7 @@ export const memberSections = {
 };
 
 export type PortfolioStatus =
-  | "Open Campaign"
+  | "Campaign Opened"
   | "Property Secured"
   | "Renovation In Progress"
   | "Listed For Sale"
@@ -217,7 +211,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     propertyName: "Shah Alam Terrace House",
     location: "Shah Alam, Selangor",
     participationAmount: 32000,
-    status: "Open Campaign",
+    status: "Campaign Opened",
     latestUpdate: "Campaign collection reached 85%",
     distributionStatus: "Pending",
     updates: [

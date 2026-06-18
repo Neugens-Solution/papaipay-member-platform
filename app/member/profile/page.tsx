@@ -21,11 +21,9 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
     <section className="rounded-2xl border border-slate-200/70 bg-white/90 px-4 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:px-5 sm:py-5">
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</h2>
-        {action}
-      </div>
+      <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</h2>
       <dl className="mt-3">{children}</dl>
+      {action ? <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">{action}</div> : null}
     </section>
   );
 }
@@ -151,7 +149,7 @@ export default function MemberProfilePage() {
           <InfoRow label="IC Number" value={profile.nominee.icNumberMasked} />
         </Section>
 
-        <Section title="Security" action={<ActionButton onClick={() => setModal("password")}>Change Password</ActionButton>}>
+        <Section title="Password" action={<ActionButton onClick={() => setModal("password")}>Change Password</ActionButton>}>
           <InfoRow label="Password Status" value={profile.security.passwordStatus} />
           <InfoRow label="Last Login" value={profile.security.lastLogin} />
           <InfoRow label="Two-Factor Authentication" value="Coming Soon" />
