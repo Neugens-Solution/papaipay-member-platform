@@ -1,7 +1,7 @@
 import { BackLink, Card, PageHeader } from "@/components/admin/AdminUI";
 
 export default function CreateAnnouncementPage() {
-  return <div className="mx-auto max-w-4xl space-y-6"><BackLink href="/admin/announcements" /><PageHeader eyebrow="Announcements" title="Create Announcement" description="Frontend prototype for publishing admin announcements." /><AnnouncementForm /></div>;
+  return <div className="mx-auto max-w-4xl space-y-6"><BackLink href="/admin/announcements" /><PageHeader title="Create Announcement" description="Frontend prototype for publishing admin announcements." /><AnnouncementForm /></div>;
 }
 
 function AnnouncementForm() {

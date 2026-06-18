@@ -11,7 +11,7 @@ const toneClasses: Record<string, string> = {
 export default function AdminDashboardPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-8">
-      <PageHeader eyebrow="Admin" title="Dashboard" description="A data-rich overview of members, listings, participation and distribution operations." />
+      <PageHeader title="Dashboard" description="A data-rich overview of members, listings, participation and distribution operations." />
 
       <section aria-label="Operational Summary" className="space-y-3">
         <h2 className="text-lg font-bold tracking-tight">Operational Summary</h2>

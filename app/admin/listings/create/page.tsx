@@ -16,7 +16,7 @@ export default function CreateListingPage() {
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <BackLink href="/admin/listings" />
-      <PageHeader eyebrow="Listings" title="Create Listing" description="Frontend prototype for drafting and publishing a campaign listing." />
+      <PageHeader title="Create Listing" description="Frontend prototype for drafting and publishing a campaign listing." />
       <Card>
         <div className="grid gap-4 sm:grid-cols-2">
           {fields.map((field) => (

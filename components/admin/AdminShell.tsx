@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import type { SVGProps } from "react";
 
 const navItems = [
   ["Dashboard", "/admin/dashboard"],
@@ -42,12 +43,20 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
           <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
               <Link href="/admin/dashboard" className="rounded-md lg:hidden"><p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY Admin</p></Link>
-              <div className="hidden min-w-0 overflow-x-auto lg:block">
-                <div className="flex gap-2">
-                  {navItems.map(([label, href]) => <Link key={label} href={href} className={`whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-bold ${activePath(pathname, href) ? "bg-papaipay-ink text-white" : "text-slate-500 hover:bg-slate-100"}`}>{label}</Link>)}
-                </div>
+              <div className="ml-auto flex items-center gap-2">
+                <HeaderIconLink href="/admin/activity-log" label="Notifications" icon={BellIcon} hasUnread />
+                <details className="group relative">
+                  <summary aria-label="Admin profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">SA</summary>
+                  <div className="absolute right-0 mt-2 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+                    <div className="px-3 py-2">
+                      <p className="text-sm font-bold text-papaipay-ink">Sarah Lim</p>
+                      <p className="mt-1 text-xs text-slate-500">Super Admin</p>
+                    </div>
+                    <Link href="/admin/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">Admin Profile</Link>
+                    <Link href="/" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">Portal Access</Link>
+                  </div>
+                </details>
               </div>
-              <div className="ml-auto grid min-h-10 min-w-10 place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white">SA</div>
             </div>
           </header>
           <main className="px-4 py-7 pb-28 sm:px-6 lg:px-10 lg:py-10">{children}</main>
@@ -60,4 +69,19 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
       </nav>
     </div>
   );
+}
+
+type IconComponent = (props: SVGProps<SVGSVGElement>) => JSX.Element;
+
+function HeaderIconLink({ href, label, icon: Icon, hasUnread = false }: { href: string; label: string; icon: IconComponent; hasUnread?: boolean }) {
+  return (
+    <Link href={href} aria-label={label} className="relative grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition hover:border-papaipay-green/30 hover:bg-slate-50 hover:text-papaipay-green">
+      <Icon className="h-5 w-5" />
+      {hasUnread ? <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-papaipay-green ring-2 ring-white" /> : null}
+    </Link>
+  );
+}
+
+function BellIcon(props: SVGProps<SVGSVGElement>) {
+  return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}><path d="M18 9.8A6 6 0 0 0 6 9.8c0 6-2.2 6.7-2.2 6.7h16.4S18 15.8 18 9.8" /><path d="M10 19a2 2 0 0 0 4 0" /></svg>;
 }

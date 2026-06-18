@@ -1,24 +1,29 @@
-import { Badge, Card, PageHeader } from "@/components/admin/AdminUI";
+import { Badge, PageHeader, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { activityLog } from "@/lib/adminMockData";
+
+const activityRows = [
+  { activity: "Member Created", user: "Hafiz Omar", dateTime: "18 Jun 2026, 10:42", type: "Member" },
+  { activity: "Member Updated", user: "Sarah Lim", dateTime: "18 Jun 2026, 10:05", type: "Member" },
+  { activity: "Listing Created", user: "Mei Wong", dateTime: "17 Jun 2026, 18:20", type: "Listing" },
+  { activity: "Listing Updated", user: "Mei Wong", dateTime: "17 Jun 2026, 16:48", type: "Listing" },
+  { activity: "Distribution Completed", user: "Finance Admin", dateTime: "17 Jun 2026, 14:12", type: "Distribution" },
+  { activity: "Announcement Published", user: "Sarah Lim", dateTime: "17 Jun 2026, 11:24", type: "Announcement" },
+  ...activityLog,
+];
 
 export default function ActivityLogPage() {
   return (
-    <div className="mx-auto max-w-5xl space-y-6">
-      <PageHeader eyebrow="Activity Log" title="Activity Log" description="Recent system activity across members, campaigns, distributions and announcements." />
-      <Card>
-        <div className="space-y-1">
-          {activityLog.map((item, index) => (
-            <div key={`${item.activity}-${item.dateTime}`} className="relative grid gap-3 border-l border-slate-200 pb-6 pl-6 last:pb-0 sm:grid-cols-[1fr_auto]">
-              <span className="absolute -left-[7px] top-1 h-3 w-3 rounded-full bg-papaipay-green ring-4 ring-emerald-50" />
-              <div>
-                <p className="text-sm font-bold text-papaipay-ink">{item.activity}</p>
-                <p className="mt-1 text-sm text-slate-500">{item.user} • {item.dateTime}</p>
-              </div>
-              <div className="sm:text-right"><Badge>{item.type}</Badge><p className="mt-1 text-xs text-slate-400">#{String(index + 1).padStart(3, "0")}</p></div>
-            </div>
-          ))}
-        </div>
-      </Card>
+    <div className="mx-auto max-w-7xl space-y-6">
+      <PageHeader title="Activity Log" description="Recent system activity across members, campaigns, distributions and announcements." />
+      <div className="grid gap-3 sm:grid-cols-3">
+        <input className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-papaipay-green" placeholder="Date Range" />
+        <input className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-papaipay-green" placeholder="User" />
+        <select className="min-h-11 rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none focus:border-papaipay-green"><option>Action Type</option><option>Member</option><option>Listing</option><option>Distribution</option><option>Announcement</option></select>
+      </div>
+      <TableWrap>
+        <thead><tr><Th>Activity</Th><Th>User</Th><Th>Date & Time</Th><Th>Type</Th></tr></thead>
+        <tbody>{activityRows.map((item, index) => <tr key={`${item.activity}-${index}`} className="border-t border-slate-100"><Td><b className="text-papaipay-ink">{item.activity}</b></Td><Td>{item.user}</Td><Td>{item.dateTime}</Td><Td><Badge>{item.type}</Badge></Td></tr>)}</tbody>
+      </TableWrap>
     </div>
   );
 }

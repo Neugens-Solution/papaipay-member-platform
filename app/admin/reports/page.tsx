@@ -4,7 +4,7 @@ import { adminKpis, exportCentreItems, reportGroups } from "@/lib/adminMockData"
 export default function ReportsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <PageHeader eyebrow="Reports" title="Reports & Analytics" description="Member, participation, listing and distribution reporting with placeholder export actions." />
+      <PageHeader title="Reports & Analytics" description="Member, participation, listing and distribution reporting with placeholder export actions." />
 
       <Card>
         <h2 className="text-lg font-bold tracking-tight">Export Centre</h2>

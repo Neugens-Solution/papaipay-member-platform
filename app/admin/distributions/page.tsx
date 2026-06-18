@@ -1,2 +1,13 @@
-import Link from "next/link";import { Badge, PageHeader, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";import { distributions } from "@/lib/adminMockData";
-export default function DistributionsPage(){return <div className="mx-auto max-w-7xl space-y-6"><PageHeader eyebrow="Distributions" title="Distribution Management" description="View pending, processing and completed member distributions."/><SearchFilter placeholder="Search distributions"/><TableWrap><thead><tr><Th>Campaign</Th><Th>Member</Th><Th>Participation Amount</Th><Th>Distribution Amount</Th><Th>Status</Th><Th>Paid Date</Th><Th>Actions</Th></tr></thead><tbody>{distributions.map(d=><tr key={d.id} className="border-t border-slate-100"><Td>{d.campaign}</Td><Td>{d.member}</Td><Td>{d.participation}</Td><Td>{d.amount}</Td><Td><Badge>{d.status}</Badge></Td><Td>{d.paid}</Td><Td><Link className="font-bold text-papaipay-green" href={`/admin/distributions/${d.id}`}>View</Link></Td></tr>)}</tbody></TableWrap></div>}
+import Link from "next/link";
+import { Badge, PageHeader, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import { distributions } from "@/lib/adminMockData";
+
+export default function DistributionsPage() {
+  return (
+    <div className="mx-auto max-w-7xl space-y-6">
+      <PageHeader title="Distributions" description="View pending, processing and completed member distributions." />
+      <SearchFilter placeholder="Search distributions" />
+      <TableWrap><thead><tr><Th>Campaign</Th><Th>Member</Th><Th>Participation Amount</Th><Th>Distribution Amount</Th><Th>Status</Th><Th>Paid Date</Th><Th>Actions</Th></tr></thead><tbody>{distributions.map((distribution) => <tr key={distribution.id} className="border-t border-slate-100"><Td>{distribution.campaign}</Td><Td>{distribution.member}</Td><Td>{distribution.participation}</Td><Td>{distribution.amount}</Td><Td><Badge>{distribution.status}</Badge></Td><Td>{distribution.paid}</Td><Td><Link className="font-bold text-papaipay-green" href={`/admin/distributions/${distribution.id}`}>View</Link></Td></tr>)}</tbody></TableWrap>
+    </div>
+  );
+}

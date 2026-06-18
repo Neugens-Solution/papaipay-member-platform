@@ -5,7 +5,7 @@ import { members } from "@/lib/adminMockData";
 export default function MembersPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <PageHeader eyebrow="Members" title="Members" description="Search, filter and review complete member account activity." />
+      <PageHeader title="Members" description="Search, filter and review complete member account activity." />
       <SearchFilter placeholder="Search members" />
       <TableWrap>
         <thead>

@@ -4,7 +4,7 @@ export default function EditAnnouncementPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
       <BackLink href="/admin/announcements" />
-      <PageHeader eyebrow="Announcements" title="Edit Announcement" description="Update announcement title, content, audience, publish date and status." />
+      <PageHeader title="Edit Announcement" description="Update announcement title, content, audience, publish date and status." />
       <Card>
         <div className="grid gap-4">
           <label><span className="text-sm font-bold">Title</span><input defaultValue="June distribution window" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 px-3" /></label>
