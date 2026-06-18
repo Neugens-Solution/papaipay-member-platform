@@ -272,3 +272,160 @@ export const portfolioRecords: PortfolioRecord[] = [
     property: { propertyType: "Condominium", tenure: "Leasehold", bumiStatus: "Open Market", targetAmount: 650000, collectedAmount: 650000, currentParticipants: 139 },
   },
 ];
+
+export function formatRM(amount: number) {
+  return `RM ${amount.toLocaleString("en-MY")}`;
+}
+
+export type DistributionStatus = "Pending" | "Processing" | "Paid" | "Completed";
+
+export type DistributionRecord = {
+  slug: string;
+  propertyName: string;
+  location: string;
+  participationAmount: number;
+  distributionAmount: number;
+  status: DistributionStatus;
+  paidDate: string;
+  referenceNumber: string;
+  notes: string;
+};
+
+export const distributionRecords: DistributionRecord[] = [
+  {
+    slug: "bangi-terrace-house-completion",
+    propertyName: "Bangi Terrace House",
+    location: "Bangi, Selangor",
+    participationAmount: 8000,
+    distributionAmount: 2200,
+    status: "Completed",
+    paidDate: "15 Aug 2026",
+    referenceNumber: "PP-DIST-2026-0815",
+    notes: "Distribution completed after final auction residential property records were reconciled.",
+  },
+  {
+    slug: "seremban-terrace-house-processing",
+    propertyName: "Seremban Terrace House",
+    location: "Seremban, Negeri Sembilan",
+    participationAmount: 24000,
+    distributionAmount: 3200,
+    status: "Processing",
+    paidDate: "Processing",
+    referenceNumber: "PP-DIST-2026-0712",
+    notes: "Payment file is being reviewed before release to the member account.",
+  },
+  {
+    slug: "cheras-terrace-house-paid",
+    propertyName: "Cheras Terrace House",
+    location: "Cheras, Kuala Lumpur",
+    participationAmount: 12500,
+    distributionAmount: 2850,
+    status: "Paid",
+    paidDate: "28 May 2026",
+    referenceNumber: "PP-DIST-2026-0528",
+    notes: "Receipt is available for this completed payment record.",
+  },
+  {
+    slug: "kajang-terrace-house-pending",
+    propertyName: "Kajang Terrace House",
+    location: "Kajang, Selangor",
+    participationAmount: 10000,
+    distributionAmount: 5000,
+    status: "Pending",
+    paidDate: "Pending",
+    referenceNumber: "PP-DIST-2026-0904",
+    notes: "Distribution amount is pending completion checks for the auction residential property record.",
+  },
+  {
+    slug: "ipoh-terrace-house-completed",
+    propertyName: "Ipoh Terrace House",
+    location: "Ipoh, Perak",
+    participationAmount: 27500,
+    distributionAmount: 3450,
+    status: "Completed",
+    paidDate: "10 Apr 2026",
+    referenceNumber: "PP-DIST-2026-0410",
+    notes: "Distribution and receipt records have been marked completed.",
+  },
+];
+
+export type ReportStatus = "Available" | "Ready" | "Generated";
+
+export type ReportRecord = {
+  slug: string;
+  reportName: string;
+  reportType: string;
+  period: string;
+  generatedDate: string;
+  status: ReportStatus;
+  content: {
+    participationAmount: number;
+    participationRecords: number;
+    distributionAmount: number;
+    distributionNote: string;
+    propertyRecords: string[];
+  };
+};
+
+export const reportRecords: ReportRecord[] = [
+  {
+    slug: "participation-statement-q2-2026",
+    reportName: "Participation Statement Q2 2026",
+    reportType: "Participation Statements",
+    period: "Apr 2026 - Jun 2026",
+    generatedDate: "18 Jun 2026",
+    status: "Available",
+    content: {
+      participationAmount: 60500,
+      participationRecords: 3,
+      distributionAmount: 0,
+      distributionNote: "No distribution payment recorded for this period.",
+      propertyRecords: ["Kajang Terrace House", "Shah Alam Terrace House", "Ipoh Terrace House"],
+    },
+  },
+  {
+    slug: "distribution-statement-may-2026",
+    reportName: "Distribution Statement May 2026",
+    reportType: "Distribution Statements",
+    period: "May 2026",
+    generatedDate: "01 Jun 2026",
+    status: "Ready",
+    content: {
+      participationAmount: 12500,
+      participationRecords: 1,
+      distributionAmount: 2850,
+      distributionNote: "One paid distribution receipt is available.",
+      propertyRecords: ["Cheras Terrace House"],
+    },
+  },
+  {
+    slug: "annual-summary-2026-preview",
+    reportName: "Annual Summary 2026 Preview",
+    reportType: "Annual Summaries",
+    period: "Jan 2026 - Jun 2026",
+    generatedDate: "18 Jun 2026",
+    status: "Generated",
+    content: {
+      participationAmount: 93000,
+      participationRecords: 5,
+      distributionAmount: 8500,
+      distributionNote: "Distribution records include paid and completed payments only.",
+      propertyRecords: ["Bangi Terrace House", "Cheras Terrace House", "Ipoh Terrace House"],
+    },
+  },
+  {
+    slug: "receipt-bangi-terrace-house-aug-2026",
+    reportName: "Receipt Bangi Terrace House",
+    reportType: "Receipts",
+    period: "Aug 2026",
+    generatedDate: "15 Aug 2026",
+    status: "Available",
+    content: {
+      participationAmount: 8000,
+      participationRecords: 1,
+      distributionAmount: 2200,
+      distributionNote: "Receipt generated for the completed distribution payment.",
+      propertyRecords: ["Bangi Terrace House"],
+    },
+  },
+];
