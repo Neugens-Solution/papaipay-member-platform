@@ -11,7 +11,7 @@ export default function ListingDetailPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <BackLink href="/admin/listings" />
-      <PageHeader eyebrow="CAMPAIGN DETAIL" title={listing.name} description="Overview, participants, updates, documents and distribution records for this campaign." />
+      <PageHeader eyebrow="CAMPAIGN DETAIL" title={listing.name} description="Overview, participants, updates, documents and distribution records for this campaign." action={<a className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" href="/admin/listings/kajang-terrace-house/edit">Edit Listing</a>} />
       <div className="flex gap-2 overflow-x-auto pb-1">{["Overview", "Participants", "Updates", "Documents", "Distributions"].map((tab) => <span key={tab} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{tab}</span>)}</div>
 
       <section className="grid gap-4 lg:grid-cols-[1fr_.8fr]">
