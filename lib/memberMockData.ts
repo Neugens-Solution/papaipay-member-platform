@@ -41,6 +41,40 @@ const terraceImages = [
 
 export const memberProfile = { firstName: "Amina", lastName: "Rahman", memberNumber: "PPM-10482", email: "amina.rahman@example.com", kycStatus: "approved" };
 
+export const memberProfileDetails = {
+  personal: {
+    fullName: "Amina Binti Rahman",
+    icNumberMasked: "900812-14-••••",
+    email: "amina.rahman@example.com",
+    phone: "+60 12-438 9210",
+    address: "No. 18, Jalan Anggerik 3, Taman Bukit Indah, 68000 Ampang, Selangor",
+  },
+  verification: {
+    status: "Verified",
+  },
+  bank: {
+    bankName: "Maybank",
+    accountHolderName: "Amina Binti Rahman",
+    accountNumber: "5142 38•• ••9021",
+  },
+  nominee: {
+    name: "Farid Bin Rahman",
+    relationship: "Brother",
+    phone: "+60 13-772 1844",
+    icNumberMasked: "880421-10-••••",
+  },
+  security: {
+    passwordStatus: "Active",
+    lastLogin: "18 Jun 2026, 09:24 AM",
+  },
+  communicationPreferences: [
+    { label: "Campaign Updates", enabled: true },
+    { label: "Progress Updates", enabled: true },
+    { label: "Distribution Notifications", enabled: true },
+    { label: "Announcements", enabled: false },
+  ],
+};
+
 export const opportunities: Opportunity[] = [
   ["opp-kajang", "kajang-terrace-house", "Kajang Terrace House", "open", "Kajang, Selangor", "Selangor", 600000, 420000, 128, "2026-07-15"],
   ["opp-shah-alam", "shah-alam-terrace-house", "Shah Alam Terrace House", "closing soon", "Shah Alam, Selangor", "Selangor", 720000, 612000, 146, "2026-06-30"],
@@ -123,10 +157,6 @@ export const memberSections = {
   reports: [
     { title: "Member participation statement", meta: "Q2 2026", status: "available", body: "Mock statement summarizes participation activity and can be used for UI review." },
     { title: "Distribution history report", meta: "Year to date", status: "available", body: "Mock report record shows distribution totals and related auction property references." },
-  ],
-  settings: [
-    { title: "Communication preferences", meta: "Email enabled", status: "active", body: "Preference controls are represented as read-only mock records for this foundation." },
-    { title: "Display settings", meta: "Default workspace", status: "active", body: "Member workspace display defaults are shown without persistence or backend storage." },
   ],
   notifications: [], announcements: [], profileKyc: [], activeProperties: [], completedProperties: []
 };
