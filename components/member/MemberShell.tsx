@@ -3,7 +3,7 @@ import Link from "next/link";
 const navItems = [
   ["Dashboard", "/member/dashboard"],
   ["Listings", "/member/opportunities"],
-  ["Portfolio", "/member/participations"],
+  ["Portfolio", "/member/portfolio"],
   ["Distributions", "/member/distributions"],
   ["Reports", "/member/reports"],
   ["Settings", "/member/settings"],
@@ -12,7 +12,7 @@ const navItems = [
 const bottomNavItems = [
   ["Dashboard", "/member/dashboard", "⌂"],
   ["Listings", "/member/opportunities", "▤"],
-  ["Portfolio", "/member/participations", "◫"],
+  ["Portfolio", "/member/portfolio", "◫"],
   ["Distributions", "/member/distributions", "RM"],
 ];
 
