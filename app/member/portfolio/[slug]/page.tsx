@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { ContentCard, Info } from "@/components/member/Cards";
 import { portfolioRecords, type PortfolioStatus } from "@/lib/memberMockData";
 
-const timeline = ["Open Campaign", "Property Secured", "Renovation In Progress", "Listed For Sale", "Under Offer", "Sold", "Distribution Processing", "Completed"];
+const timeline = ["Campaign Opened", "Property Secured", "Renovation In Progress", "Listed For Sale", "Under Offer", "Sold", "Distribution Processing", "Completed"];
 const formatRM = (value: number) => `RM${value.toLocaleString()}`;
 
 function statusClasses(status: PortfolioStatus) {
-  if (status === "Open Campaign") return "border-blue-200 bg-blue-50 text-blue-700";
+  if (status === "Campaign Opened") return "border-blue-200 bg-blue-50 text-blue-700";
   if (status === "Distribution Processing") return "border-purple-200 bg-purple-50 text-purple-700";
   if (status === "Completed") return "border-green-200 bg-green-50 text-green-700";
   return "border-amber-200 bg-amber-50 text-amber-700";
@@ -31,7 +31,7 @@ export default function PortfolioDetailPage({ params }: { params: { slug: string
       </header>
       <section className="grid gap-5 xl:grid-cols-[1.3fr_.7fr]">
         <div className="space-y-5">
-          <ContentCard><h2 className="text-lg font-bold">Timeline</h2><ol className="mt-4 space-y-2">{timeline.map((item, index) => <li key={item} className={`rounded-md border p-3 text-sm font-semibold ${index <= currentIndex ? "border-papaipay-green/20 bg-green-50/70 text-papaipay-green" : "border-slate-100 bg-slate-50 text-slate-500"}`}>{item}</li>)}</ol></ContentCard>
+          <ContentCard><h2 className="text-lg font-bold">Timeline</h2><ol className="mt-4 space-y-3">{timeline.map((item, index) => { const state = index < currentIndex ? "completed" : index === currentIndex ? "current" : "upcoming"; return <li key={item} className={`flex items-center justify-between rounded-xl border p-3 text-sm font-semibold ${state === "completed" ? "border-emerald-200 bg-emerald-50 text-papaipay-green" : state === "current" ? "border-papaipay-green/40 bg-white text-papaipay-ink shadow-[0_0_0_3px_rgba(70,148,85,0.10)]" : "border-slate-100 bg-slate-50 text-slate-400"}`}><span>{item}</span><span className={`grid h-6 w-6 place-items-center rounded-full text-xs ${state === "completed" ? "bg-papaipay-green text-white" : state === "current" ? "bg-papaipay-ink text-white" : "bg-slate-200 text-slate-400"}`}>{state === "completed" ? "✓" : index + 1}</span></li>; })}</ol></ContentCard>
           <ContentCard><h2 className="text-lg font-bold">Latest Updates</h2><div className="mt-4 space-y-3">{record.updates.map((update) => <article key={`${update.date}-${update.title}`} className="rounded-md border border-slate-100 bg-slate-50/70 p-4"><p className="text-sm font-bold text-papaipay-green">{update.date}</p><p className="mt-1 text-sm font-semibold text-slate-700">{update.title}</p></article>)}</div></ContentCard>
         </div>
         <aside className="space-y-5">

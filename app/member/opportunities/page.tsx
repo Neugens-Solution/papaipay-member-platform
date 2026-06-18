@@ -18,9 +18,9 @@ export default function OpportunitiesPage() {
     <div className="space-y-6">
       <header className="space-y-4">
         <h1 className="text-2xl font-semibold tracking-[-0.03em] text-papaipay-ink sm:text-3xl">Listings</h1>
-        <div className="sticky top-[65px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:static sm:mx-0 sm:border-0 sm:bg-transparent sm:p-0">
+        <div className="sticky top-[65px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/90 sm:p-3 sm:shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
           <div className="flex gap-2 md:grid md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-3">
-            <input className={`${inputClass} min-w-0 flex-1`} placeholder="Search listings" />
+            <input className={`${inputClass} min-w-0 flex-1`} placeholder="Search Listings" />
             <div className="hidden md:contents">
               <FilterFields />
             </div>
