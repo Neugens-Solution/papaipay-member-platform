@@ -34,6 +34,11 @@ export type Opportunity = {
   valuationReport: string;
   imageUrl: string;
   gallery: string[];
+  galleryCount: number;
+  daysRemaining: number;
+  principalProtectionEnabled: boolean;
+  aboutCampaign: string;
+  importantInformation: string;
   updates: { title: string; date: string; body: string }[];
   faqs: { question: string; answer: string }[];
   holdingReturnRate: string;
@@ -125,6 +130,11 @@ export const opportunities: Opportunity[] = [
   valuationReport: "Independent desktop valuation summary available for member review",
   imageUrl: terraceImages[index % terraceImages.length],
   gallery: terraceImages,
+  galleryCount: terraceImages.length,
+  daysRemaining: Math.max(0, Math.ceil((new Date(closeDate as string).getTime() - new Date("2026-06-17").getTime()) / 86400000)),
+  principalProtectionEnabled: true,
+  aboutCampaign: `This campaign aims to secure ${title} through an auction process, complete legal review, prepare the property, and sell it through a structured disposal process.`,
+  importantInformation: "All participation is subject to campaign documents and terms. Please review the documents carefully before participating.",
   updates: [
     { title: "Campaign progress updated", date: "2026-06-14", body: "Collected amount and current participants were refreshed for this property." },
     { title: "Auction file reviewed", date: "2026-06-09", body: "Key auction and valuation references were checked for portal display." },
@@ -179,8 +189,8 @@ export const memberSections = {
     { title: "Cheras Terrace House", meta: "RM2,850 received", status: "received", body: "Distribution received was recorded with reference PP-DIST-7782." },
   ],
   reports: [
-    { title: "Member participation statement", meta: "Q2 2026", status: "available", body: "Mock statement summarizes participation activity and can be used for UI review." },
-    { title: "Distribution history report", meta: "Year to date", status: "available", body: "Mock report record shows distribution totals and related auction property references." },
+    { title: "Member participation statement", meta: "Q2 2026", status: "available", body: "Statement summarizes participation activity for member review." },
+    { title: "Distribution history report", meta: "Year to date", status: "available", body: "Report record shows distribution totals and related auction property references." },
   ],
   notifications: [], announcements: [], profileKyc: [], activeProperties: [], completedProperties: []
 };
@@ -588,6 +598,7 @@ export const completedCampaigns = [
     holdingReturn: "22.5%",
     profitDistribution: "18%",
     totalDistribution: "40.5%",
+    finalDistributionAmount: 112400,
     distributionDate: "15 Aug 2026",
   },
   {
@@ -602,6 +613,7 @@ export const completedCampaigns = [
     holdingReturn: "18%",
     profitDistribution: "12%",
     totalDistribution: "30%",
+    finalDistributionAmount: 37500,
     distributionDate: "28 May 2026",
   },
 ];

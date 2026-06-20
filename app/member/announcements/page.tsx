@@ -6,7 +6,7 @@ export default function Page() {
     <MemberSectionPage
       eyebrow="Announcements"
       title="Announcements"
-      description="Read mock member-facing announcements published for portal review."
+      description="Read member-facing announcements published for portal review."
       items={memberSections.announcements}
     />
   );
