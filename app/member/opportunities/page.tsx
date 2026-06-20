@@ -71,7 +71,7 @@ export default function ListingsPage({ searchParams }: { searchParams?: { tab?: 
                     <p className="text-xs font-bold text-slate-400">{campaign.campaignId} • {campaign.campaignCode}</p>
                     <h3 className="mt-1 text-lg font-bold">{campaign.campaignName}</h3>
                   </div>
-                  <StatusBadge status={campaign.status} />
+                  <div className="flex flex-wrap justify-end gap-2"><StatusBadge status={campaign.status} /><StatusBadge status="Distributed" /></div>
                 </div>
                 <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
                   <Summary label="Sale Price" value={formatRM(campaign.salePrice)} />
