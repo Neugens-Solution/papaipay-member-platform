@@ -166,16 +166,16 @@ export default function CampaignDetailPage({ params }: { params: { slug: string 
           </div>
         </div>
 
-        <aside className="hidden space-y-5 md:block xl:sticky xl:top-6 xl:self-start"><ParticipationPanel campaign={campaign} /></aside>
+        <aside className="hidden space-y-5 md:block xl:sticky xl:top-[120px] xl:self-start"><ParticipationPanel campaign={campaign} /></aside>
       </section>
 
-      <details className="fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 md:hidden">
-        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-papaipay-green/40 bg-white p-4 shadow-soft">
+      <details className="group fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 md:hidden">
+        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-papaipay-green/40 bg-white p-4 shadow-soft group-open:hidden">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span>
           <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Campaign</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
           <span className="rounded-xl bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Participate Now</span>
         </summary>
-        <div className="mb-3 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>
+        <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>
       </details>
     </div>
   );
