@@ -44,16 +44,17 @@ export const distributionHistory = [
 ];
 
 export const listings = [
-  { id: "CAM-000001", slug: "kajang-terrace-house", name: "Kajang Terrace House", location: "Kajang, Selangor", state: "Selangor", status: "Open", target: 600000, collected: 420000, participants: 128, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Non-Bumi", isLaca: false, builtUp: "1,600 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 550000, auctionDate: "2026-07-15" },
-  { id: "CAM-000002", slug: "shah-alam-terrace-house", name: "Shah Alam Terrace House", location: "Shah Alam, Selangor", state: "Selangor", status: "Closing Soon", target: 720000, collected: 612000, participants: 146, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Open Market", isLaca: true, builtUp: "1,690 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 670000, auctionDate: "2026-06-30" },
-  { id: "CAM-000003", slug: "ampang-terrace-house", name: "Ampang Terrace House", location: "Ampang, Selangor", state: "Selangor", status: "Open", target: 560000, collected: 302400, participants: 94, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Open Market", isLaca: false, builtUp: "1,780 sq ft", bedrooms: 3, bathrooms: 2, reservePrice: 510000, auctionDate: "2026-08-05" },
-  { id: "CAM-000004", slug: "cheras-terrace-house", name: "Cheras Terrace House", location: "Cheras, Kuala Lumpur", state: "Kuala Lumpur", status: "Completed", target: 680000, collected: 680000, participants: 172, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Non-Bumi", isLaca: true, builtUp: "1,870 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 630000, auctionDate: "2026-06-10" },
+  { id: "CAM-000001", campaignCode: "PP-SGR-2026-001", slug: "kajang-terrace-house", name: "Kajang Terrace House", location: "Kajang, Selangor", state: "Selangor", status: "Open", target: 600000, collected: 420000, participants: 128, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Non-Bumi", isLaca: false, builtUp: "1,600 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 550000, auctionDate: "2026-07-15" },
+  { id: "CAM-000002", campaignCode: "PP-SGR-2026-002", slug: "shah-alam-terrace-house", name: "Shah Alam Terrace House", location: "Shah Alam, Selangor", state: "Selangor", status: "Closing Soon", target: 720000, collected: 612000, participants: 146, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Open Market", isLaca: true, builtUp: "1,690 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 670000, auctionDate: "2026-06-30" },
+  { id: "CAM-000003", campaignCode: "PP-SGR-2026-003", slug: "ampang-terrace-house", name: "Ampang Terrace House", location: "Ampang, Selangor", state: "Selangor", status: "Open", target: 560000, collected: 302400, participants: 94, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Open Market", isLaca: false, builtUp: "1,780 sq ft", bedrooms: 3, bathrooms: 2, reservePrice: 510000, auctionDate: "2026-08-05" },
+  { id: "CAM-000004", campaignCode: "PP-KL-2026-004", slug: "cheras-terrace-house", name: "Cheras Terrace House", location: "Cheras, Kuala Lumpur", state: "Kuala Lumpur", status: "Completed", target: 680000, collected: 680000, participants: 172, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Non-Bumi", isLaca: true, builtUp: "1,870 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 630000, auctionDate: "2026-06-10" },
 ];
 
 export const participants = members.slice(0, 4).map((member, index) => ({
   participationId: `PAR-${String(index + 1).padStart(6, "0")}`,
   memberId: member.id,
   campaignId: `CAM-${String(index + 1).padStart(6, "0")}`,
+  campaignCode: ["PP-SGR-2026-001", "PP-SGR-2026-002", "PP-SGR-2026-003", "PP-KL-2026-004"][index],
   name: member.name,
   email: member.email,
   amount: [42500, 55000, 18000, 32000][index],
@@ -71,10 +72,10 @@ export const listingDocuments = [
 ];
 
 export const distributions = [
-  { id: "DIS-000001", campaignId: "CAM-000004", participationId: "PAR-000001", memberId: "MEM-000001", paymentReference: "PAY-000001", campaign: "Cheras Terrace House", member: "Amina Rahman", participation: "RM42,500", principalReturn: "RM42,500", holdingReturn: "RM956", profitDistribution: "RM1,894", amount: "RM45,350", status: "Completed", paid: "14 Jun 2026" },
-  { id: "DIS-000002", campaignId: "CAM-000005", participationId: "PAR-000002", memberId: "MEM-000002", paymentReference: "PAY-000002", campaign: "Seremban Semi-D", member: "Daniel Tan", participation: "RM32,000", principalReturn: "RM32,000", holdingReturn: "RM1,440", profitDistribution: "RM480", amount: "RM33,920", status: "Processing", paid: "Scheduled" },
-  { id: "DIS-000003", campaignId: "CAM-000006", participationId: "PAR-000003", memberId: "MEM-000003", paymentReference: "PAY-000003", campaign: "Ipoh Terrace House", member: "Nur Iman", participation: "RM18,000", principalReturn: "RM18,000", holdingReturn: "RM810", profitDistribution: "RM70", amount: "RM18,880", status: "Pending", paid: "—" },
-  { id: "DIS-000004", campaignId: "CAM-000001", participationId: "PAR-000004", memberId: "MEM-000004", paymentReference: "PAY-000004", campaign: "Kajang Terrace House", member: "Raj Kumar", participation: "RM55,000", principalReturn: "RM55,000", holdingReturn: "RM2,475", profitDistribution: "RM765", amount: "RM58,240", status: "Pending", paid: "—" },
+  { id: "DIS-000001", distributionBatchId: "DBT-000001", campaignId: "CAM-000004", campaignCode: "PP-KL-2026-004", participationId: "PAR-000001", memberId: "MEM-000001", paymentReference: "PAY-000001", campaign: "Cheras Terrace House", member: "Amina Rahman", participation: "RM42,500", principalReturn: "RM42,500", holdingReturn: "RM956", profitDistribution: "RM1,894", amount: "RM45,350", status: "Paid", paid: "14 Jun 2026" },
+  { id: "DIS-000002", distributionBatchId: "DBT-000001", campaignId: "CAM-000005", campaignCode: "PP-NS-2026-005", participationId: "PAR-000002", memberId: "MEM-000002", paymentReference: "PAY-000002", campaign: "Seremban Semi-D", member: "Daniel Tan", participation: "RM32,000", principalReturn: "RM32,000", holdingReturn: "RM1,440", profitDistribution: "RM480", amount: "RM33,920", status: "Processing", paid: "Scheduled" },
+  { id: "DIS-000003", distributionBatchId: "DBT-000002", campaignId: "CAM-000006", campaignCode: "PP-PRK-2026-006", participationId: "PAR-000003", memberId: "MEM-000003", paymentReference: "PAY-000003", campaign: "Ipoh Terrace House", member: "Nur Iman", participation: "RM18,000", principalReturn: "RM18,000", holdingReturn: "RM810", profitDistribution: "RM70", amount: "RM18,880", status: "Pending", paid: "—" },
+  { id: "DIS-000004", distributionBatchId: "DBT-000003", campaignId: "CAM-000001", campaignCode: "PP-SGR-2026-001", participationId: "PAR-000004", memberId: "MEM-000004", paymentReference: "PAY-000004", campaign: "Kajang Terrace House", member: "Raj Kumar", participation: "RM55,000", principalReturn: "RM55,000", holdingReturn: "RM2,475", profitDistribution: "RM765", amount: "RM58,240", status: "Pending", paid: "—" },
 ];
 
 export const announcements = [

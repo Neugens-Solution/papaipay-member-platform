@@ -1,11 +1,11 @@
-# PAPAIPAY Portal Prototype Documentation
+# PAPAIPAY Portal V1 Documentation
 
-This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform prototype using mock data only.
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
 ## Scope limits
 
-- Prototype only.
-- Mock data only.
+- Interface layer only.
+- Local sample data only.
 - No backend services.
 - No database schema or migrations.
 - No real authentication.
@@ -20,7 +20,7 @@ Use these labels: Member, Campaign, Listing, Participation, Participation Amount
 
 ## Reference IDs
 
-Every relevant record has a prototype reference ID:
+Every relevant record has a sample-data reference ID:
 
 - Member ID: `MEM-000001`
 - Campaign ID: `CAM-000001`
@@ -40,8 +40,8 @@ Admin configuration includes Holding Return Rate, Return Type, Maximum Holding P
 
 Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-If the asset is not sold after 24 months, the prototype rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-Admin settlement mock fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Prototype calculations show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
 Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

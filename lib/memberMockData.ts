@@ -3,6 +3,7 @@ export type OpportunityStatus = "open" | "closing soon" | "closed";
 export type Opportunity = {
   id: string;
   campaignId: string;
+  campaignCode: string;
   slug: string;
   title: string;
   status: OpportunityStatus;
@@ -93,6 +94,7 @@ export const opportunities: Opportunity[] = [
 ].map(([id, slug, title, status, location, state, targetAmount, collectedAmount, participants, closeDate], index) => ({
   id: `CAM-${String(index + 1).padStart(6, "0")}`,
   campaignId: `CAM-${String(index + 1).padStart(6, "0")}`,
+  campaignCode: `${["PP-SGR", "PP-SGR", "PP-SGR", "PP-KL", "PP-NS", "PP-PRK"][index]}-2026-${String(index + 1).padStart(3, "0")}`,
   slug: slug as string,
   title: title as string,
   status: status as OpportunityStatus,
@@ -147,7 +149,7 @@ export const dashboardMetrics = [
   { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion", trend: "2 records pending" },
   { label: "Distribution Processing", value: "RM3,200", helper: "Scheduled processing", trend: "Next cycle in review" },
   { label: "This Month Distribution", value: "RM850", helper: "June distribution activity", trend: "+8.2% month over month" },
-  { label: "Holding Return Preview", value: "7.8%", helper: "Accrued until final distribution", trend: "Prototype calculation" },
+  { label: "Holding Return Preview", value: "7.8%", helper: "Accrued until final distribution", trend: "Final distribution view" },
 ];
 
 export const myProperties = [
@@ -197,6 +199,7 @@ export type DistributionState = "Pending" | "Processing" | "Paid" | "Completed";
 export type PortfolioRecord = {
   participationId: string;
   campaignId: string;
+  campaignCode: string;
   memberId: string;
   slug: string;
   propertyName: string;
@@ -212,6 +215,7 @@ export type PortfolioRecord = {
   profitDistribution: number;
   finalDistributionTotal: number;
   distributionId: string;
+  distributionBatchId: string;
   paymentReference: string;
   adminNotes: string;
   distributionReceived?: number;
@@ -230,6 +234,7 @@ export type PortfolioRecord = {
 export const portfolioRecords: PortfolioRecord[] = [
   {
     memberId: "MEM-000001",
+    campaignCode: "PP-SGR-2026-001",
     participationId: "PAR-000001",
     campaignId: "CAM-000001",
     slug: "kajang-terrace-house",
@@ -243,8 +248,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 900,
     finalDistributionTotal: 13668,
     distributionId: "DIS-000000",
+    distributionBatchId: "DBT-000000",
     paymentReference: "PAY-000000",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Renovation In Progress",
     latestUpdate: "Renovation 60% completed",
     distributionStatus: "Pending",
@@ -259,6 +265,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000002",
     campaignId: "CAM-000002",
+    campaignCode: "PP-SGR-2026-002",
     slug: "shah-alam-terrace-house",
     propertyName: "Shah Alam Terrace House",
     location: "Shah Alam, Selangor",
@@ -270,8 +277,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 750,
     finalDistributionTotal: 35000,
     distributionId: "DIS-000001",
+    distributionBatchId: "DBT-000001",
     paymentReference: "PAY-000001",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Campaign Opened",
     latestUpdate: "Campaign collection reached 85%",
     distributionStatus: "Pending",
@@ -286,6 +294,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000003",
     campaignId: "CAM-000003",
+    campaignCode: "PP-SGR-2026-003",
     slug: "ampang-terrace-house",
     propertyName: "Ampang Terrace House",
     location: "Ampang, Selangor",
@@ -297,8 +306,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 0,
     finalDistributionTotal: 18000,
     distributionId: "DIS-000002",
+    distributionBatchId: "DBT-000002",
     paymentReference: "PAY-000002",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Property Secured",
     latestUpdate: "Title search completed",
     distributionStatus: "Pending",
@@ -313,6 +323,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000004",
     campaignId: "CAM-000004",
+    campaignCode: "PP-KL-2026-004",
     slug: "cheras-apartment",
     propertyName: "Cheras Apartment",
     location: "Cheras, Kuala Lumpur",
@@ -324,8 +335,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 540,
     finalDistributionTotal: 14255,
     distributionId: "DIS-000003",
+    distributionBatchId: "DBT-000003",
     paymentReference: "PAY-000003",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Listed For Sale",
     latestUpdate: "Sale listing published",
     distributionStatus: "Pending",
@@ -340,6 +352,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000005",
     campaignId: "CAM-000005",
+    campaignCode: "PP-NS-2026-005",
     slug: "seremban-semi-d",
     propertyName: "Seremban Semi-D",
     location: "Seremban, Negeri Sembilan",
@@ -351,8 +364,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 620,
     finalDistributionTotal: 26026,
     distributionId: "DIS-000004",
+    distributionBatchId: "DBT-000004",
     paymentReference: "PAY-000004",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Distribution Processing",
     latestUpdate: "Distribution batch approved",
     distributionStatus: "Processing",
@@ -367,6 +381,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000006",
     campaignId: "CAM-000006",
+    campaignCode: "PP-SGR-2025-007",
     slug: "bangi-terrace-house",
     propertyName: "Bangi Terrace House",
     location: "Bangi, Selangor",
@@ -378,8 +393,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 1200,
     finalDistributionTotal: 12440,
     distributionId: "DIS-000005",
+    distributionBatchId: "DBT-000005",
     paymentReference: "PAY-000005",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Completed",
     latestUpdate: "Distribution paid to member account",
     distributionStatus: "Completed",
@@ -396,6 +412,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     memberId: "MEM-000001",
     participationId: "PAR-000007",
     campaignId: "CAM-000007",
+    campaignCode: "PP-SGR-2026-006",
     slug: "subang-condominium",
     propertyName: "Subang Condominium",
     location: "Subang Jaya, Selangor",
@@ -407,8 +424,9 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 640,
     finalDistributionTotal: 22100,
     distributionId: "DIS-000006",
+    distributionBatchId: "DBT-000006",
     paymentReference: "PAY-000006",
-    adminNotes: "Prototype calculation; manual transfer required before marking paid",
+    adminNotes: "Calculation reviewed; manual transfer required before marking paid",
     status: "Under Offer",
     latestUpdate: "Buyer offer accepted pending legal review",
     distributionStatus: "Pending",
@@ -430,6 +448,7 @@ export type DistributionStatus = "Pending" | "Processing" | "Paid" | "Completed"
 export type DistributionRecord = {
   distributionId: string;
   campaignId: string;
+  campaignCode: string;
   participationId: string;
   memberId: string;
   slug: string;
@@ -443,6 +462,7 @@ export type DistributionRecord = {
   status: DistributionStatus;
   paidDate: string;
   referenceNumber: string;
+  distributionBatchId: string;
   paymentReference: string;
   notes: string;
 };
@@ -451,6 +471,7 @@ export const distributionRecords: DistributionRecord[] = [
   {
     distributionId: "DIS-000001",
     campaignId: "CAM-000001",
+    campaignCode: "PP-SGR-2025-007",
     participationId: "PAR-000001",
     memberId: "MEM-000001",
     slug: "bangi-terrace-house-completion",
@@ -463,6 +484,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 2200,
     status: "Completed",
     paidDate: "15 Aug 2026",
+    distributionBatchId: "DBT-000001",
     referenceNumber: "PP-DIST-2026-0815",
     paymentReference: "PAY-000001",
     notes: "Distribution completed after final auction residential property records were reconciled.",
@@ -470,6 +492,7 @@ export const distributionRecords: DistributionRecord[] = [
   {
     distributionId: "DIS-000002",
     campaignId: "CAM-000002",
+    campaignCode: "PP-NS-2026-005",
     participationId: "PAR-000002",
     memberId: "MEM-000001",
     slug: "seremban-terrace-house-processing",
@@ -482,6 +505,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 3200,
     status: "Processing",
     paidDate: "Processing",
+    distributionBatchId: "DBT-000002",
     referenceNumber: "PP-DIST-2026-0712",
     paymentReference: "PAY-000002",
     notes: "Payment file is being reviewed before release to the member account.",
@@ -489,6 +513,7 @@ export const distributionRecords: DistributionRecord[] = [
   {
     distributionId: "DIS-000003",
     campaignId: "CAM-000003",
+    campaignCode: "PP-KL-2026-004",
     participationId: "PAR-000003",
     memberId: "MEM-000001",
     slug: "cheras-terrace-house-paid",
@@ -501,6 +526,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 2850,
     status: "Paid",
     paidDate: "28 May 2026",
+    distributionBatchId: "DBT-000003",
     referenceNumber: "PP-DIST-2026-0528",
     paymentReference: "PAY-000003",
     notes: "Payment confirmation is available for this completed distribution record.",
@@ -508,6 +534,7 @@ export const distributionRecords: DistributionRecord[] = [
   {
     distributionId: "DIS-000004",
     campaignId: "CAM-000004",
+    campaignCode: "PP-SGR-2026-001",
     participationId: "PAR-000004",
     memberId: "MEM-000001",
     slug: "kajang-terrace-house-pending",
@@ -520,6 +547,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 5000,
     status: "Pending",
     paidDate: "Pending",
+    distributionBatchId: "DBT-000004",
     referenceNumber: "PP-DIST-2026-0904",
     paymentReference: "PAY-000004",
     notes: "Distribution amount is pending completion checks for the auction residential property record.",
@@ -527,6 +555,7 @@ export const distributionRecords: DistributionRecord[] = [
   {
     distributionId: "DIS-000005",
     campaignId: "CAM-000005",
+    campaignCode: "PP-PRK-2026-006",
     participationId: "PAR-000005",
     memberId: "MEM-000001",
     slug: "ipoh-terrace-house-completed",
@@ -539,9 +568,41 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 3450,
     status: "Completed",
     paidDate: "10 Apr 2026",
+    distributionBatchId: "DBT-000005",
     referenceNumber: "PP-DIST-2026-0410",
     paymentReference: "PAY-000005",
     notes: "Distribution records have been marked completed.",
+  },
+];
+
+export const completedCampaigns = [
+  {
+    slug: "bangi-terrace-house",
+    campaignId: "CAM-000007",
+    campaignCode: "PP-SGR-2025-007",
+    campaignName: "Bangi Terrace House",
+    status: "Completed",
+    holdingPeriod: "15 months",
+    purchasePrice: 510000,
+    salePrice: 645000,
+    holdingReturn: "22.5%",
+    profitDistribution: "18%",
+    totalDistribution: "40.5%",
+    distributionDate: "15 Aug 2026",
+  },
+  {
+    slug: "cheras-apartment",
+    campaignId: "CAM-000008",
+    campaignCode: "PP-KL-2025-008",
+    campaignName: "Cheras Apartment",
+    status: "Completed",
+    holdingPeriod: "12 months",
+    purchasePrice: 360000,
+    salePrice: 438000,
+    holdingReturn: "18%",
+    profitDistribution: "12%",
+    totalDistribution: "30%",
+    distributionDate: "28 May 2026",
   },
 ];
 

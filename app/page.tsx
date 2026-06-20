@@ -22,7 +22,7 @@ export default function Home() {
         <div className="max-w-3xl">
           <p className="text-sm font-semibold uppercase tracking-[0.32em] text-papaipay-green">Portal Access</p>
           <h1 className="mt-5 text-4xl font-bold tracking-tight sm:text-6xl">PAPAIPAY Portal Access</h1>
-          <p className="mt-6 text-lg leading-8 text-slate-700">Choose the workspace for this prototype. Member users continue to the Member Portal, while Admin, Manager and Super Admin roles share the Admin Portal interface.</p>
+          <p className="mt-6 text-lg leading-8 text-slate-700">Choose the workspace. Member users continue to the Member Portal, while Admin, Manager and Super Admin roles share the Admin Portal interface.</p>
         </div>
 
         <div className="mt-12 grid gap-4 sm:grid-cols-2">

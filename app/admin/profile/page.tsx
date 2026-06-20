@@ -14,7 +14,7 @@ export default function AdminProfilePage() {
           <h2 className="font-bold">Security</h2>
           <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50/70 p-4">
             <p className="text-sm font-bold text-papaipay-ink">Change Password</p>
-            <p className="mt-1 text-sm leading-6 text-slate-500">Prototype placeholder for a future password update flow.</p>
+            <p className="mt-1 text-sm leading-6 text-slate-500">Password update flow will be available in a later release.</p>
             <button className="mt-4 rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600">Change Password</button>
           </div>
         </Card>
@@ -34,7 +34,7 @@ export default function AdminProfilePage() {
           {["Super Admin", "Admin", "Manager"].map((role) => (
             <div key={role} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
               <p className="text-sm font-bold text-papaipay-ink">{role}</p>
-              <p className="mt-2 text-sm leading-6 text-slate-500">Read-only prototype role summary. Detailed permissions will be defined in a later phase.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-500">Read-only role summary. Detailed permissions will be defined in a later release.</p>
             </div>
           ))}
         </div>

@@ -31,7 +31,7 @@ export default function DistributionDetailPage() {
       </Card>
 
       <section className="grid gap-4 lg:grid-cols-2">
-        <Card><h2 className="font-bold">Campaign Information</h2><InfoGrid items={[{ label: "Campaign ID", value: distribution.campaignId }, { label: "Campaign", value: distribution.campaign }, { label: "Participation ID", value: distribution.participationId }, { label: "Participation", value: distribution.participation }]} /></Card>
+        <Card><h2 className="font-bold">Campaign Information</h2><InfoGrid items={[{ label: "Campaign ID", value: distribution.campaignId }, { label: "Campaign Code", value: distribution.campaignCode }, { label: "Distribution Batch", value: distribution.distributionBatchId }, { label: "Campaign", value: distribution.campaign }, { label: "Participation ID", value: distribution.participationId }, { label: "Participation", value: distribution.participation }]} /></Card>
         <Card><h2 className="font-bold">Member Information</h2><InfoGrid items={[{ label: "Member", value: distribution.member }, { label: "Member ID", value: distribution.memberId }]} /></Card>
         <Card><h2 className="font-bold">Distribution Information</h2><InfoGrid items={[{ label: "Distribution ID", value: distribution.id }, { label: "Principal Return", value: distribution.principalReturn }, { label: "Holding Return", value: distribution.holdingReturn }, { label: "Profit Distribution", value: distribution.profitDistribution }, { label: "Final Distribution Total", value: distribution.amount }, { label: "Payment Date", value: distribution.paid }, { label: "Payment Reference", value: distribution.paymentReference }, { label: "Admin Notes", value: "Manual transfer pending finance confirmation" }]} /></Card>
         <Card>

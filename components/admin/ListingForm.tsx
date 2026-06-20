@@ -100,6 +100,8 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       <Card>
         <SectionTitle title="Campaign Information" description="Configure campaign amounts, participation limits, date pickers and publication status." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Field label="Campaign ID" />
+          <Field label="Campaign Code" />
           <Field label="Campaign Target" />
           <Field label="Minimum Participation Amount" />
           <Field label="Maximum Participation Amount" />
@@ -107,8 +109,8 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
           <Field label="Campaign End Date" type="date" />
           <Field label="Holding Return Rate" />
           <SelectField label="Return Type" options={["Fixed", "Target", "Up To"]} />
-          <Field label="Maximum Holding Period Months" />
-          <Field label="Principal Protection Rule" />
+          <Field label="Maximum Holding Period" />
+          <SelectField label="Principal Protection" options={["Enabled", "Disabled"]} />
           <Field label="Final Distribution Notes" />
           <SelectField label="Status" options={["Draft", "Published", "Open", "Closing Soon", "Closed", "Completed"]} />
         </div>
@@ -125,10 +127,10 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       </Card>
 
       <Card>
-        <SectionTitle title="Settlement / Distribution Configuration" description="Prototype calculation fields only; no backend, payment gateway or automated payout." />
+        <SectionTitle title="Settlement / Distribution Configuration" description="Review acquisition, holding, renovation, disposal, platform costs and final distribution calculations." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {["Auction Deposit", "Balance Purchase Price", "Legal Fee", "Stamp Duty", "Disbursement", "Title Search", "Other Acquisition Costs", "Maintenance Fee", "Sinking Fund", "Quit Rent / Cukai Tanah", "Assessment / Cukai Pintu", "Utilities", "Insurance", "Security / Management Charges", "Other Holding Costs", "Renovation Cost", "Contractor Cost", "Material Cost", "Cleaning Cost", "Defect Rectification", "Other Preparation Costs", "Agent Fee", "Legal Fee on Sale", "RPGT, if applicable", "Marketing Cost", "Documentation Cost", "Other Disposal Costs", "Platform Fee", "Management Fee", "Administration Fee", "Other Platform Costs", "Member Profit Distribution Percentage", "Platform Profit Share Percentage"].map((field) => <Field key={field} label={field} />)}
-          <div className="sm:col-span-2 lg:col-span-3"><TextAreaField label="Notes / Calculation Remarks" rows={4} helper="Clearly label any not-finalized formula as a prototype calculation." /></div>
+          <div className="sm:col-span-2 lg:col-span-3"><TextAreaField label="Notes / Calculation Remarks" rows={4} helper="Add calculation remarks for finance review." /></div>
         </div>
       </Card>
 
@@ -181,7 +183,7 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       </Card>
 
       <Card>
-        <SectionTitle title="Documents" description="Upload structured campaign documents by category. Prototype only; no upload handling yet." />
+        <SectionTitle title="Documents" description="Manage campaign document categories for member review." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {documentCategories.map((category) => <UploadZone key={category} title={category} supported="PDF, DOCX" />)}
         </div>
@@ -191,7 +193,7 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
         <SectionTitle title="Property Images" description="Upload multiple property images that feed the member listing gallery." />
         <UploadZone title="Drag & Drop Property Images" supported="JPG, PNG, WEBP" />
         <div className="mt-4 grid gap-3 sm:grid-cols-3">
-          {["Front view", "Living area", "Exterior detail"].map((placeholder) => <div key={placeholder} className="grid h-24 place-items-center rounded-xl border border-slate-100 bg-slate-50/80 text-xs font-bold text-slate-400">{placeholder}</div>)}
+          {["Front view", "Living area", "Exterior detail"].map((preview) => <div key={preview} className="grid h-24 place-items-center rounded-xl border border-slate-100 bg-slate-50/80 text-xs font-bold text-slate-400">{preview}</div>)}
         </div>
       </Card>
 

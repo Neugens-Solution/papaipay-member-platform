@@ -27,7 +27,7 @@ export default function PortfolioPage() {
         {portfolioRecords.map((record) => (
           <article key={record.slug} className="rounded-lg border border-slate-200 bg-white p-4 sm:p-5">
             <div className="grid gap-4 lg:grid-cols-[1.4fr_2fr_auto] lg:items-center">
-              <div><p className="text-xs font-bold text-slate-400">{record.campaignId} • {record.participationId}</p><h2 className="font-bold text-papaipay-ink">{record.propertyName}</h2><p className="mt-1 text-sm text-slate-500">{record.location}</p></div>
+              <div><p className="text-xs font-bold text-slate-400">{record.campaignId} • {record.campaignCode} • {record.participationId}</p><h2 className="font-bold text-papaipay-ink">{record.propertyName}</h2><p className="mt-1 text-sm text-slate-500">{record.location}</p></div>
               <dl className="grid grid-cols-2 gap-3 text-sm xl:grid-cols-4">
                 <div><dt className="text-xs font-bold uppercase text-slate-400">Participation Amount</dt><dd className="mt-1 font-bold text-slate-800">{formatRM(record.participationAmount)}</dd></div>
                 <div><dt className="text-xs font-bold uppercase text-slate-400">Status</dt><dd className="mt-1"><span className={`inline-flex rounded-md border px-2 py-1 text-xs font-bold ${statusClasses(record.status)}`}>{record.status}</span></dd></div>
