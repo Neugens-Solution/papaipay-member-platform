@@ -117,6 +117,7 @@ export default function MemberProfilePage() {
 
       <div className="grid gap-5">
         <Section title="Personal Information" action={<ActionButton onClick={() => setModal("personal")}>Edit Information</ActionButton>}>
+          <InfoRow label="Member ID" value={profile.memberId} />
           <InfoRow label="Full Name" value={profile.personal.fullName} />
           <InfoRow label="IC Number" value={profile.personal.icNumberMasked} />
           <InfoRow label="Phone Number" value={profile.personal.phone} />

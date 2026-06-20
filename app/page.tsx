@@ -4,7 +4,7 @@ const portalCards = [
   {
     title: "Member Portal",
     href: "/member/dashboard",
-    description: "Access member opportunities, portfolio activity, participation records and distributions.",
+    description: "Access member listings, portfolio activity, participation records and distributions.",
     meta: "Members",
   },
   {

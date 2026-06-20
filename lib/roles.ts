@@ -8,7 +8,7 @@ export type RolePlaceholder = {
 export const rolePlaceholders: RolePlaceholder[] = [
   {
     name: "Member",
-    description: "Member-facing portal placeholder for future opportunities and participations.",
+    description: "Member-facing portal placeholder for future listings and participations.",
   },
   {
     name: "Admin",

@@ -6,9 +6,15 @@ const propertyFields = [
   "Full Address",
   "Property Type",
   "Tenure",
+  "Tenure Display Alias (FH / LH)",
+  "LACA",
   "Bumi Status",
   "Built-up Area (sq ft)",
   "Land Area (sq ft)",
+  "Bedrooms",
+  "Bathrooms",
+  "Auction Date",
+  "Reserve Price",
   "Year Built",
 ];
 
@@ -94,12 +100,16 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       <Card>
         <SectionTitle title="Campaign Information" description="Configure campaign amounts, participation limits, date pickers and publication status." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Target Amount" />
-          <Field label="Minimum Participation" />
-          <Field label="Maximum Participation" />
+          <Field label="Campaign Target" />
+          <Field label="Minimum Participation Amount" />
+          <Field label="Maximum Participation Amount" />
           <Field label="Campaign Start Date" type="date" />
           <Field label="Campaign End Date" type="date" />
-          <Field label="Estimated Outcome (%)" />
+          <Field label="Holding Return Rate" />
+          <SelectField label="Return Type" options={["Fixed", "Target", "Up To"]} />
+          <Field label="Maximum Holding Period Months" />
+          <Field label="Principal Protection Rule" />
+          <Field label="Final Distribution Notes" />
           <SelectField label="Status" options={["Draft", "Published", "Open", "Closing Soon", "Closed", "Completed"]} />
         </div>
       </Card>
@@ -107,10 +117,18 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       <Card>
         <SectionTitle title="Property Valuation" description="Control the valuation information displayed to members." />
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Field label="Auction Price" />
-          <Field label="Market Value" />
+          <Field label="Purchase Price / Successful Bid Price" />
+          <Field label="Sale Price" />
           <Field label="Valuation Date" type="date" />
           <div className="sm:col-span-2 lg:col-span-4"><TextAreaField label="Valuation Report Summary" rows={4} /></div>
+        </div>
+      </Card>
+
+      <Card>
+        <SectionTitle title="Settlement / Distribution Configuration" description="Prototype calculation fields only; no backend, payment gateway or automated payout." />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {["Auction Deposit", "Balance Purchase Price", "Legal Fee", "Stamp Duty", "Disbursement", "Title Search", "Other Acquisition Costs", "Maintenance Fee", "Sinking Fund", "Quit Rent / Cukai Tanah", "Assessment / Cukai Pintu", "Utilities", "Insurance", "Security / Management Charges", "Other Holding Costs", "Renovation Cost", "Contractor Cost", "Material Cost", "Cleaning Cost", "Defect Rectification", "Other Preparation Costs", "Agent Fee", "Legal Fee on Sale", "RPGT, if applicable", "Marketing Cost", "Documentation Cost", "Other Disposal Costs", "Platform Fee", "Management Fee", "Administration Fee", "Other Platform Costs", "Member Profit Distribution Percentage", "Platform Profit Share Percentage"].map((field) => <Field key={field} label={field} />)}
+          <div className="sm:col-span-2 lg:col-span-3"><TextAreaField label="Notes / Calculation Remarks" rows={4} helper="Clearly label any not-finalized formula as a prototype calculation." /></div>
         </div>
       </Card>
 
@@ -120,7 +138,7 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       </Card>
 
       <Card>
-        <SectionTitle title="Timeline Management" description="Select the project stages that should appear highlighted in the member timeline." />
+        <SectionTitle title="Timeline Management" description="Select the campaign stages that should appear highlighted in the member timeline." />
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {timelineStages.map((stage, index) => (
             <label key={stage} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold text-slate-700">

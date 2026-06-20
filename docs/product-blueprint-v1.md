@@ -1,210 +1,47 @@
-# Product Blueprint v1
+# PAPAIPAY Portal Prototype Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform prototype using mock data only.
 
-This blueprint defines the initial product model for the PAPAIPAY Member Platform. It is a planning document only and does not define implementation details, database schema, API contracts, authentication logic, or application routes.
+## Scope limits
 
-## Roles
+- Prototype only.
+- Mock data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-### Member
+## Language and model
 
-Members are end users who participate in platform opportunities and monitor their related activity.
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-#### Member Capabilities
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-- View available opportunities.
-- Review opportunity summaries, requirements, timelines, and status.
-- Submit or track participation interest.
-- View active project status for accepted participations.
-- View completed projects and historical outcomes.
-- View distribution records and expected distribution schedules.
-- Receive notifications about platform activity.
-- Read announcements published by authorized staff.
-- Manage profile information.
-- Submit and monitor KYC information.
-- Access member-facing reports and statements.
-- Manage basic account settings and communication preferences.
+## Reference IDs
 
-### Admin
+Every relevant record has a prototype reference ID:
 
-Admins operate the daily administrative workflows of the platform.
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-#### Admin Capabilities
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-- View and manage member records.
-- Review member profile and KYC status.
-- Create, edit, and archive opportunities when permitted.
-- Review and process participations.
-- Monitor active and completed project records.
-- Prepare and review distribution records.
-- Publish notifications and announcements within assigned permissions.
-- Generate operational reports.
-- Manage routine platform settings assigned to the admin role.
+## Campaign and listing fields
 
-### Manager
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-Managers oversee operational performance and portfolio-level activity.
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-#### Manager Capabilities
+## Distribution and settlement
 
-- Review opportunity pipeline and performance.
-- Approve or reject opportunity updates when workflow requires approval.
-- Monitor participation volume and conversion.
-- Oversee active and completed project performance.
-- Review distribution planning and execution summaries.
-- Publish manager-level announcements.
-- Access management reports and dashboards.
-- Review admin activity and operational workload.
-- Configure team-level settings within assigned scope.
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-### Super Admin
+If the asset is not sold after 24 months, the prototype rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-Super Admins govern the entire platform.
+Admin settlement mock fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Prototype calculations show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
-#### Super Admin Capabilities
-
-- Manage all roles and permissions.
-- Manage administrative users.
-- Configure global platform settings.
-- Review audit activity and governance reports.
-- Access all platform modules.
-- Define permission boundaries for Admins and Managers.
-- Control system-level announcement and notification settings.
-- Approve high-impact operational changes when required.
-
-## Core Platform Areas
-
-### Opportunities
-
-Opportunities represent available offerings that members may review and potentially join.
-
-Key information:
-
-- Opportunity title and summary.
-- Opportunity status.
-- Eligibility requirements.
-- Target participation window.
-- Funding or allocation targets.
-- Risk and disclosure summary.
-- Related project category.
-- Supporting documents.
-
-### Participations
-
-Participations represent a member's interest, commitment, or accepted involvement in an opportunity.
-
-Key information:
-
-- Member reference.
-- Opportunity reference.
-- Participation amount or unit detail.
-- Participation status.
-- Submission date.
-- Approval or rejection metadata.
-- Related project reference when converted.
-
-### Projects
-
-Projects represent opportunities that have moved into an active or completed lifecycle.
-
-#### Active Projects
-
-- Show ongoing status.
-- Track milestones.
-- Track member participation relevance.
-- Display expected distribution timing.
-- Provide project updates and manager commentary.
-
-#### Completed Projects
-
-- Show completion date.
-- Display outcome summary.
-- Provide final distribution status.
-- Archive related reporting and documents.
-
-### Distributions
-
-Distributions represent payment, return, credit, or benefit events associated with member participations or projects.
-
-Key information:
-
-- Distribution reference.
-- Member reference.
-- Project or opportunity reference.
-- Amount.
-- Status.
-- Scheduled date.
-- Paid date.
-- Method or channel summary.
-
-### Notifications
-
-Notifications deliver targeted platform messages to users.
-
-Notification types:
-
-- Opportunity updates.
-- Participation status changes.
-- Project milestone updates.
-- Distribution notices.
-- KYC reminders.
-- Administrative alerts.
-- System notices.
-
-### Announcements
-
-Announcements are broadcast messages published to role-specific or platform-wide audiences.
-
-Announcement attributes:
-
-- Title.
-- Audience.
-- Body.
-- Publish status.
-- Publish date.
-- Expiration date.
-- Author role.
-
-### Reports
-
-Reports provide structured visibility into member activity, platform operations, project performance, and governance.
-
-Report categories:
-
-- Member reports.
-- Participation reports.
-- Opportunity reports.
-- Project reports.
-- Distribution reports.
-- KYC reports.
-- Operational reports.
-- Governance reports.
-
-### Settings
-
-Settings define configurable preferences and platform controls.
-
-Settings categories:
-
-- Account preferences.
-- Notification preferences.
-- Platform display settings.
-- Operational settings.
-- Report settings.
-- Security and governance settings.
-
-### Roles & Permissions
-
-Roles and permissions define access boundaries for every platform area.
-
-Permission concepts:
-
-- Module access.
-- Read permission.
-- Create permission.
-- Update permission.
-- Delete or archive permission.
-- Approval permission.
-- Publishing permission.
-- Export permission.
-- Administrative delegation.
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

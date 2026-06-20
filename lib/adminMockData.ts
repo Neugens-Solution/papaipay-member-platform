@@ -17,11 +17,11 @@ export const operationalSummary = [
 ];
 
 export const members = [
-  { id: "PPM-10482", name: "Amina Rahman", email: "amina.rahman@example.com", phone: "+60 12-438 9210", status: "Verified", participation: "RM125,000", distribution: "RM8,500", joined: "12 Jan 2026", activeCampaigns: 4, completedCampaigns: 2 },
-  { id: "PPM-10483", name: "Daniel Tan", email: "daniel.tan@example.com", phone: "+60 16-229 1840", status: "Verified", participation: "RM86,000", distribution: "RM5,920", joined: "28 Jan 2026", activeCampaigns: 3, completedCampaigns: 1 },
-  { id: "PPM-10484", name: "Nur Iman", email: "nur.iman@example.com", phone: "+60 13-776 2019", status: "Pending", participation: "RM42,000", distribution: "RM1,250", joined: "04 Feb 2026", activeCampaigns: 7, completedCampaigns: 0 },
-  { id: "PPM-10485", name: "Raj Kumar", email: "raj.kumar@example.com", phone: "+60 17-552 9004", status: "Verified", participation: "RM151,500", distribution: "RM12,430", joined: "16 Feb 2026", activeCampaigns: 2, completedCampaigns: 4 },
-  { id: "PPM-10486", name: "Siti Aisyah", email: "siti.aisyah@example.com", phone: "+60 18-314 2280", status: "Review", participation: "RM63,000", distribution: "RM3,840", joined: "22 Mar 2026", activeCampaigns: 5, completedCampaigns: 1 },
+  { id: "MEM-000001", name: "Amina Rahman", email: "amina.rahman@example.com", phone: "+60 12-438 9210", status: "Verified", participation: "RM125,000", distribution: "RM8,500", joined: "12 Jan 2026", activeCampaigns: 4, completedCampaigns: 2 },
+  { id: "MEM-000002", name: "Daniel Tan", email: "daniel.tan@example.com", phone: "+60 16-229 1840", status: "Verified", participation: "RM86,000", distribution: "RM5,920", joined: "28 Jan 2026", activeCampaigns: 3, completedCampaigns: 1 },
+  { id: "MEM-000003", name: "Nur Iman", email: "nur.iman@example.com", phone: "+60 13-776 2019", status: "Pending", participation: "RM42,000", distribution: "RM1,250", joined: "04 Feb 2026", activeCampaigns: 7, completedCampaigns: 0 },
+  { id: "MEM-000004", name: "Raj Kumar", email: "raj.kumar@example.com", phone: "+60 17-552 9004", status: "Verified", participation: "RM151,500", distribution: "RM12,430", joined: "16 Feb 2026", activeCampaigns: 2, completedCampaigns: 4 },
+  { id: "MEM-000005", name: "Siti Aisyah", email: "siti.aisyah@example.com", phone: "+60 18-314 2280", status: "Review", participation: "RM63,000", distribution: "RM3,840", joined: "22 Mar 2026", activeCampaigns: 5, completedCampaigns: 1 },
 ];
 
 export const memberDetail = {
@@ -39,19 +39,21 @@ export const participationHistory = [
 ];
 
 export const distributionHistory = [
-  { listing: "Cheras Terrace House", amount: "RM2,850", status: "Completed", paid: "14 Jun 2026", ref: "PP-DIST-7782" },
-  { listing: "Seremban Semi-D", amount: "RM1,240", status: "Processing", paid: "Scheduled", ref: "PP-DIST-7814" },
+  { listing: "Cheras Terrace House", principalReturn: "RM42,500", holdingReturn: "RM956", profitDistribution: "RM1,894", amount: "RM45,350", status: "Completed", paid: "14 Jun 2026", ref: "PAY-000001" },
+  { listing: "Seremban Semi-D", amount: "RM1,240", status: "Processing", paid: "Scheduled", ref: "PAY-000002" },
 ];
 
 export const listings = [
-  { slug: "kajang-terrace-house", name: "Kajang Terrace House", location: "Kajang, Selangor", status: "Open", target: 600000, collected: 420000, participants: 128 },
-  { slug: "shah-alam-terrace-house", name: "Shah Alam Terrace House", location: "Shah Alam, Selangor", status: "Closing Soon", target: 720000, collected: 612000, participants: 146 },
-  { slug: "ampang-terrace-house", name: "Ampang Terrace House", location: "Ampang, Selangor", status: "Open", target: 560000, collected: 302400, participants: 94 },
-  { slug: "cheras-terrace-house", name: "Cheras Terrace House", location: "Cheras, Kuala Lumpur", status: "Completed", target: 680000, collected: 680000, participants: 172 },
+  { id: "CAM-000001", slug: "kajang-terrace-house", name: "Kajang Terrace House", location: "Kajang, Selangor", state: "Selangor", status: "Open", target: 600000, collected: 420000, participants: 128, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Non-Bumi", isLaca: false, builtUp: "1,600 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 550000, auctionDate: "2026-07-15" },
+  { id: "CAM-000002", slug: "shah-alam-terrace-house", name: "Shah Alam Terrace House", location: "Shah Alam, Selangor", state: "Selangor", status: "Closing Soon", target: 720000, collected: 612000, participants: 146, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Open Market", isLaca: true, builtUp: "1,690 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 670000, auctionDate: "2026-06-30" },
+  { id: "CAM-000003", slug: "ampang-terrace-house", name: "Ampang Terrace House", location: "Ampang, Selangor", state: "Selangor", status: "Open", target: 560000, collected: 302400, participants: 94, propertyType: "Terrace House", tenureAlias: "FH", bumiStatus: "Open Market", isLaca: false, builtUp: "1,780 sq ft", bedrooms: 3, bathrooms: 2, reservePrice: 510000, auctionDate: "2026-08-05" },
+  { id: "CAM-000004", slug: "cheras-terrace-house", name: "Cheras Terrace House", location: "Cheras, Kuala Lumpur", state: "Kuala Lumpur", status: "Completed", target: 680000, collected: 680000, participants: 172, propertyType: "Terrace House", tenureAlias: "LH", bumiStatus: "Non-Bumi", isLaca: true, builtUp: "1,870 sq ft", bedrooms: 4, bathrooms: 3, reservePrice: 630000, auctionDate: "2026-06-10" },
 ];
 
 export const participants = members.slice(0, 4).map((member, index) => ({
+  participationId: `PAR-${String(index + 1).padStart(6, "0")}`,
   memberId: member.id,
+  campaignId: `CAM-${String(index + 1).padStart(6, "0")}`,
   name: member.name,
   email: member.email,
   amount: [42500, 55000, 18000, 32000][index],
@@ -69,15 +71,15 @@ export const listingDocuments = [
 ];
 
 export const distributions = [
-  { id: "DIST-1001", campaign: "Cheras Terrace House", member: "Amina Rahman", participation: "RM42,500", amount: "RM2,850", status: "Completed", paid: "14 Jun 2026" },
-  { id: "DIST-1002", campaign: "Seremban Semi-D", member: "Daniel Tan", participation: "RM32,000", amount: "RM1,920", status: "Processing", paid: "Scheduled" },
-  { id: "DIST-1003", campaign: "Ipoh Terrace House", member: "Nur Iman", participation: "RM18,000", amount: "RM880", status: "Pending", paid: "—" },
-  { id: "DIST-1004", campaign: "Kajang Terrace House", member: "Raj Kumar", participation: "RM55,000", amount: "RM3,240", status: "Pending", paid: "—" },
+  { id: "DIS-000001", campaignId: "CAM-000004", participationId: "PAR-000001", memberId: "MEM-000001", paymentReference: "PAY-000001", campaign: "Cheras Terrace House", member: "Amina Rahman", participation: "RM42,500", principalReturn: "RM42,500", holdingReturn: "RM956", profitDistribution: "RM1,894", amount: "RM45,350", status: "Completed", paid: "14 Jun 2026" },
+  { id: "DIS-000002", campaignId: "CAM-000005", participationId: "PAR-000002", memberId: "MEM-000002", paymentReference: "PAY-000002", campaign: "Seremban Semi-D", member: "Daniel Tan", participation: "RM32,000", principalReturn: "RM32,000", holdingReturn: "RM1,440", profitDistribution: "RM480", amount: "RM33,920", status: "Processing", paid: "Scheduled" },
+  { id: "DIS-000003", campaignId: "CAM-000006", participationId: "PAR-000003", memberId: "MEM-000003", paymentReference: "PAY-000003", campaign: "Ipoh Terrace House", member: "Nur Iman", participation: "RM18,000", principalReturn: "RM18,000", holdingReturn: "RM810", profitDistribution: "RM70", amount: "RM18,880", status: "Pending", paid: "—" },
+  { id: "DIS-000004", campaignId: "CAM-000001", participationId: "PAR-000004", memberId: "MEM-000004", paymentReference: "PAY-000004", campaign: "Kajang Terrace House", member: "Raj Kumar", participation: "RM55,000", principalReturn: "RM55,000", holdingReturn: "RM2,475", profitDistribution: "RM765", amount: "RM58,240", status: "Pending", paid: "—" },
 ];
 
 export const announcements = [
   { id: "ann-1", title: "June distribution window", audience: "All Members", content: "Distribution processing window is open for completed campaigns.", date: "18 Jun 2026", status: "Published" },
-  { id: "ann-2", title: "New auction listings", audience: "Verified Members", content: "New terrace house opportunities are being prepared for member review.", date: "20 Jun 2026", status: "Draft" },
+  { id: "ann-2", title: "New auction listings", audience: "Verified Members", content: "New terrace house campaigns are being prepared for member review.", date: "20 Jun 2026", status: "Draft" },
   { id: "ann-3", title: "Kajang campaign update", audience: "Specific Campaign Participants", content: "Kajang Terrace House progress has been refreshed for participating members.", date: "25 Jun 2026", status: "Scheduled" },
 ];
 
