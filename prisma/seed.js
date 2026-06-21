@@ -227,15 +227,15 @@ async function main() {
       paymentRef: 'PAY-000001',
       memberId: member.id,
       campaignId: distributedCampaign.id,
+      participationId: participation.id,
       gateway: 'future-payment-gateway',
       gatewayTransactionId: 'gateway-sample-transaction',
       amount: '10000',
       status: 'Succeeded',
       providerResponse: { status: 'succeeded', environment: 'sample' },
+      providerResponseEncrypted: 'encrypted-full-provider-response',
     },
   })
-
-  await prisma.participation.update({ where: { id: participation.id }, data: { paymentId: payment.id } })
 
   const settlement = await prisma.campaignSettlement.upsert({
     where: { id: '00000000-0000-0000-0000-000000000201' },
