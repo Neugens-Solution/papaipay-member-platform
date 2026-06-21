@@ -93,7 +93,7 @@ function EditModal({ type, onClose }: { type: Exclude<ModalType, null>; onClose:
         <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
         <h2 id="profile-modal-title" className="text-lg font-semibold tracking-tight text-papaipay-ink">{config.title}</h2>
         <div className="mt-5 grid gap-4">{config.fields}</div>
-        {type === "email" ? <p className="mt-3 text-xs leading-5 text-slate-500">A confirmation code placeholder will be required before the email is changed.</p> : null}
+        {type === "email" ? <p className="mt-3 text-xs leading-5 text-slate-500">A confirmation code will be required before the email is changed.</p> : null}
         <div className="mt-6 grid grid-cols-2 gap-3">
           <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
           <button type="button" onClick={onClose} className="min-h-11 rounded-xl bg-papaipay-green text-sm font-semibold text-white transition hover:bg-papaipay-green/90">{config.action}</button>
@@ -117,6 +117,7 @@ export default function MemberProfilePage() {
 
       <div className="grid gap-5">
         <Section title="Personal Information" action={<ActionButton onClick={() => setModal("personal")}>Edit Information</ActionButton>}>
+          <InfoRow label="Member ID" value={profile.memberId} />
           <InfoRow label="Full Name" value={profile.personal.fullName} />
           <InfoRow label="IC Number" value={profile.personal.icNumberMasked} />
           <InfoRow label="Phone Number" value={profile.personal.phone} />

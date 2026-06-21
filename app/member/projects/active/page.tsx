@@ -6,7 +6,7 @@ export default function Page() {
     <MemberSectionPage
       eyebrow="Active Properties"
       title="Active Properties"
-      description="Follow mock auction property milestones, status summaries, and upcoming distribution context."
+      description="Follow auction property milestones, status summaries, and upcoming distribution context."
       items={memberSections.activeProperties}
     />
   );

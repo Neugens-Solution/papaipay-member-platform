@@ -1,290 +1,47 @@
-# Mock Data Specification v1
+# PAPAIPAY Portal V1 Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
-This document defines mock data structures needed for future prototyping and UI validation. It is not a database schema, API contract, or backend implementation.
+## Scope limits
 
-## Common Conventions
+- Interface layer only.
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-- Use stable string IDs in mock data.
-- Use ISO 8601 date strings for dates.
-- Use explicit status strings.
-- Use nullable fields only when the planned UI requires absent data states.
-- Include created and updated timestamps where useful for audit-oriented UI.
+## Language and model
 
-## Members
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-Required fields:
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-- `id`
-- `memberNumber`
-- `firstName`
-- `lastName`
-- `email`
-- `phone`
-- `accountStatus`
-- `kycStatus`
-- `joinedAt`
-- `lastLoginAt`
-- `addressSummary`
-- `communicationPreferences`
-- `createdAt`
-- `updatedAt`
+## Reference IDs
 
-Suggested statuses:
+Every relevant record has a sample-data reference ID:
 
-- `active`
-- `pending`
-- `suspended`
-- `closed`
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-Suggested KYC statuses:
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-- `not_started`
-- `in_progress`
-- `submitted`
-- `approved`
-- `rejected`
-- `needs_information`
+## Campaign and listing fields
 
-## Opportunities
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-Required fields:
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-- `id`
-- `title`
-- `summary`
-- `category`
-- `status`
-- `eligibilitySummary`
-- `targetAmount`
-- `minimumParticipationAmount`
-- `openDate`
-- `closeDate`
-- `expectedProjectStartDate`
-- `riskSummary`
-- `documentIds`
-- `createdAt`
-- `updatedAt`
+## Distribution and settlement
 
-Suggested statuses:
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-- `draft`
-- `review`
-- `open`
-- `closed`
-- `archived`
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-## Participations
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
-Required fields:
-
-- `id`
-- `memberId`
-- `opportunityId`
-- `projectId`
-- `amount`
-- `units`
-- `status`
-- `submittedAt`
-- `reviewedAt`
-- `reviewedByUserId`
-- `notes`
-- `createdAt`
-- `updatedAt`
-
-Suggested statuses:
-
-- `draft`
-- `submitted`
-- `under_review`
-- `approved`
-- `rejected`
-- `cancelled`
-- `converted_to_project`
-
-## Projects
-
-Required fields:
-
-- `id`
-- `opportunityId`
-- `title`
-- `summary`
-- `status`
-- `healthStatus`
-- `startDate`
-- `targetCompletionDate`
-- `completedAt`
-- `milestones`
-- `updates`
-- `managerUserId`
-- `createdAt`
-- `updatedAt`
-
-Milestone fields:
-
-- `id`
-- `title`
-- `status`
-- `dueDate`
-- `completedAt`
-
-Suggested project statuses:
-
-- `planned`
-- `active`
-- `paused`
-- `completed`
-- `archived`
-
-Suggested health statuses:
-
-- `on_track`
-- `at_risk`
-- `delayed`
-- `complete`
-
-## Distributions
-
-Required fields:
-
-- `id`
-- `memberId`
-- `projectId`
-- `participationId`
-- `amount`
-- `currency`
-- `status`
-- `scheduledDate`
-- `paidDate`
-- `methodSummary`
-- `referenceNumber`
-- `createdAt`
-- `updatedAt`
-
-Suggested statuses:
-
-- `scheduled`
-- `processing`
-- `paid`
-- `failed`
-- `cancelled`
-
-## Notifications
-
-Required fields:
-
-- `id`
-- `recipientUserId`
-- `recipientRole`
-- `title`
-- `body`
-- `category`
-- `readStatus`
-- `actionUrl`
-- `createdAt`
-- `readAt`
-
-Suggested categories:
-
-- `opportunity`
-- `participation`
-- `project`
-- `distribution`
-- `kyc`
-- `announcement`
-- `system`
-
-## Announcements
-
-Required fields:
-
-- `id`
-- `title`
-- `body`
-- `audienceRoles`
-- `status`
-- `pinned`
-- `publishedAt`
-- `expiresAt`
-- `authorUserId`
-- `createdAt`
-- `updatedAt`
-
-Suggested statuses:
-
-- `draft`
-- `scheduled`
-- `published`
-- `expired`
-- `archived`
-
-## Reports
-
-Required fields:
-
-- `id`
-- `name`
-- `description`
-- `category`
-- `audienceRoles`
-- `periodStart`
-- `periodEnd`
-- `status`
-- `generatedAt`
-- `generatedByUserId`
-- `downloadUrl`
-- `createdAt`
-
-Suggested categories:
-
-- `member`
-- `opportunity`
-- `participation`
-- `project`
-- `distribution`
-- `kyc`
-- `operational`
-- `governance`
-
-Suggested statuses:
-
-- `available`
-- `generating`
-- `failed`
-- `expired`
-
-## Settings
-
-Required fields:
-
-- `id`
-- `scope`
-- `scopeId`
-- `key`
-- `label`
-- `description`
-- `valueType`
-- `value`
-- `defaultValue`
-- `editableByRoles`
-- `updatedByUserId`
-- `createdAt`
-- `updatedAt`
-
-Suggested scopes:
-
-- `user`
-- `role`
-- `team`
-- `platform`
-
-Suggested value types:
-
-- `string`
-- `number`
-- `boolean`
-- `select`
-- `multi_select`
-- `json`
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

@@ -1,110 +1,47 @@
-# Navigation v1
+# PAPAIPAY Portal V1 Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
-This document defines the planned sidebar and navigation model for each role. It is not an implementation file.
+## Scope limits
 
-## Global Navigation Patterns
+- Interface layer only.
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-- Every portal should include a role-specific sidebar.
-- Every portal should include a top bar with user identity, notification access, and contextual actions.
-- Navigation labels should be consistent across roles when modules overlap.
-- Administrative navigation should expose only items allowed by role permissions.
+## Language and model
 
-## Member Navigation
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-### Sidebar
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-1. Dashboard
-2. Opportunities
-3. My Participations
-4. Active Projects
-5. Completed Projects
-6. Distributions
-7. Notifications
-8. Announcements
-9. Profile & KYC
-10. Reports
-11. Settings
+## Reference IDs
 
-### Top Bar
+Every relevant record has a sample-data reference ID:
 
-- Current page title.
-- Notification shortcut.
-- Announcement shortcut.
-- Profile menu.
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-## Admin Navigation
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-### Sidebar
+## Campaign and listing fields
 
-1. Dashboard
-2. Members
-3. KYC Reviews
-4. Opportunities
-5. Participations
-6. Active Projects
-7. Completed Projects
-8. Distributions
-9. Notifications
-10. Announcements
-11. Reports
-12. Settings
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-### Top Bar
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-- Current workspace label.
-- Quick search.
-- Create action menu.
-- Notification center.
-- Admin profile menu.
+## Distribution and settlement
 
-## Manager Navigation
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-### Sidebar
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-1. Dashboard
-2. Opportunities
-3. Participations
-4. Active Projects
-5. Completed Projects
-6. Distributions
-7. Announcements
-8. Reports
-9. Team Activity
-10. Settings
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
-### Top Bar
-
-- Management dashboard context.
-- Portfolio filter.
-- Reporting period selector.
-- Notification center.
-- Manager profile menu.
-
-## Super Admin Navigation
-
-### Sidebar
-
-1. Dashboard
-2. Users
-3. Roles
-4. Permissions
-5. Members
-6. Opportunities
-7. Participations
-8. Projects
-9. Distributions
-10. Notifications
-11. Announcements
-12. Reports
-13. Audit Log
-14. Settings
-
-### Top Bar
-
-- Global search.
-- Environment indicator.
-- System alerts.
-- Role switch or impersonation indicator when supported by policy.
-- Super Admin profile menu.
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

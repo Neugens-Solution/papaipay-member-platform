@@ -1,56 +1,43 @@
-# PAPAIPAY Member Platform
+# PAPAIPAY Portal V1
 
-PAPAIPAY Member Platform is a greenfield portal foundation for managing member-facing investment-style opportunities, participations, project lifecycle tracking, distributions, announcements, notifications, profiles, KYC workflows, reporting, settings, and role-based administration.
+PAPAIPAY Portal is a property participation campaign platform. This repository contains the V1 interface implementation using local sample data for member and admin screens covering campaign listings, portfolio records, participation records, manual distribution review, announcements, reports and profiles.
 
-This repository currently contains documentation only. It defines the intended product architecture, portal structure, navigation model, UI planning, reusable component expectations, mock data contracts, and Codex contribution rules before implementation begins.
+## Implementation limits
 
-## Platform Overview
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-The platform is intended to support secure, role-aware workflows across member, operational, management, and executive administration experiences. The initial documentation foundation establishes the boundaries for future Next.js implementation without creating application routes, pages, components, backend services, database schemas, API endpoints, or authentication logic.
+## Core terminology
 
-## Roles
+Members join Campaigns for Malaysian property Listings using a Participation Amount in RM. Participation is based on RM amount only. The member joined-campaign area is Portfolio and `/member/portfolio` is the canonical Portfolio route.
 
-- **Members**: Review opportunities, track participations, monitor projects, receive distributions, manage profile and KYC information, and view notifications and announcements.
-- **Admins**: Operate daily platform workflows, manage member records, review KYC status, publish announcements, monitor participations, and support reporting tasks.
-- **Managers**: Oversee portfolios, projects, distributions, reports, announcements, and operational performance.
-- **Super Admins**: Manage global platform settings, roles, permissions, administrative users, audit visibility, and organization-wide governance.
+Required reference IDs are displayed in relevant screens:
 
-## Core Modules
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Campaign Code: `PP-KL-2026-001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Distribution Batch ID: `DBT-000001`
+- Payment Reference: `PAY-000001`
 
-- Opportunities
-- Participations
-- Active Projects
-- Completed Projects
-- Distributions
-- Notifications
-- Announcements
-- Member Profile & KYC
-- Reports
-- Settings
-- Roles & Permissions
+## Campaign model
 
-## Technology Stack
+Admin campaign setup includes Campaign Target, Minimum Participation Amount, Maximum Participation Amount, Holding Return Rate, Return Type (Fixed / Target / Up To), Maximum Holding Period, Principal Protection and Manual Distribution Process notes.
 
-- **Framework**: Next.js
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **UI Architecture**: shadcn/ui style architecture
+Holding Return accrues during the holding period and is paid once during final distribution only. If the asset is not sold after 24 months, the rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-## Repository Principles
+## Distribution model
 
-- Documentation comes before implementation.
-- Product scope must be defined before application pages, routes, services, schemas, or APIs are created.
-- Features should be isolated and introduced through small, reviewable pull requests.
-- Naming conventions must remain consistent across documentation and future code.
-- Build and quality verification should be completed before merging implementation changes.
-- Direct commits to `main` are not allowed.
+Distribution screens show Principal Return, Holding Return, Profit Distribution, Final Distribution Total, Distribution Status, Payment Date, Payment Reference, Distribution Batch and Admin Notes. Admin screens represent a manual process: review calculation, check bank details, transfer outside the system, enter reference/date/notes and mark Paid.
 
-## Documentation Index
+## Development
 
-- [Product Blueprint](docs/product-blueprint-v1.md)
-- [Portal Structure](docs/portal-structure-v1.md)
-- [Navigation](docs/navigation-v1.md)
-- [UI Wireframe](docs/ui-wireframe-v1.md)
-- [Component Library](docs/component-library-v1.md)
-- [Mock Data Specification](docs/mock-data-spec-v1.md)
-- [Codex Rules](docs/codex-rules.md)
+```bash
+npm install
+npm run build
+```

@@ -28,13 +28,13 @@ export default function Page({ params }: { params: { slug: string } }) {
 
       <ContentCard>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Info label="Property Name" value={record.propertyName} />
+          <Info label="Distribution ID" value={record.distributionId} /><Info label="Campaign ID" value={record.campaignId} /><Info label="Campaign Code" value={record.campaignCode} /><Info label="Distribution Batch" value={record.distributionBatchId} /><Info label="Participation ID" value={record.participationId} /><Info label="Member ID" value={record.memberId} /><Info label="Property Name" value={record.propertyName} />
           <Info label="Location" value={record.location} />
           <Info label="Participation Amount" value={formatRM(record.participationAmount)} />
-          <Info label="Distribution Amount" value={formatRM(record.distributionAmount)} />
+          <Info label="Principal Return" value={formatRM(record.principalReturn)} /><Info label="Holding Return" value={formatRM(record.holdingReturn)} /><Info label="Profit Distribution" value={formatRM(record.profitDistribution)} /><Info label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
           <Info label="Distribution Status" value={record.status} />
           <Info label="Paid Date" value={record.paidDate} />
-          <Info label="Reference Number" value={record.referenceNumber} />
+          <Info label="Reference Number" value={record.referenceNumber} /><Info label="Payment Reference" value={record.paymentReference} />
         </div>
         <div className="mt-4 rounded-md border border-slate-100 bg-slate-50/80 p-3">
           <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">Notes</p>

@@ -1,114 +1,47 @@
-# Portal Structure v1
+# PAPAIPAY Portal V1 Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
-This document defines the intended portal route map for planning purposes only. These routes must not be created until implementation work is explicitly approved.
+## Scope limits
 
-## Route Principles
+- Interface layer only.
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-- Keep role areas clearly separated.
-- Use predictable naming.
-- Prefer nouns for top-level sections.
-- Keep detail routes nested under their parent resource.
-- Keep authentication routes separate from role portals.
+## Language and model
 
-## `/auth`
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-Planned authentication area:
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-- `/auth/sign-in`
-- `/auth/forgot-password`
-- `/auth/reset-password`
-- `/auth/verify-email`
-- `/auth/mfa`
-- `/auth/session-expired`
+## Reference IDs
 
-## `/member`
+Every relevant record has a sample-data reference ID:
 
-Planned member portal:
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-- `/member/dashboard`
-- `/member/opportunities`
-- `/member/opportunities/[opportunityId]`
-- `/member/participations`
-- `/member/participations/[participationId]`
-- `/member/projects/active`
-- `/member/projects/active/[projectId]`
-- `/member/projects/completed`
-- `/member/projects/completed/[projectId]`
-- `/member/distributions`
-- `/member/distributions/[distributionId]`
-- `/member/notifications`
-- `/member/announcements`
-- `/member/profile`
-- `/member/profile/kyc`
-- `/member/reports`
-- `/member/settings`
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-## `/admin`
+## Campaign and listing fields
 
-Planned admin portal:
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-- `/admin/dashboard`
-- `/admin/members`
-- `/admin/members/[memberId]`
-- `/admin/members/[memberId]/kyc`
-- `/admin/opportunities`
-- `/admin/opportunities/new`
-- `/admin/opportunities/[opportunityId]`
-- `/admin/participations`
-- `/admin/participations/[participationId]`
-- `/admin/projects/active`
-- `/admin/projects/active/[projectId]`
-- `/admin/projects/completed`
-- `/admin/projects/completed/[projectId]`
-- `/admin/distributions`
-- `/admin/distributions/[distributionId]`
-- `/admin/notifications`
-- `/admin/announcements`
-- `/admin/reports`
-- `/admin/settings`
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-## `/manager`
+## Distribution and settlement
 
-Planned manager portal:
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-- `/manager/dashboard`
-- `/manager/opportunities`
-- `/manager/opportunities/[opportunityId]`
-- `/manager/participations`
-- `/manager/projects/active`
-- `/manager/projects/active/[projectId]`
-- `/manager/projects/completed`
-- `/manager/projects/completed/[projectId]`
-- `/manager/distributions`
-- `/manager/announcements`
-- `/manager/reports`
-- `/manager/reports/opportunities`
-- `/manager/reports/participations`
-- `/manager/reports/projects`
-- `/manager/reports/distributions`
-- `/manager/team-activity`
-- `/manager/settings`
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-## `/super-admin`
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
-Planned super admin portal:
-
-- `/super-admin/dashboard`
-- `/super-admin/users`
-- `/super-admin/users/[userId]`
-- `/super-admin/roles`
-- `/super-admin/roles/[roleId]`
-- `/super-admin/permissions`
-- `/super-admin/members`
-- `/super-admin/opportunities`
-- `/super-admin/participations`
-- `/super-admin/projects`
-- `/super-admin/distributions`
-- `/super-admin/notifications`
-- `/super-admin/announcements`
-- `/super-admin/reports`
-- `/super-admin/reports/governance`
-- `/super-admin/audit-log`
-- `/super-admin/settings`
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

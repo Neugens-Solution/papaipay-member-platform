@@ -1,139 +1,47 @@
-# Component Library v1
+# PAPAIPAY Portal V1 Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
-This document defines the reusable UI component inventory expected for the PAPAIPAY Member Platform. It is a planning document only and does not create components.
+## Scope limits
 
-## Component Architecture Principles
+- Interface layer only.
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-- Follow shadcn/ui style composition patterns.
-- Prefer small, reusable primitives over large monolithic components.
-- Keep role-specific behavior outside base primitives.
-- Use TypeScript-friendly prop naming in future implementation.
-- Keep visual language consistent across member and administrative portals.
+## Language and model
 
-## Foundation Components
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-- Button
-- Icon Button
-- Link Button
-- Input
-- Textarea
-- Select
-- Checkbox
-- Radio Group
-- Switch
-- Label
-- Form Field
-- Field Error
-- Date Picker
-- Date Range Picker
-- File Upload Placeholder
-- Tooltip
-- Popover
-- Dialog
-- Alert Dialog
-- Drawer
-- Sheet
-- Tabs
-- Accordion
-- Separator
-- Scroll Area
-- Skeleton
-- Spinner
-- Empty State
-- Error State
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-## Layout Components
+## Reference IDs
 
-- App Shell
-- Role Sidebar
-- Top Bar
-- Page Header
-- Section Header
-- Content Card
-- Metric Card Grid
-- Detail Layout
-- Split Pane Layout
-- Right Rail
-- Responsive Stack
-- Breadcrumbs
+Every relevant record has a sample-data reference ID:
 
-## Navigation Components
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-- Sidebar Item
-- Sidebar Group
-- Sidebar Badge
-- Top Bar Menu
-- Profile Menu
-- Notification Shortcut
-- Global Search Placeholder
-- Role Context Indicator
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-## Data Display Components
+## Campaign and listing fields
 
-- Data Table
-- Table Toolbar
-- Table Pagination
-- Table Bulk Actions
-- Sort Control
-- Filter Bar
-- Filter Chip
-- Status Badge
-- Role Badge
-- Health Badge
-- Severity Badge
-- Timeline
-- Activity Feed
-- Audit Event Row
-- Document List
-- Description List
-- Key Value List
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-## Product Components
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-- Opportunity Card
-- Opportunity Summary Panel
-- Participation Summary Card
-- Participation Status Timeline
-- Project Card
-- Project Milestone Timeline
-- Project Update Card
-- Distribution Summary Card
-- Distribution Schedule Table
-- Notification Item
-- Announcement Card
-- Report Card
-- KYC Status Panel
-- KYC Document Checklist
-- Member Profile Summary
-- Permission Matrix
-- Role Summary Card
-- Settings Section
+## Distribution and settlement
 
-## Feedback Components
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-- Alert
-- Toast Placeholder
-- Confirmation Dialog
-- Inline Validation Message
-- Permission Notice
-- Publish Status Indicator
-- Loading State
-- Success State
-- Warning State
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
 
-## Chart and Reporting Placeholders
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
 
-- Metric Trend Chart Placeholder
-- Distribution Chart Placeholder
-- Participation Funnel Placeholder
-- Project Health Chart Placeholder
-- Report Export Action Placeholder
-
-## Component Naming Guidelines
-
-- Use PascalCase for component names in future implementation.
-- Use descriptive nouns, such as `OpportunityCard` and `DistributionSummaryCard`.
-- Prefix role-specific components only when the component cannot be generalized.
-- Keep shared components under a future shared UI area when implementation begins.
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

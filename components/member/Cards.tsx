@@ -2,7 +2,11 @@ import Link from "next/link";
 import type { Opportunity } from "@/lib/memberMockData";
 
 export function StatusBadge({ status }: { status: string }) {
-  return <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">{status}</span>;
+  return (
+    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">
+      {status}
+    </span>
+  );
 }
 
 export function ContentCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
@@ -21,12 +25,15 @@ export function MetricCard({ label, value, helper, trend }: { label: string; val
 }
 
 export function ProgressBar({ value }: { value: number }) {
-  return <div className="h-2.5 overflow-hidden rounded-md bg-slate-100"><div className="h-full rounded-md bg-papaipay-green" style={{ width: `${Math.min(value, 100)}%` }} /></div>;
+  return (
+    <div className="h-2.5 overflow-hidden rounded-md bg-slate-100">
+      <div className="h-full rounded-md bg-papaipay-green" style={{ width: `${Math.min(value, 100)}%` }} />
+    </div>
+  );
 }
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const progress = Math.round((opportunity.collectedAmount / opportunity.targetAmount) * 100);
-  const daysRemaining = Math.max(0, Math.ceil((new Date(opportunity.closeDate).getTime() - new Date("2026-06-17").getTime()) / 86400000));
   const detailHref = `/member/opportunities/${opportunity.slug}`;
   const statusLabel = opportunity.status.replace(/\b\w/g, (char) => char.toUpperCase());
 
@@ -39,10 +46,16 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
       </Link>
       <div className="space-y-4 p-5">
         <div>
+          <p className="text-xs font-bold text-slate-400">{opportunity.campaignId} • {opportunity.campaignCode}</p>
           <Link href={detailHref} className="group">
             <h3 className="text-lg font-bold tracking-tight group-hover:text-papaipay-green">{opportunity.title}</h3>
           </Link>
           <p className="mt-1 text-sm text-slate-500">{opportunity.location}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <StatusBadge status={opportunity.tenureAlias} />
+            <StatusBadge status={opportunity.bumiStatus} />
+            {opportunity.isLaca ? <StatusBadge status="LACA" /> : null}
+          </div>
         </div>
 
         <div>
@@ -54,15 +67,16 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </div>
 
         <dl className="space-y-2 text-sm">
-          <DetailRow label="Participants" value={`${opportunity.participants} Participants`} />
-          <DetailRow label="Days Remaining" value={`${daysRemaining} Days Remaining`} />
-          <DetailRow label="Participation Range" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
           <DetailRow label="Property Type" value={opportunity.propertyType} />
-          <DetailRow label="Tenure" value={opportunity.tenure} />
+          <DetailRow label="Built-up" value={opportunity.builtUpArea} />
+          <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
+          <DetailRow label="Reserve Price" value={`RM${opportunity.reservePrice.toLocaleString()}`} />
+          <DetailRow label="Auction Date" value={opportunity.auctionDate} />
+          <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 
         <Link href={detailHref} className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
-          View Details
+          View Campaign
         </Link>
       </div>
     </article>
@@ -79,5 +93,10 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 export function Info({ label, value }: { label: string; value: string }) {
-  return <div className="rounded-md border border-slate-100 bg-slate-50/80 p-3"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-1 font-bold text-slate-800">{value}</p></div>;
+  return (
+    <div className="rounded-md border border-slate-100 bg-slate-50/80 p-3">
+      <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p>
+      <p className="mt-1 font-bold text-slate-800">{value}</p>
+    </div>
+  );
 }
