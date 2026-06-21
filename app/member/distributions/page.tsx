@@ -30,11 +30,11 @@ export default function Page() {
           {distributionRecords.map((record) => (
             <div key={record.slug} className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr_1fr_0.9fr_0.9fr_auto] lg:items-center">
               <div>
-                <p className="text-sm font-bold text-papaipay-ink">{record.propertyName}</p>
-                <p className="mt-1 text-xs text-slate-500">Participation Amount: {formatRM(record.participationAmount)}</p>
+                <p className="text-xs font-bold text-slate-400">{record.distributionId} • {record.distributionBatchId} • {record.campaignId}</p><p className="text-sm font-bold text-papaipay-ink">{record.propertyName}</p>
+                <p className="mt-1 text-xs text-slate-500">{record.campaignCode} • Participation Amount: {formatRM(record.participationAmount)}</p>
               </div>
               <ListField label="Participation Amount" value={formatRM(record.participationAmount)} className="hidden lg:block" />
-              <ListField label="Distribution Amount" value={formatRM(record.distributionAmount)} />
+              <ListField label="Principal Return" value={formatRM(record.principalReturn)} /><ListField label="Holding Return" value={formatRM(record.holdingReturn)} /><ListField label="Profit Distribution" value={formatRM(record.profitDistribution)} /><ListField label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
               <div>
                 <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 lg:hidden">Distribution Status</p>
                 <StatusBadge status={record.status} />

@@ -6,7 +6,7 @@ export default function Page() {
     <MemberSectionPage
       eyebrow="Completed Properties"
       title="Completed Properties"
-      description="Review mock historical auction property summaries and archived distribution records."
+      description="Review historical auction property summaries and archived distribution records."
       items={memberSections.completedProperties}
     />
   );

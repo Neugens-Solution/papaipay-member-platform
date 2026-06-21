@@ -1,54 +1,47 @@
-# Codex Rules
+# PAPAIPAY Portal V1 Documentation
 
-## Purpose
+This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
 
-These rules guide Codex contributions for the PAPAIPAY Member Platform repository.
+## Scope limits
 
-## Documentation-First Approach
+- Interface layer only.
+- Local sample data only.
+- No backend services.
+- No database schema or migrations.
+- No real authentication.
+- No payment gateway.
+- No automated payout or production payment logic.
 
-- Start with documentation for new product areas.
-- Do not create application pages, routes, components, services, schemas, API endpoints, or authentication logic until the relevant documentation exists and the implementation scope is approved.
-- Keep planning documents clear, versioned, and easy to review.
-- Update documentation when product decisions change.
+## Language and model
 
-## Small Pull Requests
+Members join property Campaigns / Listings with an RM Participation Amount. Participation is based on RM amount only. The member joined-campaign area remains Portfolio, with `/member/portfolio` as the canonical route.
 
-- Keep pull requests focused on one concern.
-- Prefer small, reviewable changes over large multi-feature submissions.
-- Avoid mixing documentation, UI, backend, and infrastructure changes unless explicitly requested.
-- Include a concise summary and validation notes in every pull request.
+Use these labels: Member, Campaign, Listing, Participation, Participation Amount, Minimum Participation Amount, Maximum Participation Amount, Campaign Target, Portfolio, Distribution, Principal Return, Holding Return, Profit Distribution and Final Distribution.
 
-## Feature Isolation
+## Reference IDs
 
-- Keep each feature area isolated during implementation.
-- Do not introduce shared abstractions before at least two real use cases exist.
-- Keep member, admin, manager, and super admin concerns clearly separated unless a shared primitive is intentional.
-- Avoid cross-feature side effects.
+Every relevant record has a sample-data reference ID:
 
-## Branch and Commit Rules
+- Member ID: `MEM-000001`
+- Campaign ID: `CAM-000001`
+- Participation ID: `PAR-000001`
+- Distribution ID: `DIS-000001`
+- Payment Reference: `PAY-000001`
 
-- Do not commit directly to `main`.
-- Use descriptive branch names for feature work.
-- Use clear commit messages that describe the intent of the change.
-- Keep commits coherent and scoped.
+IDs should be visible, searchable in admin tables, copyable from detail pages, and included in reports / exports.
 
-## Build Verification Before Merge
+## Campaign and listing fields
 
-- Run relevant build, type, lint, and test checks before merge when implementation code exists.
-- Document any skipped checks and the reason.
-- Do not merge changes with known failing checks unless the failure is documented and explicitly accepted.
+Listings include Malaysian property conventions: FH / LH, LACA, Bumi / Non-Bumi / Open Market, property type, built-up, land area, bedrooms, bathrooms, auction date, reserve price, location, state, full address, documents, campaign status badge, progress, Campaign Target, collected amount, remaining amount and min / max Participation Amount.
 
-## Naming Conventions
+Admin configuration includes Holding Return Rate, Return Type, Maximum Holding Period Months, Principal Protection Rule, Final Distribution Notes, Member Profit Distribution Percentage, Platform Profit Share Percentage, Platform Fee, Management Fee and Other Fee Notes.
 
-- Use clear, descriptive names.
-- Use kebab-case for documentation file names.
-- Use PascalCase for future component names.
-- Use camelCase for future TypeScript variables and object fields.
-- Use role names consistently: Member, Admin, Manager, Super Admin.
-- Use module names consistently: Opportunities, Participations, Projects, Distributions, Notifications, Announcements, Reports, Settings, Roles & Permissions.
+## Distribution and settlement
 
-## Greenfield Boundary
+Holding Return accrues during the holding period and is paid once during final distribution only. Example: Participation Amount RM10,000, Holding Return Rate 1.5% per month, Holding Period 15 months, Accrued Holding Return RM2,250, paid upon final distribution only.
 
-- Treat this repository as a new project.
-- Do not copy, migrate, reference, or reuse code, routes, components, documents, structures, naming conventions, or assumptions from previous repositories.
-- Base decisions only on requirements documented in this repository and approved future work.
+If the asset is not sold after 24 months, the business rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
+
+Admin settlement sample settlement fields cover acquisition costs, holding costs, renovation / preparation costs, disposal / sale costs and platform / management costs. Calculation summaries show Gross Profit, Total Costs, Net Profit, Profit Distribution Pool, Platform Share and Final Distribution Total.
+
+Manual distribution process: review final calculation, check member bank details, manually transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.

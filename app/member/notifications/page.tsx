@@ -6,7 +6,7 @@ export default function Page() {
     <MemberSectionPage
       eyebrow="Notifications"
       title="Notifications"
-      description="View mock member notifications for listing, profile, and property events."
+      description="View member notifications for listing, profile, and property events."
       items={memberSections.notifications}
     />
   );
