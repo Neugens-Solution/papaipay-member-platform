@@ -197,3 +197,69 @@ The safest next technical phase is database + ORM setup after approval of this c
 3. Add migrations.
 4. Seed database with data matching current local sample records.
 5. Keep UI behavior unchanged while introducing database reads in a later phase.
+
+## Phase 1.2 capacity, verification, and settlement contract
+
+### Participation capacity rule
+
+Before a member can proceed to payment, the service layer must validate all of the following:
+
+1. Participation Amount is greater than or equal to the campaign minimum.
+2. Participation Amount is less than or equal to the campaign maximum.
+3. Participation Amount is less than or equal to available campaign capacity.
+4. Campaign lifecycle status is `Open`.
+5. Member verification status is `Approved`.
+
+Available campaign capacity is derived as:
+
+```text
+available_amount = campaign_target - collected_amount_snapshot - reserved_amount_snapshot
+```
+
+`collected_amount_snapshot` and `reserved_amount_snapshot` are cached operational snapshots. Confirmed participation and active reservation records remain the reconciliation source.
+
+### Participation reservation contract
+
+A pending Participation may reserve capacity while payment is attempted. The reservation fields are:
+
+- `reserved_at`
+- `reserved_until`
+- `expires_at`
+- `confirmed_at`
+- `cancelled_at`
+
+Future payment services must release reservations when checkout expires, payment fails, or the member cancels before confirmation.
+
+### Manual KYC V1 contract
+
+Manual KYC is the V1 verification path. External e-KYC remains available in the schema for a later provider integration.
+
+Required manual KYC uploads are:
+
+- IC front
+- IC back
+- Selfie holding IC
+- Bank statement showing the member name for bank review
+
+Admin review is tracked by `manual_kyc_submissions` and `manual_kyc_documents`, including document type, document status, reviewed-by user, review timestamp, rejection reason, and internal notes.
+
+### Bank account verification contract
+
+Member bank accounts must support `Pending`, `Verified`, and `Rejected` verification states. Verification stores the reviewing admin, review timestamp, rejection reason, internal notes, and primary-account flag. Payment distribution operations should use a verified primary bank account.
+
+### Principal-only settlement contract
+
+Campaign settlement must explicitly store the settlement scenario:
+
+- `SuccessfulExit`
+- `PrincipalOnlyAfterMaxHoldingPeriod`
+
+For the principal-only scenario, settlement stores the reason and triggered timestamp. Distribution calculation must return Participation Amount only, with no Holding Return and no Profit Distribution.
+
+### Holding-period snapshot contract
+
+Campaign settlement stores `holding_period_months`, `holding_start_date`, `sale_completed_at`, and `distribution_calculation_date` so Holding Return and final distribution decisions can be audited after approval and lock.
+
+### Planned versus locked profit sharing
+
+Campaign records store planned member/platform profit sharing percentages for pre-publication configuration. Campaign settlement records store final approved percentages as locked snapshots for distribution calculation and reporting.

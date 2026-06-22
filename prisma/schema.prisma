@@ -24,6 +24,34 @@ enum MemberVerificationStatus {
   Cancelled
 }
 
+enum BankAccountVerificationStatus {
+  Pending
+  Verified
+  Rejected
+}
+
+enum ManualKycStatus {
+  NotSubmitted
+  Submitted
+  UnderReview
+  Approved
+  Rejected
+  ResubmissionRequired
+}
+
+enum ManualKycDocumentType {
+  IcFront
+  IcBack
+  SelfieHoldingIc
+  BankStatement
+}
+
+enum ManualKycDocumentStatus {
+  Pending
+  Accepted
+  Rejected
+}
+
 enum AdminAccountStatus {
   Invited
   Active
@@ -116,6 +144,11 @@ enum SettlementCalculationStatus {
   Locked
 }
 
+enum SettlementScenario {
+  SuccessfulExit
+  PrincipalOnlyAfterMaxHoldingPeriod
+}
+
 enum DistributionStatus {
   Pending
   Processing
@@ -205,6 +238,8 @@ model User {
   createdCampaigns           Campaign[]            @relation("CampaignCreatedBy")
   updatedCampaigns           Campaign[]            @relation("CampaignUpdatedBy")
   reviewedEkycChecks         EkycCheck[]           @relation("EkycReviewedBy")
+  reviewedManualKycSubmissions ManualKycSubmission[] @relation("ManualKycReviewedBy")
+  verifiedBankAccounts      MemberBankAccount[]   @relation("BankAccountVerifiedBy")
   reviewedSettlements        CampaignSettlement[]  @relation("SettlementReviewedBy")
   approvedSettlements        CampaignSettlement[]  @relation("SettlementApprovedBy")
   lockedSettlements          CampaignSettlement[]  @relation("SettlementLockedBy")
@@ -235,6 +270,7 @@ model Member {
   addresses             MemberAddress[]
   bankAccounts          MemberBankAccount[]
   nominees              MemberNominee[]
+  manualKycSubmissions  ManualKycSubmission[]
   participations        Participation[]
   payments              Payment[]
   ekycChecks            EkycCheck[]
@@ -285,14 +321,21 @@ model MemberBankAccount {
   accountHolderName      String
   accountNumberEncrypted String
   accountNumberLast4     String?
-  isPrimary              Boolean  @default(false)
+  verificationStatus     BankAccountVerificationStatus @default(Pending)
+  verifiedById           String?
   verifiedAt             DateTime?
+  rejectedReason         String?
+  adminNotes             String?
+  isPrimary              Boolean  @default(false)
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
   member                 Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  verifiedBy             User?    @relation("BankAccountVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([memberId])
+  @@index([verificationStatus])
+  @@index([verifiedById])
   @@index([isPrimary])
 }
 
@@ -376,6 +419,7 @@ model Campaign {
   visibility                 Visibility              @default(InternalOnly)
   campaignTarget             Decimal                 @db.Decimal(14, 2)
   collectedAmountSnapshot    Decimal?                @db.Decimal(14, 2)
+  reservedAmountSnapshot     Decimal?                @db.Decimal(14, 2)
   minimumParticipationAmount Decimal                 @db.Decimal(14, 2)
   maximumParticipationAmount Decimal                 @db.Decimal(14, 2)
   campaignOpenDate           DateTime?
@@ -384,6 +428,8 @@ model Campaign {
   returnType                 ReturnType
   maximumHoldingPeriodMonths Int                     @default(24)
   principalProtectionEnabled Boolean                 @default(true)
+  memberProfitDistributionPercentagePlanned Decimal? @db.Decimal(8, 4)
+  platformProfitSharePercentagePlanned Decimal?      @db.Decimal(8, 4)
   twentyFourMonthRuleText    String                  @default("If not sold within 24 months, Participation Amount only will be returned.")
   createdById                String?
   updatedById                String?
@@ -463,6 +509,7 @@ model FileAsset {
 
   campaignMedia    CampaignMedia[]
   documents        CampaignDocument[]
+  manualKycDocuments ManualKycDocument[]
   reports          Report[]
 
   @@index([visibility])
@@ -582,6 +629,9 @@ model Participation {
   campaignId          String
   participationAmount Decimal             @db.Decimal(14, 2)
   participationStatus ParticipationStatus @default(PendingPayment)
+  reservedAt          DateTime?
+  reservedUntil       DateTime?
+  expiresAt           DateTime?
   confirmedAt         DateTime?
   cancelledAt         DateTime?
   createdAt           DateTime            @default(now())
@@ -595,6 +645,8 @@ model Participation {
   @@index([memberId])
   @@index([campaignId])
   @@index([participationStatus])
+  @@index([reservedUntil])
+  @@index([expiresAt])
   @@index([createdAt])
 }
 
@@ -649,6 +701,48 @@ model PaymentWebhookEvent {
   @@index([paymentId])
   @@index([processingStatus])
   @@index([receivedAt])
+}
+
+model ManualKycSubmission {
+  id              String          @id @default(uuid())
+  memberId        String
+  status          ManualKycStatus @default(NotSubmitted)
+  submittedAt     DateTime?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  adminNotes      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  member          Member          @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy      User?           @relation("ManualKycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  documents       ManualKycDocument[]
+
+  @@index([memberId])
+  @@index([status])
+  @@index([reviewedById])
+  @@index([submittedAt])
+}
+
+model ManualKycDocument {
+  id              String                  @id @default(uuid())
+  submissionId    String
+  fileAssetId     String
+  documentType    ManualKycDocumentType
+  documentStatus  ManualKycDocumentStatus @default(Pending)
+  rejectionReason String?
+  adminNotes      String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  submission      ManualKycSubmission     @relation(fields: [submissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset       FileAsset               @relation(fields: [fileAssetId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([submissionId])
+  @@index([fileAssetId])
+  @@index([documentType])
+  @@index([documentStatus])
 }
 
 model EkycCheck {
@@ -712,6 +806,13 @@ model CampaignSettlement {
   renovationCosts                      Json?
   disposalCosts                        Json?
   platformCosts                        Json?
+  settlementScenario                   SettlementScenario           @default(SuccessfulExit)
+  principalOnlyReason                  String?
+  principalOnlyTriggeredAt             DateTime?
+  holdingPeriodMonths                  Int?
+  holdingStartDate                     DateTime?
+  saleCompletedAt                      DateTime?
+  distributionCalculationDate          DateTime?
   memberProfitDistributionPercentage   Decimal?                    @db.Decimal(8, 4)
   platformProfitSharePercentage        Decimal?                    @db.Decimal(8, 4)
   grossProfitSnapshot                  Decimal?                    @db.Decimal(14, 2)
@@ -740,6 +841,7 @@ model CampaignSettlement {
   distributionBatches                  DistributionBatch[]
 
   @@index([campaignId])
+  @@index([settlementScenario])
   @@index([calculationStatus])
   @@index([reviewedById])
   @@index([approvedById])

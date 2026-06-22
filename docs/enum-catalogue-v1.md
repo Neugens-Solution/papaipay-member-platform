@@ -210,3 +210,46 @@ This catalogue defines approved backend enum values for the production data cont
 | `Published` |
 | `Read` |
 | `Archived` |
+
+## Bank account verification status
+
+| Value | Meaning |
+| --- | --- |
+| `Pending` | Awaiting admin verification. |
+| `Verified` | Bank account has passed admin review. |
+| `Rejected` | Bank account failed admin review. |
+
+## Manual KYC status
+
+| Value | Meaning |
+| --- | --- |
+| `NotSubmitted` | Member has not submitted manual KYC. |
+| `Submitted` | Member submitted manual KYC documents. |
+| `UnderReview` | Admin review is in progress. |
+| `Approved` | Manual KYC is approved. |
+| `Rejected` | Manual KYC is rejected. |
+| `ResubmissionRequired` | Member must resubmit one or more documents. |
+
+## Manual KYC document type
+
+| Value | Meaning |
+| --- | --- |
+| `IcFront` | Front of IC. |
+| `IcBack` | Back of IC. |
+| `SelfieHoldingIc` | Selfie while holding IC. |
+| `BankStatement` | Bank statement for name/account review. |
+
+## Manual KYC document status
+
+| Value | Meaning |
+| --- | --- |
+| `Pending` | Document is awaiting review. |
+| `Accepted` | Document passed review. |
+| `Rejected` | Document failed review. |
+
+## Settlement scenario
+
+| Value | Meaning |
+| --- | --- |
+| `SuccessfulExit` | Sale completed and final distribution may include Principal Return, Holding Return, and Profit Distribution. |
+| `PrincipalOnlyAfterMaxHoldingPeriod` | 24-month rule triggered; Participation Amount only is returned. |

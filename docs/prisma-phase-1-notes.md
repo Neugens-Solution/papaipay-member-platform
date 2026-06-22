@@ -64,3 +64,25 @@ This applies to payment provider responses, payment webhook events, e-KYC provid
 Financial and audit-linked records use restrictive referential actions where deletion would risk losing payment, participation, settlement, distribution, or audit context. Optional admin/user action references use `SetNull` so historical records remain available if an admin account is removed.
 
 Lookup indexes are added for common filtering paths such as public statuses, campaign/member foreign keys, distribution processing fields, provider event processing, and audit entity lookup.
+
+## Phase 1.2 refinement notes
+
+### Capacity reservation support
+
+Campaign capacity now separates confirmed and reserved totals using `collectedAmountSnapshot` and `reservedAmountSnapshot`. Available amount is derived as campaign target minus those two snapshots. Participation records include reservation and expiry timestamps so future payment checkout logic can hold and release capacity safely.
+
+### Manual KYC V1
+
+Manual KYC is modeled as the V1 verification path through `ManualKycSubmission` and `ManualKycDocument`. Documents link to `FileAsset` so file access controls can be handled by storage policy later. The external `EkycCheck` models remain for a future provider path only.
+
+### Bank account verification
+
+Member bank accounts now include verification status, reviewer, review timestamp, rejection reason, internal notes, and primary-account selection. This supports manual distribution review before a payment record is marked paid.
+
+### Settlement scenarios and holding snapshots
+
+`CampaignSettlement` now records whether a campaign exits successfully or follows the principal-only 24-month scenario. Holding period, holding start, sale completion, and distribution calculation timestamps are stored as settlement snapshots for audit and reporting.
+
+### Planned and locked profit sharing
+
+Campaign records hold planned member/platform percentage settings. Settlement records continue to hold final approved percentages as locked calculation snapshots.

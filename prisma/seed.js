@@ -96,7 +96,7 @@ async function main() {
 
   await prisma.memberBankAccount.upsert({
     where: { id: '00000000-0000-0000-0000-000000000103' },
-    update: { bankName: 'Sample Bank', accountHolderName: 'Sample Member' },
+    update: { bankName: 'Sample Bank', accountHolderName: 'Sample Member', verificationStatus: 'Verified', verifiedById: adminUser.id, verifiedAt: new Date('2026-01-03T00:00:00.000Z'), adminNotes: 'Bank account verified against submitted bank statement.' },
     create: {
       id: '00000000-0000-0000-0000-000000000103',
       memberId: member.id,
@@ -104,9 +104,68 @@ async function main() {
       accountHolderName: 'Sample Member',
       accountNumberEncrypted: 'encrypted-sample-account-number',
       accountNumberLast4: '0001',
+      verificationStatus: 'Verified',
+      verifiedById: adminUser.id,
+      verifiedAt: new Date('2026-01-03T00:00:00.000Z'),
+      adminNotes: 'Bank account verified against submitted bank statement.',
       isPrimary: true,
     },
   })
+
+  const manualKycFiles = [
+    ['00000000-0000-0000-0000-000000000301', 'FIL-000001', 'ic-front.pdf', 'IC front verification document'],
+    ['00000000-0000-0000-0000-000000000302', 'FIL-000002', 'ic-back.pdf', 'IC back verification document'],
+    ['00000000-0000-0000-0000-000000000303', 'FIL-000003', 'selfie-holding-ic.jpg', 'Selfie holding IC verification document'],
+    ['00000000-0000-0000-0000-000000000304', 'FIL-000004', 'bank-statement.pdf', 'Bank statement verification document'],
+  ]
+
+  for (const [id, fileRef, fileName, description] of manualKycFiles) {
+    await prisma.fileAsset.upsert({
+      where: { fileRef },
+      update: { originalFilename: fileName, objectKey: `member-verification/sample/${fileName}` },
+      create: {
+        id,
+        fileRef,
+        bucket: 'member-verification',
+        objectKey: `member-verification/sample/${fileName}`,
+        originalFilename: fileName,
+        contentType: fileName.endsWith('.jpg') ? 'image/jpeg' : 'application/pdf',
+        sizeBytes: 1024,
+        visibility: 'InternalOnly',
+        purpose: 'EkycDocument',
+      },
+    })
+  }
+
+  const manualKycSubmission = await prisma.manualKycSubmission.upsert({
+    where: { id: '00000000-0000-0000-0000-000000000305' },
+    update: { status: 'Approved', reviewedById: adminUser.id, reviewedAt: new Date('2026-01-03T00:00:00.000Z') },
+    create: {
+      id: '00000000-0000-0000-0000-000000000305',
+      memberId: member.id,
+      status: 'Approved',
+      submittedAt: new Date('2026-01-02T12:00:00.000Z'),
+      reviewedById: adminUser.id,
+      reviewedAt: new Date('2026-01-03T00:00:00.000Z'),
+      adminNotes: 'Manual verification approved using the submitted IC, selfie, and bank statement.',
+    },
+  })
+
+  for (const [id, fileRef, , ] of manualKycFiles) {
+    const fileAsset = await prisma.fileAsset.findUniqueOrThrow({ where: { fileRef } })
+    const documentType = fileRef === 'FIL-000001' ? 'IcFront' : fileRef === 'FIL-000002' ? 'IcBack' : fileRef === 'FIL-000003' ? 'SelfieHoldingIc' : 'BankStatement'
+    await prisma.manualKycDocument.upsert({
+      where: { id: id.replace('00000000030', '00000000031') },
+      update: { documentStatus: 'Accepted' },
+      create: {
+        id: id.replace('00000000030', '00000000031'),
+        submissionId: manualKycSubmission.id,
+        fileAssetId: fileAsset.id,
+        documentType,
+        documentStatus: 'Accepted',
+      },
+    })
+  }
 
   const openCampaign = await prisma.campaign.upsert({
     where: { campaignRef: 'CAM-000001' },
@@ -121,6 +180,7 @@ async function main() {
       visibility: 'MemberVisible',
       campaignTarget: '560000',
       collectedAmountSnapshot: '420000',
+      reservedAmountSnapshot: '25000',
       minimumParticipationAmount: '500',
       maximumParticipationAmount: '60000',
       campaignOpenDate: new Date('2026-06-01T00:00:00.000Z'),
@@ -128,6 +188,8 @@ async function main() {
       holdingReturnRateMonthly: '1.5',
       returnType: 'UpTo',
       principalProtectionEnabled: true,
+      memberProfitDistributionPercentagePlanned: '70',
+      platformProfitSharePercentagePlanned: '30',
       createdById: adminUser.id,
       updatedById: adminUser.id,
     },
@@ -146,6 +208,7 @@ async function main() {
       visibility: 'MemberVisible',
       campaignTarget: '500000',
       collectedAmountSnapshot: '500000',
+      reservedAmountSnapshot: '0',
       minimumParticipationAmount: '500',
       maximumParticipationAmount: '50000',
       campaignOpenDate: new Date('2025-01-15T00:00:00.000Z'),
@@ -153,6 +216,8 @@ async function main() {
       holdingReturnRateMonthly: '1.5',
       returnType: 'Fixed',
       principalProtectionEnabled: true,
+      memberProfitDistributionPercentagePlanned: '70',
+      platformProfitSharePercentagePlanned: '30',
       createdById: adminUser.id,
       updatedById: adminUser.id,
     },
@@ -216,6 +281,9 @@ async function main() {
       campaignId: distributedCampaign.id,
       participationAmount: '10000',
       participationStatus: 'Confirmed',
+      reservedAt: new Date('2025-02-10T00:00:00.000Z'),
+      reservedUntil: new Date('2025-02-10T00:30:00.000Z'),
+      expiresAt: new Date('2025-02-10T00:30:00.000Z'),
       confirmedAt: new Date('2025-02-10T00:00:00.000Z'),
     },
   })
@@ -250,6 +318,11 @@ async function main() {
       renovationCosts: { renovation: 35000, cleaning: 1200 },
       disposalCosts: { agentFee: 18000, documentation: 900 },
       platformCosts: { platformFee: 8000, managementFee: 6500 },
+      settlementScenario: 'SuccessfulExit',
+      holdingPeriodMonths: 15,
+      holdingStartDate: new Date('2025-02-15T00:00:00.000Z'),
+      saleCompletedAt: new Date('2025-10-30T00:00:00.000Z'),
+      distributionCalculationDate: new Date('2025-11-03T00:00:00.000Z'),
       memberProfitDistributionPercentage: '70',
       platformProfitSharePercentage: '30',
       grossProfitSnapshot: '230000',

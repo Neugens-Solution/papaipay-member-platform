@@ -201,3 +201,38 @@ This matrix classifies major fields before backend implementation. Classificatio
 | reports | file link | File Metadata Field | Stored report file. |
 | notifications | title/body/status | Database Field | Notification content. |
 | notifications | read_at | Database Field | Member read timestamp. |
+
+## Phase 1.2 additional classifications
+
+| Entity | Field | Classification | Notes |
+| --- | --- | --- | --- |
+| campaigns | collected_amount_snapshot | Snapshot Field | Cached confirmed Participation Amount total; reconcile against confirmed participation records. |
+| campaigns | reserved_amount_snapshot | Snapshot Field | Cached active reserved Participation Amount total. |
+| campaigns | available_amount | Derived Field | Campaign Target minus collected and reserved snapshots. |
+| campaigns | member_profit_distribution_percentage_planned | Database Field | Planned campaign configuration before settlement lock. |
+| campaigns | platform_profit_share_percentage_planned | Database Field | Planned platform share before settlement lock. |
+| participations | reserved_at | Database Field | Reservation timestamp. |
+| participations | reserved_until | Database Field | Reservation deadline. |
+| participations | expires_at | Database Field | Pending participation expiry. |
+| participations | confirmed_at | Database Field | Confirmation timestamp after successful payment verification. |
+| participations | cancelled_at | Database Field | Cancellation or expiry timestamp. |
+| manual_kyc_submissions | status | Database Field | Manual KYC review state. |
+| manual_kyc_submissions | reviewed_by_id | Database Field | Admin reviewer FK. |
+| manual_kyc_submissions | rejection_reason | Database Field | Review reason when rejected. |
+| manual_kyc_submissions | admin_notes | Database Field | Internal review notes. |
+| manual_kyc_documents | file_asset_id | File Metadata Field | Links to stored file metadata. |
+| manual_kyc_documents | document_type | Database Field | Required manual KYC document type. |
+| manual_kyc_documents | document_status | Database Field | Document review status. |
+| member_bank_accounts | verification_status | Database Field | Pending/Verified/Rejected bank account review state. |
+| member_bank_accounts | verified_by_id | Database Field | Admin reviewer FK. |
+| member_bank_accounts | verified_at | Database Field | Verification timestamp. |
+| member_bank_accounts | rejected_reason | Database Field | Reason when rejected. |
+| member_bank_accounts | admin_notes | Database Field | Internal bank review notes. |
+| member_bank_accounts | is_primary | Database Field | Primary account selection. |
+| campaign_settlements | settlement_scenario | Snapshot Field | Successful exit or principal-only settlement scenario. |
+| campaign_settlements | principal_only_reason | Snapshot Field | Principal-only audit reason. |
+| campaign_settlements | principal_only_triggered_at | Snapshot Field | Principal-only trigger timestamp. |
+| campaign_settlements | holding_period_months | Snapshot Field | Holding period used for locked calculation. |
+| campaign_settlements | holding_start_date | Snapshot Field | Holding period start used for audit. |
+| campaign_settlements | sale_completed_at | Snapshot Field | Sale completion date when applicable. |
+| campaign_settlements | distribution_calculation_date | Snapshot Field | Calculation preparation date. |

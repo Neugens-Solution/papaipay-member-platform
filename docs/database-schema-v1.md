@@ -299,3 +299,83 @@ Gross Profit, Total Costs, and Net Profit are derived values until stored as app
 | `reports` | Report generation metadata and file reference. |
 | `notifications` | Member/Admin notification records. |
 | `announcements` | Admin-created announcements. |
+
+## Phase 1.2 reservation, manual verification, and settlement refinements
+
+### Campaign capacity fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `campaigns` | `collected_amount_snapshot` | decimal | Cached confirmed Participation Amount total for capacity checks and fast display. Reconcile against confirmed participation records. |
+| `campaigns` | `reserved_amount_snapshot` | decimal | Cached active reserved Participation Amount total while checkout attempts are pending. Expired reservations must be released by service logic. |
+| `campaigns` | `member_profit_distribution_percentage_planned` | decimal | Planned campaign-level member share before final settlement approval. |
+| `campaigns` | `platform_profit_share_percentage_planned` | decimal | Planned campaign-level platform share before final settlement approval. |
+| derived | `available_amount` | decimal | Derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`. |
+
+Future participation validation must require: Participation Amount is at least the minimum, no more than the maximum, no more than available amount, campaign status is `Open`, and member verification status is `Approved`.
+
+### Participation reservation fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `participations` | `reserved_at` | timestamptz | When capacity was reserved. |
+| `participations` | `reserved_until` | timestamptz | Reservation hold deadline for checkout. |
+| `participations` | `expires_at` | timestamptz | Expiry timestamp for pending participation cleanup. |
+| `participations` | `confirmed_at` | timestamptz | Set after payment success is verified. |
+| `participations` | `cancelled_at` | timestamptz | Set when member cancellation, payment failure, or expiry releases capacity. |
+
+### Manual KYC for V1
+
+Manual KYC is the V1 verification path. External provider checks remain modeled for later integration, but members first submit files for admin review.
+
+#### `manual_kyc_submissions`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal submission key. |
+| `member_id` | uuid fk | FK members. |
+| `status` | enum | NotSubmitted/Submitted/UnderReview/Approved/Rejected/ResubmissionRequired. |
+| `submitted_at` | timestamptz | Submission timestamp. |
+| `reviewed_by_id` | uuid fk | Admin user who reviewed. |
+| `reviewed_at` | timestamptz | Review timestamp. |
+| `rejection_reason` | text | Required when rejected. |
+| `admin_notes` | text | Internal review notes. |
+
+#### `manual_kyc_documents`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal document review key. |
+| `submission_id` | uuid fk | FK manual KYC submission. |
+| `file_asset_id` | uuid fk | FK stored file metadata. |
+| `document_type` | enum | IcFront/IcBack/SelfieHoldingIc/BankStatement. |
+| `document_status` | enum | Pending/Accepted/Rejected. |
+| `rejection_reason` | text | Document-level rejection reason. |
+| `admin_notes` | text | Document-level review notes. |
+
+### Bank account verification fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `member_bank_accounts` | `verification_status` | enum | Pending/Verified/Rejected. |
+| `member_bank_accounts` | `verified_by_id` | uuid fk | Admin user who verified or rejected the account. |
+| `member_bank_accounts` | `verified_at` | timestamptz | Verification timestamp. |
+| `member_bank_accounts` | `rejected_reason` | text | Reason if rejected. |
+| `member_bank_accounts` | `admin_notes` | text | Internal notes. |
+| `member_bank_accounts` | `is_primary` | boolean | Primary payout bank account flag. |
+
+The bank statement manual KYC document supports account-holder name review against the member IC name before distributions are paid.
+
+### Settlement scenario and holding-period snapshots
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `campaign_settlements` | `settlement_scenario` | enum | SuccessfulExit or PrincipalOnlyAfterMaxHoldingPeriod. |
+| `campaign_settlements` | `principal_only_reason` | text | Audit explanation when the 24-month rule applies. |
+| `campaign_settlements` | `principal_only_triggered_at` | timestamptz | Timestamp when principal-only handling was triggered. |
+| `campaign_settlements` | `holding_period_months` | integer | Locked holding-period snapshot used for Holding Return audit. |
+| `campaign_settlements` | `holding_start_date` | timestamptz | Start of holding period. |
+| `campaign_settlements` | `sale_completed_at` | timestamptz | Sale completion timestamp when applicable. |
+| `campaign_settlements` | `distribution_calculation_date` | timestamptz | Date final distribution calculation was prepared. |
+
+When `settlement_scenario` is `PrincipalOnlyAfterMaxHoldingPeriod`, service logic must produce Principal Return only, with no Holding Return and no Profit Distribution.
