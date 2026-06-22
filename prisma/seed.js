@@ -151,7 +151,7 @@ async function main() {
     },
   })
 
-  for (const [id, fileRef, , ] of manualKycFiles) {
+  for (const [id, fileRef] of manualKycFiles) {
     const fileAsset = await prisma.fileAsset.findUniqueOrThrow({ where: { fileRef } })
     const documentType = fileRef === 'FIL-000001' ? 'IcFront' : fileRef === 'FIL-000002' ? 'IcBack' : fileRef === 'FIL-000003' ? 'SelfieHoldingIc' : 'BankStatement'
     await prisma.manualKycDocument.upsert({

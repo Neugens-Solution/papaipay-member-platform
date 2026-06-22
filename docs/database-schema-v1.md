@@ -122,8 +122,12 @@ This document proposes the production database schema for the backend transition
 | `publish_status` | enum | Draft/Published/Archived. |
 | `visibility` | enum | Internal/Member visible. |
 | `campaign_target` | numeric(14,2) | RM amount. |
+| `collected_amount_snapshot` | numeric(14,2) | Defaults to 0; cached confirmed Participation Amount total. |
+| `reserved_amount_snapshot` | numeric(14,2) | Defaults to 0; cached active reserved Participation Amount total. |
 | `minimum_participation_amount` | numeric(14,2) | RM amount. |
 | `maximum_participation_amount` | numeric(14,2) | RM amount. |
+| `member_profit_distribution_percentage_planned` | numeric(8,4) | Planned member share before final settlement approval. |
+| `platform_profit_share_percentage_planned` | numeric(8,4) | Planned platform share before final settlement approval. |
 | `campaign_open_date` | timestamptz | Nullable. |
 | `campaign_close_date` | timestamptz | Nullable. |
 | `holding_return_rate_monthly` | numeric(8,4) | Percent per month. |
@@ -137,7 +141,7 @@ This document proposes the production database schema for the backend transition
 | `created_at` | timestamptz |  |
 | `updated_at` | timestamptz |  |
 
-Derived campaign values should be calculated in queries/services: collected amount, remaining amount, progress percentage, days remaining, and gallery count.
+`available_amount` is derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`. Remaining amount, progress percentage, days remaining, and gallery count should be calculated in queries/services.
 
 ### `property_details`
 
@@ -192,9 +196,11 @@ Derived campaign values should be calculated in queries/services: collected amou
 | `campaign_id` | uuid fk | FK campaigns. |
 | `participation_amount` | numeric(14,2) | RM amount. |
 | `participation_status` | enum | Pending Payment/Confirmed/etc. |
-| `payment_id` | uuid fk | Nullable until created. |
-| `confirmed_at` | timestamptz | Nullable. |
-| `cancelled_at` | timestamptz | Nullable. |
+| `reserved_at` | timestamptz | Nullable; when campaign capacity was reserved. |
+| `reserved_until` | timestamptz | Nullable; reservation hold deadline for checkout. |
+| `expires_at` | timestamptz | Nullable; pending participation expiry timestamp. |
+| `confirmed_at` | timestamptz | Nullable; set after payment success is verified. |
+| `cancelled_at` | timestamptz | Nullable; set when reservation/payment is cancelled or expired. |
 | `created_at` | timestamptz |  |
 | `updated_at` | timestamptz |  |
 
@@ -202,7 +208,7 @@ Derived campaign values should be calculated in queries/services: collected amou
 
 | Table | Purpose |
 | --- | --- |
-| `payments` | Portal payment reference, amount, gateway, status, provider transaction ID, reconciliation fields. |
+| `payments` | Retry-ready payment records. A Participation can have many Payments, and each Payment has nullable `participation_id` for checkout attempts, retries, and reconciliation. |
 | `payment_webhook_events` | Raw callback event log, signature result, processing status, and failure reason. |
 
 ## e-KYC schema

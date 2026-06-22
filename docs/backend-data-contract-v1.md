@@ -4,12 +4,12 @@ This is the Phase 0 backend data contract. It freezes core entity boundaries, fi
 
 ## Scope
 
-This document is planning documentation only.
+This document began as Phase 0 planning/data-contract documentation. The current repository also includes the Phase 1 Prisma schema foundation for future Supabase PostgreSQL work.
 
-- No packages are installed.
-- No ORM is added.
-- No database connection is added.
-- No migrations are created.
+- Prisma schema and seed foundation are present for review.
+- No runtime UI database reads are connected yet.
+- No migration has been created yet.
+- No Supabase database has been modified yet.
 - No auth, payment gateway, or e-KYC connection is added.
 - No runtime behavior changes are introduced.
 
