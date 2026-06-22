@@ -2,9 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
-import { opportunities, formatRM } from "@/lib/memberMockData";
+import { formatRM } from "@/lib/memberMockData";
+import { getMemberCampaignBySlug, getMemberCampaigns } from "@/lib/data/memberCampaigns";
 
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const opportunities = await getMemberCampaigns();
+
   return opportunities.map((opportunity) => ({ slug: opportunity.slug }));
 }
 
@@ -53,8 +56,8 @@ function MobileAccordion({ title, children }: { title: string; children: React.R
   );
 }
 
-export default function CampaignDetailPage({ params }: { params: { slug: string } }) {
-  const campaign = opportunities.find((item) => item.slug === params.slug);
+export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
+  const campaign = await getMemberCampaignBySlug(params.slug);
   if (!campaign) notFound();
 
   const progress = Math.round((campaign.collectedAmount / campaign.targetAmount) * 100);
@@ -181,7 +184,13 @@ export default function CampaignDetailPage({ params }: { params: { slug: string 
   );
 }
 
-function ParticipationPanel({ campaign, compact = false }: { campaign: NonNullable<(typeof opportunities)[number]>; compact?: boolean }) {
+function ParticipationPanel({
+  campaign,
+  compact = false,
+}: {
+  campaign: NonNullable<Awaited<ReturnType<typeof getMemberCampaignBySlug>>>;
+  compact?: boolean;
+}) {
   return (
     <ContentCard className={`${compact ? "border-0 p-0 shadow-none" : "border-papaipay-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"}`}>
       <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participation Panel</h2><p className="text-xs font-semibold text-slate-500">You will be redirected to secure payment gateway.</p></div></div>
