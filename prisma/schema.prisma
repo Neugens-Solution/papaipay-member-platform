@@ -236,47 +236,47 @@ model User {
   member       Member?
   adminProfile AdminProfile?
 
-  createdCampaigns           Campaign[]            @relation("CampaignCreatedBy")
-  updatedCampaigns           Campaign[]            @relation("CampaignUpdatedBy")
-  reviewedEkycChecks         EkycCheck[]           @relation("EkycReviewedBy")
+  createdCampaigns             Campaign[]            @relation("CampaignCreatedBy")
+  updatedCampaigns             Campaign[]            @relation("CampaignUpdatedBy")
+  reviewedEkycChecks           EkycCheck[]           @relation("EkycReviewedBy")
   reviewedManualKycSubmissions ManualKycSubmission[] @relation("ManualKycReviewedBy")
-  verifiedBankAccounts      MemberBankAccount[]   @relation("BankAccountVerifiedBy")
-  reviewedSettlements        CampaignSettlement[]  @relation("SettlementReviewedBy")
-  approvedSettlements        CampaignSettlement[]  @relation("SettlementApprovedBy")
-  lockedSettlements          CampaignSettlement[]  @relation("SettlementLockedBy")
-  approvedDistributionBatches DistributionBatch[]   @relation("DistributionBatchApprovedBy")
-  createdDistributionBatches DistributionBatch[]    @relation("DistributionBatchCreatedBy")
-  processingDistributions    Distribution[]        @relation("DistributionMarkedProcessingBy")
-  paidDistributions          Distribution[]        @relation("DistributionMarkedPaidBy")
-  auditLogs                  AuditLog[]            @relation("AuditActor")
-  reports                    Report[]              @relation("ReportGeneratedBy")
-  createdAnnouncements       Announcement[]        @relation("AnnouncementCreatedBy")
+  verifiedBankAccounts         MemberBankAccount[]   @relation("BankAccountVerifiedBy")
+  reviewedSettlements          CampaignSettlement[]  @relation("SettlementReviewedBy")
+  approvedSettlements          CampaignSettlement[]  @relation("SettlementApprovedBy")
+  lockedSettlements            CampaignSettlement[]  @relation("SettlementLockedBy")
+  approvedDistributionBatches  DistributionBatch[]   @relation("DistributionBatchApprovedBy")
+  createdDistributionBatches   DistributionBatch[]   @relation("DistributionBatchCreatedBy")
+  processingDistributions      Distribution[]        @relation("DistributionMarkedProcessingBy")
+  paidDistributions            Distribution[]        @relation("DistributionMarkedPaidBy")
+  auditLogs                    AuditLog[]            @relation("AuditActor")
+  reports                      Report[]              @relation("ReportGeneratedBy")
+  createdAnnouncements         Announcement[]        @relation("AnnouncementCreatedBy")
 }
 
 model Member {
-  id                    String                   @id @default(uuid())
-  userId                String                   @unique
-  memberRef             String                   @unique
-  fullName              String
-  icNumberEncrypted     String?
-  dateOfBirth           DateTime?
-  nationality           String?
-  verificationStatus    MemberVerificationStatus @default(NotStarted)
-  profileCompletedAt    DateTime?
-  createdAt             DateTime                 @default(now())
-  updatedAt             DateTime                 @updatedAt
+  id                 String                   @id @default(uuid())
+  userId             String                   @unique
+  memberRef          String                   @unique
+  fullName           String
+  icNumberEncrypted  String?
+  dateOfBirth        DateTime?
+  nationality        String?
+  verificationStatus MemberVerificationStatus @default(NotStarted)
+  profileCompletedAt DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
 
-  user                  User                    @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  contacts              MemberContact[]
-  addresses             MemberAddress[]
-  bankAccounts          MemberBankAccount[]
-  nominees              MemberNominee[]
-  manualKycSubmissions  ManualKycSubmission[]
-  participations        Participation[]
-  payments              Payment[]
-  ekycChecks            EkycCheck[]
-  distributions         Distribution[]
-  notifications         Notification[]
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  contacts             MemberContact[]
+  addresses            MemberAddress[]
+  bankAccounts         MemberBankAccount[]
+  nominees             MemberNominee[]
+  manualKycSubmissions ManualKycSubmission[]
+  participations       Participation[]
+  payments             Payment[]
+  ekycChecks           EkycCheck[]
+  distributions        Distribution[]
+  notifications        Notification[]
 }
 
 model MemberContact {
@@ -289,7 +289,7 @@ model MemberContact {
   createdAt              DateTime @default(now())
   updatedAt              DateTime @updatedAt
 
-  member                 Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([memberId])
   @@index([isPrimary])
@@ -308,7 +308,7 @@ model MemberAddress {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  member       Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([memberId])
   @@index([state])
@@ -316,7 +316,7 @@ model MemberAddress {
 }
 
 model MemberBankAccount {
-  id                     String   @id @default(uuid())
+  id                     String                        @id @default(uuid())
   memberId               String
   bankName               String
   accountHolderName      String
@@ -327,12 +327,12 @@ model MemberBankAccount {
   verifiedAt             DateTime?
   rejectedReason         String?
   adminNotes             String?
-  isPrimary              Boolean  @default(false)
-  createdAt              DateTime @default(now())
-  updatedAt              DateTime @updatedAt
+  isPrimary              Boolean                       @default(false)
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
 
-  member                 Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  verifiedBy             User?    @relation("BankAccountVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  member     Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  verifiedBy User?  @relation("BankAccountVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([memberId])
   @@index([verificationStatus])
@@ -352,7 +352,7 @@ model MemberNominee {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  member               Member   @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([memberId])
 }
@@ -369,90 +369,90 @@ model AdminProfile {
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
-  user        User               @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  role        Role               @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([roleId])
   @@index([status])
 }
 
 model Role {
-  id          String           @id @default(uuid())
-  name        String           @unique
+  id          String   @id @default(uuid())
+  name        String   @unique
   description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   admins      AdminProfile[]
   permissions RolePermission[]
 }
 
 model Permission {
-  id          String           @id @default(uuid())
-  key         String           @unique
+  id          String   @id @default(uuid())
+  key         String   @unique
   description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  roles       RolePermission[]
+  roles RolePermission[]
 }
 
 model RolePermission {
   roleId       String
   permissionId String
-  createdAt    DateTime   @default(now())
+  createdAt    DateTime @default(now())
 
-  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@id([roleId, permissionId])
   @@index([permissionId])
 }
 
 model Campaign {
-  id                         String                  @id @default(uuid())
-  campaignRef                String                  @unique
-  campaignCode               String                  @unique
-  title                      String
-  slug                       String                  @unique
-  lifecycleStatus            CampaignLifecycleStatus @default(Draft)
-  publishStatus              PublishStatus           @default(Draft)
-  visibility                 Visibility              @default(InternalOnly)
-  campaignTarget             Decimal                 @db.Decimal(14, 2)
-  collectedAmountSnapshot    Decimal                 @default(0) @db.Decimal(14, 2)
-  reservedAmountSnapshot     Decimal                 @default(0) @db.Decimal(14, 2)
-  minimumParticipationAmount Decimal                 @db.Decimal(14, 2)
-  maximumParticipationAmount Decimal                 @db.Decimal(14, 2)
-  campaignOpenDate           DateTime?
-  campaignCloseDate          DateTime?
-  holdingReturnRateMonthly   Decimal                 @db.Decimal(8, 4)
-  returnType                 ReturnType
-  maximumHoldingPeriodMonths Int                     @default(24)
-  principalProtectionEnabled Boolean                 @default(true)
-  memberProfitDistributionPercentagePlanned Decimal? @db.Decimal(8, 4)
-  platformProfitSharePercentagePlanned Decimal?      @db.Decimal(8, 4)
-  twentyFourMonthRuleText    String                  @default("If not sold within 24 months, Participation Amount only will be returned.")
-  createdById                String?
-  updatedById                String?
-  publishedAt                DateTime?
-  createdAt                  DateTime                @default(now())
-  updatedAt                  DateTime                @updatedAt
+  id                                        String                  @id @default(uuid())
+  campaignRef                               String                  @unique
+  campaignCode                              String                  @unique
+  title                                     String
+  slug                                      String                  @unique
+  lifecycleStatus                           CampaignLifecycleStatus @default(Draft)
+  publishStatus                             PublishStatus           @default(Draft)
+  visibility                                Visibility              @default(InternalOnly)
+  campaignTarget                            Decimal                 @db.Decimal(14, 2)
+  collectedAmountSnapshot                   Decimal                 @default(0) @db.Decimal(14, 2)
+  reservedAmountSnapshot                    Decimal                 @default(0) @db.Decimal(14, 2)
+  minimumParticipationAmount                Decimal                 @db.Decimal(14, 2)
+  maximumParticipationAmount                Decimal                 @db.Decimal(14, 2)
+  campaignOpenDate                          DateTime?
+  campaignCloseDate                         DateTime?
+  holdingReturnRateMonthly                  Decimal                 @db.Decimal(8, 4)
+  returnType                                ReturnType
+  maximumHoldingPeriodMonths                Int                     @default(24)
+  principalProtectionEnabled                Boolean                 @default(true)
+  memberProfitDistributionPercentagePlanned Decimal?                @db.Decimal(8, 4)
+  platformProfitSharePercentagePlanned      Decimal?                @db.Decimal(8, 4)
+  twentyFourMonthRuleText                   String                  @default("If not sold within 24 months, Participation Amount only will be returned.")
+  createdById                               String?
+  updatedById                               String?
+  publishedAt                               DateTime?
+  createdAt                                 DateTime                @default(now())
+  updatedAt                                 DateTime                @updatedAt
 
-  createdBy                  User?                   @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  updatedBy                  User?                   @relation("CampaignUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  propertyDetail             PropertyDetail?
-  media                      CampaignMedia[]
-  documents                  CampaignDocument[]
-  content                    CampaignContent?
-  updates                    CampaignUpdate[]
-  faqs                       CampaignFaq[]
-  timelineEvents             CampaignTimelineEvent[]
-  participations             Participation[]
-  payments                   Payment[]
-  settlements                CampaignSettlement[]
-  distributionBatches        DistributionBatch[]
-  distributions              Distribution[]
-  notifications              Notification[]
+  createdBy           User?                   @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy           User?                   @relation("CampaignUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  propertyDetail      PropertyDetail?
+  media               CampaignMedia[]
+  documents           CampaignDocument[]
+  content             CampaignContent?
+  updates             CampaignUpdate[]
+  faqs                CampaignFaq[]
+  timelineEvents      CampaignTimelineEvent[]
+  participations      Participation[]
+  payments            Payment[]
+  settlements         CampaignSettlement[]
+  distributionBatches DistributionBatch[]
+  distributions       Distribution[]
+  notifications       Notification[]
 
   @@index([lifecycleStatus])
   @@index([publishStatus])
@@ -465,27 +465,27 @@ model Campaign {
 }
 
 model PropertyDetail {
-  id            String      @id @default(uuid())
-  campaignId    String      @unique
-  propertyType  String
-  tenure        Tenure
-  tenureAlias   TenureAlias
-  isLaca        Boolean     @default(false)
-  bumiStatus    BumiStatus
-  builtUpArea   String?
-  landArea      String?
-  bedrooms      Int?
-  bathrooms     Int?
-  auctionDate   DateTime?
-  reservePrice  Decimal?    @db.Decimal(14, 2)
-  state         String
-  location      String
-  fullAddress   String
-  yearBuilt     String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+  id           String      @id @default(uuid())
+  campaignId   String      @unique
+  propertyType String
+  tenure       Tenure
+  tenureAlias  TenureAlias
+  isLaca       Boolean     @default(false)
+  bumiStatus   BumiStatus
+  builtUpArea  String?
+  landArea     String?
+  bedrooms     Int?
+  bathrooms    Int?
+  auctionDate  DateTime?
+  reservePrice Decimal?    @db.Decimal(14, 2)
+  state        String
+  location     String
+  fullAddress  String
+  yearBuilt    String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
-  campaign      Campaign    @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([state])
   @@index([location])
@@ -508,10 +508,10 @@ model FileAsset {
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
 
-  campaignMedia    CampaignMedia[]
-  documents        CampaignDocument[]
+  campaignMedia      CampaignMedia[]
+  documents          CampaignDocument[]
   manualKycDocuments ManualKycDocument[]
-  reports          Report[]
+  reports            Report[]
 
   @@index([visibility])
   @@index([purpose])
@@ -529,8 +529,8 @@ model CampaignMedia {
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
-  campaign    Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fileAsset   FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  campaign  Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([campaignId])
   @@index([fileAssetId])
@@ -550,8 +550,8 @@ model CampaignDocument {
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  campaign       Campaign         @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fileAsset      FileAsset?       @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  campaign  Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([campaignId])
   @@index([fileAssetId])
@@ -571,11 +571,11 @@ model CampaignContent {
   createdAt                    DateTime @default(now())
   updatedAt                    DateTime @updatedAt
 
-  campaign                     Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 }
 
 model CampaignUpdate {
-  id          String    @id @default(uuid())
+  id          String     @id @default(uuid())
   campaignId  String
   title       String
   body        String
@@ -584,7 +584,7 @@ model CampaignUpdate {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([campaignId])
   @@index([publishedAt])
@@ -592,22 +592,22 @@ model CampaignUpdate {
 }
 
 model CampaignFaq {
-  id        String   @id @default(uuid())
+  id         String   @id @default(uuid())
   campaignId String
-  question  String
-  answer    String
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  question   String
+  answer     String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  campaign  Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([campaignId])
   @@index([sortOrder])
 }
 
 model CampaignTimelineEvent {
-  id          String    @id @default(uuid())
+  id          String     @id @default(uuid())
   campaignId  String
   title       String
   description String?
@@ -616,7 +616,7 @@ model CampaignTimelineEvent {
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
 
-  campaign    Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([campaignId])
   @@index([eventDate])
@@ -638,10 +638,10 @@ model Participation {
   createdAt           DateTime            @default(now())
   updatedAt           DateTime            @updatedAt
 
-  member              Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  payments            Payment[]
-  distributions       Distribution[]
+  member        Member         @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign      Campaign       @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  payments      Payment[]
+  distributions Distribution[]
 
   @@index([memberId])
   @@index([campaignId])
@@ -652,28 +652,28 @@ model Participation {
 }
 
 model Payment {
-  id                        String                @id @default(uuid())
-  paymentRef                String                @unique
+  id                        String        @id @default(uuid())
+  paymentRef                String        @unique
   memberId                  String
   campaignId                String
   participationId           String?
   gateway                   String
   gatewayTransactionId      String?
-  amount                    Decimal               @db.Decimal(14, 2)
-  status                    PaymentStatus         @default(Pending)
+  amount                    Decimal       @db.Decimal(14, 2)
+  status                    PaymentStatus @default(Pending)
   /// Redacted provider response safe for operational review.
   providerResponse          Json?
   /// Encrypted full provider response when retention is required.
   providerResponseEncrypted String?
   failureReason             String?
   reconciliationReference   String?
-  createdAt                 DateTime              @default(now())
-  updatedAt                 DateTime              @updatedAt
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
 
-  member                    Member                @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  campaign                  Campaign              @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  participation             Participation?        @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  webhookEvents             PaymentWebhookEvent[]
+  member        Member                @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign      Campaign              @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  participation Participation?        @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  webhookEvents PaymentWebhookEvent[]
 
   @@index([memberId])
   @@index([campaignId])
@@ -684,20 +684,20 @@ model Payment {
 }
 
 model PaymentWebhookEvent {
-  id               String                       @id @default(uuid())
+  id               String                        @id @default(uuid())
   paymentId        String?
-  providerEventId  String?                      @unique
+  providerEventId  String?                       @unique
   /// Redacted provider payload safe for operational review.
   payload          Json
   /// Encrypted full provider payload when retention is required.
   payloadEncrypted String?
-  signatureValid   Boolean                      @default(false)
+  signatureValid   Boolean                       @default(false)
   processingStatus ProviderEventProcessingStatus @default(Received)
   failureReason    String?
-  receivedAt       DateTime                     @default(now())
+  receivedAt       DateTime                      @default(now())
   processedAt      DateTime?
 
-  payment          Payment?                     @relation(fields: [paymentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([paymentId])
   @@index([processingStatus])
@@ -716,9 +716,9 @@ model ManualKycSubmission {
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
 
-  member          Member          @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  reviewedBy      User?           @relation("ManualKycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  documents       ManualKycDocument[]
+  member     Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy User?               @relation("ManualKycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  documents  ManualKycDocument[]
 
   @@index([memberId])
   @@index([status])
@@ -737,8 +737,8 @@ model ManualKycDocument {
   createdAt       DateTime                @default(now())
   updatedAt       DateTime                @updatedAt
 
-  submission      ManualKycSubmission     @relation(fields: [submissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  fileAsset       FileAsset               @relation(fields: [fileAssetId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  submission ManualKycSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset  FileAsset           @relation(fields: [fileAssetId], references: [id], onDelete: Restrict, onUpdate: Cascade)
 
   @@index([submissionId])
   @@index([fileAssetId])
@@ -747,12 +747,12 @@ model ManualKycDocument {
 }
 
 model EkycCheck {
-  id                        String             @id @default(uuid())
-  ekycRef                   String             @unique
+  id                        String     @id @default(uuid())
+  ekycRef                   String     @unique
   memberId                  String
   provider                  String
   providerReferenceId       String?
-  status                    EkycStatus         @default(NotStarted)
+  status                    EkycStatus @default(NotStarted)
   documentCheckStatus       String?
   livenessStatus            String?
   faceMatchStatus           String?
@@ -763,12 +763,12 @@ model EkycCheck {
   reviewedById              String?
   approvedAt                DateTime?
   rejectedAt                DateTime?
-  createdAt                 DateTime           @default(now())
-  updatedAt                 DateTime           @updatedAt
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @updatedAt
 
-  member                    Member             @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  reviewedBy                User?              @relation("EkycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  webhookEvents             EkycWebhookEvent[]
+  member        Member             @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy    User?              @relation("EkycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  webhookEvents EkycWebhookEvent[]
 
   @@index([memberId])
   @@index([providerReferenceId])
@@ -777,20 +777,20 @@ model EkycCheck {
 }
 
 model EkycWebhookEvent {
-  id               String                       @id @default(uuid())
+  id               String                        @id @default(uuid())
   ekycCheckId      String?
-  providerEventId  String?                      @unique
+  providerEventId  String?                       @unique
   /// Redacted provider payload safe for operational review.
   payload          Json
   /// Encrypted full provider payload when retention is required.
   payloadEncrypted String?
-  signatureValid   Boolean                      @default(false)
+  signatureValid   Boolean                       @default(false)
   processingStatus ProviderEventProcessingStatus @default(Received)
   failureReason    String?
-  receivedAt       DateTime                     @default(now())
+  receivedAt       DateTime                      @default(now())
   processedAt      DateTime?
 
-  ekycCheck        EkycCheck?                   @relation(fields: [ekycCheckId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  ekycCheck EkycCheck? @relation(fields: [ekycCheckId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([ekycCheckId])
   @@index([processingStatus])
@@ -798,48 +798,48 @@ model EkycWebhookEvent {
 }
 
 model CampaignSettlement {
-  id                                   String                      @id @default(uuid())
-  campaignId                           String
-  purchasePrice                        Decimal?                    @db.Decimal(14, 2)
-  salePrice                            Decimal?                    @db.Decimal(14, 2)
-  acquisitionCosts                     Json?
-  holdingCosts                         Json?
-  renovationCosts                      Json?
-  disposalCosts                        Json?
-  platformCosts                        Json?
-  settlementScenario                   SettlementScenario           @default(SuccessfulExit)
-  principalOnlyReason                  String?
-  principalOnlyTriggeredAt             DateTime?
-  holdingPeriodMonths                  Int?
-  holdingStartDate                     DateTime?
-  saleCompletedAt                      DateTime?
-  distributionCalculationDate          DateTime?
-  memberProfitDistributionPercentage   Decimal?                    @db.Decimal(8, 4)
-  platformProfitSharePercentage        Decimal?                    @db.Decimal(8, 4)
-  grossProfitSnapshot                  Decimal?                    @db.Decimal(14, 2)
-  totalCostsSnapshot                   Decimal?                    @db.Decimal(14, 2)
-  netProfitSnapshot                    Decimal?                    @db.Decimal(14, 2)
-  calculationStatus                    SettlementCalculationStatus @default(Draft)
-  calculationRemarks                   String?
-  principalReturnPool                  Decimal?                    @db.Decimal(14, 2)
-  holdingReturnPool                    Decimal?                    @db.Decimal(14, 2)
-  profitDistributionPool               Decimal?                    @db.Decimal(14, 2)
-  platformShare                        Decimal?                    @db.Decimal(14, 2)
-  finalDistributionPool                Decimal?                    @db.Decimal(14, 2)
-  reviewedById                         String?
-  reviewedAt                           DateTime?
-  approvedById                         String?
-  approvedAt                           DateTime?
-  lockedById                           String?
-  lockedAt                             DateTime?
-  createdAt                            DateTime                    @default(now())
-  updatedAt                            DateTime                    @updatedAt
+  id                                 String                      @id @default(uuid())
+  campaignId                         String
+  purchasePrice                      Decimal?                    @db.Decimal(14, 2)
+  salePrice                          Decimal?                    @db.Decimal(14, 2)
+  acquisitionCosts                   Json?
+  holdingCosts                       Json?
+  renovationCosts                    Json?
+  disposalCosts                      Json?
+  platformCosts                      Json?
+  settlementScenario                 SettlementScenario          @default(SuccessfulExit)
+  principalOnlyReason                String?
+  principalOnlyTriggeredAt           DateTime?
+  holdingPeriodMonths                Int?
+  holdingStartDate                   DateTime?
+  saleCompletedAt                    DateTime?
+  distributionCalculationDate        DateTime?
+  memberProfitDistributionPercentage Decimal?                    @db.Decimal(8, 4)
+  platformProfitSharePercentage      Decimal?                    @db.Decimal(8, 4)
+  grossProfitSnapshot                Decimal?                    @db.Decimal(14, 2)
+  totalCostsSnapshot                 Decimal?                    @db.Decimal(14, 2)
+  netProfitSnapshot                  Decimal?                    @db.Decimal(14, 2)
+  calculationStatus                  SettlementCalculationStatus @default(Draft)
+  calculationRemarks                 String?
+  principalReturnPool                Decimal?                    @db.Decimal(14, 2)
+  holdingReturnPool                  Decimal?                    @db.Decimal(14, 2)
+  profitDistributionPool             Decimal?                    @db.Decimal(14, 2)
+  platformShare                      Decimal?                    @db.Decimal(14, 2)
+  finalDistributionPool              Decimal?                    @db.Decimal(14, 2)
+  reviewedById                       String?
+  reviewedAt                         DateTime?
+  approvedById                       String?
+  approvedAt                         DateTime?
+  lockedById                         String?
+  lockedAt                           DateTime?
+  createdAt                          DateTime                    @default(now())
+  updatedAt                          DateTime                    @updatedAt
 
-  campaign                             Campaign                    @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  reviewedBy                           User?                       @relation("SettlementReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  approvedBy                           User?                       @relation("SettlementApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  lockedBy                             User?                       @relation("SettlementLockedBy", fields: [lockedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  distributionBatches                  DistributionBatch[]
+  campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy          User?               @relation("SettlementReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  approvedBy          User?               @relation("SettlementApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  lockedBy            User?               @relation("SettlementLockedBy", fields: [lockedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  distributionBatches DistributionBatch[]
 
   @@index([campaignId])
   @@index([settlementScenario])
@@ -867,11 +867,11 @@ model DistributionBatch {
   createdAt              DateTime                @default(now())
   updatedAt              DateTime                @updatedAt
 
-  campaign               Campaign                @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  settlement             CampaignSettlement?     @relation(fields: [settlementId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  approvedBy             User?                   @relation("DistributionBatchApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  createdBy              User?                   @relation("DistributionBatchCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  distributions          Distribution[]
+  campaign      Campaign            @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  settlement    CampaignSettlement? @relation(fields: [settlementId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  approvedBy    User?               @relation("DistributionBatchApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdBy     User?               @relation("DistributionBatchCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  distributions Distribution[]
 
   @@index([campaignId])
   @@index([settlementId])
@@ -902,12 +902,12 @@ model Distribution {
   createdAt              DateTime           @default(now())
   updatedAt              DateTime           @updatedAt
 
-  distributionBatch      DistributionBatch  @relation(fields: [distributionBatchId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  campaign               Campaign           @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  member                 Member             @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  participation          Participation      @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  markedProcessingBy     User?              @relation("DistributionMarkedProcessingBy", fields: [markedProcessingById], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  markedPaidBy           User?              @relation("DistributionMarkedPaidBy", fields: [markedPaidById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  distributionBatch  DistributionBatch @relation(fields: [distributionBatchId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign           Campaign          @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  member             Member            @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  participation      Participation     @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  markedProcessingBy User?             @relation("DistributionMarkedProcessingBy", fields: [markedProcessingById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  markedPaidBy       User?             @relation("DistributionMarkedPaidBy", fields: [markedPaidById], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([distributionBatchId])
   @@index([campaignId])
@@ -933,7 +933,7 @@ model AuditLog {
   deviceInfo     String?
   createdAt      DateTime @default(now())
 
-  actor          User?    @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([actorId])
   @@index([entityType, entityId])
@@ -953,8 +953,8 @@ model Report {
   createdAt     DateTime     @default(now())
   updatedAt     DateTime     @updatedAt
 
-  fileAsset     FileAsset?   @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  generatedBy   User?        @relation("ReportGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  fileAsset   FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  generatedBy User?      @relation("ReportGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([reportType])
   @@index([status])
@@ -976,8 +976,8 @@ model Notification {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
-  member          Member?            @relation(fields: [memberId], references: [id], onDelete: SetNull, onUpdate: Cascade)
-  campaign        Campaign?          @relation(fields: [campaignId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  member   Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([memberId])
   @@index([campaignId])
@@ -997,7 +997,7 @@ model Announcement {
   createdAt       DateTime           @default(now())
   updatedAt       DateTime           @updatedAt
 
-  createdBy       User?              @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdBy User? @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
 
   @@index([status])
   @@index([publishedAt])
