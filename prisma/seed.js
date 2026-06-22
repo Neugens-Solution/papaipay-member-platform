@@ -113,13 +113,13 @@ async function main() {
   })
 
   const manualKycFiles = [
-    ['00000000-0000-0000-0000-000000000301', 'FIL-000001', 'ic-front.pdf', 'IC front verification document'],
-    ['00000000-0000-0000-0000-000000000302', 'FIL-000002', 'ic-back.pdf', 'IC back verification document'],
-    ['00000000-0000-0000-0000-000000000303', 'FIL-000003', 'selfie-holding-ic.jpg', 'Selfie holding IC verification document'],
-    ['00000000-0000-0000-0000-000000000304', 'FIL-000004', 'bank-statement.pdf', 'Bank statement verification document'],
+    ['00000000-0000-0000-0000-000000000301', 'FIL-000001', 'ic-front.pdf'],
+    ['00000000-0000-0000-0000-000000000302', 'FIL-000002', 'ic-back.pdf'],
+    ['00000000-0000-0000-0000-000000000303', 'FIL-000003', 'selfie-holding-ic.jpg'],
+    ['00000000-0000-0000-0000-000000000304', 'FIL-000004', 'bank-statement.pdf'],
   ]
 
-  for (const [id, fileRef, fileName, description] of manualKycFiles) {
+  for (const [id, fileRef, fileName] of manualKycFiles) {
     await prisma.fileAsset.upsert({
       where: { fileRef },
       update: { originalFilename: fileName, objectKey: `member-verification/sample/${fileName}` },
@@ -132,7 +132,7 @@ async function main() {
         contentType: fileName.endsWith('.jpg') ? 'image/jpeg' : 'application/pdf',
         sizeBytes: 1024,
         visibility: 'InternalOnly',
-        purpose: 'EkycDocument',
+        purpose: 'ManualKycDocument',
       },
     })
   }

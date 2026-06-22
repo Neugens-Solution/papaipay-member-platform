@@ -192,7 +192,8 @@ enum FilePurpose {
   CampaignImage
   CampaignDocument
   MemberDocument
-  EkycDocument
+  ManualKycDocument
+  ExternalEkycDocument
   ReportExport
 }
 
@@ -418,8 +419,8 @@ model Campaign {
   publishStatus              PublishStatus           @default(Draft)
   visibility                 Visibility              @default(InternalOnly)
   campaignTarget             Decimal                 @db.Decimal(14, 2)
-  collectedAmountSnapshot    Decimal?                @db.Decimal(14, 2)
-  reservedAmountSnapshot     Decimal?                @db.Decimal(14, 2)
+  collectedAmountSnapshot    Decimal                 @default(0) @db.Decimal(14, 2)
+  reservedAmountSnapshot     Decimal                 @default(0) @db.Decimal(14, 2)
   minimumParticipationAmount Decimal                 @db.Decimal(14, 2)
   maximumParticipationAmount Decimal                 @db.Decimal(14, 2)
   campaignOpenDate           DateTime?

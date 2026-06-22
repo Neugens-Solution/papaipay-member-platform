@@ -263,3 +263,10 @@ Campaign settlement stores `holding_period_months`, `holding_start_date`, `sale_
 ### Planned versus locked profit sharing
 
 Campaign records store planned member/platform profit sharing percentages for pre-publication configuration. Campaign settlement records store final approved percentages as locked snapshots for distribution calculation and reporting.
+
+## Phase 1.2 cleanup decisions
+
+- Campaign capacity snapshots default to zero: `collected_amount_snapshot = 0` and `reserved_amount_snapshot = 0`.
+- `available_amount` is always derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`.
+- `ManualKycDocument` file purpose is for member-uploaded V1 verification files.
+- `ExternalEkycDocument` file purpose is reserved for future provider-based verification files.

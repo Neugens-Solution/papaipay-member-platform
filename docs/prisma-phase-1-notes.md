@@ -86,3 +86,9 @@ Member bank accounts now include verification status, reviewer, review timestamp
 ### Planned and locked profit sharing
 
 Campaign records hold planned member/platform percentage settings. Settlement records continue to hold final approved percentages as locked calculation snapshots.
+
+## Phase 1.2 cleanup
+
+Capacity snapshots are non-null Decimal fields with zero defaults, and available amount remains derived from campaign target minus collected and reserved snapshots.
+
+File purposes now distinguish member-uploaded V1 verification files (`ManualKycDocument`) from future provider-based verification files (`ExternalEkycDocument`).

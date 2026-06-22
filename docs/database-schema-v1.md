@@ -379,3 +379,11 @@ The bank statement manual KYC document supports account-holder name review again
 | `campaign_settlements` | `distribution_calculation_date` | timestamptz | Date final distribution calculation was prepared. |
 
 When `settlement_scenario` is `PrincipalOnlyAfterMaxHoldingPeriod`, service logic must produce Principal Return only, with no Holding Return and no Profit Distribution.
+
+## Phase 1.2 cleanup notes
+
+- `collected_amount_snapshot` defaults to `0` and is not nullable so capacity calculations always have a safe base value.
+- `reserved_amount_snapshot` defaults to `0` and is not nullable so checkout reservations can be subtracted without null handling.
+- `available_amount` remains derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`.
+- `FilePurpose.ManualKycDocument` is used for member-uploaded V1 verification documents.
+- `FilePurpose.ExternalEkycDocument` is reserved for future provider-based verification documents.

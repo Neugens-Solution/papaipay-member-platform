@@ -236,3 +236,12 @@ This matrix classifies major fields before backend implementation. Classificatio
 | campaign_settlements | holding_start_date | Snapshot Field | Holding period start used for audit. |
 | campaign_settlements | sale_completed_at | Snapshot Field | Sale completion date when applicable. |
 | campaign_settlements | distribution_calculation_date | Snapshot Field | Calculation preparation date. |
+
+## Phase 1.2 cleanup classifications
+
+| Entity | Field | Classification | Notes |
+| --- | --- | --- | --- |
+| campaigns | collected_amount_snapshot default | Snapshot Field | Defaults to zero for capacity calculation safety. |
+| campaigns | reserved_amount_snapshot default | Snapshot Field | Defaults to zero for reservation calculation safety. |
+| file_assets | purpose: ManualKycDocument | File Metadata Field | Member-uploaded V1 verification file purpose. |
+| file_assets | purpose: ExternalEkycDocument | File Metadata Field | Reserved for future provider-based verification file purpose. |

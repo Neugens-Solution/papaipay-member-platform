@@ -253,3 +253,14 @@ This catalogue defines approved backend enum values for the production data cont
 | --- | --- |
 | `SuccessfulExit` | Sale completed and final distribution may include Principal Return, Holding Return, and Profit Distribution. |
 | `PrincipalOnlyAfterMaxHoldingPeriod` | 24-month rule triggered; Participation Amount only is returned. |
+
+## File purpose
+
+| Value | Meaning |
+| --- | --- |
+| `CampaignImage` | Property or campaign image file. |
+| `CampaignDocument` | Campaign document file. |
+| `MemberDocument` | General member document file. |
+| `ManualKycDocument` | Member-uploaded V1 verification file. |
+| `ExternalEkycDocument` | Future provider-based verification file. |
+| `ReportExport` | Generated report file. |
