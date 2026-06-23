@@ -1,19 +1,55 @@
 import { db } from "@/lib/db";
+import { listings as demoListings } from "@/lib/adminMockData";
+
+function demoAdminListingSummaries() {
+  return demoListings.map((listing) => ({
+    id: listing.id,
+    campaignRef: listing.campaignId,
+    campaignCode: listing.campaignCode,
+    title: listing.campaignTitle,
+    slug: listing.slug,
+    lifecycleStatus: listing.status.replaceAll(" ", ""),
+    campaignTarget: listing.campaignTarget,
+    collectedAmountSnapshot: listing.collectedAmount,
+    propertyDetail: {
+      propertyType: listing.propertyType,
+      tenure: listing.tenure,
+      tenureAlias: listing.tenureAlias,
+      bumiStatus: listing.bumiStatus,
+      isLaca: listing.isLaca,
+      location: listing.location,
+      state: listing.state,
+    },
+    _count: {
+      participations: listing.participants,
+    },
+  }));
+}
 
 export async function getAdminListingSummaries() {
-  return db.campaign.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      propertyDetail: true,
-      _count: {
-        select: {
-          participations: true,
+  if (!process.env.DATABASE_URL) return demoAdminListingSummaries();
+
+  try {
+    return await db.campaign.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        propertyDetail: true,
+        _count: {
+          select: {
+            participations: true,
+          },
         },
       },
-    },
-  });
+    });
+  } catch (error) {
+    console.warn(
+      "Falling back to demo admin listings because database reads are unavailable.",
+      error,
+    );
+    return demoAdminListingSummaries();
+  }
 }
 
 export async function getAdminListingBySlug(slug: string) {
