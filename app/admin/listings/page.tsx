@@ -18,8 +18,16 @@ function decimalToNumber(value: unknown): number {
   return 0;
 }
 
+function formatTenureBadge(tenure: string | null, tenureAlias: string | null) {
+  if (tenure === "Freehold" || tenureAlias === "FH") return "FH";
+  if (tenure === "Leasehold" || tenureAlias === "LH") return "LH";
+
+  return null;
+}
+
 function formatProperty(property: {
   propertyType: string;
+  tenure: string | null;
   tenureAlias: string | null;
   bumiStatus: string;
   isLaca: boolean;
@@ -28,7 +36,7 @@ function formatProperty(property: {
 
   return [
     property.propertyType,
-    property.tenureAlias,
+    formatTenureBadge(property.tenure, property.tenureAlias),
     property.bumiStatus,
     property.isLaca ? "LACA" : null,
   ]

@@ -52,7 +52,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           </Link>
           <p className="mt-1 text-sm text-slate-500">{opportunity.location}</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            <StatusBadge status={opportunity.tenureAlias} />
+            <StatusBadge status={opportunity.tenure} />
             <StatusBadge status={opportunity.bumiStatus} />
             {opportunity.isLaca ? <StatusBadge status="LACA" /> : null}
           </div>
@@ -62,7 +62,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <ProgressBar value={progress} />
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Campaign Progress</p>
+            <p>{progress}% Listing Progress</p>
           </div>
         </div>
 
@@ -76,7 +76,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </dl>
 
         <Link href={detailHref} className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
-          View Campaign
+          View Listing
         </Link>
       </div>
     </article>

@@ -303,7 +303,7 @@ function UploadZone({
         Choose file
       </span>
       <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported} · Upload pending
+        Supported: {supported} · Ready to upload
       </p>
     </div>
   );
@@ -549,10 +549,10 @@ export function ListingForm({
           />
           <SelectField
             label="Tenure Badge"
-            options={["FH", "LH"]}
-            helper="Use FH / LH only as a compact badge or alias."
+            options={["Auto: FH", "Auto: LH"]}
+            helper="Automatically derived from Tenure; shown only as an optional compact admin badge."
           />
-          <SelectField label="LACA Status" options={["Yes", "No"]} />
+          <SelectField label="LACA Status" options={["Yes", "No"]} helper="LACA (Land Acquisition Cost Allocation), if applicable." />
           <SelectField
             label="Bumi Status"
             options={["Bumi", "Non-Bumi", "Open Market"]}
@@ -575,14 +575,14 @@ export function ListingForm({
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <UploadZone
-                title="Primary Image"
+                title="Hero Image"
                 supported="JPG, PNG, WEBP"
-                helper="Drag and drop the hero image, or choose file. Placeholder preview only for now."
+                helper="Use one hero image as the primary listing image."
               />
               <UploadZone
                 title="Gallery Images"
                 supported="JPG, PNG, WEBP"
-                helper="Drag and drop multiple gallery images. Upload pending until storage is connected."
+                helper="Add multiple supporting gallery images for the listing."
               />
               <Field label="Image Caption" />
               <Field label="Image Alt Text" />
@@ -611,7 +611,7 @@ export function ListingForm({
                 <UploadZone
                   key={category}
                   title={`${category} Upload`}
-                  helper="Document upload control placeholder. Storage connection pending."
+                  helper="Upload document."
                   supported={
                     category === "Property Photos"
                       ? "JPG, PNG, WEBP"
@@ -665,7 +665,7 @@ export function ListingForm({
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <RepeaterPreview
             title="Updates"
-            description="Repeater-style update entries. UI only; persistence will be added during CRUD implementation."
+            description="Add member-facing update entries for upcoming release workflows."
             buttonLabel="Add Update"
             items={[
               {
@@ -677,7 +677,7 @@ export function ListingForm({
           />
           <RepeaterPreview
             title="FAQ"
-            description="Repeater-style FAQ entries. UI only; persistence will be added during CRUD implementation."
+            description="Add member-facing FAQ entries for upcoming release workflows."
             buttonLabel="Add FAQ"
             items={[
               {
@@ -857,8 +857,7 @@ export function ListingForm({
           </div>
         </div>
         <p className="mt-4 text-xs font-semibold text-slate-500">
-          Action buttons are UI-only placeholders for Phase 1; server actions
-          and database writes are not wired yet.
+          Action buttons are available for preview and review workflows; publishing automation is planned for an upcoming release.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
@@ -868,10 +867,10 @@ export function ListingForm({
             Submit for Review
           </button>
           <button className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
-            Publish Campaign
+            Publish Listing
           </button>
           <button className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white">
-            Update Campaign
+            Update Listing
           </button>
         </div>
       </Section>

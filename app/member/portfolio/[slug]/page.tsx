@@ -3,11 +3,11 @@ import { notFound } from "next/navigation";
 import { ContentCard, Info } from "@/components/member/Cards";
 import { portfolioRecords, type PortfolioStatus } from "@/lib/memberMockData";
 
-const timeline = ["Campaign Opened", "Property Secured", "Renovation In Progress", "Listed For Sale", "Under Offer", "Sold", "Distribution Processing", "Completed"];
+const timeline = ["Listing Opened", "Property Secured", "Renovation In Progress", "Listed For Sale", "Under Offer", "Sold", "Distribution Processing", "Completed"];
 const formatRM = (value: number) => `RM${value.toLocaleString()}`;
 
 function statusClasses(status: PortfolioStatus) {
-  if (status === "Campaign Opened") return "border-blue-200 bg-blue-50 text-blue-700";
+  if (status === "Listing Opened") return "border-blue-200 bg-blue-50 text-blue-700";
   if (status === "Distribution Processing") return "border-purple-200 bg-purple-50 text-purple-700";
   if (status === "Completed") return "border-green-200 bg-green-50 text-green-700";
   return "border-amber-200 bg-amber-50 text-amber-700";

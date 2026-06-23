@@ -62,8 +62,8 @@ export default async function ListingsPage({ searchParams }: { searchParams?: { 
         <section className="space-y-4">
           <div>
             <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Completed</p>
-            <h2 className="mt-2 text-xl font-bold">Campaign History</h2>
-            <p className="mt-1 text-sm text-slate-600">Review completed campaigns and final distribution outcomes.</p>
+            <h2 className="mt-2 text-xl font-bold">Listing History</h2>
+            <p className="mt-1 text-sm text-slate-600">Review completed listings and final distribution outcomes.</p>
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
             {completedCampaigns.map((campaign) => (

@@ -112,10 +112,10 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     daysRemaining: calculateDaysRemaining(closeDate),
     principalProtectionEnabled: campaign.principalProtectionEnabled,
     aboutCampaign:
-      campaign.content?.aboutCampaign || "Campaign details will be updated soon.",
+      campaign.content?.aboutCampaign || "Listing details will be updated soon.",
     importantInformation:
       campaign.content?.importantInformation ||
-      "Please review the campaign documents before participating.",
+      "Please review the listing documents before participating.",
     updates: campaign.updates.map((update) => ({
       date: formatDate(update.createdAt),
       title: update.title,
@@ -135,7 +135,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
       .filter((filename): filename is string => Boolean(filename)),
     riskSummary:
       campaign.content?.riskDisclaimer ||
-      "Please review all campaign information before participating.",
+      "Please review all listing information before participating.",
   };
 }
 

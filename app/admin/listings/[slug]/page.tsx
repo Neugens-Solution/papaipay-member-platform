@@ -215,16 +215,17 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <h2 className="font-bold">Property Details</h2>
           <InfoGrid
             items={[
-              { label: "Asset Category", value: property?.propertyType || "Residential Property" },
+              { label: "Asset Category", value: "Residential Property" },
               { label: "Property Type", value: property?.propertyType || "To be confirmed" },
               {
                 label: "Tenure",
                 value: formatTenure(property?.tenure || property?.tenureAlias),
               },
               { label: "Bumi Status", value: property?.bumiStatus || "To be confirmed" },
-              { label: "Built-up", value: property?.builtUpArea || "To be confirmed" },
+              { label: "Built-Up", value: property?.builtUpArea || "To be confirmed" },
               { label: "Land Area", value: property?.landArea || "To be confirmed" },
-              { label: "Bedrooms / Bathrooms", value: `${property?.bedrooms || 0} / ${property?.bathrooms || 0}` },
+              { label: "Bedrooms", value: property?.bedrooms ? String(property.bedrooms) : "To be confirmed" },
+              { label: "Bathrooms", value: property?.bathrooms ? String(property.bathrooms) : "To be confirmed" },
               { label: "Full Address", value: property?.fullAddress || "To be confirmed" },
               { label: "Year Built", value: property?.yearBuilt || "To be confirmed" },
             ]}
@@ -236,12 +237,12 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             {listing.media.length > 0 ? (
               listing.media.map((media) => (
                 <div key={media.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                  <p className="text-sm font-bold text-papaipay-ink">{media.caption || media.fileAsset?.originalFilename || "Campaign image"}</p>
+                  <p className="text-sm font-bold text-papaipay-ink">{media.caption || media.fileAsset?.originalFilename || "Listing image"}</p>
                   <p className="mt-1 text-xs text-slate-500">{media.mediaType} • {media.altText || "Alt text not set"}</p>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No media gallery items uploaded yet.</p>
+              <p className="text-sm text-slate-500">No media gallery items added yet.</p>
             )}
           </div>
         </Card>
@@ -254,12 +255,12 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                   <DocumentIcon />
                   <div>
                     <p className="text-sm font-bold text-papaipay-ink">{document.fileAsset?.originalFilename || document.category}</p>
-                    <p className="text-xs text-slate-500">Campaign document</p>
+                    <p className="text-xs text-slate-500">Listing document</p>
                   </div>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No documents uploaded yet.</p>
+              <p className="text-sm text-slate-500">No documents added yet.</p>
             )}
           </div>
         </Card>
@@ -272,7 +273,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
               </p>
             ))
           ) : (
-            <p className="mt-3 text-sm text-slate-500">No updates yet.</p>
+            <p className="mt-3 text-sm text-slate-500">No updates added yet.</p>
           )}
         </Card>
       </section>
