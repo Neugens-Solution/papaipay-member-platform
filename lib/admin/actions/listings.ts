@@ -4,10 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import {
-  createAdminAuditEntry,
-  type AdminAuditAction,
-} from "@/lib/audit/adminAudit";
+import { type AdminAuditAction } from "@/lib/audit/adminAudit";
 import {
   listingDraftSchema,
   type ListingDraftInput,
@@ -58,6 +55,33 @@ function makeCampaignCode(title: string) {
 }
 function makeAuditRef() {
   return `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+function toJsonValue(value: unknown): Prisma.InputJsonValue {
+  return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
+}
+function buildAuditData({
+  action,
+  entityId,
+  beforeSnapshot,
+  afterSnapshot,
+}: {
+  action: AdminAuditAction;
+  entityId: string;
+  beforeSnapshot?: unknown;
+  afterSnapshot?: unknown;
+}): Prisma.AuditLogUncheckedCreateInput {
+  return {
+    auditRef: makeAuditRef(),
+    action,
+    entityType: "Campaign",
+    entityId,
+    ...(beforeSnapshot !== undefined
+      ? { beforeSnapshot: toJsonValue(beforeSnapshot) }
+      : {}),
+    ...(afterSnapshot !== undefined
+      ? { afterSnapshot: toJsonValue(afterSnapshot) }
+      : {}),
+  };
 }
 function buildInput(
   formData: FormData,
@@ -199,16 +223,12 @@ export async function saveListingAction(formData: FormData) {
       create: { campaignId: campaign.id, ...input.content },
     });
     await tx.auditLog.create({
-      data: {
-        ...createAdminAuditEntry({
-          action: auditAction,
-          entityType: "Campaign",
-          entityId: campaign.id,
-          beforeSnapshot: existing as Prisma.InputJsonValue,
-          afterSnapshot: campaign as Prisma.InputJsonValue,
-        }),
-        auditRef: makeAuditRef(),
-      },
+      data: buildAuditData({
+        action: auditAction,
+        entityId: campaign.id,
+        beforeSnapshot: existing ?? undefined,
+        afterSnapshot: campaign,
+      }),
     });
     return campaign;
   });
