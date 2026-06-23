@@ -64,6 +64,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   const remainingAmount = campaign.targetAmount - campaign.collectedAmount;
   const finalDistributionText = "Principal Return + Holding Return + Profit Distribution, paid once during final distribution";
 
+function MobileAccordion({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-5 pb-44 md:pb-0">
       <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Listings</Link>
@@ -133,6 +134,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <CompactRow label="Land Area" value={campaign.landArea} icon="map" />
               <CompactRow label="Bedrooms" value={`${campaign.bedrooms}`} icon="home" />
               <CompactRow label="Bathrooms" value={`${campaign.bathrooms}`} icon="home" />
+              <CompactRow label="Reserve Price" value={formatRM(campaign.reservePrice)} icon="dollar" />
               <CompactRow label="State" value={campaign.state} icon="map" />
               <CompactRow label="Full Address" value={campaign.fullAddress} icon="map" />
             </dl>

@@ -155,6 +155,7 @@ export const opportunities: Opportunity[] = [
   principalProtectionRule: "If the asset is not sold after 24 months, return principal / participation amount only with no Holding Return or Profit Distribution.",
   documents: ["Proclamation of Sale", "Conditions of Sale", "Title Search", "Valuation Report", "Property Photos", "Location Map", "Legal Documents"],
   riskSummary: "Property participation may be affected by title review, occupancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
+  riskSummary: "Auction property participation may be affected by reserve price, title review, vacancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
 }));
 
 export const dashboardMetrics = [
