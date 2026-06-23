@@ -1,22 +1,7 @@
 import Link from "next/link";
 import { Badge, PageHeader, ProgressBar, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";
-import { db } from "@/lib/db";
-
-function decimalToNumber(value: unknown): number {
-  if (
-    value &&
-    typeof value === "object" &&
-    "toNumber" in value &&
-    typeof value.toNumber === "function"
-  ) {
-    return value.toNumber();
-  }
-
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Number(value);
-
-  return 0;
-}
+import { getAdminListingSummaries } from "@/lib/admin/data/listings";
+import { decimalToNumber, formatCurrency, formatEnumLabel } from "@/lib/utils/formatters";
 
 function formatTenureBadge(tenure: string | null, tenureAlias: string | null) {
   if (tenure === "Freehold" || tenureAlias === "FH") return "FH";
@@ -44,24 +29,8 @@ function formatProperty(property: {
     .join(" • ");
 }
 
-function formatStatus(status: string) {
-  return status.replace(/([a-z])([A-Z])/g, "$1 $2");
-}
-
 export default async function ListingsPage() {
-  const listings = await db.campaign.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      propertyDetail: true,
-      _count: {
-        select: {
-          participations: true,
-        },
-      },
-    },
-  });
+  const listings = await getAdminListingSummaries();
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -114,10 +83,10 @@ export default async function ListingsPage() {
                 </Td>
                 <Td>{formatProperty(listing.propertyDetail)}</Td>
                 <Td>
-                  <Badge>{formatStatus(listing.lifecycleStatus)}</Badge>
+                  <Badge>{formatEnumLabel(listing.lifecycleStatus)}</Badge>
                 </Td>
-                <Td>RM{target.toLocaleString()}</Td>
-                <Td>RM{collected.toLocaleString()}</Td>
+                <Td>{formatCurrency(target)}</Td>
+                <Td>{formatCurrency(collected)}</Td>
                 <Td>
                   <ProgressBar value={progress} />
                 </Td>
