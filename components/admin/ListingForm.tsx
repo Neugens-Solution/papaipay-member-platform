@@ -1,4 +1,5 @@
 import { Card } from "@/components/admin/AdminUI";
+import { saveListingAction } from "@/lib/admin/actions/listings";
 import {
   campaignLifecycleStatuses,
   documentCategories,
@@ -103,19 +104,25 @@ const calculationFields = [
 
 function Field({
   label,
+  name,
   type = "text",
   className = "",
+  defaultValue,
 }: {
   label: string;
+  name?: string;
   type?: string;
   className?: string;
+  defaultValue?: string | number | null;
 }) {
   const normalizedType = label.includes("Date") ? "date" : type;
   return (
     <label className={className}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
       <input
+        name={name}
         type={normalizedType}
+        defaultValue={defaultValue ?? undefined}
         className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
       />
     </label>
@@ -124,14 +131,18 @@ function Field({
 
 function SelectField({
   label,
+  name,
   options,
   helper,
   className = "",
+  defaultValue,
 }: {
   label: string;
+  name?: string;
   options: readonly string[];
   helper?: string;
   className?: string;
+  defaultValue?: string;
 }) {
   return (
     <label className={className}>
@@ -139,7 +150,11 @@ function SelectField({
       {helper ? (
         <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
       ) : null}
-      <select className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10">
+      <select
+        name={name}
+        defaultValue={defaultValue}
+        className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+      >
         {options.map((option) => (
           <option key={option}>{option}</option>
         ))}
@@ -150,12 +165,16 @@ function SelectField({
 
 function TextAreaField({
   label,
+  name,
   helper,
   rows = 4,
+  defaultValue,
 }: {
   label: string;
+  name?: string;
   helper?: string;
   rows?: number;
+  defaultValue?: string | null;
 }) {
   return (
     <label>
@@ -164,7 +183,9 @@ function TextAreaField({
         <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
       ) : null}
       <textarea
+        name={name}
         rows={rows}
+        defaultValue={defaultValue ?? undefined}
         className="mt-2 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
       />
     </label>
@@ -412,8 +433,22 @@ function ChecklistItem({ label }: { label: string }) {
 }
 
 type ListingFormInitialValues = {
+  id?: string;
   campaignRef?: string;
   campaignCode?: string;
+  title?: string;
+  visibility?: string;
+  campaignTarget?: string | number;
+  minimumParticipationAmount?: string | number;
+  maximumParticipationAmount?: string | number;
+  campaignOpenDate?: string | null;
+  campaignCloseDate?: string | null;
+  holdingReturnRateMonthly?: string | number;
+  returnType?: string;
+  maximumHoldingPeriodMonths?: number;
+  principalProtectionEnabled?: boolean;
+  propertyDetail?: any;
+  content?: any;
 };
 
 export function ListingForm({
@@ -437,7 +472,8 @@ export function ListingForm({
       : "Auto-generated after save";
 
   return (
-    <div className="space-y-5">
+    <form action={saveListingAction} className="space-y-5">
+      <input type="hidden" name="campaignId" value={initialValues?.id ?? ""} />
       <div className="sticky top-[76px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
         <div
           className="flex gap-2 overflow-x-auto"
@@ -476,10 +512,16 @@ export function ListingForm({
                 helper="System-generated campaign code. Manual entry is disabled."
                 value={campaignCodeValue}
               />
-              <Field label="Campaign Title" />
+              <Field
+                label="Campaign Title"
+                name="title"
+                defaultValue={initialValues?.title}
+              />
               <SelectField
                 label="Member Preview Visibility"
-                options={["Member Visible", "Internal Only"]}
+                name="visibility"
+                defaultValue={initialValues?.visibility ?? "InternalOnly"}
+                options={["MemberVisible", "InternalOnly"]}
               />
             </div>
           </SubsectionCard>
@@ -493,9 +535,16 @@ export function ListingForm({
                 options={campaignLifecycleStatuses}
                 className="sm:col-span-2"
               />
-              {campaignDateFields.map((field) => (
-                <Field key={field} label={field} />
-              ))}
+              <Field
+                label="Campaign Open Date"
+                name="campaignOpenDate"
+                defaultValue={initialValues?.campaignOpenDate}
+              />
+              <Field
+                label="Campaign Close Date"
+                name="campaignCloseDate"
+                defaultValue={initialValues?.campaignCloseDate}
+              />
               <CalculatedField
                 label="Days Remaining"
                 helper="Calculated from the campaign close date."
@@ -507,9 +556,24 @@ export function ListingForm({
             description="Campaign funding values and derived campaign progress."
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {campaignAmountFields.map((field) => (
-                <Field key={field} label={field} />
-              ))}
+              <Field
+                label="Campaign Target"
+                name="campaignTarget"
+                type="number"
+                defaultValue={initialValues?.campaignTarget ?? 0}
+              />
+              <Field
+                label="Minimum Participation Amount"
+                name="minimumParticipationAmount"
+                type="number"
+                defaultValue={initialValues?.minimumParticipationAmount ?? 0}
+              />
+              <Field
+                label="Maximum Participation Amount"
+                name="maximumParticipationAmount"
+                type="number"
+                defaultValue={initialValues?.maximumParticipationAmount ?? 0}
+              />
               <ReadOnlyField
                 label="Collected Amount"
                 helper="Derived from confirmed participations and successful payments. Admin editing is disabled."
@@ -544,6 +608,8 @@ export function ListingForm({
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <SelectField
             label="Tenure"
+            name="tenure"
+            defaultValue={initialValues?.propertyDetail?.tenure ?? "Freehold"}
             options={["Freehold", "Leasehold"]}
             helper="Use full wording in normal rows and form labels."
           />
@@ -552,14 +618,95 @@ export function ListingForm({
             options={["Auto: FH", "Auto: LH"]}
             helper="Automatically derived from Tenure; shown only as an optional compact admin badge."
           />
-          <SelectField label="LACA Status" options={["Yes", "No"]} helper="LACA (Land Acquisition Cost Allocation), if applicable." />
+          <label>
+            <span className="text-sm font-bold text-slate-600">
+              LACA Status
+            </span>
+            <select
+              name="isLaca"
+              defaultValue={
+                initialValues?.propertyDetail?.isLaca ? "true" : "false"
+              }
+              className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+            >
+              <option value="true">Yes</option>
+              <option value="false">No</option>
+            </select>
+            <p className="mt-1 text-xs leading-5 text-slate-500">
+              LACA (Land Acquisition Cost Allocation), if applicable.
+            </p>
+          </label>
           <SelectField
             label="Bumi Status"
-            options={["Bumi", "Non-Bumi", "Open Market"]}
+            name="bumiStatus"
+            defaultValue={
+              initialValues?.propertyDetail?.bumiStatus ?? "OpenMarket"
+            }
+            options={["Bumi", "NonBumi", "OpenMarket"]}
           />
         </div>
         <div className="mt-4">
-          <FieldGrid fields={propertyFields} />
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <Field
+              label="Property Type"
+              name="propertyType"
+              defaultValue={initialValues?.propertyDetail?.propertyType}
+            />
+            <Field
+              label="Reserve Price"
+              name="reservePrice"
+              type="number"
+              defaultValue={initialValues?.propertyDetail?.reservePrice}
+            />
+            <Field
+              label="Built-Up"
+              name="builtUpArea"
+              defaultValue={initialValues?.propertyDetail?.builtUpArea}
+            />
+            <Field
+              label="Land Area"
+              name="landArea"
+              defaultValue={initialValues?.propertyDetail?.landArea}
+            />
+            <Field
+              label="Bedrooms"
+              name="bedrooms"
+              type="number"
+              defaultValue={initialValues?.propertyDetail?.bedrooms}
+            />
+            <Field
+              label="Bathrooms"
+              name="bathrooms"
+              type="number"
+              defaultValue={initialValues?.propertyDetail?.bathrooms}
+            />
+            <Field
+              label="Auction Date"
+              name="auctionDate"
+              defaultValue={initialValues?.propertyDetail?.auctionDate}
+            />
+            <Field
+              label="State"
+              name="state"
+              defaultValue={initialValues?.propertyDetail?.state}
+            />
+            <Field
+              label="Location"
+              name="location"
+              defaultValue={initialValues?.propertyDetail?.location}
+            />
+            <Field
+              label="Full Address"
+              name="fullAddress"
+              className="sm:col-span-2 lg:col-span-3"
+              defaultValue={initialValues?.propertyDetail?.fullAddress}
+            />
+            <Field
+              label="Year Built"
+              name="yearBuilt"
+              defaultValue={initialValues?.propertyDetail?.yearBuilt}
+            />
+          </div>
         </div>
       </Section>
 
@@ -632,10 +779,17 @@ export function ListingForm({
         <div className="grid gap-5 lg:grid-cols-2">
           <TextAreaField
             label="About This Campaign"
+            name="aboutCampaign"
             rows={7}
+            defaultValue={initialValues?.content?.aboutCampaign}
             helper="Member-facing campaign overview displayed on the campaign detail page."
           />
-          <TextAreaField label="Important Information" rows={7} />
+          <TextAreaField
+            label="Important Information"
+            name="importantInformation"
+            rows={7}
+            defaultValue={initialValues?.content?.importantInformation}
+          />
         </div>
         <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
           <h3 className="text-sm font-black text-papaipay-ink">
@@ -688,7 +842,12 @@ export function ListingForm({
             ]}
           />
           <div className="lg:col-span-2">
-            <TextAreaField label="Risk / Disclaimer" rows={5} />
+            <TextAreaField
+              label="Risk / Disclaimer"
+              name="riskDisclaimer"
+              rows={5}
+              defaultValue={initialValues?.content?.riskDisclaimer}
+            />
           </div>
         </div>
       </Section>
@@ -699,26 +858,55 @@ export function ListingForm({
         description="Configure the holding return model and the member-facing final distribution explanation."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field label="Holding Return Rate" />
+          <Field
+            label="Holding Return Rate"
+            name="holdingReturnRateMonthly"
+            type="number"
+            defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
+          />
           <SelectField
             label="Return Type"
-            options={["Fixed", "Target", "Up To"]}
+            name="returnType"
+            defaultValue={initialValues?.returnType ?? "Target"}
+            options={["Fixed", "Target", "UpTo"]}
           />
-          <Field label="Maximum Holding Period Months" />
-          <SelectField
-            label="Principal Protection Enabled"
-            options={["Enabled", "Disabled"]}
+          <Field
+            label="Maximum Holding Period Months"
+            name="maximumHoldingPeriodMonths"
+            type="number"
+            defaultValue={initialValues?.maximumHoldingPeriodMonths ?? 24}
           />
+          <label>
+            <span className="text-sm font-bold text-slate-600">
+              Principal Protection Enabled
+            </span>
+            <select
+              name="principalProtectionEnabled"
+              defaultValue={
+                initialValues?.principalProtectionEnabled === false
+                  ? "false"
+                  : "true"
+              }
+              className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+            >
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </label>
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
           <TextAreaField
             label="Holding Return Explanation"
+            name="holdingReturnExplanation"
             rows={5}
+            defaultValue={initialValues?.content?.holdingReturnExplanation}
             helper="Holding Return accrues during the holding period and is paid once during final distribution."
           />
           <TextAreaField
             label="Final Distribution Explanation"
+            name="finalDistributionExplanation"
             rows={5}
+            defaultValue={initialValues?.content?.finalDistributionExplanation}
             helper="Explain Principal Return, Holding Return and Profit Distribution clearly."
           />
         </div>
@@ -857,23 +1045,48 @@ export function ListingForm({
           </div>
         </div>
         <p className="mt-4 text-xs font-semibold text-slate-500">
-          Action buttons are available for preview and review workflows; publishing automation is planned for an upcoming release.
+          Save Draft stores Draft status. Publish Listing stores Published
+          status and makes the listing member visible.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+          <button
+            name="intent"
+            value="draft"
+            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
+          >
             Save Draft
           </button>
-          <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+          <button
+            type="button"
+            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
+          >
             Submit for Review
           </button>
-          <button className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
+          <button
+            name="intent"
+            value="publish"
+            className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+          >
             Publish Listing
           </button>
-          <button className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white">
+          <button
+            name="intent"
+            value="draft"
+            className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white"
+          >
             Update Listing
           </button>
+          {mode === "edit" ? (
+            <button
+              name="intent"
+              value="unpublish"
+              className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800"
+            >
+              Unpublish Listing
+            </button>
+          ) : null}
         </div>
       </Section>
-    </div>
+    </form>
   );
 }

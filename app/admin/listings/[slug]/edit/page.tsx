@@ -12,9 +12,9 @@ export default async function EditListingPage({
     where: {
       slug: params.slug,
     },
-    select: {
-      campaignRef: true,
-      campaignCode: true,
+    include: {
+      propertyDetail: true,
+      content: true,
     },
   });
 
@@ -22,7 +22,10 @@ export default async function EditListingPage({
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <BackLink href={`/admin/listings/${params.slug}`} label="Back to Listing Detail" />
+      <BackLink
+        href={`/admin/listings/${params.slug}`}
+        label="Back to Listing Detail"
+      />
       <PageHeader
         title="Edit Listing"
         description="Edit all member-facing property, campaign, valuation, timeline, update, FAQ, risk, document and image fields."
@@ -31,8 +34,37 @@ export default async function EditListingPage({
         mode="edit"
         slug={params.slug}
         initialValues={{
+          id: campaign.id,
           campaignRef: campaign.campaignRef,
           campaignCode: campaign.campaignCode,
+          title: campaign.title,
+          visibility: campaign.visibility,
+          campaignTarget: campaign.campaignTarget.toString(),
+          minimumParticipationAmount:
+            campaign.minimumParticipationAmount.toString(),
+          maximumParticipationAmount:
+            campaign.maximumParticipationAmount.toString(),
+          campaignOpenDate: campaign.campaignOpenDate
+            ?.toISOString()
+            .slice(0, 10),
+          campaignCloseDate: campaign.campaignCloseDate
+            ?.toISOString()
+            .slice(0, 10),
+          holdingReturnRateMonthly:
+            campaign.holdingReturnRateMonthly.toString(),
+          returnType: campaign.returnType,
+          maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
+          principalProtectionEnabled: campaign.principalProtectionEnabled,
+          propertyDetail: campaign.propertyDetail
+            ? {
+                ...campaign.propertyDetail,
+                reservePrice: campaign.propertyDetail.reservePrice?.toString(),
+                auctionDate: campaign.propertyDetail.auctionDate
+                  ?.toISOString()
+                  .slice(0, 10),
+              }
+            : undefined,
+          content: campaign.content,
         }}
       />
     </div>
