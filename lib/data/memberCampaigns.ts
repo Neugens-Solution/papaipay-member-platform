@@ -1,8 +1,17 @@
 import { db } from "@/lib/db";
-import type { Opportunity } from "@/lib/memberMockData";
-import { calculateDaysRemaining, decimalToNumber, formatDate } from "@/lib/utils/formatters";
+import {
+  opportunities as demoOpportunities,
+  type Opportunity,
+} from "@/lib/memberMockData";
+import {
+  calculateDaysRemaining,
+  decimalToNumber,
+  formatDate,
+} from "@/lib/utils/formatters";
 
-type CampaignWithRelations = Awaited<ReturnType<typeof getMemberCampaignsRaw>>[number];
+type CampaignWithRelations = Awaited<
+  ReturnType<typeof getMemberCampaignsRaw>
+>[number];
 
 function statusToMemberStatus(status: string): Opportunity["status"] {
   if (status === "Distributed") return "closed";
@@ -19,14 +28,30 @@ function formatReturnType(returnType: string): Opportunity["returnType"] {
   return "Target";
 }
 
+const fallbackImageUrl =
+  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+
+function fileAssetUrl(
+  fileAsset?: CampaignWithRelations["media"][number]["fileAsset"] | null,
+): string | null {
+  if (!fileAsset) return null;
+  return fileAsset.objectKey.startsWith("/")
+    ? fileAsset.objectKey
+    : `/${fileAsset.objectKey}`;
+}
+
 function getPrimaryImageUrl(campaign: CampaignWithRelations): string {
-  const firstMedia = campaign.media[0]?.fileAsset;
-
-  if (firstMedia) {
-    return "/placeholder-property.jpg";
-  }
-
-  return "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
+  return (
+    fileAssetUrl(
+      campaign.media.find((media) => media.mediaType === "PrimaryImage")
+        ?.fileAsset,
+    ) ||
+    fileAssetUrl(
+      campaign.media.find((media) => media.mediaType === "GalleryImage")
+        ?.fileAsset,
+    ) ||
+    fallbackImageUrl
+  );
 }
 
 function toOpportunity(campaign: CampaignWithRelations): Opportunity {
@@ -44,11 +69,18 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     campaignCode: campaign.campaignCode,
     status: statusToMemberStatus(campaign.lifecycleStatus),
     imageUrl,
-    gallery:
-      campaign.media.length > 0
-        ? campaign.media.map(() => imageUrl)
-        : [imageUrl],
-    galleryCount: campaign.media.length > 0 ? campaign.media.length : 1,
+    gallery: [
+      imageUrl,
+      ...campaign.media
+        .filter((media) => media.mediaType === "GalleryImage")
+        .map((media) => fileAssetUrl(media.fileAsset))
+        .filter((url): url is string => Boolean(url)),
+    ],
+    galleryCount:
+      1 +
+      campaign.media.filter(
+        (media) => media.mediaType === "GalleryImage" && media.fileAsset,
+      ).length,
     location: property?.location || property?.state || "Malaysia",
     state: property?.state || "Malaysia",
     propertyType: property?.propertyType || "Property",
@@ -80,7 +112,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     daysRemaining: calculateDaysRemaining(closeDate),
     principalProtectionEnabled: campaign.principalProtectionEnabled,
     aboutCampaign:
-      campaign.content?.aboutCampaign || "Listing details will be updated soon.",
+      campaign.content?.aboutCampaign ||
+      "Listing details will be updated soon.",
     importantInformation:
       campaign.content?.importantInformation ||
       "Please review the listing documents before participating.",
@@ -108,6 +141,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
 }
 
 async function getMemberCampaignsRaw() {
+  if (!process.env.DATABASE_URL) return [];
+
   return db.campaign.findMany({
     where: {
       publishStatus: "Published",
@@ -142,45 +177,71 @@ async function getMemberCampaignsRaw() {
   });
 }
 
-export async function getMemberCampaigns() {
-  const campaigns = await getMemberCampaignsRaw();
+function demoCampaignBySlug(slug: string) {
+  return demoOpportunities.find((campaign) => campaign.slug === slug) ?? null;
+}
 
-  return campaigns.map(toOpportunity);
+export async function getMemberCampaigns() {
+  try {
+    const campaigns = await getMemberCampaignsRaw();
+
+    if (campaigns.length === 0 && !process.env.DATABASE_URL) {
+      return demoOpportunities;
+    }
+
+    return campaigns.map(toOpportunity);
+  } catch (error) {
+    console.warn(
+      "Falling back to demo member campaigns because database reads are unavailable.",
+      error,
+    );
+    return demoOpportunities;
+  }
 }
 
 export async function getMemberCampaignBySlug(slug: string) {
-  const campaign = await db.campaign.findFirst({
-    where: {
-      slug,
-      publishStatus: "Published",
-      visibility: "MemberVisible",
-    },
-    include: {
-      propertyDetail: true,
-      media: {
-        include: {
-          fileAsset: true,
-        },
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-      content: true,
-      documents: {
-        include: {
-          fileAsset: true,
-        },
-      },
-      updates: true,
-      faqs: {
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-    },
-  });
+  if (!process.env.DATABASE_URL) return demoCampaignBySlug(slug);
 
-  if (!campaign) return null;
+  try {
+    const campaign = await db.campaign.findFirst({
+      where: {
+        slug,
+        publishStatus: "Published",
+        visibility: "MemberVisible",
+      },
+      include: {
+        propertyDetail: true,
+        media: {
+          include: {
+            fileAsset: true,
+          },
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+        content: true,
+        documents: {
+          include: {
+            fileAsset: true,
+          },
+        },
+        updates: true,
+        faqs: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+      },
+    });
 
-  return toOpportunity(campaign);
+    if (!campaign) return null;
+
+    return toOpportunity(campaign);
+  } catch (error) {
+    console.warn(
+      "Falling back to demo member campaign because database reads are unavailable.",
+      error,
+    );
+    return demoCampaignBySlug(slug);
+  }
 }

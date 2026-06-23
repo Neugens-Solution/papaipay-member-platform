@@ -295,10 +295,14 @@ function UploadZone({
   title,
   supported,
   helper = "Drag and drop here, or choose file",
+  name,
+  multiple = false,
 }: {
   title: string;
   supported: string;
   helper?: string;
+  name?: string;
+  multiple?: boolean;
 }) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
@@ -320,9 +324,20 @@ function UploadZone({
       </div>
       <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}</p>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
-      <span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
+      <label className="mt-3 inline-flex cursor-pointer rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
+        <input
+          type="file"
+          name={name}
+          multiple={multiple}
+          accept={
+            supported.includes("PDF")
+              ? ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+              : "image/jpeg,image/png,image/webp"
+          }
+          className="sr-only"
+        />
         Choose file
-      </span>
+      </label>
       <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
         Supported: {supported} · Ready to upload
       </p>
@@ -449,6 +464,8 @@ type ListingFormInitialValues = {
   principalProtectionEnabled?: boolean;
   propertyDetail?: any;
   content?: any;
+  media?: any[];
+  documents?: any[];
 };
 
 export function ListingForm({
@@ -470,6 +487,14 @@ export function ListingForm({
     mode === "edit" && initialValues?.campaignCode
       ? initialValues.campaignCode
       : "Auto-generated after save";
+  const heroImage = initialValues?.media?.find(
+    (media) => media.mediaType === "PrimaryImage",
+  );
+  const galleryImages =
+    initialValues?.media?.filter(
+      (media) => media.mediaType === "GalleryImage",
+    ) ?? [];
+  const documents = initialValues?.documents ?? [];
 
   return (
     <form action={saveListingAction} className="space-y-5">
@@ -723,21 +748,113 @@ export function ListingForm({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <UploadZone
                 title="Hero Image"
+                name="heroImage"
                 supported="JPG, PNG, WEBP"
                 helper="Use one hero image as the primary listing image."
               />
+              <input
+                type="hidden"
+                name="heroMediaId"
+                value={heroImage?.id ?? ""}
+              />
               <UploadZone
                 title="Gallery Images"
+                name="galleryImages"
+                multiple
                 supported="JPG, PNG, WEBP"
                 helper="Add multiple supporting gallery images for the listing."
               />
-              <Field label="Image Caption" />
-              <Field label="Image Alt Text" />
+              <Field
+                label="Image Caption"
+                name="heroCaption"
+                defaultValue={heroImage?.caption}
+              />
+              <Field
+                label="Image Alt Text"
+                name="heroAltText"
+                defaultValue={heroImage?.altText}
+              />
               <CalculatedField
                 label="Gallery Count"
                 helper="Calculated from uploaded gallery images."
               />
             </div>
+            {heroImage ? (
+              <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4 text-sm">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="font-black text-papaipay-ink">
+                      Current hero image
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {heroImage.fileAsset?.originalFilename ??
+                        "Uploaded image"}
+                    </p>
+                  </div>
+                  <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                    <input
+                      type="checkbox"
+                      name="deleteHeroImage"
+                      value="true"
+                    />{" "}
+                    Delete
+                  </label>
+                </div>
+              </div>
+            ) : null}
+            {galleryImages.length > 0 ? (
+              <div className="mt-4 space-y-3">
+                {galleryImages.map((media, index) => (
+                  <div
+                    key={media.id}
+                    className="rounded-xl border border-slate-100 bg-white p-4"
+                  >
+                    <input
+                      type="hidden"
+                      name="galleryMediaId"
+                      value={media.id}
+                    />
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-black text-papaipay-ink">
+                          Gallery image {index + 1}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {media.fileAsset?.originalFilename ??
+                            "Uploaded image"}
+                        </p>
+                      </div>
+                      <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                        <input
+                          type="checkbox"
+                          name="deleteGalleryMediaId"
+                          value={media.id}
+                        />{" "}
+                        Delete
+                      </label>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-3">
+                      <Field
+                        label="Image Caption"
+                        name={`galleryCaption:${media.id}`}
+                        defaultValue={media.caption}
+                      />
+                      <Field
+                        label="Image Alt Text"
+                        name={`galleryAltText:${media.id}`}
+                        defaultValue={media.altText}
+                      />
+                      <Field
+                        label="Sort Order"
+                        name={`gallerySortOrder:${media.id}`}
+                        type="number"
+                        defaultValue={media.sortOrder}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </SubsectionCard>
           <SubsectionCard
             title="Documents"
@@ -746,10 +863,12 @@ export function ListingForm({
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SelectField
                 label="Document Visibility"
+                name="newDocumentVisibility"
                 options={["Internal Only", "Member Visible"]}
               />
               <SelectField
                 label="Document Status"
+                name="newDocumentStatus"
                 options={["Draft", "Ready", "Published"]}
               />
             </div>
@@ -758,6 +877,7 @@ export function ListingForm({
                 <UploadZone
                   key={category}
                   title={`${category} Upload`}
+                  name={`documentFile:${category}`}
                   helper="Upload document."
                   supported={
                     category === "Property Photos"
@@ -767,6 +887,73 @@ export function ListingForm({
                 />
               ))}
             </div>
+            {documents.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {documents.map((document) => (
+                  <div
+                    key={document.id}
+                    className="rounded-xl border border-slate-100 bg-white p-4"
+                  >
+                    <input
+                      type="hidden"
+                      name="documentId"
+                      value={document.id}
+                    />
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <p className="text-sm font-black text-papaipay-ink">
+                        {document.fileAsset?.originalFilename ?? document.title}
+                      </p>
+                      <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                        <input
+                          type="checkbox"
+                          name="deleteDocumentId"
+                          value={document.id}
+                        />{" "}
+                        Delete
+                      </label>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <Field
+                        label="Document Title"
+                        name={`documentTitle:${document.id}`}
+                        defaultValue={document.title}
+                      />
+                      <SelectField
+                        label="Document Visibility"
+                        name={`documentVisibility:${document.id}`}
+                        defaultValue={
+                          document.visibility === "MemberVisible"
+                            ? "Member Visible"
+                            : "Internal Only"
+                        }
+                        options={["Internal Only", "Member Visible"]}
+                      />
+                      <SelectField
+                        label="Document Status"
+                        name={`documentStatus:${document.id}`}
+                        defaultValue={document.documentStatus}
+                        options={["Draft", "Ready", "Published", "Archived"]}
+                      />
+                      <SelectField
+                        label="Document Category"
+                        name={`documentCategory:${document.id}`}
+                        defaultValue={document.category}
+                        options={[
+                          "ProclamationOfSale",
+                          "ConditionsOfSale",
+                          "TitleSearch",
+                          "ValuationReport",
+                          "PropertyPhotos",
+                          "LocationMap",
+                          "LegalDocuments",
+                          "OtherDocuments",
+                        ]}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </SubsectionCard>
         </div>
       </Section>

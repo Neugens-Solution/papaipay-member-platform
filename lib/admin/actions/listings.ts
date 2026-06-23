@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { mkdir, writeFile } from "fs/promises";
+import path from "path";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { type AdminAuditAction } from "@/lib/audit/adminAudit";
@@ -55,6 +57,78 @@ function makeCampaignCode(title: string) {
 }
 function makeAuditRef() {
   return `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+function makeFileRef(prefix: string) {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+}
+const allowedImageMimeTypes = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+] as const;
+const allowedImageTypes = new Set<string>(allowedImageMimeTypes);
+const allowedDocumentTypes = new Set<string>([
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  ...allowedImageMimeTypes,
+]);
+const maxGalleryImages = 12;
+const maxCaptionLength = 160;
+const maxAltTextLength = 180;
+
+function fileFromForm(formData: FormData, key: string) {
+  const value = formData.get(key);
+  return value instanceof File && value.size > 0 ? value : null;
+}
+function filesFromForm(formData: FormData, key: string) {
+  return formData
+    .getAll(key)
+    .filter((value): value is File => value instanceof File && value.size > 0);
+}
+function assertLength(value: string, max: number, label: string) {
+  if (value.length > max)
+    throw new Error(`${label} must be ${max} characters or fewer.`);
+}
+function normalizeVisibility(value: string) {
+  return value === "Member Visible" ? "MemberVisible" : "InternalOnly";
+}
+function normalizeDocumentCategory(value: string) {
+  return value.replaceAll(" ", "") || "OtherDocuments";
+}
+async function createFileAsset(
+  tx: Prisma.TransactionClient,
+  file: File,
+  purpose: "CampaignImage" | "CampaignDocument",
+) {
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
+  const objectKey = `campaign-assets/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+  // Temporary Phase 2B storage: local public/uploads keeps FileAsset persistence
+  // unblocked for demo/admin workflows. Vercel/serverless file systems are not
+  // durable, so replace this with object storage (S3/R2/Vercel Blob/etc.) before
+  // production media retention is required.
+  const uploadDir = path.join(
+    process.cwd(),
+    "public",
+    "uploads",
+    "campaign-assets",
+  );
+  await mkdir(uploadDir, { recursive: true });
+  await writeFile(
+    path.join(process.cwd(), "public", "uploads", objectKey),
+    Buffer.from(await file.arrayBuffer()),
+  );
+  return tx.fileAsset.create({
+    data: {
+      fileRef: makeFileRef("FILE"),
+      bucket: "public/uploads",
+      objectKey: `/uploads/${objectKey}`,
+      originalFilename: file.name,
+      contentType: file.type || "application/octet-stream",
+      sizeBytes: file.size,
+      visibility: purpose === "CampaignImage" ? "Public" : "InternalOnly",
+      purpose,
+    },
+  });
 }
 function toJsonValue(value: unknown): Prisma.InputJsonValue {
   return JSON.parse(JSON.stringify(value)) as Prisma.InputJsonValue;
@@ -184,9 +258,42 @@ export async function saveListingAction(formData: FormData) {
   const existing = campaignId
     ? await db.campaign.findUnique({
         where: { id: campaignId },
-        include: { propertyDetail: true, content: true },
+        include: {
+          propertyDetail: true,
+          content: true,
+          media: { include: { fileAsset: true } },
+          documents: { include: { fileAsset: true } },
+        },
       })
     : null;
+  const heroFile = fileFromForm(formData, "heroImage");
+  const galleryFiles = filesFromForm(formData, "galleryImages");
+  const heroCaption = requiredString(formData, "heroCaption");
+  const heroAltText = requiredString(formData, "heroAltText");
+  assertLength(heroCaption, maxCaptionLength, "Hero image caption");
+  assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
+  if (heroFile && !allowedImageTypes.has(heroFile.type))
+    throw new Error("Hero image must be JPG, PNG, or WEBP.");
+  for (const file of galleryFiles) {
+    if (!allowedImageTypes.has(file.type))
+      throw new Error("Gallery images must be JPG, PNG, or WEBP.");
+  }
+  const existingGalleryCount =
+    existing?.media.filter(
+      (media) =>
+        media.mediaType === "GalleryImage" &&
+        !formData.getAll("deleteGalleryMediaId").includes(media.id),
+    ).length ?? 0;
+  if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
+    throw new Error(
+      `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
+    );
+  const hasExistingHero =
+    Boolean(
+      existing?.media.some((media) => media.mediaType === "PrimaryImage"),
+    ) && requiredString(formData, "deleteHeroImage") !== "true";
+  if (action === "publish" && !heroFile && !hasExistingHero)
+    throw new Error("A hero image is required before publishing.");
   const input = buildInput(formData, action, {
     campaignCode:
       existing?.campaignCode ||
@@ -222,6 +329,167 @@ export async function saveListingAction(formData: FormData) {
       update: input.content,
       create: { campaignId: campaign.id, ...input.content },
     });
+    const mediaAuditEvents: Prisma.AuditLogUncheckedCreateInput[] = [];
+    const heroMediaId = requiredString(formData, "heroMediaId");
+    if (requiredString(formData, "deleteHeroImage") === "true" && heroMediaId) {
+      await tx.campaignMedia.delete({ where: { id: heroMediaId } });
+      mediaAuditEvents.push(
+        buildAuditData({
+          action: "update",
+          entityId: campaign.id,
+          beforeSnapshot: { heroMediaId },
+          afterSnapshot: { deleted: true },
+        }),
+      );
+    }
+    if (heroFile) {
+      const asset = await createFileAsset(tx, heroFile, "CampaignImage");
+      await tx.campaignMedia.deleteMany({
+        where: { campaignId: campaign.id, mediaType: "PrimaryImage" },
+      });
+      const hero = await tx.campaignMedia.create({
+        data: {
+          campaignId: campaign.id,
+          fileAssetId: asset.id,
+          mediaType: "PrimaryImage",
+          caption: heroCaption || null,
+          altText: heroAltText || null,
+          sortOrder: 0,
+        },
+      });
+      mediaAuditEvents.push(
+        buildAuditData({
+          action: "update",
+          entityId: campaign.id,
+          afterSnapshot: { heroMediaId: hero.id, fileAssetId: asset.id },
+        }),
+      );
+    } else if (heroMediaId) {
+      await tx.campaignMedia.update({
+        where: { id: heroMediaId },
+        data: {
+          caption: heroCaption || null,
+          altText: heroAltText || null,
+          sortOrder: 0,
+        },
+      });
+    }
+    for (const mediaId of formData.getAll("galleryMediaId").map(String)) {
+      if (formData.getAll("deleteGalleryMediaId").includes(mediaId)) {
+        await tx.campaignMedia.delete({ where: { id: mediaId } });
+        mediaAuditEvents.push(
+          buildAuditData({
+            action: "update",
+            entityId: campaign.id,
+            beforeSnapshot: { galleryMediaId: mediaId },
+            afterSnapshot: { deleted: true },
+          }),
+        );
+        continue;
+      }
+      const caption = requiredString(formData, `galleryCaption:${mediaId}`);
+      const altText = requiredString(formData, `galleryAltText:${mediaId}`);
+      assertLength(caption, maxCaptionLength, "Gallery image caption");
+      assertLength(altText, maxAltTextLength, "Gallery image alt text");
+      await tx.campaignMedia.update({
+        where: { id: mediaId },
+        data: {
+          caption: caption || null,
+          altText: altText || null,
+          sortOrder: Number(formData.get(`gallerySortOrder:${mediaId}`) ?? 0),
+        },
+      });
+    }
+    let nextSortOrder = existingGalleryCount;
+    for (const file of galleryFiles) {
+      const asset = await createFileAsset(tx, file, "CampaignImage");
+      const media = await tx.campaignMedia.create({
+        data: {
+          campaignId: campaign.id,
+          fileAssetId: asset.id,
+          mediaType: "GalleryImage",
+          sortOrder: nextSortOrder++,
+        },
+      });
+      mediaAuditEvents.push(
+        buildAuditData({
+          action: "update",
+          entityId: campaign.id,
+          afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id },
+        }),
+      );
+    }
+    for (const documentId of formData.getAll("documentId").map(String)) {
+      if (formData.getAll("deleteDocumentId").includes(documentId)) {
+        await tx.campaignDocument.delete({ where: { id: documentId } });
+        mediaAuditEvents.push(
+          buildAuditData({
+            action: "update",
+            entityId: campaign.id,
+            beforeSnapshot: { documentId },
+            afterSnapshot: { deleted: true },
+          }),
+        );
+        continue;
+      }
+      await tx.campaignDocument.update({
+        where: { id: documentId },
+        data: {
+          title: requiredString(formData, `documentTitle:${documentId}`),
+          visibility: normalizeVisibility(
+            requiredString(formData, `documentVisibility:${documentId}`),
+          ) as any,
+          documentStatus: requiredString(
+            formData,
+            `documentStatus:${documentId}`,
+          ) as any,
+          category: requiredString(
+            formData,
+            `documentCategory:${documentId}`,
+          ) as any,
+        },
+      });
+    }
+    for (const category of [
+      "Proclamation of Sale",
+      "Conditions of Sale",
+      "Title Search",
+      "Valuation Report",
+      "Property Photos",
+      "Location Map",
+      "Legal Documents",
+      "Other Documents",
+    ]) {
+      const file = fileFromForm(formData, `documentFile:${category}`);
+      if (!file) continue;
+      if (!allowedDocumentTypes.has(file.type))
+        throw new Error(
+          "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
+        );
+      const asset = await createFileAsset(tx, file, "CampaignDocument");
+      const document = await tx.campaignDocument.create({
+        data: {
+          documentRef: makeFileRef("DOC"),
+          campaignId: campaign.id,
+          fileAssetId: asset.id,
+          category: normalizeDocumentCategory(category) as any,
+          title: file.name,
+          visibility: normalizeVisibility(
+            requiredString(formData, "newDocumentVisibility"),
+          ) as any,
+          documentStatus: requiredString(formData, "newDocumentStatus") as any,
+        },
+      });
+      mediaAuditEvents.push(
+        buildAuditData({
+          action: "update",
+          entityId: campaign.id,
+          afterSnapshot: { documentId: document.id, fileAssetId: asset.id },
+        }),
+      );
+    }
+    if (mediaAuditEvents.length > 0)
+      await tx.auditLog.createMany({ data: mediaAuditEvents });
     await tx.auditLog.create({
       data: buildAuditData({
         action: auditAction,
