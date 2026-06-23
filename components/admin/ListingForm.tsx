@@ -150,12 +150,12 @@ function SelectField({
 
 function TextAreaField({
   label,
-  rows = 5,
   helper,
+  rows = 4,
 }: {
   label: string;
-  rows?: number;
   helper?: string;
+  rows?: number;
 }) {
   return (
     <label>
@@ -206,8 +206,6 @@ function ReadOnlyField({
         {value}
       </div>
       <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
-      {helper ? <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p> : null}
-      <textarea rows={rows} className="mt-2 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10" />
     </label>
   );
 }
