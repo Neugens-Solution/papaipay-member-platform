@@ -409,15 +409,30 @@ function ChecklistItem({ label }: { label: string }) {
   );
 }
 
+type ListingFormInitialValues = {
+  campaignRef?: string;
+  campaignCode?: string;
+};
+
 export function ListingForm({
   mode,
   slug,
+  initialValues,
 }: {
   mode: "create" | "edit";
   slug?: string;
+  initialValues?: ListingFormInitialValues;
 }) {
   const memberPreviewHref =
     mode === "edit" && slug ? `/member/opportunities/${slug}` : undefined;
+  const campaignIdValue =
+    mode === "edit" && initialValues?.campaignRef
+      ? initialValues.campaignRef
+      : "Auto-generated after save";
+  const campaignCodeValue =
+    mode === "edit" && initialValues?.campaignCode
+      ? initialValues.campaignCode
+      : "Auto-generated after save";
 
   return (
     <div className="space-y-5">
@@ -452,10 +467,12 @@ export function ListingForm({
               <ReadOnlyField
                 label="Campaign ID"
                 helper="System-generated database identifier. Manual entry is disabled."
+                value={campaignIdValue}
               />
               <ReadOnlyField
                 label="Campaign Code"
                 helper="System-generated campaign code. Manual entry is disabled."
+                value={campaignCodeValue}
               />
               <Field label="Campaign Title" />
               <SelectField
