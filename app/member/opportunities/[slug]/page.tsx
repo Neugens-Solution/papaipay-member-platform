@@ -64,7 +64,6 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   const remainingAmount = campaign.targetAmount - campaign.collectedAmount;
   const finalDistributionText = "Principal Return + Holding Return + Profit Distribution, paid once during final distribution";
 
-function MobileAccordion({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="space-y-5 pb-44 md:pb-0">
       <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Listings</Link>
