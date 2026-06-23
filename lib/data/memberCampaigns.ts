@@ -65,6 +65,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
   const property = campaign.propertyDetail;
   const imageUrl = getPrimaryImageUrl(campaign);
   const reservePrice = decimalToNumber(property?.reservePrice);
+  const campaignTarget = decimalToNumber(campaign.campaignTarget);
   const closeDate = campaign.campaignCloseDate;
 
   return {
@@ -83,6 +84,9 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     location: property?.location || property?.state || "Malaysia",
     state: property?.state || "Malaysia",
     propertyType: property?.propertyType || "Property",
+    assetCategory: property?.propertyType || "Residential Property",
+    occupancyStatus: "To be confirmed",
+    estimatedYield: `${(decimalToNumber(campaign.holdingReturnRateMonthly) * 12).toFixed(2)}% p.a.`,
     tenure: property?.tenure || "To be confirmed",
     tenureAlias: property?.tenureAlias || "N/A",
     isLaca: property?.isLaca || false,
@@ -97,12 +101,12 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     fullAddress: property?.fullAddress || "To be confirmed",
     minimumParticipation: decimalToNumber(campaign.minimumParticipationAmount),
     maximumParticipation: decimalToNumber(campaign.maximumParticipationAmount),
-    targetAmount: decimalToNumber(campaign.campaignTarget),
+    targetAmount: campaignTarget,
     collectedAmount: decimalToNumber(campaign.collectedAmountSnapshot),
     participants: 0,
     closeDate: formatDate(closeDate),
     auctionPrice: reservePrice,
-    marketValue: reservePrice,
+    marketValue: campaignTarget || reservePrice,
     valuationDate: "To be confirmed",
     valuationReport: "To be uploaded",
     daysRemaining: calculateDaysRemaining(closeDate),
