@@ -14,21 +14,10 @@ const tabs = [
   { id: "review-publish", label: "Review & Publish" },
 ];
 
-const campaignIdentityFields = [
-  "Campaign ID",
-  "Campaign Code",
-  "Campaign Title",
-];
 const campaignAmountFields = [
   "Campaign Target",
-  "Collected Amount",
   "Minimum Participation Amount",
   "Maximum Participation Amount",
-];
-const campaignCalculatedFields = [
-  "Remaining Amount",
-  "Progress Percentage",
-  "Days Remaining",
 ];
 const campaignDateFields = ["Campaign Open Date", "Campaign Close Date"];
 
@@ -46,16 +35,9 @@ const propertyFields = [
   "Year Built",
 ];
 
-const galleryFields = [
-  "Primary Image",
-  "Gallery Images",
-  "Image Caption",
-  "Image Alt Text",
-];
-
 const timelineStages = [
-  "Campaign Created",
-  "Campaign Opened",
+  "Draft",
+  "Open",
   "Funded",
   "Holding",
   "Sold",
@@ -187,12 +169,14 @@ function TextAreaField({
   );
 }
 
-function CalculatedField({
+function ReadOnlyField({
   label,
-  helper = "Calculated from campaign data",
+  helper,
+  value = "Auto-generated after save",
 }: {
   label: string;
-  helper?: string;
+  helper: string;
+  value?: string;
 }) {
   return (
     <label>
@@ -217,11 +201,21 @@ function CalculatedField({
         {label}
       </span>
       <div className="mt-2 min-h-11 rounded-lg border border-slate-200 bg-slate-100 px-3 py-3 text-sm font-semibold text-slate-500 ring-1 ring-slate-100">
-        Calculated value
+        {value}
       </div>
       <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
     </label>
   );
+}
+
+function CalculatedField({
+  label,
+  helper = "Calculated from campaign data",
+}: {
+  label: string;
+  helper?: string;
+}) {
+  return <ReadOnlyField label={label} helper={helper} value="Derived value" />;
 }
 
 function Section({
@@ -277,9 +271,11 @@ function FieldGrid({
 function UploadZone({
   title,
   supported,
+  helper = "Drag and drop here, or choose file",
 }: {
   title: string;
   supported: string;
+  helper?: string;
 }) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
@@ -300,10 +296,55 @@ function UploadZone({
         </svg>
       </div>
       <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}</p>
-      <p className="mt-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported}
+      <p className="mt-1 text-xs text-slate-500">{helper}</p>
+      <span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
+        Choose file
+      </span>
+      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        Supported: {supported} · Upload pending
       </p>
     </div>
+  );
+}
+
+function RepeaterPreview({
+  title,
+  description,
+  items,
+  buttonLabel,
+}: {
+  title: string;
+  description: string;
+  items: { primary: string; secondary: string; body?: string }[];
+  buttonLabel: string;
+}) {
+  return (
+    <SubsectionCard title={title} description={description}>
+      <div className="space-y-4">
+        {items.map((item, index) => (
+          <div
+            key={`${title}-${index}`}
+            className="rounded-xl border border-slate-100 bg-white p-4"
+          >
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field label={item.primary} />
+              <Field label={item.secondary} />
+            </div>
+            {item.body ? (
+              <div className="mt-4">
+                <TextAreaField label={item.body} rows={4} />
+              </div>
+            ) : null}
+          </div>
+        ))}
+        <button
+          type="button"
+          className="rounded-md border border-dashed border-papaipay-green/50 bg-emerald-50 px-4 py-2 text-sm font-black text-papaipay-green"
+        >
+          {buttonLabel}
+        </button>
+      </div>
+    </SubsectionCard>
   );
 }
 
@@ -368,8 +409,30 @@ function ChecklistItem({ label }: { label: string }) {
   );
 }
 
-export function ListingForm({ mode }: { mode: "create" | "edit" }) {
-  const memberPreviewHref = "/member/opportunities/kajang-terrace-house";
+type ListingFormInitialValues = {
+  campaignRef?: string;
+  campaignCode?: string;
+};
+
+export function ListingForm({
+  mode,
+  slug,
+  initialValues,
+}: {
+  mode: "create" | "edit";
+  slug?: string;
+  initialValues?: ListingFormInitialValues;
+}) {
+  const memberPreviewHref =
+    mode === "edit" && slug ? `/member/opportunities/${slug}` : undefined;
+  const campaignIdValue =
+    mode === "edit" && initialValues?.campaignRef
+      ? initialValues.campaignRef
+      : "Auto-generated after save";
+  const campaignCodeValue =
+    mode === "edit" && initialValues?.campaignCode
+      ? initialValues.campaignCode
+      : "Auto-generated after save";
 
   return (
     <div className="space-y-5">
@@ -401,9 +464,17 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
             description="Reference details and member-facing visibility controls."
           >
             <div className="grid gap-4 sm:grid-cols-2">
-              {campaignIdentityFields.map((field) => (
-                <Field key={field} label={field} />
-              ))}
+              <ReadOnlyField
+                label="Campaign ID"
+                helper="System-generated database identifier. Manual entry is disabled."
+                value={campaignIdValue}
+              />
+              <ReadOnlyField
+                label="Campaign Code"
+                helper="System-generated campaign code. Manual entry is disabled."
+                value={campaignCodeValue}
+              />
+              <Field label="Campaign Title" />
               <SelectField
                 label="Member Preview Visibility"
                 options={["Member Visible", "Internal Only"]}
@@ -437,11 +508,21 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
               {campaignAmountFields.map((field) => (
                 <Field key={field} label={field} />
               ))}
-              {campaignCalculatedFields
-                .filter((field) => field !== "Days Remaining")
-                .map((field) => (
-                  <CalculatedField key={field} label={field} />
-                ))}
+              <ReadOnlyField
+                label="Collected Amount"
+                helper="Derived from confirmed participations and successful payments. Admin editing is disabled."
+                value="Derived from confirmed payments"
+              />
+              <ReadOnlyField
+                label="Remaining Amount"
+                helper="Derived from campaign target minus collected and reserved amounts."
+                value="Derived balance"
+              />
+              <ReadOnlyField
+                label="Progress Percentage"
+                helper="Derived from collected amount against campaign target."
+                value="Derived percentage"
+              />
             </div>
           </SubsectionCard>
           <SubsectionCard
@@ -491,9 +572,18 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
             description="Images used in the campaign detail gallery."
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {galleryFields.map((field) => (
-                <Field key={field} label={field} />
-              ))}
+              <UploadZone
+                title="Primary Image"
+                supported="JPG, PNG, WEBP"
+                helper="Drag and drop the hero image, or choose file. Placeholder preview only for now."
+              />
+              <UploadZone
+                title="Gallery Images"
+                supported="JPG, PNG, WEBP"
+                helper="Drag and drop multiple gallery images. Upload pending until storage is connected."
+              />
+              <Field label="Image Caption" />
+              <Field label="Image Alt Text" />
               <CalculatedField
                 label="Gallery Count"
                 helper="Calculated from uploaded gallery images."
@@ -518,7 +608,8 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
               {documentCategories.map((category) => (
                 <UploadZone
                   key={category}
-                  title={category}
+                  title={`${category} Upload`}
+                  helper="Document upload control placeholder. Storage connection pending."
                   supported={
                     category === "Property Photos"
                       ? "JPG, PNG, WEBP"
@@ -548,32 +639,51 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
           <h3 className="text-sm font-black text-papaipay-ink">
             Campaign Timeline
           </h3>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <p className="mt-1 text-xs leading-5 text-slate-500">
+            Read-only lifecycle display. Stage changes will be system-generated
+            later from campaign events.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             {timelineStages.map((stage, index) => (
-              <label
+              <div
                 key={stage}
-                className="flex items-center gap-3 rounded-xl border border-slate-100 bg-white p-3 text-sm font-bold text-slate-700"
+                className="rounded-xl border border-slate-100 bg-white p-3 text-sm font-bold text-slate-700"
               >
-                <input
-                  type="checkbox"
-                  defaultChecked={index < 2}
-                  className="h-4 w-4 rounded border-slate-300 accent-papaipay-green"
-                />
-                <span>{stage}</span>
-              </label>
+                <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
+                  {index + 1}
+                </span>
+                <p>{stage}</p>
+                <p className="mt-1 text-xs font-medium text-slate-400">
+                  System-generated stage
+                </p>
+              </div>
             ))}
           </div>
         </div>
         <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          <TextAreaField
-            label="Updates"
-            rows={6}
-            helper="Add date, title and update copy for member-facing campaign updates."
+          <RepeaterPreview
+            title="Updates"
+            description="Repeater-style update entries. UI only; persistence will be added during CRUD implementation."
+            buttonLabel="Add Update"
+            items={[
+              {
+                primary: "Update Title",
+                secondary: "Update Date",
+                body: "Update Description / Body",
+              },
+            ]}
           />
-          <TextAreaField
-            label="FAQ"
-            rows={6}
-            helper="Add common questions and answers for member review."
+          <RepeaterPreview
+            title="FAQ"
+            description="Repeater-style FAQ entries. UI only; persistence will be added during CRUD implementation."
+            buttonLabel="Add FAQ"
+            items={[
+              {
+                primary: "Question",
+                secondary: "Display Order",
+                body: "Answer",
+              },
+            ]}
           />
           <div className="lg:col-span-2">
             <TextAreaField label="Risk / Disclaimer" rows={5} />
@@ -631,7 +741,7 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
       <Section
         id="settlement-fees"
         title="Settlement & Fees"
-        description="Review acquisition, holding, preparation, disposal, platform costs and final distribution calculation fields."
+        description="Finance workflow and calculation section for acquisition, holding, preparation, disposal, platform costs and final distribution fields. Calculation logic is not implemented yet."
       >
         <div className="space-y-5">
           <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
@@ -642,7 +752,7 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
               />
               <div className="rounded-xl border border-amber-200 bg-white/70 p-4 text-sm leading-6 text-amber-900">
                 <p className="text-xs font-black uppercase tracking-wide">
-                  Locked indicator
+                  Finance workflow / calculation
                 </p>
                 <p className="mt-1">
                   <strong>Locked calculation note:</strong> if Calculation
@@ -730,14 +840,24 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
                 updating this campaign.
               </p>
             </div>
-            <a
-              href={memberPreviewHref}
-              className="rounded-xl bg-papaipay-green px-5 py-3 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.22)]"
-            >
-              Preview Member View
-            </a>
+            {memberPreviewHref ? (
+              <a
+                href={memberPreviewHref}
+                className="rounded-xl bg-papaipay-green px-5 py-3 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.22)]"
+              >
+                Preview Member View
+              </a>
+            ) : (
+              <span className="rounded-xl bg-slate-200 px-5 py-3 text-center text-sm font-bold text-slate-500">
+                Preview available after save
+              </span>
+            )}
           </div>
         </div>
+        <p className="mt-4 text-xs font-semibold text-slate-500">
+          Action buttons are UI-only placeholders for Phase 1; server actions
+          and database writes are not wired yet.
+        </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
             Save Draft
@@ -746,7 +866,10 @@ export function ListingForm({ mode }: { mode: "create" | "edit" }) {
             Submit for Review
           </button>
           <button className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
-            {mode === "create" ? "Publish Campaign" : "Update Campaign"}
+            Publish Campaign
+          </button>
+          <button className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white">
+            Update Campaign
           </button>
         </div>
       </Section>
