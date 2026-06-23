@@ -1,0 +1,395 @@
+# PAPAIPAY Portal V1 Database Schema Proposal
+
+This document proposes the production database schema for the backend transition. It is documentation only. No migrations are introduced by this document.
+
+## Schema principles
+
+- PostgreSQL is the recommended database.
+- Internal primary keys should be UUIDs.
+- Public references should use the ID standards defined in `id-standard-catalogue-v1.md`.
+- Sensitive fields must be encrypted or tokenized.
+- Derived values should be calculated from source records unless explicitly stored as approved snapshots.
+- Settlement and distribution values must be snapshotted when approved/locked.
+- All sensitive admin actions require audit logs.
+
+## Identity and access
+
+### `users`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal auth identity. |
+| `email` | text unique | Login/contact. |
+| `phone` | text | Optional. |
+| `password_hash` | text | Only if password auth is used. |
+| `auth_provider` | text | Credentials or managed provider. |
+| `status` | enum | Active/Suspended/Closed. |
+| `last_login_at` | timestamptz | Last login. |
+| `created_at` | timestamptz | Created timestamp. |
+| `updated_at` | timestamptz | Updated timestamp. |
+
+### `members`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal member key. |
+| `user_id` | uuid fk | FK users. |
+| `member_ref` | text unique | `MEM-000001`. |
+| `full_name` | text | Member name. |
+| `ic_number_encrypted` | text | Encrypted sensitive value. |
+| `date_of_birth` | date | Optional. |
+| `nationality` | text | Optional. |
+| `verification_status` | enum | e-KYC/member verification state. |
+| `profile_completed_at` | timestamptz | Nullable. |
+| `created_at` | timestamptz | Created timestamp. |
+| `updated_at` | timestamptz | Updated timestamp. |
+
+### `member_contacts`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `member_id` | uuid fk | FK members. |
+| `email` | text | Contact email. |
+| `phone` | text | Contact phone. |
+| `preferred_contact_method` | text | Optional. |
+| `is_primary` | boolean | Primary contact flag. |
+
+### `member_addresses`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `member_id` | uuid fk | FK members. |
+| `address_line_1` | text |  |
+| `address_line_2` | text | Optional. |
+| `city` | text |  |
+| `state` | text |  |
+| `postcode` | text |  |
+| `country` | text |  |
+| `is_primary` | boolean | Primary address flag. |
+
+### `member_bank_accounts`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `member_id` | uuid fk | FK members. |
+| `bank_name` | text | Restricted data. |
+| `account_holder_name` | text | Restricted data. |
+| `account_number_encrypted` | text | Encrypted. |
+| `account_number_last4` | text | Display helper. |
+| `verification_status` | enum | Pending/Verified/Rejected. |
+| `verified_at` | timestamptz | Nullable. |
+| `created_at` | timestamptz | Created timestamp. |
+| `updated_at` | timestamptz | Updated timestamp. |
+
+### `member_nominees`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `member_id` | uuid fk | FK members. |
+| `nominee_name` | text |  |
+| `relationship` | text |  |
+| `phone` | text |  |
+| `email` | text | Optional. |
+| `address` | text | Optional. |
+| `created_at` | timestamptz | Created timestamp. |
+| `updated_at` | timestamptz | Updated timestamp. |
+
+### `admin_profiles`, `roles`, `permissions`, `role_permissions`
+
+| Table | Purpose |
+| --- | --- |
+| `admin_profiles` | Admin account profile linked to `users`. |
+| `roles` | Role names and descriptions. |
+| `permissions` | Permission keys for protected actions. |
+| `role_permissions` | Role-to-permission mapping. |
+
+## Campaign and listing schema
+
+### `campaigns`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal key. |
+| `campaign_ref` | text unique | `CAM-000001`. |
+| `campaign_code` | text unique | `PP-SGR-2026-001`. |
+| `title` | text | Campaign title. |
+| `slug` | text unique | URL slug. |
+| `lifecycle_status` | enum | V1 lifecycle. |
+| `publish_status` | enum | Draft/Published/Archived. |
+| `visibility` | enum | Internal/Member visible. |
+| `campaign_target` | numeric(14,2) | RM amount. |
+| `collected_amount_snapshot` | numeric(14,2) | Defaults to 0; cached confirmed Participation Amount total. |
+| `reserved_amount_snapshot` | numeric(14,2) | Defaults to 0; cached active reserved Participation Amount total. |
+| `minimum_participation_amount` | numeric(14,2) | RM amount. |
+| `maximum_participation_amount` | numeric(14,2) | RM amount. |
+| `member_profit_distribution_percentage_planned` | numeric(8,4) | Planned member share before final settlement approval. |
+| `platform_profit_share_percentage_planned` | numeric(8,4) | Planned platform share before final settlement approval. |
+| `campaign_open_date` | timestamptz | Nullable. |
+| `campaign_close_date` | timestamptz | Nullable. |
+| `holding_return_rate_monthly` | numeric(8,4) | Percent per month. |
+| `return_type` | enum | Fixed/Target/Up To. |
+| `maximum_holding_period_months` | integer | Default 24. |
+| `principal_protection_enabled` | boolean |  |
+| `twenty_four_month_rule_text` | text | Approved rule text. |
+| `created_by` | uuid fk | Admin. |
+| `updated_by` | uuid fk | Admin. |
+| `published_at` | timestamptz | Nullable. |
+| `created_at` | timestamptz |  |
+| `updated_at` | timestamptz |  |
+
+`available_amount` is derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`. Remaining amount, progress percentage, days remaining, and gallery count should be calculated in queries/services.
+
+### `property_details`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `campaign_id` | uuid fk | FK campaigns. |
+| `property_type` | text |  |
+| `tenure` | enum | Freehold/Leasehold. |
+| `tenure_alias` | enum | FH/LH. |
+| `is_laca` | boolean |  |
+| `bumi_status` | enum | Bumi/Non-Bumi/Open Market. |
+| `built_up_area` | text | Display convention. |
+| `land_area` | text | Display convention. |
+| `bedrooms` | integer |  |
+| `bathrooms` | integer |  |
+| `auction_date` | date |  |
+| `reserve_price` | numeric(14,2) | RM amount. |
+| `state` | text |  |
+| `location` | text |  |
+| `full_address` | text |  |
+| `year_built` | text | Optional. |
+| `created_at` | timestamptz |  |
+| `updated_at` | timestamptz |  |
+
+### `campaign_media`, `campaign_documents`, `files`
+
+| Table | Purpose |
+| --- | --- |
+| `files` | Storage metadata for uploaded files. |
+| `campaign_media` | Primary image and gallery image records. |
+| `campaign_documents` | Campaign document records with category, status, and visibility. |
+
+### `campaign_content`, `campaign_updates`, `campaign_faqs`, `campaign_timeline_events`
+
+| Table | Purpose |
+| --- | --- |
+| `campaign_content` | About This Campaign, Important Information, risk/disclaimer, return explanations. |
+| `campaign_updates` | Repeatable update entries. |
+| `campaign_faqs` | Repeatable FAQ entries. |
+| `campaign_timeline_events` | Member/Admin timeline records. |
+
+## Participation and payment schema
+
+### `participations`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `participation_ref` | text unique | `PAR-000001`. |
+| `member_id` | uuid fk | FK members. |
+| `campaign_id` | uuid fk | FK campaigns. |
+| `participation_amount` | numeric(14,2) | RM amount. |
+| `participation_status` | enum | Pending Payment/Confirmed/etc. |
+| `reserved_at` | timestamptz | Nullable; when campaign capacity was reserved. |
+| `reserved_until` | timestamptz | Nullable; reservation hold deadline for checkout. |
+| `expires_at` | timestamptz | Nullable; pending participation expiry timestamp. |
+| `confirmed_at` | timestamptz | Nullable; set after payment success is verified. |
+| `cancelled_at` | timestamptz | Nullable; set when reservation/payment is cancelled or expired. |
+| `created_at` | timestamptz |  |
+| `updated_at` | timestamptz |  |
+
+### `payments` and `payment_webhook_events`
+
+| Table | Purpose |
+| --- | --- |
+| `payments` | Retry-ready payment records. A Participation can have many Payments, and each Payment has nullable `participation_id` for checkout attempts, retries, and reconciliation. |
+| `payment_webhook_events` | Raw callback event log, signature result, processing status, and failure reason. |
+
+## e-KYC schema
+
+| Table | Purpose |
+| --- | --- |
+| `ekyc_checks` | Provider session/check status for a member. |
+| `ekyc_webhook_events` | Provider callback event log. |
+
+## Settlement and distribution schema
+
+### `campaign_settlements`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `campaign_id` | uuid fk | FK campaigns. |
+| `purchase_price` | numeric(14,2) | RM amount. |
+| `sale_price` | numeric(14,2) | RM amount. |
+| `acquisition_costs` | jsonb | Cost category detail. |
+| `holding_costs` | jsonb | Cost category detail. |
+| `renovation_costs` | jsonb | Cost category detail. |
+| `disposal_costs` | jsonb | Cost category detail. |
+| `platform_costs` | jsonb | Cost category detail. |
+| `member_profit_distribution_percentage` | numeric(8,4) | Rule value. |
+| `platform_profit_share_percentage` | numeric(8,4) | Rule value. |
+| `calculation_status` | enum | Draft/Reviewed/Approved/Locked. |
+| `calculation_remarks` | text | Admin notes. |
+| `principal_return_pool` | numeric(14,2) | Snapshot at approval/lock. |
+| `holding_return_pool` | numeric(14,2) | Snapshot at approval/lock. |
+| `profit_distribution_pool` | numeric(14,2) | Snapshot at approval/lock. |
+| `platform_share` | numeric(14,2) | Snapshot at approval/lock. |
+| `final_distribution_pool` | numeric(14,2) | Snapshot at approval/lock. |
+| `reviewed_by` | uuid fk | Admin. |
+| `reviewed_at` | timestamptz | Nullable. |
+| `approved_by` | uuid fk | Admin. |
+| `approved_at` | timestamptz | Nullable. |
+| `locked_by` | uuid fk | Admin. |
+| `locked_at` | timestamptz | Nullable. |
+
+Gross Profit, Total Costs, and Net Profit are derived values until stored as approved snapshots.
+
+### `distribution_batches`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `batch_ref` | text unique | `DBT-000001`. |
+| `campaign_id` | uuid fk | FK campaigns. |
+| `settlement_id` | uuid fk | FK campaign_settlements. |
+| `total_members` | integer | Snapshot. |
+| `total_final_distribution` | numeric(14,2) | Snapshot. |
+| `pending_count` | integer | Snapshot/derived. |
+| `processing_count` | integer | Snapshot/derived. |
+| `paid_count` | integer | Snapshot/derived. |
+| `status` | enum | Draft/Approved/Processing/Completed/Cancelled. |
+| `locked_status` | boolean | Lock flag. |
+| `approved_by` | uuid fk | Admin. |
+| `approved_at` | timestamptz | Nullable. |
+| `created_by` | uuid fk | Admin. |
+| `created_at` | timestamptz |  |
+| `updated_at` | timestamptz |  |
+
+### `distributions`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk |  |
+| `distribution_ref` | text unique | `DIS-000001`. |
+| `distribution_batch_id` | uuid fk | FK distribution_batches. |
+| `campaign_id` | uuid fk | FK campaigns. |
+| `member_id` | uuid fk | FK members. |
+| `participation_id` | uuid fk | FK participations. |
+| `principal_return` | numeric(14,2) | Snapshot. |
+| `holding_return` | numeric(14,2) | Snapshot. |
+| `profit_distribution` | numeric(14,2) | Snapshot. |
+| `final_distribution_total` | numeric(14,2) | Snapshot. |
+| `status` | enum | Pending/Processing/Paid. |
+| `payment_date` | date | Manual payout date. |
+| `payment_reference` | text | Manual payment reference. |
+| `admin_notes` | text | Admin notes. |
+| `marked_processing_by` | uuid fk | Admin. |
+| `marked_processing_at` | timestamptz | Nullable. |
+| `marked_paid_by` | uuid fk | Admin. |
+| `marked_paid_at` | timestamptz | Nullable. |
+| `created_at` | timestamptz |  |
+| `updated_at` | timestamptz |  |
+
+## Audit, reports, notifications
+
+| Table | Purpose |
+| --- | --- |
+| `audit_logs` | Actor, action, entity, before/after snapshot, IP/device metadata. |
+| `reports` | Report generation metadata and file reference. |
+| `notifications` | Member/Admin notification records. |
+| `announcements` | Admin-created announcements. |
+
+## Phase 1.2 reservation, manual verification, and settlement refinements
+
+### Campaign capacity fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `campaigns` | `collected_amount_snapshot` | decimal | Cached confirmed Participation Amount total for capacity checks and fast display. Reconcile against confirmed participation records. |
+| `campaigns` | `reserved_amount_snapshot` | decimal | Cached active reserved Participation Amount total while checkout attempts are pending. Expired reservations must be released by service logic. |
+| `campaigns` | `member_profit_distribution_percentage_planned` | decimal | Planned campaign-level member share before final settlement approval. |
+| `campaigns` | `platform_profit_share_percentage_planned` | decimal | Planned campaign-level platform share before final settlement approval. |
+| derived | `available_amount` | decimal | Derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`. |
+
+Future participation validation must require: Participation Amount is at least the minimum, no more than the maximum, no more than available amount, campaign status is `Open`, and member verification status is `Approved`.
+
+### Participation reservation fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `participations` | `reserved_at` | timestamptz | When capacity was reserved. |
+| `participations` | `reserved_until` | timestamptz | Reservation hold deadline for checkout. |
+| `participations` | `expires_at` | timestamptz | Expiry timestamp for pending participation cleanup. |
+| `participations` | `confirmed_at` | timestamptz | Set after payment success is verified. |
+| `participations` | `cancelled_at` | timestamptz | Set when member cancellation, payment failure, or expiry releases capacity. |
+
+### Manual KYC for V1
+
+Manual KYC is the V1 verification path. External provider checks remain modeled for later integration, but members first submit files for admin review.
+
+#### `manual_kyc_submissions`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal submission key. |
+| `member_id` | uuid fk | FK members. |
+| `status` | enum | NotSubmitted/Submitted/UnderReview/Approved/Rejected/ResubmissionRequired. |
+| `submitted_at` | timestamptz | Submission timestamp. |
+| `reviewed_by_id` | uuid fk | Admin user who reviewed. |
+| `reviewed_at` | timestamptz | Review timestamp. |
+| `rejection_reason` | text | Required when rejected. |
+| `admin_notes` | text | Internal review notes. |
+
+#### `manual_kyc_documents`
+
+| Column | Type | Notes |
+| --- | --- | --- |
+| `id` | uuid pk | Internal document review key. |
+| `submission_id` | uuid fk | FK manual KYC submission. |
+| `file_asset_id` | uuid fk | FK stored file metadata. |
+| `document_type` | enum | IcFront/IcBack/SelfieHoldingIc/BankStatement. |
+| `document_status` | enum | Pending/Accepted/Rejected. |
+| `rejection_reason` | text | Document-level rejection reason. |
+| `admin_notes` | text | Document-level review notes. |
+
+### Bank account verification fields
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `member_bank_accounts` | `verification_status` | enum | Pending/Verified/Rejected. |
+| `member_bank_accounts` | `verified_by_id` | uuid fk | Admin user who verified or rejected the account. |
+| `member_bank_accounts` | `verified_at` | timestamptz | Verification timestamp. |
+| `member_bank_accounts` | `rejected_reason` | text | Reason if rejected. |
+| `member_bank_accounts` | `admin_notes` | text | Internal notes. |
+| `member_bank_accounts` | `is_primary` | boolean | Primary payout bank account flag. |
+
+The bank statement manual KYC document supports account-holder name review against the member IC name before distributions are paid.
+
+### Settlement scenario and holding-period snapshots
+
+| Table | Column | Type | Notes |
+| --- | --- | --- | --- |
+| `campaign_settlements` | `settlement_scenario` | enum | SuccessfulExit or PrincipalOnlyAfterMaxHoldingPeriod. |
+| `campaign_settlements` | `principal_only_reason` | text | Audit explanation when the 24-month rule applies. |
+| `campaign_settlements` | `principal_only_triggered_at` | timestamptz | Timestamp when principal-only handling was triggered. |
+| `campaign_settlements` | `holding_period_months` | integer | Locked holding-period snapshot used for Holding Return audit. |
+| `campaign_settlements` | `holding_start_date` | timestamptz | Start of holding period. |
+| `campaign_settlements` | `sale_completed_at` | timestamptz | Sale completion timestamp when applicable. |
+| `campaign_settlements` | `distribution_calculation_date` | timestamptz | Date final distribution calculation was prepared. |
+
+When `settlement_scenario` is `PrincipalOnlyAfterMaxHoldingPeriod`, service logic must produce Principal Return only, with no Holding Return and no Profit Distribution.
+
+## Phase 1.2 cleanup notes
+
+- `collected_amount_snapshot` defaults to `0` and is not nullable so capacity calculations always have a safe base value.
+- `reserved_amount_snapshot` defaults to `0` and is not nullable so checkout reservations can be subtracted without null handling.
+- `available_amount` remains derived as `campaign_target - collected_amount_snapshot - reserved_amount_snapshot`.
+- `FilePurpose.ManualKycDocument` is used for member-uploaded V1 verification documents.
+- `FilePurpose.ExternalEkycDocument` is reserved for future provider-based verification documents.

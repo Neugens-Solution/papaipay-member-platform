@@ -1,0 +1,1005 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+enum UserStatus {
+  Active
+  Suspended
+  Closed
+}
+
+enum MemberVerificationStatus {
+  NotStarted
+  Pending
+  Approved
+  Rejected
+  ManualReview
+  Expired
+  Cancelled
+}
+
+enum BankAccountVerificationStatus {
+  Pending
+  Verified
+  Rejected
+}
+
+enum ManualKycStatus {
+  NotSubmitted
+  Submitted
+  UnderReview
+  Approved
+  Rejected
+  ResubmissionRequired
+}
+
+enum ManualKycDocumentType {
+  IcFront
+  IcBack
+  SelfieHoldingIc
+  BankStatement
+}
+
+enum ManualKycDocumentStatus {
+  Pending
+  Accepted
+  Rejected
+}
+
+enum AdminAccountStatus {
+  Invited
+  Active
+  Suspended
+}
+
+enum CampaignLifecycleStatus {
+  Draft
+  Open
+  Funded
+  Holding
+  Sold
+  DistributionProcessing
+  Distributed
+  Cancelled
+}
+
+enum PublishStatus {
+  Draft
+  Published
+  Archived
+}
+
+enum Visibility {
+  InternalOnly
+  MemberVisible
+  ParticipantsOnly
+}
+
+enum Tenure {
+  Freehold
+  Leasehold
+}
+
+enum TenureAlias {
+  FH
+  LH
+}
+
+enum BumiStatus {
+  Bumi
+  NonBumi
+  OpenMarket
+}
+
+enum ReturnType {
+  Fixed
+  Target
+  UpTo
+}
+
+enum ParticipationStatus {
+  PendingPayment
+  Confirmed
+  Cancelled
+  Refunded
+}
+
+enum PaymentStatus {
+  Pending
+  Processing
+  Succeeded
+  Failed
+  Cancelled
+  Expired
+  Refunded
+}
+
+enum ProviderEventProcessingStatus {
+  Received
+  Processed
+  Ignored
+  Failed
+}
+
+enum EkycStatus {
+  NotStarted
+  Pending
+  Approved
+  Rejected
+  ManualReview
+  Expired
+  Cancelled
+}
+
+enum SettlementCalculationStatus {
+  Draft
+  Reviewed
+  Approved
+  Locked
+}
+
+enum SettlementScenario {
+  SuccessfulExit
+  PrincipalOnlyAfterMaxHoldingPeriod
+}
+
+enum DistributionStatus {
+  Pending
+  Processing
+  Paid
+}
+
+enum DistributionBatchStatus {
+  Draft
+  Approved
+  Processing
+  Completed
+  Cancelled
+}
+
+enum DocumentCategory {
+  ProclamationOfSale
+  ConditionsOfSale
+  TitleSearch
+  ValuationReport
+  PropertyPhotos
+  LocationMap
+  LegalDocuments
+  OtherDocuments
+}
+
+enum DocumentStatus {
+  Draft
+  Ready
+  Published
+  Archived
+}
+
+enum FileVisibility {
+  Public
+  Authenticated
+  InternalOnly
+  ParticipantsOnly
+}
+
+enum FilePurpose {
+  CampaignImage
+  CampaignDocument
+  MemberDocument
+  ManualKycDocument
+  ExternalEkycDocument
+  ReportExport
+}
+
+enum MediaType {
+  PrimaryImage
+  GalleryImage
+}
+
+enum ReportStatus {
+  Queued
+  Processing
+  Generated
+  Failed
+}
+
+enum NotificationStatus {
+  Draft
+  Sent
+  Read
+  Archived
+}
+
+enum AnnouncementStatus {
+  Draft
+  Published
+  Archived
+}
+
+model User {
+  id           String     @id @default(uuid())
+  email        String     @unique
+  phone        String?
+  passwordHash String?
+  authProvider String?
+  status       UserStatus @default(Active)
+  lastLoginAt  DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  member       Member?
+  adminProfile AdminProfile?
+
+  createdCampaigns             Campaign[]            @relation("CampaignCreatedBy")
+  updatedCampaigns             Campaign[]            @relation("CampaignUpdatedBy")
+  reviewedEkycChecks           EkycCheck[]           @relation("EkycReviewedBy")
+  reviewedManualKycSubmissions ManualKycSubmission[] @relation("ManualKycReviewedBy")
+  verifiedBankAccounts         MemberBankAccount[]   @relation("BankAccountVerifiedBy")
+  reviewedSettlements          CampaignSettlement[]  @relation("SettlementReviewedBy")
+  approvedSettlements          CampaignSettlement[]  @relation("SettlementApprovedBy")
+  lockedSettlements            CampaignSettlement[]  @relation("SettlementLockedBy")
+  approvedDistributionBatches  DistributionBatch[]   @relation("DistributionBatchApprovedBy")
+  createdDistributionBatches   DistributionBatch[]   @relation("DistributionBatchCreatedBy")
+  processingDistributions      Distribution[]        @relation("DistributionMarkedProcessingBy")
+  paidDistributions            Distribution[]        @relation("DistributionMarkedPaidBy")
+  auditLogs                    AuditLog[]            @relation("AuditActor")
+  reports                      Report[]              @relation("ReportGeneratedBy")
+  createdAnnouncements         Announcement[]        @relation("AnnouncementCreatedBy")
+}
+
+model Member {
+  id                 String                   @id @default(uuid())
+  userId             String                   @unique
+  memberRef          String                   @unique
+  fullName           String
+  icNumberEncrypted  String?
+  dateOfBirth        DateTime?
+  nationality        String?
+  verificationStatus MemberVerificationStatus @default(NotStarted)
+  profileCompletedAt DateTime?
+  createdAt          DateTime                 @default(now())
+  updatedAt          DateTime                 @updatedAt
+
+  user                 User                  @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  contacts             MemberContact[]
+  addresses            MemberAddress[]
+  bankAccounts         MemberBankAccount[]
+  nominees             MemberNominee[]
+  manualKycSubmissions ManualKycSubmission[]
+  participations       Participation[]
+  payments             Payment[]
+  ekycChecks           EkycCheck[]
+  distributions        Distribution[]
+  notifications        Notification[]
+}
+
+model MemberContact {
+  id                     String   @id @default(uuid())
+  memberId               String
+  email                  String?
+  phone                  String?
+  preferredContactMethod String?
+  isPrimary              Boolean  @default(false)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([memberId])
+  @@index([isPrimary])
+}
+
+model MemberAddress {
+  id           String   @id @default(uuid())
+  memberId     String
+  addressLine1 String
+  addressLine2 String?
+  city         String
+  state        String
+  postcode     String
+  country      String   @default("Malaysia")
+  isPrimary    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([memberId])
+  @@index([state])
+  @@index([isPrimary])
+}
+
+model MemberBankAccount {
+  id                     String                        @id @default(uuid())
+  memberId               String
+  bankName               String
+  accountHolderName      String
+  accountNumberEncrypted String
+  accountNumberLast4     String?
+  verificationStatus     BankAccountVerificationStatus @default(Pending)
+  verifiedById           String?
+  verifiedAt             DateTime?
+  rejectedReason         String?
+  adminNotes             String?
+  isPrimary              Boolean                       @default(false)
+  createdAt              DateTime                      @default(now())
+  updatedAt              DateTime                      @updatedAt
+
+  member     Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  verifiedBy User?  @relation("BankAccountVerifiedBy", fields: [verifiedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([memberId])
+  @@index([verificationStatus])
+  @@index([verifiedById])
+  @@index([isPrimary])
+}
+
+model MemberNominee {
+  id                   String   @id @default(uuid())
+  memberId             String
+  fullName             String
+  relationship         String
+  phone                String?
+  email                String?
+  icNumberEncrypted    String?
+  allocationPercentage Decimal? @db.Decimal(8, 4)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([memberId])
+}
+
+model AdminProfile {
+  id          String             @id @default(uuid())
+  userId      String             @unique
+  adminRef    String?            @unique
+  displayName String
+  roleId      String
+  status      AdminAccountStatus @default(Invited)
+  invitedAt   DateTime?
+  activatedAt DateTime?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([roleId])
+  @@index([status])
+}
+
+model Role {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  admins      AdminProfile[]
+  permissions RolePermission[]
+}
+
+model Permission {
+  id          String   @id @default(uuid())
+  key         String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  roles RolePermission[]
+}
+
+model RolePermission {
+  roleId       String
+  permissionId String
+  createdAt    DateTime @default(now())
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([roleId, permissionId])
+  @@index([permissionId])
+}
+
+model Campaign {
+  id                                        String                  @id @default(uuid())
+  campaignRef                               String                  @unique
+  campaignCode                              String                  @unique
+  title                                     String
+  slug                                      String                  @unique
+  lifecycleStatus                           CampaignLifecycleStatus @default(Draft)
+  publishStatus                             PublishStatus           @default(Draft)
+  visibility                                Visibility              @default(InternalOnly)
+  campaignTarget                            Decimal                 @db.Decimal(14, 2)
+  collectedAmountSnapshot                   Decimal                 @default(0) @db.Decimal(14, 2)
+  reservedAmountSnapshot                    Decimal                 @default(0) @db.Decimal(14, 2)
+  minimumParticipationAmount                Decimal                 @db.Decimal(14, 2)
+  maximumParticipationAmount                Decimal                 @db.Decimal(14, 2)
+  campaignOpenDate                          DateTime?
+  campaignCloseDate                         DateTime?
+  holdingReturnRateMonthly                  Decimal                 @db.Decimal(8, 4)
+  returnType                                ReturnType
+  maximumHoldingPeriodMonths                Int                     @default(24)
+  principalProtectionEnabled                Boolean                 @default(true)
+  memberProfitDistributionPercentagePlanned Decimal?                @db.Decimal(8, 4)
+  platformProfitSharePercentagePlanned      Decimal?                @db.Decimal(8, 4)
+  twentyFourMonthRuleText                   String                  @default("If not sold within 24 months, Participation Amount only will be returned.")
+  createdById                               String?
+  updatedById                               String?
+  publishedAt                               DateTime?
+  createdAt                                 DateTime                @default(now())
+  updatedAt                                 DateTime                @updatedAt
+
+  createdBy           User?                   @relation("CampaignCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  updatedBy           User?                   @relation("CampaignUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  propertyDetail      PropertyDetail?
+  media               CampaignMedia[]
+  documents           CampaignDocument[]
+  content             CampaignContent?
+  updates             CampaignUpdate[]
+  faqs                CampaignFaq[]
+  timelineEvents      CampaignTimelineEvent[]
+  participations      Participation[]
+  payments            Payment[]
+  settlements         CampaignSettlement[]
+  distributionBatches DistributionBatch[]
+  distributions       Distribution[]
+  notifications       Notification[]
+
+  @@index([lifecycleStatus])
+  @@index([publishStatus])
+  @@index([visibility])
+  @@index([campaignOpenDate])
+  @@index([campaignCloseDate])
+  @@index([createdAt])
+  @@index([createdById])
+  @@index([updatedById])
+}
+
+model PropertyDetail {
+  id           String      @id @default(uuid())
+  campaignId   String      @unique
+  propertyType String
+  tenure       Tenure
+  tenureAlias  TenureAlias
+  isLaca       Boolean     @default(false)
+  bumiStatus   BumiStatus
+  builtUpArea  String?
+  landArea     String?
+  bedrooms     Int?
+  bathrooms    Int?
+  auctionDate  DateTime?
+  reservePrice Decimal?    @db.Decimal(14, 2)
+  state        String
+  location     String
+  fullAddress  String
+  yearBuilt    String?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([state])
+  @@index([location])
+  @@index([propertyType])
+  @@index([tenure])
+  @@index([bumiStatus])
+}
+
+model FileAsset {
+  id               String         @id @default(uuid())
+  fileRef          String         @unique
+  bucket           String
+  objectKey        String         @unique
+  originalFilename String
+  contentType      String
+  sizeBytes        Int?
+  checksum         String?
+  visibility       FileVisibility @default(InternalOnly)
+  purpose          FilePurpose
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  campaignMedia      CampaignMedia[]
+  documents          CampaignDocument[]
+  manualKycDocuments ManualKycDocument[]
+  reports            Report[]
+
+  @@index([visibility])
+  @@index([purpose])
+  @@index([createdAt])
+}
+
+model CampaignMedia {
+  id          String    @id @default(uuid())
+  campaignId  String
+  fileAssetId String?
+  mediaType   MediaType
+  caption     String?
+  altText     String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  campaign  Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([fileAssetId])
+  @@index([mediaType])
+  @@index([sortOrder])
+}
+
+model CampaignDocument {
+  id             String           @id @default(uuid())
+  documentRef    String           @unique
+  campaignId     String
+  fileAssetId    String?
+  category       DocumentCategory
+  title          String
+  visibility     Visibility       @default(InternalOnly)
+  documentStatus DocumentStatus   @default(Draft)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  campaign  Campaign   @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([fileAssetId])
+  @@index([category])
+  @@index([visibility])
+  @@index([documentStatus])
+}
+
+model CampaignContent {
+  id                           String   @id @default(uuid())
+  campaignId                   String   @unique
+  aboutCampaign                String
+  importantInformation         String?
+  riskDisclaimer               String?
+  holdingReturnExplanation     String?
+  finalDistributionExplanation String?
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+}
+
+model CampaignUpdate {
+  id          String     @id @default(uuid())
+  campaignId  String
+  title       String
+  body        String
+  publishedAt DateTime?
+  visibility  Visibility @default(MemberVisible)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([publishedAt])
+  @@index([visibility])
+}
+
+model CampaignFaq {
+  id         String   @id @default(uuid())
+  campaignId String
+  question   String
+  answer     String
+  sortOrder  Int      @default(0)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([sortOrder])
+}
+
+model CampaignTimelineEvent {
+  id          String     @id @default(uuid())
+  campaignId  String
+  title       String
+  description String?
+  eventDate   DateTime?
+  visibility  Visibility @default(MemberVisible)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([campaignId])
+  @@index([eventDate])
+  @@index([visibility])
+}
+
+model Participation {
+  id                  String              @id @default(uuid())
+  participationRef    String              @unique
+  memberId            String
+  campaignId          String
+  participationAmount Decimal             @db.Decimal(14, 2)
+  participationStatus ParticipationStatus @default(PendingPayment)
+  reservedAt          DateTime?
+  reservedUntil       DateTime?
+  expiresAt           DateTime?
+  confirmedAt         DateTime?
+  cancelledAt         DateTime?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  member        Member         @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign      Campaign       @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  payments      Payment[]
+  distributions Distribution[]
+
+  @@index([memberId])
+  @@index([campaignId])
+  @@index([participationStatus])
+  @@index([reservedUntil])
+  @@index([expiresAt])
+  @@index([createdAt])
+}
+
+model Payment {
+  id                        String        @id @default(uuid())
+  paymentRef                String        @unique
+  memberId                  String
+  campaignId                String
+  participationId           String?
+  gateway                   String
+  gatewayTransactionId      String?
+  amount                    Decimal       @db.Decimal(14, 2)
+  status                    PaymentStatus @default(Pending)
+  /// Redacted provider response safe for operational review.
+  providerResponse          Json?
+  /// Encrypted full provider response when retention is required.
+  providerResponseEncrypted String?
+  failureReason             String?
+  reconciliationReference   String?
+  createdAt                 DateTime      @default(now())
+  updatedAt                 DateTime      @updatedAt
+
+  member        Member                @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign      Campaign              @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  participation Participation?        @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  webhookEvents PaymentWebhookEvent[]
+
+  @@index([memberId])
+  @@index([campaignId])
+  @@index([participationId])
+  @@index([gatewayTransactionId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentWebhookEvent {
+  id               String                        @id @default(uuid())
+  paymentId        String?
+  providerEventId  String?                       @unique
+  /// Redacted provider payload safe for operational review.
+  payload          Json
+  /// Encrypted full provider payload when retention is required.
+  payloadEncrypted String?
+  signatureValid   Boolean                       @default(false)
+  processingStatus ProviderEventProcessingStatus @default(Received)
+  failureReason    String?
+  receivedAt       DateTime                      @default(now())
+  processedAt      DateTime?
+
+  payment Payment? @relation(fields: [paymentId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([paymentId])
+  @@index([processingStatus])
+  @@index([receivedAt])
+}
+
+model ManualKycSubmission {
+  id              String          @id @default(uuid())
+  memberId        String
+  status          ManualKycStatus @default(NotSubmitted)
+  submittedAt     DateTime?
+  reviewedById    String?
+  reviewedAt      DateTime?
+  rejectionReason String?
+  adminNotes      String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  member     Member              @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy User?               @relation("ManualKycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  documents  ManualKycDocument[]
+
+  @@index([memberId])
+  @@index([status])
+  @@index([reviewedById])
+  @@index([submittedAt])
+}
+
+model ManualKycDocument {
+  id              String                  @id @default(uuid())
+  submissionId    String
+  fileAssetId     String
+  documentType    ManualKycDocumentType
+  documentStatus  ManualKycDocumentStatus @default(Pending)
+  rejectionReason String?
+  adminNotes      String?
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+
+  submission ManualKycSubmission @relation(fields: [submissionId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  fileAsset  FileAsset           @relation(fields: [fileAssetId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+
+  @@index([submissionId])
+  @@index([fileAssetId])
+  @@index([documentType])
+  @@index([documentStatus])
+}
+
+model EkycCheck {
+  id                        String     @id @default(uuid())
+  ekycRef                   String     @unique
+  memberId                  String
+  provider                  String
+  providerReferenceId       String?
+  status                    EkycStatus @default(NotStarted)
+  documentCheckStatus       String?
+  livenessStatus            String?
+  faceMatchStatus           String?
+  /// Redacted provider response safe for operational review.
+  providerResponse          Json?
+  /// Encrypted full provider response when retention is required.
+  providerResponseEncrypted String?
+  reviewedById              String?
+  approvedAt                DateTime?
+  rejectedAt                DateTime?
+  createdAt                 DateTime   @default(now())
+  updatedAt                 DateTime   @updatedAt
+
+  member        Member             @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy    User?              @relation("EkycReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  webhookEvents EkycWebhookEvent[]
+
+  @@index([memberId])
+  @@index([providerReferenceId])
+  @@index([status])
+  @@index([reviewedById])
+}
+
+model EkycWebhookEvent {
+  id               String                        @id @default(uuid())
+  ekycCheckId      String?
+  providerEventId  String?                       @unique
+  /// Redacted provider payload safe for operational review.
+  payload          Json
+  /// Encrypted full provider payload when retention is required.
+  payloadEncrypted String?
+  signatureValid   Boolean                       @default(false)
+  processingStatus ProviderEventProcessingStatus @default(Received)
+  failureReason    String?
+  receivedAt       DateTime                      @default(now())
+  processedAt      DateTime?
+
+  ekycCheck EkycCheck? @relation(fields: [ekycCheckId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([ekycCheckId])
+  @@index([processingStatus])
+  @@index([receivedAt])
+}
+
+model CampaignSettlement {
+  id                                 String                      @id @default(uuid())
+  campaignId                         String
+  purchasePrice                      Decimal?                    @db.Decimal(14, 2)
+  salePrice                          Decimal?                    @db.Decimal(14, 2)
+  acquisitionCosts                   Json?
+  holdingCosts                       Json?
+  renovationCosts                    Json?
+  disposalCosts                      Json?
+  platformCosts                      Json?
+  settlementScenario                 SettlementScenario          @default(SuccessfulExit)
+  principalOnlyReason                String?
+  principalOnlyTriggeredAt           DateTime?
+  holdingPeriodMonths                Int?
+  holdingStartDate                   DateTime?
+  saleCompletedAt                    DateTime?
+  distributionCalculationDate        DateTime?
+  memberProfitDistributionPercentage Decimal?                    @db.Decimal(8, 4)
+  platformProfitSharePercentage      Decimal?                    @db.Decimal(8, 4)
+  grossProfitSnapshot                Decimal?                    @db.Decimal(14, 2)
+  totalCostsSnapshot                 Decimal?                    @db.Decimal(14, 2)
+  netProfitSnapshot                  Decimal?                    @db.Decimal(14, 2)
+  calculationStatus                  SettlementCalculationStatus @default(Draft)
+  calculationRemarks                 String?
+  principalReturnPool                Decimal?                    @db.Decimal(14, 2)
+  holdingReturnPool                  Decimal?                    @db.Decimal(14, 2)
+  profitDistributionPool             Decimal?                    @db.Decimal(14, 2)
+  platformShare                      Decimal?                    @db.Decimal(14, 2)
+  finalDistributionPool              Decimal?                    @db.Decimal(14, 2)
+  reviewedById                       String?
+  reviewedAt                         DateTime?
+  approvedById                       String?
+  approvedAt                         DateTime?
+  lockedById                         String?
+  lockedAt                           DateTime?
+  createdAt                          DateTime                    @default(now())
+  updatedAt                          DateTime                    @updatedAt
+
+  campaign            Campaign            @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  reviewedBy          User?               @relation("SettlementReviewedBy", fields: [reviewedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  approvedBy          User?               @relation("SettlementApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  lockedBy            User?               @relation("SettlementLockedBy", fields: [lockedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  distributionBatches DistributionBatch[]
+
+  @@index([campaignId])
+  @@index([settlementScenario])
+  @@index([calculationStatus])
+  @@index([reviewedById])
+  @@index([approvedById])
+  @@index([lockedById])
+}
+
+model DistributionBatch {
+  id                     String                  @id @default(uuid())
+  batchRef               String                  @unique
+  campaignId             String
+  settlementId           String?
+  totalMembers           Int?
+  totalFinalDistribution Decimal?                @db.Decimal(14, 2)
+  pendingCount           Int?
+  processingCount        Int?
+  paidCount              Int?
+  status                 DistributionBatchStatus @default(Draft)
+  lockedStatus           Boolean                 @default(false)
+  approvedById           String?
+  approvedAt             DateTime?
+  createdById            String?
+  createdAt              DateTime                @default(now())
+  updatedAt              DateTime                @updatedAt
+
+  campaign      Campaign            @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  settlement    CampaignSettlement? @relation(fields: [settlementId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  approvedBy    User?               @relation("DistributionBatchApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  createdBy     User?               @relation("DistributionBatchCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  distributions Distribution[]
+
+  @@index([campaignId])
+  @@index([settlementId])
+  @@index([status])
+  @@index([approvedById])
+  @@index([createdById])
+}
+
+model Distribution {
+  id                     String             @id @default(uuid())
+  distributionRef        String             @unique
+  distributionBatchId    String
+  campaignId             String
+  memberId               String
+  participationId        String
+  principalReturn        Decimal            @db.Decimal(14, 2)
+  holdingReturn          Decimal            @db.Decimal(14, 2)
+  profitDistribution     Decimal            @db.Decimal(14, 2)
+  finalDistributionTotal Decimal            @db.Decimal(14, 2)
+  status                 DistributionStatus @default(Pending)
+  paymentDate            DateTime?
+  paymentReference       String?
+  adminNotes             String?
+  markedProcessingById   String?
+  markedProcessingAt     DateTime?
+  markedPaidById         String?
+  markedPaidAt           DateTime?
+  createdAt              DateTime           @default(now())
+  updatedAt              DateTime           @updatedAt
+
+  distributionBatch  DistributionBatch @relation(fields: [distributionBatchId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign           Campaign          @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  member             Member            @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  participation      Participation     @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  markedProcessingBy User?             @relation("DistributionMarkedProcessingBy", fields: [markedProcessingById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  markedPaidBy       User?             @relation("DistributionMarkedPaidBy", fields: [markedPaidById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([distributionBatchId])
+  @@index([campaignId])
+  @@index([memberId])
+  @@index([participationId])
+  @@index([status])
+  @@index([paymentReference])
+  @@index([paymentDate])
+  @@index([markedProcessingById])
+  @@index([markedPaidById])
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  auditRef       String   @unique
+  actorId        String?
+  action         String
+  entityType     String
+  entityId       String
+  beforeSnapshot Json?
+  afterSnapshot  Json?
+  ipAddress      String?
+  deviceInfo     String?
+  createdAt      DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([action])
+  @@index([createdAt])
+}
+
+model Report {
+  id            String       @id @default(uuid())
+  reportRef     String       @unique
+  reportType    String
+  filters       Json?
+  status        ReportStatus @default(Queued)
+  fileAssetId   String?
+  generatedById String?
+  generatedAt   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  fileAsset   FileAsset? @relation(fields: [fileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  generatedBy User?      @relation("ReportGeneratedBy", fields: [generatedById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([reportType])
+  @@index([status])
+  @@index([generatedById])
+  @@index([generatedAt])
+}
+
+model Notification {
+  id              String             @id @default(uuid())
+  notificationRef String             @unique
+  memberId        String?
+  campaignId      String?
+  audience        String
+  title           String
+  body            String
+  status          NotificationStatus @default(Draft)
+  sentAt          DateTime?
+  readAt          DateTime?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  member   Member?   @relation(fields: [memberId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([memberId])
+  @@index([campaignId])
+  @@index([status])
+  @@index([sentAt])
+}
+
+model Announcement {
+  id              String             @id @default(uuid())
+  announcementRef String             @unique
+  audience        String
+  title           String
+  body            String
+  status          AnnouncementStatus @default(Draft)
+  publishedAt     DateTime?
+  createdById     String?
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  createdBy User? @relation("AnnouncementCreatedBy", fields: [createdById], references: [id], onDelete: SetNull, onUpdate: Cascade)
+
+  @@index([status])
+  @@index([publishedAt])
+  @@index([createdById])
+}

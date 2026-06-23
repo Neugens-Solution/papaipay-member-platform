@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { OpportunityCard, StatusBadge } from "@/components/member/Cards";
-import { completedCampaigns, opportunities, formatRM } from "@/lib/memberMockData";
+import { completedCampaigns, formatRM } from "@/lib/memberMockData";
+import { getMemberCampaigns } from "@/lib/data/memberCampaigns";
 
 const inputClass = "min-h-11 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm outline-none transition focus:border-papaipay-green/50 focus:ring-4 focus:ring-papaipay-green/10";
 const tabs = ["open", "completed", "all"] as const;
@@ -17,8 +18,9 @@ function FilterFields({ compact = false }: { compact?: boolean }) {
   );
 }
 
-export default function ListingsPage({ searchParams }: { searchParams?: { tab?: string } }) {
+export default async function ListingsPage({ searchParams }: { searchParams?: { tab?: string } }) {
   const activeTab: Tab = tabs.includes(searchParams?.tab as Tab) ? (searchParams?.tab as Tab) : "open";
+  const opportunities = await getMemberCampaigns();
   const openCampaigns = opportunities.filter((campaign) => campaign.status !== "closed");
   const showOpen = activeTab === "open" || activeTab === "all";
   const showCompleted = activeTab === "completed" || activeTab === "all";

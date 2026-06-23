@@ -3,7 +3,7 @@ import { BackLink, Card, PageHeader } from "@/components/admin/AdminUI";
 export default function InviteAdminPage() {
   return (
     <div className="mx-auto max-w-4xl space-y-6">
-      <BackLink href="/admin/admin-users" />
+      <BackLink href="/admin/admin-users" label="Back to Admin Users" />
       <PageHeader title="Create Admin User" description="Create an admin user invitation." />
       <Card>
         <div className="grid gap-4 sm:grid-cols-2">
