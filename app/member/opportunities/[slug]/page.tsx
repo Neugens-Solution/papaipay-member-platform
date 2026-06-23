@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
+import { ParticipationForm } from "@/components/member/ParticipationForm";
 import { formatRM } from "@/lib/memberMockData";
 import { getMemberCampaignBySlug, getMemberCampaigns } from "@/lib/data/memberCampaigns";
 
@@ -61,7 +62,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
   if (!campaign) notFound();
 
   const progress = Math.round((campaign.collectedAmount / campaign.targetAmount) * 100);
-  const remainingAmount = campaign.targetAmount - campaign.collectedAmount;
+  const remainingAmount = Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0);
   const finalDistributionText = "Principal Return + Holding Return + Profit Distribution, paid once during final distribution";
 
   return (
@@ -113,6 +114,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <dl className="mt-3 divide-y divide-slate-100">
               <CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
+              <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
               <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
               <CompactRow label="Estimated Yield" value={campaign.estimatedYield} icon="trend" />
@@ -196,12 +198,8 @@ function ParticipationPanel({
 }) {
   return (
     <ContentCard className={`${compact ? "border-0 p-0 shadow-none" : "border-papaipay-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"}`}>
-      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participation Panel</h2><p className="text-xs font-semibold text-slate-500">You will be redirected to secure payment gateway.</p></div></div>
-      <label className="mt-5 block text-sm font-bold text-slate-600" htmlFor={compact ? "mobile-participation-amount" : "participation-amount"}>Participation Amount</label>
-      <div className="mt-2 flex rounded-xl border border-slate-200 bg-white shadow-inner"><span className="px-3 py-3 text-sm font-bold text-slate-500">RM</span><input id={compact ? "mobile-participation-amount" : "participation-amount"} className="min-h-11 flex-1 rounded-xl px-2 py-3 text-sm outline-none" placeholder="10,000" /></div>
-      <div className="mt-4 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-3"><CompactRow label="Minimum Participation Amount" value={formatRM(campaign.minimumParticipation)} /><CompactRow label="Maximum Participation Amount" value={formatRM(campaign.maximumParticipation)} /><CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} /></div>
-      <button className="mt-5 min-h-12 w-full rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.24)] transition hover:bg-papaipay-green/90">Proceed to Payment</button>
-      <p className="mt-3 text-center text-xs font-semibold leading-5 text-slate-500">Participation will be confirmed after successful payment.</p>
+      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participation Panel</h2><p className="text-xs font-semibold text-slate-500">Reserve now; payment integration is pending.</p></div></div>
+      <ParticipationForm campaignId={campaign.id} minimumParticipation={formatRM(campaign.minimumParticipation)} maximumParticipation={formatRM(campaign.maximumParticipation)} targetAmount={formatRM(campaign.targetAmount)} remainingAmount={formatRM(Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0))} compact={compact} />
     </ContentCard>
   );
 }

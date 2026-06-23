@@ -1,22 +1,27 @@
 import Link from "next/link";
-import { portfolioRecords, type PortfolioStatus } from "@/lib/memberMockData";
+import { type PortfolioStatus } from "@/lib/memberMockData";
+import { getMemberParticipations } from "@/lib/data/memberParticipations";
 
 const filters = ["All", "Listing Opened", "Active", "Processing", "Completed"];
 const formatRM = (value: number) => `RM${value.toLocaleString()}`;
 
-function statusClasses(status: PortfolioStatus) {
+function statusClasses(status: PortfolioStatus | string) {
   if (status === "Listing Opened") return "border-blue-200 bg-blue-50 text-blue-700";
   if (status === "Distribution Processing") return "border-purple-200 bg-purple-50 text-purple-700";
   if (status === "Completed") return "border-green-200 bg-green-50 text-green-700";
   return "border-amber-200 bg-amber-50 text-amber-700";
 }
 
-export default function PortfolioPage() {
+export default async function PortfolioPage() {
+  const portfolioRecords = await getMemberParticipations();
+  const totalParticipation = portfolioRecords.reduce((total, record) => total + record.participationAmount, 0);
+  const activeRecords = portfolioRecords.filter((record) => record.status !== "Completed").length;
+
   return (
     <div className="space-y-5">
       <header><h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">Portfolio</h1></header>
       <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        {[["Total Participation", "RM125,000"], ["Active Properties", "4"], ["Distribution Processing", "RM3,200"], ["Distribution Received", "RM8,500"]].map(([label, value]) => (
+        {[["Total Participation", formatRM(totalParticipation)], ["Active Properties", String(activeRecords)], ["Distribution Processing", "RM0"], ["Distribution Received", "RM0"]].map(([label, value]) => (
           <div key={label} className="rounded-lg border border-slate-200 bg-white p-3 sm:p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-lg font-bold text-papaipay-ink sm:text-xl">{value}</p></div>
         ))}
       </section>
@@ -34,7 +39,7 @@ export default function PortfolioPage() {
                 <div><dt className="text-xs font-bold uppercase text-slate-400">Latest Update</dt><dd className="mt-1 font-semibold text-slate-700">{record.latestUpdate}</dd></div>
                 <div><dt className="text-xs font-bold uppercase text-slate-400">Final Distribution</dt><dd className="mt-1 font-bold text-slate-800">{record.distributionStatus === "Completed" ? formatRM(record.finalDistributionTotal) : record.distributionStatus}</dd><p className="mt-1 text-xs text-slate-500">{record.holdingPeriodMonths} months held</p></div>
               </dl>
-              <Link href={`/member/portfolio/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green hover:bg-papaipay-green hover:text-white">View Details</Link>
+              <Link href={record.slug.startsWith("par-") || record.slug.length > 20 ? `/member/participations/${record.slug}` : `/member/portfolio/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green hover:bg-papaipay-green hover:text-white">View Details</Link>
             </div>
           </article>
         ))}

@@ -29,6 +29,7 @@ export type Opportunity = {
   maximumParticipation: number;
   targetAmount: number;
   collectedAmount: number;
+  reservedAmount: number;
   participants: number;
   closeDate: string;
   auctionPrice: number;
@@ -128,6 +129,7 @@ export const opportunities: Opportunity[] = [
   maximumParticipation: index % 2 === 0 ? 60000 : 75000,
   targetAmount: targetAmount as number,
   collectedAmount: collectedAmount as number,
+  reservedAmount: 0,
   participants: participants as number,
   closeDate: closeDate as string,
   auctionPrice: (targetAmount as number) - 50000,
