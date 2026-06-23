@@ -105,13 +105,13 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           </article>
 
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-            <h2 className="text-lg font-bold">Campaign Summary</h2>
+            <h2 className="text-lg font-bold">Listing Summary</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div><ProgressBar value={progress} /></div>
               <p className="text-sm font-bold text-papaipay-green">{progress}%</p>
             </div>
             <dl className="mt-3 divide-y divide-slate-100">
-              <CompactRow label="Campaign Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
+              <CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
               <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
@@ -133,7 +133,6 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <CompactRow label="Land Area" value={campaign.landArea} icon="map" />
               <CompactRow label="Bedrooms" value={`${campaign.bedrooms}`} icon="home" />
               <CompactRow label="Bathrooms" value={`${campaign.bathrooms}`} icon="home" />
-              <CompactRow label="Reserve Price" value={formatRM(campaign.reservePrice)} icon="dollar" />
               <CompactRow label="State" value={campaign.state} icon="map" />
               <CompactRow label="Full Address" value={campaign.fullAddress} icon="map" />
             </dl>
@@ -157,7 +156,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           </ContentCard>
 
           <div className="hidden space-y-5 md:block">
-            <ContentCard><h2 className="text-lg font-bold">About This Campaign</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">About This Listing</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <div key={doc} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold"><span className="flex items-center gap-2"><Icon name="file" className="h-4 w-4 text-papaipay-green" />{doc}</span><Icon name="chevronRight" className="h-4 w-4 text-slate-400" /></div>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Profit Distribution are not paid.</p></details></ContentCard>
@@ -166,7 +165,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
           <div className="space-y-3 md:hidden">
             <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <div key={doc} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold"><span className="flex items-center gap-2"><Icon name="file" className="h-4 w-4 text-papaipay-green" />{doc}</span><Icon name="chevronRight" className="h-4 w-4 text-slate-400" /></div>)}</div></MobileAccordion>
-            <MobileAccordion title="About This Campaign"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
+            <MobileAccordion title="About This Listing"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
             <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
             <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If not sold within 24 months, Participation Amount only will be returned.</p></div></MobileAccordion>
             <MobileAccordion title="Risk Disclaimer"><p className="text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></MobileAccordion>
@@ -179,7 +178,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
       <details className="group fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 md:hidden">
         <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-papaipay-green/40 bg-white p-4 shadow-soft group-open:hidden">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span>
-          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Campaign</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Listing</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
           <span className="rounded-xl bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Participate Now</span>
         </summary>
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>
@@ -200,7 +199,7 @@ function ParticipationPanel({
       <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participation Panel</h2><p className="text-xs font-semibold text-slate-500">You will be redirected to secure payment gateway.</p></div></div>
       <label className="mt-5 block text-sm font-bold text-slate-600" htmlFor={compact ? "mobile-participation-amount" : "participation-amount"}>Participation Amount</label>
       <div className="mt-2 flex rounded-xl border border-slate-200 bg-white shadow-inner"><span className="px-3 py-3 text-sm font-bold text-slate-500">RM</span><input id={compact ? "mobile-participation-amount" : "participation-amount"} className="min-h-11 flex-1 rounded-xl px-2 py-3 text-sm outline-none" placeholder="10,000" /></div>
-      <div className="mt-4 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-3"><CompactRow label="Minimum Participation Amount" value={formatRM(campaign.minimumParticipation)} /><CompactRow label="Maximum Participation Amount" value={formatRM(campaign.maximumParticipation)} /><CompactRow label="Campaign Target" value={formatRM(campaign.targetAmount)} /></div>
+      <div className="mt-4 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-3"><CompactRow label="Minimum Participation Amount" value={formatRM(campaign.minimumParticipation)} /><CompactRow label="Maximum Participation Amount" value={formatRM(campaign.maximumParticipation)} /><CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} /></div>
       <button className="mt-5 min-h-12 w-full rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.24)] transition hover:bg-papaipay-green/90">Proceed to Payment</button>
       <p className="mt-3 text-center text-xs font-semibold leading-5 text-slate-500">Participation will be confirmed after successful payment.</p>
     </ContentCard>

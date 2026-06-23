@@ -139,27 +139,27 @@ export const opportunities: Opportunity[] = [
   galleryCount: terraceImages.length,
   daysRemaining: Math.max(0, Math.ceil((new Date(closeDate as string).getTime() - new Date("2026-06-17").getTime()) / 86400000)),
   principalProtectionEnabled: true,
-  aboutCampaign: `This campaign gives members exposure to ${title}, with proceeds managed through Papaipay's property campaign operating process.`,
-  importantInformation: "All participation is subject to campaign documents and terms. Please review the documents carefully before participating.",
+  aboutCampaign: `This listing gives members exposure to ${title}, with proceeds managed through Papaipay's property listing operating process.`,
+  importantInformation: "All participation is subject to listing documents and terms. Please review the documents carefully before participating.",
   updates: [
-    { title: "Campaign progress updated", date: "2026-06-14", body: "Collected amount and current participants were refreshed for this property." },
-    { title: "Auction file reviewed", date: "2026-06-09", body: "Key auction and valuation references were checked for portal display." },
+    { title: "Listing progress updated", date: "2026-06-14", body: "Collected amount and current participants were refreshed for this property." },
+    { title: "Property file reviewed", date: "2026-06-09", body: "Key property and valuation references were checked for portal display." },
   ],
   faqs: [
-    { question: "Is the holding return guaranteed monthly?", answer: "No monthly payment is made. Holding Return accrues during the holding period and is paid once during final distribution if the campaign completes within the rules." },
-    { question: "How do members participate?", answer: "Members enter an RM participation amount within the campaign minimum and maximum participation range." },
+    { question: "Is the holding return guaranteed monthly?", answer: "No monthly payment is made. Holding Return accrues during the holding period and is paid once during final distribution if the listing completes within the rules." },
+    { question: "How do members participate?", answer: "Members enter an RM participation amount within the listing minimum and maximum participation range." },
   ],
   holdingReturnRate: "1.5% per month",
   returnType: index % 3 === 0 ? "Fixed" : index % 3 === 1 ? "Target" : "Up To",
   maximumHoldingPeriodMonths: 24,
   principalProtectionRule: "If the asset is not sold after 24 months, return principal / participation amount only with no Holding Return or Profit Distribution.",
   documents: ["Proclamation of Sale", "Conditions of Sale", "Title Search", "Valuation Report", "Property Photos", "Location Map", "Legal Documents"],
-  riskSummary: "Auction property participation may be affected by reserve price, title review, vacancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
+  riskSummary: "Property participation may be affected by title review, vacancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
 }));
 
 export const dashboardMetrics = [
   { label: "Total Investment", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
-  { label: "Active Campaigns", value: "4", helper: "Currently active records", trend: "+1 campaign this month" },
+  { label: "Active Listings", value: "4", helper: "Currently active records", trend: "+1 listing this month" },
   { label: "Completed Properties", value: "2", helper: "Completed participation records", trend: "+1 this quarter" },
   { label: "Total Distribution", value: "RM8,500", helper: "Recorded to date", trend: "+RM850 this month" },
   { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion", trend: "2 records pending" },
@@ -169,15 +169,15 @@ export const dashboardMetrics = [
 ];
 
 export const myProperties = [
-  { name: "Kajang Terrace House", location: "Kajang, Selangor", amount: "RM42,500", status: "active", latestUpdate: "Campaign progress updated" },
+  { name: "Kajang Terrace House", location: "Kajang, Selangor", amount: "RM42,500", status: "active", latestUpdate: "Listing progress updated" },
   { name: "Shah Alam Terrace House", location: "Shah Alam, Selangor", amount: "RM55,000", status: "closing soon", latestUpdate: "Closing date reminder posted" },
   { name: "Ipoh Terrace House", location: "Ipoh, Perak", amount: "RM27,500", status: "active", latestUpdate: "Valuation summary refreshed" },
 ];
 
 export const recentUpdates = [
-  { title: "Campaign progress refreshed", date: "2026-06-14", body: "Participation totals and participant counts were updated for active terrace house listings." },
+  { title: "Listing progress refreshed", date: "2026-06-14", body: "Participation totals and participant counts were updated for active terrace house listings." },
   { title: "Distribution processing window posted", date: "2026-06-11", body: "Upcoming distribution processing dates are available for member review." },
-  { title: "Auction document review completed", date: "2026-06-08", body: "Selected auction references were refreshed for the member portal preview." },
+  { title: "Property document review completed", date: "2026-06-08", body: "Selected property references were refreshed for the member portal preview." },
 ];
 
 export const announcements = [
@@ -187,7 +187,7 @@ export const announcements = [
 
 export const memberSections = {
   participations: [
-    { title: "Kajang Terrace House", meta: "RM42,500 participation amount", status: "under review", body: "Participation interest is being reviewed against the campaign range and member eligibility." },
+    { title: "Kajang Terrace House", meta: "RM42,500 participation amount", status: "under review", body: "Participation interest is being reviewed against the listing range and member eligibility." },
     { title: "Ipoh Terrace House", meta: "RM15,000 pending participation", status: "draft", body: "Draft participation details are ready for member review before submission." },
   ],
   distributions: [
@@ -202,7 +202,7 @@ export const memberSections = {
 };
 
 export type PortfolioStatus =
-  | "Campaign Opened"
+  | "Listing Opened"
   | "Property Secured"
   | "Renovation In Progress"
   | "Listed For Sale"
@@ -296,12 +296,12 @@ export const portfolioRecords: PortfolioRecord[] = [
     distributionBatchId: "DBT-000001",
     paymentReference: "PAY-000001",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
-    status: "Campaign Opened",
-    latestUpdate: "Campaign collection reached 85%",
+    status: "Listing Opened",
+    latestUpdate: "Listing collection reached 85%",
     distributionStatus: "Pending",
     updates: [
-      { date: "04 Jun 2026", title: "Auction documents reviewed" },
-      { date: "11 Jun 2026", title: "Campaign opened for members" },
+      { date: "04 Jun 2026", title: "Property documents reviewed" },
+      { date: "11 Jun 2026", title: "Listing opened for members" },
       { date: "17 Jun 2026", title: "Collection progress refreshed" },
     ],
     property: { propertyType: "Terrace House", tenure: "Leasehold", bumiStatus: "Open Market", targetAmount: 720000, collectedAmount: 612000, currentParticipants: 146 },
@@ -329,7 +329,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     latestUpdate: "Title search completed",
     distributionStatus: "Pending",
     updates: [
-      { date: "02 Jun 2026", title: "Campaign closed after target review" },
+      { date: "02 Jun 2026", title: "Listing closed after target review" },
       { date: "09 Jun 2026", title: "Auction bid confirmed" },
       { date: "16 Jun 2026", title: "Title search completed" },
     ],
@@ -566,7 +566,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionBatchId: "DBT-000004",
     referenceNumber: "PP-DIST-2026-0904",
     paymentReference: "PAY-000004",
-    notes: "Distribution amount is pending completion checks for the auction residential property record.",
+    notes: "Distribution amount is pending completion checks for the residential property record.",
   },
   {
     distributionId: "DIS-000005",
