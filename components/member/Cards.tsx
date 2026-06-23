@@ -70,8 +70,8 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Property Type" value={opportunity.propertyType} />
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
-          <DetailRow label="Reserve Price" value={`RM${opportunity.reservePrice.toLocaleString()}`} />
-          <DetailRow label="Auction Date" value={opportunity.auctionDate} />
+          <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
+          <DetailRow label="Estimated Yield" value={opportunity.estimatedYield} />
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 

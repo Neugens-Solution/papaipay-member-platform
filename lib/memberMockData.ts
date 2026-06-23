@@ -10,6 +10,9 @@ export type Opportunity = {
   location: string;
   state: string;
   propertyType: string;
+  assetCategory: string;
+  occupancyStatus: string;
+  estimatedYield: string;
   tenure: string;
   tenureAlias: string;
   isLaca: boolean;
@@ -106,6 +109,9 @@ export const opportunities: Opportunity[] = [
   location: location as string,
   state: state as string,
   propertyType: "Terrace House",
+  assetCategory: "Residential Property",
+  occupancyStatus: index % 2 === 0 ? "Vacant Possession Expected" : "Tenanted / To Be Verified",
+  estimatedYield: "18.0% p.a.",
   tenure: index % 2 === 0 ? "Freehold" : "Leasehold",
   tenureAlias: index % 2 === 0 ? "FH" : "LH",
   isLaca: index % 2 === 1,
@@ -133,7 +139,7 @@ export const opportunities: Opportunity[] = [
   galleryCount: terraceImages.length,
   daysRemaining: Math.max(0, Math.ceil((new Date(closeDate as string).getTime() - new Date("2026-06-17").getTime()) / 86400000)),
   principalProtectionEnabled: true,
-  aboutCampaign: `This campaign aims to secure ${title} through an auction process, complete legal review, prepare the property, and sell it through a structured disposal process.`,
+  aboutCampaign: `This campaign gives members exposure to ${title}, with proceeds managed through Papaipay's property campaign operating process.`,
   importantInformation: "All participation is subject to campaign documents and terms. Please review the documents carefully before participating.",
   updates: [
     { title: "Campaign progress updated", date: "2026-06-14", body: "Collected amount and current participants were refreshed for this property." },
@@ -148,14 +154,14 @@ export const opportunities: Opportunity[] = [
   maximumHoldingPeriodMonths: 24,
   principalProtectionRule: "If the asset is not sold after 24 months, return principal / participation amount only with no Holding Return or Profit Distribution.",
   documents: ["Proclamation of Sale", "Conditions of Sale", "Title Search", "Valuation Report", "Property Photos", "Location Map", "Legal Documents"],
-  riskSummary: "Auction property participation may be affected by reserve price, title review, vacancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
+  riskSummary: "Property participation may be affected by title review, occupancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
 }));
 
 export const dashboardMetrics = [
-  { label: "Total Participation", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
-  { label: "Active Properties", value: "4", helper: "Currently active records", trend: "+1 property this month" },
+  { label: "Total Investment", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
+  { label: "Active Campaigns", value: "4", helper: "Currently active records", trend: "+1 campaign this month" },
   { label: "Completed Properties", value: "2", helper: "Completed participation records", trend: "+1 this quarter" },
-  { label: "Distribution Received", value: "RM8,500", helper: "Recorded to date", trend: "+RM850 this month" },
+  { label: "Total Distribution", value: "RM8,500", helper: "Recorded to date", trend: "+RM850 this month" },
   { label: "Participation In Progress", value: "RM15,000", helper: "Pending completion", trend: "2 records pending" },
   { label: "Distribution Processing", value: "RM3,200", helper: "Scheduled processing", trend: "Next cycle in review" },
   { label: "This Month Distribution", value: "RM850", helper: "June distribution activity", trend: "+8.2% month over month" },

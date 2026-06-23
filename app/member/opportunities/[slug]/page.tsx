@@ -114,6 +114,8 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <CompactRow label="Campaign Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
+              <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
+              <CompactRow label="Estimated Yield" value={campaign.estimatedYield} icon="trend" />
               <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} icon="check" />
               <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} icon="check" />
             </dl>
@@ -122,16 +124,15 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
             <h2 className="text-lg font-bold">Property Snapshot</h2>
             <dl className="mt-4 grid gap-x-6 sm:grid-cols-2">
+              <CompactRow label="Asset Category" value={campaign.assetCategory} icon="building" />
               <CompactRow label="Property Type" value={campaign.propertyType} icon="home" />
               <CompactRow label="Tenure" value={campaign.tenure} icon="shield" />
-              <CompactRow label="LACA" value={campaign.isLaca ? "Yes" : "No"} icon="building" />
+              <CompactRow label="Occupancy Status" value={campaign.occupancyStatus} icon="building" />
               <CompactRow label="Bumi Status" value={campaign.bumiStatus} icon="shield" />
               <CompactRow label="Built-Up" value={campaign.builtUpArea} icon="building" />
               <CompactRow label="Land Area" value={campaign.landArea} icon="map" />
               <CompactRow label="Bedrooms" value={`${campaign.bedrooms}`} icon="home" />
               <CompactRow label="Bathrooms" value={`${campaign.bathrooms}`} icon="home" />
-              <CompactRow label="Reserve Price" value={formatRM(campaign.reservePrice)} icon="dollar" />
-              <CompactRow label="Auction Date" value={campaign.auctionDate} icon="calendar" />
               <CompactRow label="State" value={campaign.state} icon="map" />
               <CompactRow label="Full Address" value={campaign.fullAddress} icon="map" />
             </dl>
@@ -159,6 +160,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <div key={doc} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold"><span className="flex items-center gap-2"><Icon name="file" className="h-4 w-4 text-papaipay-green" />{doc}</span><Icon name="chevronRight" className="h-4 w-4 text-slate-400" /></div>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Profit Distribution are not paid.</p></details></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">Risk Disclaimer</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></ContentCard>
           </div>
 
           <div className="space-y-3 md:hidden">
@@ -166,6 +168,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <MobileAccordion title="About This Campaign"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
             <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
             <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If not sold within 24 months, Participation Amount only will be returned.</p></div></MobileAccordion>
+            <MobileAccordion title="Risk Disclaimer"><p className="text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></MobileAccordion>
           </div>
         </div>
 

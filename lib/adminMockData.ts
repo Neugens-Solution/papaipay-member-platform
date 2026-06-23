@@ -40,18 +40,18 @@ const faqs = [
 const campaignTimeline = ["Campaign Created", "Campaign Opened", "Property Review", "Distribution Processing"];
 
 export const adminKpis = [
-  { label: "Total Members", value: "8,420", helper: "Registered member accounts", trend: "+6.8% MoM" },
-  { label: "Verified Members", value: "6,984", helper: "Completed verification", trend: "83% verified" },
-  { label: "Active Listings", value: "18", helper: "Open or closing campaigns", trend: "+3 this month" },
-  { label: "Completed Listings", value: "42", helper: "Closed lifecycle records", trend: "+5 this quarter" },
-  { label: "Total Participation", value: "RM18.6M", helper: "Confirmed participation value", trend: "+14.2% QoQ" },
+  { label: "Total Listings", value: "60", helper: "All campaign listing records", trend: "18 active / 42 completed" },
+  { label: "Active Campaigns", value: "18", helper: "Open, funded or in holding", trend: "+3 this month" },
+  { label: "Registered Members", value: "8,420", helper: "Member accounts registered", trend: "+6.8% MoM" },
+  { label: "Pending eKYC", value: "12", helper: "Members awaiting verification review", trend: "Operational priority" },
+  { label: "Total Investment", value: "RM18.6M", helper: "Confirmed participation value", trend: "+14.2% QoQ" },
   { label: "Total Distribution", value: "RM2.84M", helper: "Completed distributions", trend: "+RM420K MoM" },
   { label: "Pending Distribution", value: "RM386K", helper: "Awaiting processing", trend: "126 records" },
-  { label: "Monthly Participation", value: "RM1.92M", helper: "June 2026 activity", trend: "+9.4% vs May" },
+  { label: "Monthly Investment", value: "RM1.92M", helper: "June 2026 activity", trend: "+9.4% vs May" },
 ];
 
 export const operationalSummary = [
-  { label: "Pending Verifications", value: "12", tone: "slate" },
+  { label: "Pending eKYC", value: "12", tone: "slate" },
   { label: "Pending Distributions", value: "126", tone: "sand" },
   { label: "Open Campaigns", value: "18", tone: "green" },
   { label: "Draft Announcements", value: "2", tone: "mint" },

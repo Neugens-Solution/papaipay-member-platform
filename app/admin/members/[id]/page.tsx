@@ -12,7 +12,7 @@ export default function MemberDetailPage() {
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <BackLink href="/admin/members" />
+      <BackLink href="/admin/members" label="Back to Members" />
       <PageHeader eyebrow={member.id} title={member.name} description="Complete member profile, verification, banking, nominee, participation and distribution activity." />
 
       <section aria-label="Member summary" className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">

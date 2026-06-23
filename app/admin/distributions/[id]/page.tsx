@@ -9,7 +9,7 @@ export default function DistributionDetailPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <BackLink href="/admin/distributions" />
+      <BackLink href="/admin/distributions" label="Back to Distributions" />
       <PageHeader eyebrow={distribution.id} title="Distribution Detail" description="Manual payout workflow: review calculation, check bank details, transfer outside the system, enter reference, date and notes, then mark Paid." />
 
       <Card>

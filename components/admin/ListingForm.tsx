@@ -22,13 +22,15 @@ const campaignAmountFields = [
 const campaignDateFields = ["Campaign Open Date", "Campaign Close Date"];
 
 const propertyFields = [
+  "Asset Category",
   "Property Type",
+  "Market Value",
+  "Estimated Yield",
+  "Occupancy Status",
   "Built-Up",
   "Land Area",
   "Bedrooms",
   "Bathrooms",
-  "Auction Date",
-  "Auction Reserve Price",
   "State",
   "Location",
   "Full Address",
