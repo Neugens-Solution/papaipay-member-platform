@@ -103,7 +103,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     maximumParticipation: decimalToNumber(campaign.maximumParticipationAmount),
     targetAmount: campaignTarget,
     collectedAmount: decimalToNumber(campaign.collectedAmountSnapshot),
-    participants: 0,
+    reservedAmount: decimalToNumber(campaign.reservedAmountSnapshot),
+    participants: campaign._count?.participations ?? 0,
     closeDate: formatDate(closeDate),
     auctionPrice: reservePrice,
     marketValue: campaignTarget || reservePrice,
@@ -173,6 +174,7 @@ async function getMemberCampaignsRaw() {
           sortOrder: "asc",
         },
       },
+      _count: { select: { participations: true } },
     },
   });
 }
@@ -231,6 +233,7 @@ export async function getMemberCampaignBySlug(slug: string) {
             sortOrder: "asc",
           },
         },
+        _count: { select: { participations: true } },
       },
     });
 
