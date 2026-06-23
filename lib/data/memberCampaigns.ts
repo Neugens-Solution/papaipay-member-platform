@@ -1,33 +1,8 @@
 import { db } from "@/lib/db";
 import type { Opportunity } from "@/lib/memberMockData";
+import { calculateDaysRemaining, decimalToNumber, formatDate } from "@/lib/utils/formatters";
 
 type CampaignWithRelations = Awaited<ReturnType<typeof getMemberCampaignsRaw>>[number];
-
-function decimalToNumber(value: unknown): number {
-  if (
-    value &&
-    typeof value === "object" &&
-    "toNumber" in value &&
-    typeof value.toNumber === "function"
-  ) {
-    return value.toNumber();
-  }
-
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Number(value);
-
-  return 0;
-}
-
-function formatDate(value: Date | null | undefined): string {
-  if (!value) return "To be confirmed";
-
-  return new Intl.DateTimeFormat("en-MY", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(value);
-}
 
 function statusToMemberStatus(status: string): Opportunity["status"] {
   if (status === "Distributed") return "closed";
@@ -52,13 +27,6 @@ function getPrimaryImageUrl(campaign: CampaignWithRelations): string {
   }
 
   return "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
-}
-
-function calculateDaysRemaining(value: Date | null | undefined): number {
-  if (!value) return 0;
-
-  const diff = value.getTime() - Date.now();
-  return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
 }
 
 function toOpportunity(campaign: CampaignWithRelations): Opportunity {

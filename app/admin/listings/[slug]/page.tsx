@@ -1,25 +1,11 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
-import { db } from "@/lib/db";
+import { getAdminListingBySlug } from "@/lib/admin/data/listings";
+import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
 function DocumentIcon() {
   return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
-}
-
-function decimalToNumber(value: unknown): number {
-  if (value && typeof value === "object" && "toNumber" in value && typeof value.toNumber === "function") {
-    return value.toNumber();
-  }
-
-  if (typeof value === "number") return value;
-  if (typeof value === "string") return Number(value);
-
-  return 0;
-}
-
-function formatStatus(status: string) {
-  return status.replace(/([a-z])([A-Z])/g, "$1 $2");
 }
 
 function formatTenure(value: string | null | undefined) {
@@ -29,69 +15,8 @@ function formatTenure(value: string | null | undefined) {
   return "To be confirmed";
 }
 
-function formatDate(value: Date | null | undefined) {
-  if (!value) return "To be confirmed";
-
-  return new Intl.DateTimeFormat("en-MY", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-  }).format(value);
-}
-
 export default async function ListingDetailPage({ params }: { params: { slug: string } }) {
-  const listing = await db.campaign.findUnique({
-    where: {
-      slug: params.slug,
-    },
-    include: {
-      propertyDetail: true,
-      documents: {
-        include: {
-          fileAsset: true,
-        },
-      },
-      media: {
-        include: {
-          fileAsset: true,
-        },
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-      updates: true,
-      content: true,
-      faqs: {
-        orderBy: {
-          sortOrder: "asc",
-        },
-      },
-      participations: {
-        include: {
-          member: {
-            include: {
-              user: true,
-            },
-          },
-          payments: true,
-          distributions: true,
-        },
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-      settlements: {
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-      distributions: {
-        orderBy: {
-          createdAt: "desc",
-        },
-      },
-    },
-  });
+  const listing = await getAdminListingBySlug(params.slug);
 
   if (!listing) notFound();
 
@@ -150,14 +75,14 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
               { label: "Campaign Code", value: listing.campaignCode },
               { label: "Location", value: property?.location || property?.state || "To be confirmed" },
               { label: "Asset Category", value: property?.propertyType || "Residential Property" },
-              { label: "Market Value", value: marketValue ? `RM${marketValue.toLocaleString()}` : "To be confirmed" },
+              { label: "Market Value", value: marketValue ? formatCurrency(marketValue) : "To be confirmed" },
               { label: "Estimated Yield", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
               { label: "Occupancy Status", value: "To be confirmed" },
-              { label: "Status", value: formatStatus(listing.lifecycleStatus) },
-              { label: "Campaign Target", value: `RM${target.toLocaleString()}` },
-              { label: "Collected Amount", value: `RM${collected.toLocaleString()}` },
+              { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },
+              { label: "Campaign Target", value: formatCurrency(target) },
+              { label: "Collected Amount", value: formatCurrency(collected) },
               { label: "Holding Return Rate", value: `${decimalToNumber(listing.holdingReturnRateMonthly)}% per month` },
-              { label: "Return Type", value: formatStatus(listing.returnType) },
+              { label: "Return Type", value: formatEnumLabel(listing.returnType) },
               { label: "Maximum Holding Period", value: `${listing.maximumHoldingPeriodMonths} months` },
               { label: "Principal Protection", value: listing.principalProtectionEnabled ? "Enabled" : "Disabled" },
               { label: "24-Month Rule", value: "After 24 months: Participation Amount only" },
@@ -199,7 +124,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                   <Td>{listing.campaignRef}</Td>
                   <Td>{participation.member.fullName}</Td>
                   <Td>{participation.member.user.email}</Td>
-                  <Td>RM{decimalToNumber(participation.participationAmount).toLocaleString()}</Td>
+                  <Td>{formatCurrency(decimalToNumber(participation.participationAmount))}</Td>
                   <Td>{formatDate(participation.createdAt)}</Td>
                   <Td><Badge>{latestPayment?.status || "Pending"}</Badge></Td>
                   <Td><Badge>{latestDistribution?.status || "Pending"}</Badge></Td>
@@ -313,15 +238,15 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         <h2 className="font-bold">Settlement / Fees</h2>
         <InfoGrid
           items={[
-            { label: "Sale Price", value: `RM${salePrice.toLocaleString()}` },
-            { label: "Purchase Price", value: `RM${purchasePrice.toLocaleString()}` },
-            { label: "Total Costs", value: `RM${totalCosts.toLocaleString()}` },
-            { label: "Net Profit", value: `RM${netProfit.toLocaleString()}` },
-            { label: "Principal Return Total", value: `RM${principalTotal.toLocaleString()}` },
-            { label: "Holding Return Total", value: `RM${holdingTotal.toLocaleString()}` },
-            { label: "Profit Distribution Pool", value: `RM${profitPool.toLocaleString()}` },
-            { label: "Platform Share", value: `RM${platformShare.toLocaleString()}` },
-            { label: "Final Distribution Total", value: `RM${(principalTotal + holdingTotal + profitPool).toLocaleString()}` },
+            { label: "Sale Price", value: formatCurrency(salePrice) },
+            { label: "Purchase Price", value: formatCurrency(purchasePrice) },
+            { label: "Total Costs", value: formatCurrency(totalCosts) },
+            { label: "Net Profit", value: formatCurrency(netProfit) },
+            { label: "Principal Return Total", value: formatCurrency(principalTotal) },
+            { label: "Holding Return Total", value: formatCurrency(holdingTotal) },
+            { label: "Profit Distribution Pool", value: formatCurrency(profitPool) },
+            { label: "Platform Share", value: formatCurrency(platformShare) },
+            { label: "Final Distribution Total", value: formatCurrency((principalTotal + holdingTotal + profitPool)) },
             { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement calculation recorded yet." },
           ]}
         />
@@ -334,7 +259,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         </p>
         {listing.distributions.slice(0, 3).map((distribution) => (
           <p key={distribution.id} className="mt-3 text-sm text-slate-600">
-            {distribution.distributionRef} • RM{decimalToNumber(distribution.finalDistributionTotal).toLocaleString()} • {distribution.status}
+            {distribution.distributionRef} • {formatCurrency(decimalToNumber(distribution.finalDistributionTotal))} • {distribution.status}
           </p>
         ))}
       </Card>
