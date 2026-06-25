@@ -114,6 +114,7 @@ function Field({
   defaultValue,
   step,
   error,
+  helper,
 }: {
   label: string;
   name?: string;
@@ -122,11 +123,15 @@ function Field({
   defaultValue?: string | number | null;
   step?: string;
   error?: string;
+  helper?: string;
 }) {
   const normalizedType = label.includes("Date") ? "date" : type;
   return (
     <label className={className}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
+      {helper ? (
+        <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
+      ) : null}
       <input
         name={name}
         type={normalizedType}
@@ -152,6 +157,7 @@ function SelectField({
   helper,
   className = "",
   defaultValue,
+  error,
 }: {
   label: string;
   name?: string;
@@ -159,6 +165,7 @@ function SelectField({
   helper?: string;
   className?: string;
   defaultValue?: string;
+  error?: string;
 }) {
   return (
     <label className={className}>
@@ -169,12 +176,19 @@ function SelectField({
       <select
         name={name}
         defaultValue={defaultValue}
-        className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error && name ? `${name}-error` : undefined}
+        className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
       >
         {options.map((option) => (
           <option key={option}>{option}</option>
         ))}
       </select>
+      {error && name ? (
+        <p id={`${name}-error`} className="mt-1 text-xs font-bold text-red-600">
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }
@@ -510,13 +524,23 @@ function SubmitButton({
   );
 }
 
-function Toast({ message }: { message: string }) {
+function Toast({
+  message,
+  tone = "success",
+}: {
+  message: string;
+  tone?: "success" | "error";
+}) {
+  const isError = tone === "error";
   return (
     <div
-      role="status"
-      className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)]"
+      role={isError ? "alert" : "status"}
+      className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)] ${isError ? "border-red-200" : "border-emerald-100"}`}
     >
-      <span className="text-papaipay-green">✓</span> {message}
+      <span className={isError ? "text-red-600" : "text-papaipay-green"}>
+        {isError ? "!" : "✓"}
+      </span>{" "}
+      {message}
     </div>
   );
 }
@@ -655,7 +679,10 @@ export function ListingForm({
   initialValues?: ListingFormInitialValues;
 }) {
   const [state, formAction] = useFormState(saveListingAction, { errors: [] });
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    tone: "success" | "error";
+  } | null>(null);
   const fieldErrors = useMemo(
     () => state.fieldErrors ?? {},
     [state.fieldErrors],
@@ -705,14 +732,27 @@ export function ListingForm({
       unpublish: "Listing unpublished successfully.",
     };
     if (!saved || !messages[saved]) return;
-    setToastMessage(
-      mode === "edit" && saved === "draft"
-        ? "Listing updated successfully."
-        : messages[saved],
-    );
-    const timer = window.setTimeout(() => setToastMessage(null), 4500);
+    setToast({
+      message:
+        mode === "edit" && saved === "draft"
+          ? "Listing updated successfully."
+          : messages[saved],
+      tone: "success",
+    });
+    const timer = window.setTimeout(() => setToast(null), 4500);
     return () => window.clearTimeout(timer);
   }, [mode]);
+
+  useEffect(() => {
+    if (state.errors.length === 0) return;
+    setToast({
+      message:
+        state.errors[0] || "Please review the highlighted fields and try again.",
+      tone: "error",
+    });
+    const timer = window.setTimeout(() => setToast(null), 7000);
+    return () => window.clearTimeout(timer);
+  }, [state.errors]);
 
   useEffect(() => {
     const firstField = Object.keys(fieldErrors)[0];
@@ -751,7 +791,7 @@ export function ListingForm({
 
   return (
     <form action={formAction} className="space-y-5">
-      {toastMessage ? <Toast message={toastMessage} /> : null}
+      {toast ? <Toast message={toast.message} tone={toast.tone} /> : null}
       <input type="hidden" name="campaignId" value={initialValues?.id ?? ""} />
       {state.errors.length > 0 ? (
         <div
@@ -949,6 +989,7 @@ export function ListingForm({
               initialValues?.propertyDetail?.bumiStatus ?? "OpenMarket"
             }
             options={["Bumi", "NonBumi", "OpenMarket"]}
+            error={fieldErrors.bumiStatus}
           />
         </div>
         <div className="mt-4">
@@ -1069,6 +1110,7 @@ export function ListingForm({
                 label="Image Caption"
                 name="heroCaption"
                 defaultValue={heroImage?.caption}
+                helper="Optional short label for the image, e.g. Front view, Living area, Kitchen."
               />
               <Field
                 label="Image Alt Text"
@@ -1157,6 +1199,7 @@ export function ListingForm({
                         label="Image Caption"
                         name={`galleryCaption:${media.id}`}
                         defaultValue={media.caption}
+                        helper="Optional short label for the image, e.g. Front view, Living area, Kitchen."
                       />
                       <Field
                         label="Image Alt Text"
@@ -1284,7 +1327,7 @@ export function ListingForm({
       >
         <div className="grid gap-5 lg:grid-cols-2">
           <TextAreaField
-            label="About This Campaign"
+            label="About This Listing"
             name="aboutCampaign"
             error={fieldErrors.aboutCampaign}
             rows={7}
@@ -1380,6 +1423,7 @@ export function ListingForm({
             name="returnType"
             defaultValue={initialValues?.returnType ?? "Target"}
             options={["Fixed", "Target", "UpTo"]}
+            error={fieldErrors.returnType}
           />
           <Field
             label="Maximum Holding Period Months"
@@ -1445,9 +1489,17 @@ export function ListingForm({
       <Section
         id="settlement-fees"
         title="Settlement & Fees"
-        description="Finance workflow and calculation section for acquisition, holding, preparation, disposal, platform costs and final distribution fields. Calculation logic is not implemented yet."
+        description="Optional / Later Stage finance workflow after acquisition, holding, preparation, disposal and final settlement details are available."
       >
-        <div className="space-y-5">
+        <details className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
+          <summary className="cursor-pointer text-sm font-black text-amber-900">
+            Optional / Later Stage — expand Settlement & Fees
+          </summary>
+          <p className="mt-3 text-sm leading-6 text-amber-900">
+            Finance and settlement details can be completed later after
+            acquisition, holding, preparation, and sale details are available.
+          </p>
+          <div className="mt-5 space-y-5">
           <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
             <div className="grid gap-4 lg:grid-cols-[1fr_2fr] lg:items-start">
               <SelectField
@@ -1469,7 +1521,6 @@ export function ListingForm({
           <CostAccordion
             title="Acquisition Costs"
             fields={acquisitionCostFields}
-            defaultOpen
           />
           <CostAccordion title="Holding Costs" fields={holdingCostFields} />
           <CostAccordion
@@ -1485,8 +1536,14 @@ export function ListingForm({
             fields={platformCostFields}
           />
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field label="Member Profit Distribution Percentage" />
-            <Field label="Platform Profit Share Percentage" />
+            <Field
+              label="Member Profit Distribution Percentage"
+              helper="Optional / later-stage field. Percentage of net profit allocated to members after final disposal."
+            />
+            <Field
+              label="Platform Profit Share Percentage"
+              helper="Optional / later-stage field. Percentage of net profit allocated to the platform after final disposal."
+            />
           </div>
           <SubsectionCard
             title="Calculation Preview"
@@ -1503,7 +1560,8 @@ export function ListingForm({
             </div>
           </SubsectionCard>
           <TextAreaField label="Calculation Remarks" rows={4} />
-        </div>
+          </div>
+        </details>
       </Section>
 
       <Section
@@ -1520,11 +1578,11 @@ export function ListingForm({
             "Property Snapshot complete",
             "Gallery ready",
             "Required documents ready",
-            "About This Campaign completed",
+            "About This Listing completed",
             "Important Information completed",
             "Return & Protection completed",
             "24-month rule visible",
-            "Settlement reviewed if applicable",
+            "Settlement optional / later-stage",
             "Member Preview checked",
           ].map((item) => (
             <ChecklistItem key={item} label={item} />
