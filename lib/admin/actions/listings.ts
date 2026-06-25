@@ -20,6 +20,12 @@ function optionalDate(formData: FormData, key: string) {
   const value = requiredString(formData, key);
   return value ? value : undefined;
 }
+function draftString(formData: FormData, key: string, fallback: string) {
+  return requiredString(formData, key) || fallback;
+}
+function draftNumber(formData: FormData, key: string, fallback: string) {
+  return requiredString(formData, key) || fallback;
+}
 function checkboxBoolean(formData: FormData, key: string) {
   const value = formData.get(key);
   return value === "on" || value === "true";
@@ -105,7 +111,7 @@ function validationError(message: string): never {
 }
 
 const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
-  title: { label: "Campaign Title", field: "title" },
+  title: { label: "Listing Title", field: "title" },
   campaignTarget: { label: "Campaign Target", field: "campaignTarget" },
   minimumParticipationAmount: {
     label: "Minimum Participation Amount",
@@ -172,8 +178,8 @@ function friendlyZodErrors(error: ZodError): ListingFormState {
   const errors = error.issues.map((issue) => {
     const path = issue.path.join(".");
     const field = friendlyFieldLabels[path] ?? {
-      label: "Listing",
-      field: path,
+      label: "Listing details",
+      field: "",
     };
     const lowerMessage = issue.message.toLowerCase();
     const message =
@@ -265,48 +271,81 @@ function buildInput(
   action: string,
   generated: { campaignCode: string; slug: string },
 ) {
+  const isPublish = action === "publish";
+  const title = isPublish
+    ? requiredString(formData, "title")
+    : draftString(formData, "title", "Untitled Listing Draft");
+  const tenure = draftString(formData, "tenure", "Freehold");
   const parsed = listingDraftSchema.safeParse({
-    title: requiredString(formData, "title"),
+    title,
     campaignCode: generated.campaignCode,
     slug: generated.slug,
-    lifecycleStatus: action === "publish" ? "Open" : "Draft",
-    publishStatus: action === "publish" ? "Published" : "Draft",
-    visibility:
-      action === "publish"
-        ? "MemberVisible"
-        : requiredString(formData, "visibility") || "InternalOnly",
-    campaignTarget: formData.get("campaignTarget"),
-    minimumParticipationAmount: formData.get("minimumParticipationAmount"),
-    maximumParticipationAmount: formData.get("maximumParticipationAmount"),
+    lifecycleStatus: isPublish ? "Open" : "Draft",
+    publishStatus: isPublish ? "Published" : "Draft",
+    visibility: isPublish
+      ? "MemberVisible"
+      : requiredString(formData, "visibility") || "InternalOnly",
+    campaignTarget: draftNumber(formData, "campaignTarget", "0"),
+    minimumParticipationAmount: draftNumber(
+      formData,
+      "minimumParticipationAmount",
+      "0",
+    ),
+    maximumParticipationAmount: draftNumber(
+      formData,
+      "maximumParticipationAmount",
+      "0",
+    ),
     campaignOpenDate: optionalDate(formData, "campaignOpenDate"),
     campaignCloseDate: optionalDate(formData, "campaignCloseDate"),
-    holdingReturnRateMonthly: formData.get("holdingReturnRateMonthly"),
-    returnType: requiredString(formData, "returnType"),
-    maximumHoldingPeriodMonths: formData.get("maximumHoldingPeriodMonths"),
+    holdingReturnRateMonthly: draftNumber(
+      formData,
+      "holdingReturnRateMonthly",
+      "0",
+    ),
+    returnType: draftString(formData, "returnType", "Target"),
+    maximumHoldingPeriodMonths: draftNumber(
+      formData,
+      "maximumHoldingPeriodMonths",
+      "24",
+    ),
     principalProtectionEnabled: checkboxBoolean(
       formData,
       "principalProtectionEnabled",
     ),
     property: {
-      propertyType: requiredString(formData, "propertyType"),
-      tenure: requiredString(formData, "tenure"),
-      tenureAlias:
-        requiredString(formData, "tenure") === "Freehold" ? "FH" : "LH",
+      propertyType: isPublish
+        ? requiredString(formData, "propertyType")
+        : draftString(formData, "propertyType", "To be confirmed"),
+      tenure,
+      tenureAlias: tenure === "Freehold" ? "FH" : "LH",
       isLaca: checkboxBoolean(formData, "isLaca"),
-      bumiStatus: requiredString(formData, "bumiStatus"),
+      bumiStatus: draftString(formData, "bumiStatus", "OpenMarket"),
       builtUpArea: requiredString(formData, "builtUpArea"),
       landArea: requiredString(formData, "landArea"),
       bedrooms: formData.get("bedrooms") || undefined,
       bathrooms: formData.get("bathrooms") || undefined,
       auctionDate: optionalDate(formData, "auctionDate"),
       reservePrice: formData.get("reservePrice") || undefined,
-      state: requiredString(formData, "state"),
-      location: requiredString(formData, "location"),
-      fullAddress: requiredString(formData, "fullAddress"),
+      state: isPublish
+        ? requiredString(formData, "state")
+        : draftString(formData, "state", "To be confirmed"),
+      location: isPublish
+        ? requiredString(formData, "location")
+        : draftString(formData, "location", "To be confirmed"),
+      fullAddress: isPublish
+        ? requiredString(formData, "fullAddress")
+        : draftString(formData, "fullAddress", "To be confirmed"),
       yearBuilt: requiredString(formData, "yearBuilt"),
     },
     content: {
-      aboutCampaign: requiredString(formData, "aboutCampaign"),
+      aboutCampaign: isPublish
+        ? requiredString(formData, "aboutCampaign")
+        : draftString(
+          formData,
+          "aboutCampaign",
+          "Draft content to be completed.",
+        ),
       importantInformation: requiredString(formData, "importantInformation"),
       riskDisclaimer: requiredString(formData, "riskDisclaimer"),
       holdingReturnExplanation: requiredString(
@@ -415,8 +454,11 @@ export async function saveListingAction(
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
-        makeCampaignCode(requiredString(formData, "title")),
-      slug: await makeUniqueSlug(requiredString(formData, "title"), campaignId),
+        makeCampaignCode(draftString(formData, "title", "Untitled Listing Draft")),
+      slug: await makeUniqueSlug(
+        draftString(formData, "title", "Untitled Listing Draft"),
+        campaignId,
+      ),
     });
     const auditAction: AdminAuditAction = !existing
       ? "create"
