@@ -1,30 +1,14 @@
 import { notFound } from "next/navigation";
 import { BackLink, PageHeader } from "@/components/admin/AdminUI";
 import { ListingForm } from "@/components/admin/ListingForm";
-import { db } from "@/lib/db";
+import { getAdminListingBySlug } from "@/lib/admin/data/listings";
 
 export default async function EditListingPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const campaign = await db.campaign.findUnique({
-    where: {
-      slug: params.slug,
-    },
-    include: {
-      propertyDetail: true,
-      content: true,
-      media: {
-        include: { fileAsset: true },
-        orderBy: { sortOrder: "asc" },
-      },
-      documents: {
-        include: { fileAsset: true },
-        orderBy: { createdAt: "asc" },
-      },
-    },
-  });
+  const campaign = await getAdminListingBySlug(params.slug);
 
   if (!campaign) notFound();
 

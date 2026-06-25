@@ -53,8 +53,8 @@ const timelineStages = [
 ];
 
 const acquisitionCostFields = [
-  "Purchase Price / Successful Bid Price",
-  "Auction Deposit",
+  "Purchase Price",
+  "Initial Deposit",
   "Balance Purchase Price",
   "Legal Fee",
   "Stamp Duty",
@@ -113,6 +113,7 @@ function Field({
   className = "",
   defaultValue,
   step,
+  error,
 }: {
   label: string;
   name?: string;
@@ -120,6 +121,7 @@ function Field({
   className?: string;
   defaultValue?: string | number | null;
   step?: string;
+  error?: string;
 }) {
   const normalizedType = label.includes("Date") ? "date" : type;
   return (
@@ -130,8 +132,15 @@ function Field({
         type={normalizedType}
         defaultValue={defaultValue ?? undefined}
         step={step}
-        className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error && name ? `${name}-error` : undefined}
+        className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
       />
+      {error && name ? (
+        <p id={`${name}-error`} className="mt-1 text-xs font-bold text-red-600">
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }
@@ -176,12 +185,14 @@ function TextAreaField({
   helper,
   rows = 4,
   defaultValue,
+  error,
 }: {
   label: string;
   name?: string;
   helper?: string;
   rows?: number;
   defaultValue?: string | null;
+  error?: string;
 }) {
   return (
     <label>
@@ -193,8 +204,15 @@ function TextAreaField({
         name={name}
         rows={rows}
         defaultValue={defaultValue ?? undefined}
-        className="mt-2 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error && name ? `${name}-error` : undefined}
+        className={`mt-2 w-full rounded-lg border bg-white p-3 text-sm outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
       />
+      {error && name ? (
+        <p id={`${name}-error`} className="mt-1 text-xs font-bold text-red-600">
+          {error}
+        </p>
+      ) : null}
     </label>
   );
 }
@@ -355,13 +373,25 @@ function UploadZone({
       }`}
     >
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white text-papaipay-green ring-1 ring-slate-200">
-        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <svg
+          viewBox="0 0 24 24"
+          className="h-5 w-5"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
           <path d="M12 16V4" />
           <path d="m7 9 5-5 5 5" />
           <path d="M5 20h14" />
         </svg>
       </div>
-      <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}{title === "Hero Image" ? " *" : ""}</p>
+      <p className="mt-3 text-sm font-bold text-papaipay-ink">
+        {title}
+        {title === "Hero Image" ? " *" : ""}
+      </p>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
       <label className="mt-3 inline-flex cursor-pointer rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
         <input
@@ -369,16 +399,26 @@ function UploadZone({
           type="file"
           name={name}
           multiple={multiple}
-          accept={supported.includes("PDF") ? ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp" : "image/jpeg,image/png,image/webp"}
+          accept={
+            supported.includes("PDF")
+              ? ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
+              : "image/jpeg,image/png,image/webp"
+          }
           className="sr-only"
           onChange={(event) => {
-            const nextFiles = Array.from(event.currentTarget.files ?? []).map((file) => ({
-              id: `${file.name}-${file.size}-${file.lastModified}`,
-              name: file.name,
-              url: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
-            }));
+            const nextFiles = Array.from(event.currentTarget.files ?? []).map(
+              (file) => ({
+                id: `${file.name}-${file.size}-${file.lastModified}`,
+                name: file.name,
+                url: file.type.startsWith("image/")
+                  ? URL.createObjectURL(file)
+                  : undefined,
+              }),
+            );
             setSelectedFiles((previous) => {
-              previous.forEach((file) => file.url && URL.revokeObjectURL(file.url));
+              previous.forEach(
+                (file) => file.url && URL.revokeObjectURL(file.url),
+              );
               return nextFiles;
             });
           }}
@@ -386,22 +426,55 @@ function UploadZone({
         Choose file{multiple ? "s" : ""}
       </label>
       <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported} · {selectedFiles.length > 0 ? `${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} selected` : "No new file selected"}
+        Supported: {supported} ·{" "}
+        {selectedFiles.length > 0
+          ? `${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} selected`
+          : "No new file selected"}
       </p>
-      {error ? <p className="mt-2 text-xs font-bold text-red-600">{error}</p> : null}
+      {error ? (
+        <p className="mt-2 text-xs font-bold text-red-600">{error}</p>
+      ) : null}
       {displayedFileNames.length > 0 ? (
         <div className="mt-3 max-h-80 overflow-y-auto rounded-lg border border-emerald-100 bg-white px-3 py-2 text-left">
-          <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">{selectedFiles.length > 0 ? "Selected" : "Current upload"}</p>
+          <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
+            {selectedFiles.length > 0 ? "Selected" : "Current upload"}
+          </p>
           <div className="mt-2 grid gap-2">
-            {(selectedFiles.length > 0 ? selectedFiles : displayedFileNames.map((fileName) => ({ id: fileName, name: fileName, url: undefined }))).map((file) => (
-              <div key={file.id} className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-2">
+            {(selectedFiles.length > 0
+              ? selectedFiles
+              : displayedFileNames.map((fileName) => ({
+                  id: fileName,
+                  name: fileName,
+                  url: undefined,
+                }))
+            ).map((file) => (
+              <div
+                key={file.id}
+                className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-2"
+              >
                 {typeof file.url === "string" ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={file.url} alt="" className="h-12 w-12 flex-none rounded-md object-cover" />
-                ) : <div className="grid h-12 w-12 flex-none place-items-center rounded-md bg-emerald-50 text-xs font-black text-papaipay-green">IMG</div>}
-                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-600">{file.name}</span>
+                  <img
+                    src={file.url}
+                    alt=""
+                    className="h-12 w-12 flex-none rounded-md object-cover"
+                  />
+                ) : (
+                  <div className="grid h-12 w-12 flex-none place-items-center rounded-md bg-emerald-50 text-xs font-black text-papaipay-green">
+                    IMG
+                  </div>
+                )}
+                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-600">
+                  {file.name}
+                </span>
                 {selectedFiles.length > 0 ? (
-                  <button type="button" onClick={() => removeSelectedFile(file.id)} className="flex-none rounded-full px-2 py-1 text-xs font-black text-red-600 hover:bg-red-50">Remove</button>
+                  <button
+                    type="button"
+                    onClick={() => removeSelectedFile(file.id)}
+                    className="flex-none rounded-full px-2 py-1 text-xs font-black text-red-600 hover:bg-red-50"
+                  >
+                    Remove
+                  </button>
                 ) : null}
               </div>
             ))}
@@ -412,14 +485,40 @@ function UploadZone({
   );
 }
 
-function SubmitButton({ intent, children, pendingLabel, className }: { intent: string; children: React.ReactNode; pendingLabel: string; className: string }) {
+function SubmitButton({
+  intent,
+  children,
+  pendingLabel,
+  className,
+}: {
+  intent: string;
+  children: React.ReactNode;
+  pendingLabel: string;
+  className: string;
+}) {
   const { pending, data } = useFormStatus();
   const isPending = pending && data?.get("intent") === intent;
-  return <button name="intent" value={intent} disabled={pending} className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}>{isPending ? pendingLabel : children}</button>;
+  return (
+    <button
+      name="intent"
+      value={intent}
+      disabled={pending}
+      className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}
+    >
+      {isPending ? pendingLabel : children}
+    </button>
+  );
 }
 
 function Toast({ message }: { message: string }) {
-  return <div role="status" className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)]"><span className="text-papaipay-green">✓</span> {message}</div>;
+  return (
+    <div
+      role="status"
+      className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)]"
+    >
+      <span className="text-papaipay-green">✓</span> {message}
+    </div>
+  );
 }
 
 function RepeaterPreview({
@@ -557,7 +656,46 @@ export function ListingForm({
 }) {
   const [state, formAction] = useFormState(saveListingAction, { errors: [] });
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const fieldErrors = useMemo(() => state.fieldErrors ?? {}, [state.fieldErrors]);
+  const fieldErrors = useMemo(
+    () => state.fieldErrors ?? {},
+    [state.fieldErrors],
+  );
+
+  const fieldSections: Record<string, string> = {
+    title: "campaign-setup",
+    campaignTarget: "campaign-setup",
+    minimumParticipationAmount: "campaign-setup",
+    maximumParticipationAmount: "campaign-setup",
+    campaignOpenDate: "campaign-setup",
+    campaignCloseDate: "campaign-setup",
+    propertyType: "property-details",
+    tenure: "property-details",
+    bumiStatus: "property-details",
+    builtUpArea: "property-details",
+    landArea: "property-details",
+    bedrooms: "property-details",
+    bathrooms: "property-details",
+    reservePrice: "property-details",
+    auctionDate: "property-details",
+    state: "property-details",
+    location: "property-details",
+    fullAddress: "property-details",
+    yearBuilt: "property-details",
+    heroImage: "media-documents",
+    aboutCampaign: "campaign-content",
+    importantInformation: "campaign-content",
+    riskDisclaimer: "campaign-content",
+    holdingReturnExplanation: "return-protection",
+    finalDistributionExplanation: "return-protection",
+    holdingReturnRateMonthly: "return-protection",
+    maximumHoldingPeriodMonths: "return-protection",
+    returnType: "return-protection",
+  };
+  const sectionsWithErrors = new Set(
+    Object.keys(fieldErrors)
+      .map((field) => fieldSections[field])
+      .filter(Boolean),
+  );
 
   useEffect(() => {
     const saved = new URLSearchParams(window.location.search).get("saved");
@@ -567,7 +705,11 @@ export function ListingForm({
       unpublish: "Listing unpublished successfully.",
     };
     if (!saved || !messages[saved]) return;
-    setToastMessage(mode === "edit" && saved === "draft" ? "Listing updated successfully." : messages[saved]);
+    setToastMessage(
+      mode === "edit" && saved === "draft"
+        ? "Listing updated successfully."
+        : messages[saved],
+    );
     const timer = window.setTimeout(() => setToastMessage(null), 4500);
     return () => window.clearTimeout(timer);
   }, [mode]);
@@ -575,10 +717,17 @@ export function ListingForm({
   useEffect(() => {
     const firstField = Object.keys(fieldErrors)[0];
     if (!firstField) return;
-    const element = document.querySelector<HTMLElement>(`[name="${CSS.escape(firstField)}"], [data-field="${CSS.escape(firstField)}"]`);
+    const element = document.querySelector<HTMLElement>(
+      `[name="${CSS.escape(firstField)}"], [data-field="${CSS.escape(firstField)}"]`,
+    );
     element?.scrollIntoView({ behavior: "smooth", block: "center" });
     window.setTimeout(() => {
-      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) element.focus({ preventScroll: true });
+      if (
+        element instanceof HTMLInputElement ||
+        element instanceof HTMLTextAreaElement ||
+        element instanceof HTMLSelectElement
+      )
+        element.focus({ preventScroll: true });
     }, 350);
   }, [fieldErrors]);
   const memberPreviewHref =
@@ -605,8 +754,13 @@ export function ListingForm({
       {toastMessage ? <Toast message={toastMessage} /> : null}
       <input type="hidden" name="campaignId" value={initialValues?.id ?? ""} />
       {state.errors.length > 0 ? (
-        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700" role="alert">
-          <p className="text-xs font-black uppercase tracking-wide">Please complete the following before publishing</p>
+        <div
+          className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700"
+          role="alert"
+        >
+          <p className="text-xs font-black uppercase tracking-wide">
+            Please complete the following before publishing
+          </p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {state.errors.map((error) => (
               <li key={error}>{error}</li>
@@ -626,6 +780,12 @@ export function ListingForm({
               className="whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 transition hover:border-papaipay-green/40 hover:bg-emerald-50/50 hover:text-papaipay-green"
             >
               {tab.label}
+              {sectionsWithErrors.has(tab.id) ? (
+                <span
+                  className="ml-2 inline-flex h-2 w-2 rounded-full bg-red-500"
+                  aria-label="Section has errors"
+                />
+              ) : null}
             </a>
           ))}
         </div>
@@ -655,6 +815,7 @@ export function ListingForm({
               <Field
                 label="Campaign Title"
                 name="title"
+                error={fieldErrors.title}
                 defaultValue={initialValues?.title}
               />
               <SelectField
@@ -678,11 +839,13 @@ export function ListingForm({
               <Field
                 label="Campaign Open Date"
                 name="campaignOpenDate"
+                error={fieldErrors.campaignOpenDate}
                 defaultValue={initialValues?.campaignOpenDate}
               />
               <Field
                 label="Campaign Close Date"
                 name="campaignCloseDate"
+                error={fieldErrors.campaignCloseDate}
                 defaultValue={initialValues?.campaignCloseDate}
               />
               <CalculatedField
@@ -699,18 +862,21 @@ export function ListingForm({
               <Field
                 label="Campaign Target"
                 name="campaignTarget"
+                error={fieldErrors.campaignTarget}
                 type="number"
                 defaultValue={initialValues?.campaignTarget ?? 0}
               />
               <Field
                 label="Minimum Participation Amount"
                 name="minimumParticipationAmount"
+                error={fieldErrors.minimumParticipationAmount}
                 type="number"
                 defaultValue={initialValues?.minimumParticipationAmount ?? 0}
               />
               <Field
                 label="Maximum Participation Amount"
                 name="maximumParticipationAmount"
+                error={fieldErrors.maximumParticipationAmount}
                 type="number"
                 defaultValue={initialValues?.maximumParticipationAmount ?? 0}
               />
@@ -790,60 +956,71 @@ export function ListingForm({
             <Field
               label="Property Type"
               name="propertyType"
+              error={fieldErrors.propertyType}
               defaultValue={initialValues?.propertyDetail?.propertyType}
             />
             <Field
-              label="Reserve Price"
+              label="Market Value"
               name="reservePrice"
+              error={fieldErrors.reservePrice}
               type="number"
               defaultValue={initialValues?.propertyDetail?.reservePrice}
             />
             <Field
               label="Built-Up"
               name="builtUpArea"
+              error={fieldErrors.builtUpArea}
               defaultValue={initialValues?.propertyDetail?.builtUpArea}
             />
             <Field
               label="Land Area"
               name="landArea"
+              error={fieldErrors.landArea}
               defaultValue={initialValues?.propertyDetail?.landArea}
             />
             <Field
               label="Bedrooms"
               name="bedrooms"
+              error={fieldErrors.bedrooms}
               type="number"
               defaultValue={initialValues?.propertyDetail?.bedrooms}
             />
             <Field
               label="Bathrooms"
               name="bathrooms"
+              error={fieldErrors.bathrooms}
               type="number"
               defaultValue={initialValues?.propertyDetail?.bathrooms}
             />
             <Field
-              label="Auction Date"
+              label="Expected Acquisition Date"
               name="auctionDate"
+              error={fieldErrors.auctionDate}
               defaultValue={initialValues?.propertyDetail?.auctionDate}
             />
             <Field
               label="State"
               name="state"
+              error={fieldErrors.state}
               defaultValue={initialValues?.propertyDetail?.state}
             />
             <Field
               label="Location"
               name="location"
+              error={fieldErrors.location}
               defaultValue={initialValues?.propertyDetail?.location}
             />
             <Field
               label="Full Address"
               name="fullAddress"
+              error={fieldErrors.fullAddress}
               className="sm:col-span-2 lg:col-span-3"
               defaultValue={initialValues?.propertyDetail?.fullAddress}
             />
             <Field
               label="Year Built"
               name="yearBuilt"
+              error={fieldErrors.yearBuilt}
               defaultValue={initialValues?.propertyDetail?.yearBuilt}
             />
           </div>
@@ -908,7 +1085,9 @@ export function ListingForm({
                 {heroImage.fileAsset?.objectKey ? (
                   <div
                     className="mb-4 h-48 rounded-lg bg-slate-100 bg-cover bg-center"
-                    style={{ backgroundImage: `url(${heroImage.fileAsset.objectKey})` }}
+                    style={{
+                      backgroundImage: `url(${heroImage.fileAsset.objectKey})`,
+                    }}
                     aria-label="Current hero image preview"
                   />
                 ) : null}
@@ -943,7 +1122,9 @@ export function ListingForm({
                     {media.fileAsset?.objectKey ? (
                       <div
                         className="mb-3 h-32 rounded-lg bg-slate-100 bg-cover bg-center"
-                        style={{ backgroundImage: `url(${media.fileAsset.objectKey})` }}
+                        style={{
+                          backgroundImage: `url(${media.fileAsset.objectKey})`,
+                        }}
                         aria-label={`Gallery image ${index + 1} thumbnail`}
                       />
                     ) : null}
@@ -1105,6 +1286,7 @@ export function ListingForm({
           <TextAreaField
             label="About This Campaign"
             name="aboutCampaign"
+            error={fieldErrors.aboutCampaign}
             rows={7}
             defaultValue={initialValues?.content?.aboutCampaign}
             helper="Member-facing campaign overview displayed on the campaign detail page."
@@ -1112,6 +1294,7 @@ export function ListingForm({
           <TextAreaField
             label="Important Information"
             name="importantInformation"
+            error={fieldErrors.importantInformation}
             rows={7}
             defaultValue={initialValues?.content?.importantInformation}
           />
@@ -1170,6 +1353,7 @@ export function ListingForm({
             <TextAreaField
               label="Risk / Disclaimer"
               name="riskDisclaimer"
+              error={fieldErrors.riskDisclaimer}
               rows={5}
               defaultValue={initialValues?.content?.riskDisclaimer}
             />
@@ -1186,6 +1370,7 @@ export function ListingForm({
           <Field
             label="Holding Return Rate"
             name="holdingReturnRateMonthly"
+            error={fieldErrors.holdingReturnRateMonthly}
             type="number"
             step="0.01"
             defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
@@ -1199,6 +1384,7 @@ export function ListingForm({
           <Field
             label="Maximum Holding Period Months"
             name="maximumHoldingPeriodMonths"
+            error={fieldErrors.maximumHoldingPeriodMonths}
             type="number"
             defaultValue={initialValues?.maximumHoldingPeriodMonths ?? 24}
           />
@@ -1224,6 +1410,7 @@ export function ListingForm({
           <TextAreaField
             label="Holding Return Explanation"
             name="holdingReturnExplanation"
+            error={fieldErrors.holdingReturnExplanation}
             rows={5}
             defaultValue={initialValues?.content?.holdingReturnExplanation}
             helper="Holding Return accrues during the holding period and is paid once during final distribution."
@@ -1231,6 +1418,7 @@ export function ListingForm({
           <TextAreaField
             label="Final Distribution Explanation"
             name="finalDistributionExplanation"
+            error={fieldErrors.finalDistributionExplanation}
             rows={5}
             defaultValue={initialValues?.content?.finalDistributionExplanation}
             helper="Explain Principal Return, Holding Return and Profit Distribution clearly."
@@ -1379,24 +1567,44 @@ export function ListingForm({
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
           {mode === "create" ? (
             <>
-              <SubmitButton intent="draft" pendingLabel="Saving draft..." className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+              <SubmitButton
+                intent="draft"
+                pendingLabel="Saving draft..."
+                className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
+              >
                 Save Draft
               </SubmitButton>
-              <SubmitButton intent="publish" pendingLabel="Publishing..." className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
+              <SubmitButton
+                intent="publish"
+                pendingLabel="Publishing..."
+                className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+              >
                 Publish Listing
               </SubmitButton>
             </>
           ) : (
             <>
-              <SubmitButton intent="draft" pendingLabel="Saving changes..." className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+              <SubmitButton
+                intent="draft"
+                pendingLabel="Saving changes..."
+                className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
+              >
                 Save Changes
               </SubmitButton>
               {initialValues?.publishStatus === "Published" ? (
-                <SubmitButton intent="unpublish" pendingLabel="Unpublishing..." className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800">
+                <SubmitButton
+                  intent="unpublish"
+                  pendingLabel="Unpublishing..."
+                  className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800"
+                >
                   Unpublish Listing
                 </SubmitButton>
               ) : (
-                <SubmitButton intent="publish" pendingLabel="Publishing..." className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
+                <SubmitButton
+                  intent="publish"
+                  pendingLabel="Publishing..."
+                  className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+                >
                   Publish Listing
                 </SubmitButton>
               )}
