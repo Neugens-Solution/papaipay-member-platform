@@ -2,21 +2,30 @@ import { notFound } from "next/navigation";
 import { BackLink, PageHeader } from "@/components/admin/AdminUI";
 import { ListingForm } from "@/components/admin/ListingForm";
 import { db } from "@/lib/db";
+import { listings as fallbackListings } from "@/lib/adminMockData";
 
 export default async function EditListingPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const campaign = await db.campaign.findUnique({
-    where: {
-      slug: params.slug,
-    },
-    select: {
-      campaignRef: true,
-      campaignCode: true,
-    },
-  });
+  const fallbackListing = fallbackListings.find((listing) => listing.slug === params.slug);
+  const campaign = process.env.DATABASE_URL
+    ? await db.campaign.findUnique({
+        where: {
+          slug: params.slug,
+        },
+        select: {
+          campaignRef: true,
+          campaignCode: true,
+        },
+      })
+    : fallbackListing
+      ? {
+          campaignRef: fallbackListing.campaignId,
+          campaignCode: fallbackListing.campaignCode,
+        }
+      : null;
 
   if (!campaign) notFound();
 

@@ -3,6 +3,8 @@ import Link from "next/link";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { db } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 function DocumentIcon() {
   return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
 }
