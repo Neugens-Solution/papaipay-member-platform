@@ -28,7 +28,12 @@ async function getMemberParticipationsRaw() {
 export async function getMemberParticipations() {
   try {
     const records = await getMemberParticipationsRaw();
-    if (records.length === 0 && !process.env.DATABASE_URL) return portfolioRecords;
+    if (records.length === 0 && !process.env.DATABASE_URL) return portfolioRecords.map((record, index) => ({
+      ...record,
+      status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
+      estimatedYield: "18.0% p.a.",
+      dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
+    }));
 
     return records.map((record: ParticipationWithRelations) => {
       const latestDistribution = record.distributions[0];
@@ -43,13 +48,20 @@ export async function getMemberParticipations() {
         status: statusLabel(record.participationStatus),
         latestUpdate: record.reservedUntil ? `Reserved until ${formatDate(record.reservedUntil)}` : formatDate(record.createdAt),
         distributionStatus: latestDistribution ? latestDistribution.status : "Pending Payment",
+        estimatedYield: `${(decimalToNumber(record.campaign.holdingReturnRateMonthly) * 12).toFixed(2)}% p.a.`,
+        dateSubmitted: formatDate(record.createdAt),
         finalDistributionTotal: latestDistribution ? decimalToNumber(latestDistribution.finalDistributionTotal) : 0,
         holdingPeriodMonths: 0,
       };
     });
   } catch (error) {
     console.warn("Falling back to demo portfolio records because database reads are unavailable.", error);
-    return portfolioRecords;
+    return portfolioRecords.map((record, index) => ({
+      ...record,
+      status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
+      estimatedYield: "18.0% p.a.",
+      dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
+    }));
   }
 }
 

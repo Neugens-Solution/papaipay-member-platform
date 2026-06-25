@@ -2,7 +2,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
-import { ParticipationForm } from "@/components/member/ParticipationForm";
 import { formatRM } from "@/lib/memberMockData";
 import { getMemberCampaignBySlug, getMemberCampaigns } from "@/lib/data/memberCampaigns";
 
@@ -227,8 +226,14 @@ function ParticipationPanel({
 }) {
   return (
     <ContentCard className={`${compact ? "border-0 p-0 shadow-none" : "border-papaipay-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"}`}>
-      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participation Panel</h2><p className="text-xs font-semibold text-slate-500">Reserve now; payment integration is pending.</p></div></div>
-      <ParticipationForm campaignId={campaign.id} minimumParticipation={formatRM(campaign.minimumParticipation)} maximumParticipation={formatRM(campaign.maximumParticipation)} targetAmount={formatRM(campaign.targetAmount)} remainingAmount={formatRM(Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0))} compact={compact} />
+      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participate</h2><p className="text-xs font-semibold text-slate-500">Start the review and declaration flow.</p></div></div>
+      <div className="mt-4 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-3">
+        <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} />
+        <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} />
+        <CompactRow label="Available to Participate" value={formatRM(Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0))} />
+      </div>
+      <Link href={`/member/opportunities/${campaign.slug}/participate`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.24)] transition hover:bg-papaipay-green/90">Participate</Link>
+      <p className="mt-3 text-center text-xs font-semibold leading-5 text-slate-500">No payment gateway is connected yet. Participation is submitted for review.</p>
     </ContentCard>
   );
 }

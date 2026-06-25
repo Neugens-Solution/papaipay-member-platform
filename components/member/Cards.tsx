@@ -67,7 +67,8 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </div>
 
         <dl className="space-y-2 text-sm">
-          <DetailRow label="Asset Type" value={opportunity.propertyType} />
+          <DetailRow label="Asset Category" value={opportunity.assetCategory} />
+          <DetailRow label="Occupancy Status" value={opportunity.occupancyStatus} />
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
           <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
@@ -76,7 +77,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </dl>
 
         <Link href={detailHref} className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
-          View Opportunity
+          View Details
         </Link>
       </div>
     </article>
