@@ -13,6 +13,8 @@ function demoAdminListingSummaries() {
     collectedAmountSnapshot: listing.collectedAmount,
     propertyDetail: {
       propertyType: listing.propertyType,
+      assetCategory: "Residential Asset",
+      occupancyStatus: "To be confirmed",
       tenure: listing.tenure,
       tenureAlias: listing.tenureAlias,
       bumiStatus: listing.bumiStatus,
@@ -51,6 +53,8 @@ function demoAdminListingDetail(slug: string) {
     reservedAmountSnapshot: 0,
     propertyDetail: {
       propertyType: listing.propertyType,
+      assetCategory: "Residential Asset",
+      occupancyStatus: "To be confirmed",
       tenure: listing.tenure,
       tenureAlias: listing.tenureAlias,
       isLaca: listing.isLaca,

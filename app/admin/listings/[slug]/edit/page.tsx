@@ -16,11 +16,11 @@ export default async function EditListingPage({
     <div className="mx-auto max-w-5xl space-y-6">
       <BackLink
         href={`/admin/listings/${params.slug}`}
-        label="Back to Listing Detail"
+        label="Back to Opportunity Detail"
       />
       <PageHeader
-        title="Edit Listing"
-        description="Edit all member-facing property, campaign, valuation, timeline, update, FAQ, risk, document and image fields."
+        title="Edit Opportunity"
+        description="Edit all member-facing asset, campaign, valuation, timeline, update, FAQ, risk, document and image fields."
       />
       <ListingForm
         mode="edit"
@@ -60,6 +60,7 @@ export default async function EditListingPage({
           content: campaign.content,
           media: campaign.media,
           documents: campaign.documents,
+          faqs: campaign.faqs,
         }}
       />
     </div>

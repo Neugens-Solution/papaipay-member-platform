@@ -22,6 +22,8 @@ export const listingDraftSchema = z.object({
   principalProtectionEnabled: z.coerce.boolean(),
   property: z.object({
     propertyType: z.string().trim().min(2).max(120),
+    assetCategory: z.string().trim().min(2).max(120),
+    occupancyStatus: z.string().trim().min(2).max(120),
     tenure: z.enum(["Freehold", "Leasehold"]),
     tenureAlias: z.enum(["FH", "LH"]),
     isLaca: z.coerce.boolean(),

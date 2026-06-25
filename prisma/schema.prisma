@@ -468,6 +468,8 @@ model PropertyDetail {
   id           String      @id @default(uuid())
   campaignId   String      @unique
   propertyType String
+  assetCategory String?
+  occupancyStatus String?
   tenure       Tenure
   tenureAlias  TenureAlias
   isLaca       Boolean     @default(false)

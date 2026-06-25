@@ -83,9 +83,9 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
       ).length,
     location: property?.location || property?.state || "Malaysia",
     state: property?.state || "Malaysia",
-    propertyType: property?.propertyType || "Property",
-    assetCategory: property?.propertyType || "Residential Property",
-    occupancyStatus: "To be confirmed",
+    propertyType: property?.propertyType || "Asset",
+    assetCategory: property?.assetCategory || property?.propertyType || "Residential Asset",
+    occupancyStatus: property?.occupancyStatus || "To be confirmed",
     estimatedYield: `${(decimalToNumber(campaign.holdingReturnRateMonthly) * 12).toFixed(2)}% p.a.`,
     tenure: property?.tenure || "To be confirmed",
     tenureAlias: property?.tenureAlias || "N/A",
@@ -131,7 +131,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     returnType: formatReturnType(campaign.returnType),
     maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
     principalProtectionRule:
-      "If the property is not sold within 24 months, Participation Amount only will be returned.",
+      "If the asset is not sold within 24 months, Participation Amount only will be returned.",
     documents: campaign.documents
       .filter(
         (document) =>

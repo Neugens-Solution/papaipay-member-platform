@@ -110,7 +110,7 @@ export const opportunities: Opportunity[] = [
   location: location as string,
   state: state as string,
   propertyType: "Terrace House",
-  assetCategory: "Residential Property",
+  assetCategory: "Residential Asset",
   occupancyStatus: index % 2 === 0 ? "Vacant Possession Expected" : "Tenanted / To Be Verified",
   estimatedYield: "18.0% p.a.",
   tenure: index % 2 === 0 ? "Freehold" : "Leasehold",
