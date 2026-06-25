@@ -159,14 +159,14 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
           <div className="hidden space-y-5 md:block">
             <ContentCard><h2 className="text-lg font-bold">About This Listing</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
-            <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <div key={doc} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold"><span className="flex items-center gap-2"><Icon name="file" className="h-4 w-4 text-papaipay-green" />{doc}</span><Icon name="chevronRight" className="h-4 w-4 text-slate-400" /></div>)}</div></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Profit Distribution are not paid.</p></details></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Risk Disclaimer</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></ContentCard>
           </div>
 
           <div className="space-y-3 md:hidden">
-            <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <div key={doc} className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold"><span className="flex items-center gap-2"><Icon name="file" className="h-4 w-4 text-papaipay-green" />{doc}</span><Icon name="chevronRight" className="h-4 w-4 text-slate-400" /></div>)}</div></MobileAccordion>
+            <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></MobileAccordion>
             <MobileAccordion title="About This Listing"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
             <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
             <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If not sold within 24 months, Participation Amount only will be returned.</p></div></MobileAccordion>
@@ -186,6 +186,35 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>
       </details>
     </div>
+  );
+}
+
+function DocumentLink({
+  document,
+}: {
+  document: string | { title: string; filename: string; url: string };
+}) {
+  const title = typeof document === "string" ? document : document.title;
+  const filename = typeof document === "string" ? document : document.filename;
+  const url = typeof document === "string" ? "#" : document.url;
+
+  return (
+    <a
+      href={url}
+      download={filename}
+      className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold transition hover:border-papaipay-green/30 hover:bg-emerald-50/60"
+    >
+      <span className="flex min-w-0 items-center gap-2">
+        <Icon name="file" className="h-4 w-4 flex-none text-papaipay-green" />
+        <span className="min-w-0">
+          <span className="block truncate">{title}</span>
+          <span className="block truncate text-xs font-semibold text-slate-500">
+            {filename}
+          </span>
+        </span>
+      </span>
+      <Icon name="chevronRight" className="h-4 w-4 flex-none text-slate-400" />
+    </a>
   );
 }
 

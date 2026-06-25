@@ -32,7 +32,7 @@ const fallbackImageUrl =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
 
 function fileAssetUrl(
-  fileAsset?: CampaignWithRelations["media"][number]["fileAsset"] | null,
+  fileAsset?: { objectKey: string } | null,
 ): string | null {
   if (!fileAsset) return null;
   return fileAsset.objectKey.startsWith("/")
@@ -133,8 +133,17 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     principalProtectionRule:
       "If the property is not sold within 24 months, Participation Amount only will be returned.",
     documents: campaign.documents
-      .map((document) => document.fileAsset?.originalFilename)
-      .filter((filename): filename is string => Boolean(filename)),
+      .filter(
+        (document) =>
+          document.visibility === "MemberVisible" &&
+          ["Published", "Ready"].includes(document.documentStatus) &&
+          document.fileAsset,
+      )
+      .map((document) => ({
+        title: document.title,
+        filename: document.fileAsset?.originalFilename ?? document.title,
+        url: fileAssetUrl(document.fileAsset) ?? "#",
+      })),
     riskSummary:
       campaign.content?.riskDisclaimer ||
       "Please review all listing information before participating.",
@@ -164,8 +173,15 @@ async function getMemberCampaignsRaw() {
       },
       content: true,
       documents: {
+        where: {
+          visibility: "MemberVisible",
+          documentStatus: { in: ["Published", "Ready"] },
+        },
         include: {
           fileAsset: true,
+        },
+        orderBy: {
+          createdAt: "asc",
         },
       },
       updates: true,

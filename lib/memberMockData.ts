@@ -49,7 +49,7 @@ export type Opportunity = {
   returnType: "Fixed" | "Target" | "Up To";
   maximumHoldingPeriodMonths: number;
   principalProtectionRule: string;
-  documents: string[];
+  documents: Array<string | { title: string; filename: string; url: string }>;
   riskSummary: string;
 };
 
