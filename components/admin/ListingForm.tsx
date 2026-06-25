@@ -10,13 +10,16 @@ import {
 } from "@/lib/adminMockData";
 
 const tabs = [
-  { id: "campaign-setup", label: "Campaign Setup" },
-  { id: "property-details", label: "Asset Details" },
-  { id: "media-documents", label: "Media & Documents" },
-  { id: "campaign-content", label: "Campaign Content" },
-  { id: "return-protection", label: "Return & Protection" },
+  { id: "basic-information", label: "Basic Information" },
+  { id: "property-information", label: "Property Information" },
+  { id: "investment-information", label: "Investment Information" },
   { id: "settlement-fees", label: "Settlement & Fees" },
-  { id: "review-publish", label: "Review & Publish" },
+  { id: "media", label: "Media" },
+  { id: "documents", label: "Documents" },
+  { id: "important-information", label: "Important Information" },
+  { id: "faq", label: "FAQ" },
+  { id: "risk-disclaimer", label: "Risk Disclaimer" },
+  { id: "review-publish", label: "Preview & Publish" },
 ];
 
 const campaignAmountFields = [
@@ -663,6 +666,8 @@ type ListingFormInitialValues = {
   returnType?: string;
   maximumHoldingPeriodMonths?: number;
   principalProtectionEnabled?: boolean;
+  memberProfitDistributionPercentagePlanned?: string | number | null;
+  platformProfitSharePercentagePlanned?: string | number | null;
   propertyDetail?: any;
   content?: any;
   media?: any[];
@@ -690,39 +695,38 @@ export function ListingForm({
   );
 
   const fieldSections: Record<string, string> = {
-    title: "campaign-setup",
-    campaignTarget: "campaign-setup",
-    minimumParticipationAmount: "campaign-setup",
-    maximumParticipationAmount: "campaign-setup",
-    campaignOpenDate: "campaign-setup",
-    campaignCloseDate: "campaign-setup",
-    propertyType: "property-details",
-    assetCategory: "property-details",
-    occupancyStatus: "property-details",
-    tenure: "property-details",
-    bumiStatus: "property-details",
-    builtUpArea: "property-details",
-    landArea: "property-details",
-    bedrooms: "property-details",
-    bathrooms: "property-details",
-    reservePrice: "property-details",
-    auctionDate: "property-details",
-    state: "property-details",
-    location: "property-details",
-    fullAddress: "property-details",
-    yearBuilt: "property-details",
-    heroImage: "media-documents",
-    documents: "media-documents",
-    aboutCampaign: "campaign-content",
-    importantInformation: "campaign-content",
-    riskDisclaimer: "campaign-content",
-    holdingReturnExplanation: "return-protection",
-    finalDistributionExplanation: "return-protection",
-    holdingReturnRateMonthly: "return-protection",
-    maximumHoldingPeriodMonths: "return-protection",
-    returnType: "return-protection",
-    faqQuestion: "campaign-content",
-    faqAnswer: "campaign-content",
+    title: "basic-information",
+    campaignTarget: "investment-information",
+    minimumParticipationAmount: "investment-information",
+    maximumParticipationAmount: "investment-information",
+    campaignOpenDate: "investment-information",
+    campaignCloseDate: "investment-information",
+    propertyType: "property-information",
+    assetCategory: "property-information",
+    occupancyStatus: "property-information",
+    tenure: "property-information",
+    bumiStatus: "property-information",
+    builtUpArea: "property-information",
+    landArea: "property-information",
+    bedrooms: "property-information",
+    bathrooms: "property-information",
+    reservePrice: "property-information",
+    state: "property-information",
+    location: "property-information",
+    fullAddress: "property-information",
+    yearBuilt: "property-information",
+    heroImage: "media",
+    documents: "documents",
+    aboutCampaign: "basic-information",
+    importantInformation: "important-information",
+    riskDisclaimer: "risk-disclaimer",
+    holdingReturnExplanation: "investment-information",
+    finalDistributionExplanation: "investment-information",
+    holdingReturnRateMonthly: "investment-information",
+    maximumHoldingPeriodMonths: "investment-information",
+    returnType: "investment-information",
+    faqQuestion: "faq",
+    faqAnswer: "faq",
   };
   const sectionsWithErrors = new Set(
     Object.keys(fieldErrors)
@@ -753,7 +757,8 @@ export function ListingForm({
     if (state.errors.length === 0) return;
     setToast({
       message:
-        state.errors[0] || "Please review the highlighted fields and try again.",
+        state.errors[0] ||
+        "Please review the highlighted fields and try again.",
       tone: "error",
     });
     const timer = window.setTimeout(() => setToast(null), 7000);
@@ -839,14 +844,14 @@ export function ListingForm({
       </div>
 
       <Section
-        id="campaign-setup"
-        title="Campaign Setup"
-        description="Manage identifiers, lifecycle status, participation limits, campaign dates and member preview visibility."
+        id="basic-information"
+        title="Basic Information"
+        description="Manage the core opportunity identity, status, readiness and publishing metadata."
       >
         <div className="grid gap-5 lg:grid-cols-2">
           <SubsectionCard
-            title="Identity & Visibility"
-            description="Reference details and member-facing visibility controls."
+            title="Identity"
+            description="Campaign code and campaign ID are generated by the system and locked after creation."
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <ReadOnlyField
@@ -860,16 +865,42 @@ export function ListingForm({
                 value={campaignCodeValue}
               />
               <Field
-                label="Campaign Title"
+                label="Opportunity Title"
                 name="title"
                 error={fieldErrors.title}
                 defaultValue={initialValues?.title}
               />
-              <SelectField
-                label="Member Preview Visibility"
+              <input
+                type="hidden"
                 name="visibility"
-                defaultValue={initialValues?.visibility ?? "InternalOnly"}
-                options={["MemberVisible", "InternalOnly"]}
+                value={initialValues?.visibility ?? "InternalOnly"}
+              />
+              <ReadOnlyField
+                label="Listing Readiness"
+                helper="Draft records remain internal; publishing sets the opportunity to member-visible when required fields pass validation."
+                value={
+                  initialValues?.publishStatus === "Published"
+                    ? "Ready / Published"
+                    : "Draft / In preparation"
+                }
+              />
+              <Field
+                label="Short Description"
+                name="aboutCampaign"
+                error={fieldErrors.aboutCampaign}
+                defaultValue={initialValues?.content?.aboutCampaign}
+                className="sm:col-span-2"
+                helper="Short member-facing overview used on opportunity detail."
+              />
+              <ReadOnlyField
+                label="Slug"
+                helper="Generated from opportunity title and kept unique automatically."
+                value={slug ?? "Auto-generated after save"}
+              />
+              <ReadOnlyField
+                label="Publish Status"
+                helper="Controlled by Save Draft, Publish Opportunity, and Unpublish Opportunity actions."
+                value={initialValues?.publishStatus ?? "Draft"}
               />
             </div>
           </SubsectionCard>
@@ -879,18 +910,18 @@ export function ListingForm({
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
-                label="Campaign Lifecycle Status"
+                label="Opportunity Status"
                 options={campaignLifecycleStatuses}
                 className="sm:col-span-2"
               />
               <Field
-                label="Campaign Open Date"
+                label="Publish Date"
                 name="campaignOpenDate"
                 error={fieldErrors.campaignOpenDate}
                 defaultValue={initialValues?.campaignOpenDate}
               />
               <Field
-                label="Campaign Close Date"
+                label="Expiry Date"
                 name="campaignCloseDate"
                 error={fieldErrors.campaignCloseDate}
                 defaultValue={initialValues?.campaignCloseDate}
@@ -902,12 +933,12 @@ export function ListingForm({
             </div>
           </SubsectionCard>
           <SubsectionCard
-            title="Participation & Progress"
-            description="Campaign funding values and derived campaign progress."
+            title="Investment Information"
+            description="Target funding, participation limits, expected return and campaign period."
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <Field
-                label="Campaign Target"
+                label="Target Funding"
                 name="campaignTarget"
                 error={fieldErrors.campaignTarget}
                 type="number"
@@ -954,8 +985,8 @@ export function ListingForm({
       </Section>
 
       <Section
-        id="property-details"
-        title="Asset Details"
+        id="property-information"
+        title="Property Information"
         description="Maintain the Malaysian asset benchmark fields that appear in the member asset snapshot."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1002,7 +1033,7 @@ export function ListingForm({
         <div className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field
-              label="Asset Type"
+              label="Property Type"
               name="propertyType"
               error={fieldErrors.propertyType}
               defaultValue={initialValues?.propertyDetail?.propertyType}
@@ -1053,12 +1084,6 @@ export function ListingForm({
               defaultValue={initialValues?.propertyDetail?.bathrooms}
             />
             <Field
-              label="Expected Acquisition Date"
-              name="auctionDate"
-              error={fieldErrors.auctionDate}
-              defaultValue={initialValues?.propertyDetail?.auctionDate}
-            />
-            <Field
               label="State"
               name="state"
               error={fieldErrors.state}
@@ -1088,9 +1113,133 @@ export function ListingForm({
       </Section>
 
       <Section
-        id="media-documents"
-        title="Media & Documents"
-        description="Manage the member-facing gallery, image metadata and document readiness."
+        id="investment-information"
+        title="Investment Information"
+        description="Review return expectations, distribution wording and investment period settings."
+      >
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Field
+            label="Expected Return"
+            name="holdingReturnRateMonthly"
+            error={fieldErrors.holdingReturnRateMonthly}
+            type="number"
+            step="0.01"
+            defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
+          />
+          <SelectField
+            label="Expected Distribution"
+            name="returnType"
+            defaultValue={initialValues?.returnType ?? "Target"}
+            options={["Fixed", "Target", "UpTo"]}
+            error={fieldErrors.returnType}
+          />
+          <Field
+            label="Investment Period (Months)"
+            name="maximumHoldingPeriodMonths"
+            error={fieldErrors.maximumHoldingPeriodMonths}
+            type="number"
+            defaultValue={initialValues?.maximumHoldingPeriodMonths ?? 24}
+          />
+          <label>
+            <span className="text-sm font-bold text-slate-600">
+              Principal Protection Enabled
+            </span>
+            <select
+              name="principalProtectionEnabled"
+              defaultValue={
+                initialValues?.principalProtectionEnabled === false
+                  ? "false"
+                  : "true"
+              }
+              className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+            >
+              <option value="true">Enabled</option>
+              <option value="false">Disabled</option>
+            </select>
+          </label>
+        </div>
+        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+          <TextAreaField
+            label="Holding Return Explanation"
+            name="holdingReturnExplanation"
+            error={fieldErrors.holdingReturnExplanation}
+            rows={5}
+            defaultValue={initialValues?.content?.holdingReturnExplanation}
+            helper="Holding Return accrues during the holding period and is paid once during final distribution."
+          />
+          <TextAreaField
+            label="Final Distribution Explanation"
+            name="finalDistributionExplanation"
+            error={fieldErrors.finalDistributionExplanation}
+            rows={5}
+            defaultValue={initialValues?.content?.finalDistributionExplanation}
+            helper="Explain Principal Return, Holding Return and Profit Distribution clearly."
+          />
+        </div>
+        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+          <p className="text-xs font-black uppercase tracking-wide text-blue-700">
+            Locked 24-Month Rule
+          </p>
+          <p className="mt-2 text-sm font-bold leading-6 text-blue-900">
+            If not sold within 24 months, Participation Amount only will be
+            returned.
+          </p>
+          <div className="mt-4">
+            <TextAreaField
+              label="24-Month Rule Display Text"
+              rows={3}
+              helper="Keep this aligned with the approved rule text."
+            />
+          </div>
+        </div>
+      </Section>
+
+      <Section
+        id="settlement-fees"
+        title="Settlement & Fees"
+        description="Optional / Later Stage finance workflow after acquisition, holding, preparation, disposal and final settlement details are available."
+      >
+        <details className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
+          <summary className="cursor-pointer text-sm font-black text-amber-900">
+            Optional / Later Stage — expand Settlement & Fees
+          </summary>
+          <p className="mt-3 text-sm leading-6 text-amber-900">
+            Finance and settlement details can be completed later after
+            acquisition, holding, preparation, and sale details are available.
+          </p>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2">
+            <Field
+              label="Member Profit Distribution Percentage"
+              name="memberProfitDistributionPercentagePlanned"
+              type="number"
+              step="0.01"
+              defaultValue={
+                initialValues?.memberProfitDistributionPercentagePlanned
+              }
+              helper="Optional. Percentage of future net profit allocated to members; no calculation is run here."
+            />
+            <Field
+              label="Platform Profit Share Percentage"
+              name="platformProfitSharePercentagePlanned"
+              type="number"
+              step="0.01"
+              defaultValue={initialValues?.platformProfitSharePercentagePlanned}
+              helper="Optional. Percentage reserved for platform share; no payment logic is triggered."
+            />
+            <TextAreaField
+              label="Optional Notes"
+              name="settlementFeeNotes"
+              rows={4}
+              helper="Optional operational notes for future fee-calculation workflows."
+            />
+          </div>
+        </details>
+      </Section>
+
+      <Section
+        id="media"
+        title="Media"
+        description="Manage the member-facing thumbnail, hero image, gallery previews and display ordering."
       >
         <div className="grid gap-5">
           <SubsectionCard
@@ -1237,122 +1386,120 @@ export function ListingForm({
               </div>
             ) : null}
           </SubsectionCard>
-          <SubsectionCard
-            title="Documents"
-            description="Document categories prepared for member review or internal operations."
-          >
-            <div data-field="documents" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <SelectField
-                label="Document Visibility"
-                name="newDocumentVisibility"
-                options={["Internal Only", "Member Visible"]}
-              />
-              <SelectField
-                label="Document Status"
-                name="newDocumentStatus"
-                options={["Draft", "Ready", "Published"]}
-              />
-            </div>
-            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {documentCategories.map((category) => (
-                <UploadZone
-                  key={category}
-                  title={`${category} Upload`}
-                  name={`documentFile:${category}`}
-                  helper="Upload document."
-                  supported={
-                    category === "Property Photos"
-                      ? "JPG, PNG, WEBP"
-                      : "PDF, DOCX"
-                  }
-                />
-              ))}
-            </div>
-            {documents.length > 0 ? (
-              <div className="mt-5 space-y-3">
-                {documents.map((document) => (
-                  <div
-                    key={document.id}
-                    className="rounded-xl border border-slate-100 bg-white p-4"
-                  >
-                    <input
-                      type="hidden"
-                      name="documentId"
-                      value={document.id}
-                    />
-                    <div className="mb-3 flex items-start justify-between gap-3">
-                      <p className="text-sm font-black text-papaipay-ink">
-                        {document.fileAsset?.originalFilename ?? document.title}
-                      </p>
-                      <label className="flex items-center gap-2 text-xs font-bold text-red-600">
-                        <input
-                          type="checkbox"
-                          name="deleteDocumentId"
-                          value={document.id}
-                        />{" "}
-                        Delete
-                      </label>
-                    </div>
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      <Field
-                        label="Document Title"
-                        name={`documentTitle:${document.id}`}
-                        defaultValue={document.title}
-                      />
-                      <SelectField
-                        label="Document Visibility"
-                        name={`documentVisibility:${document.id}`}
-                        defaultValue={
-                          document.visibility === "MemberVisible"
-                            ? "Member Visible"
-                            : "Internal Only"
-                        }
-                        options={["Internal Only", "Member Visible"]}
-                      />
-                      <SelectField
-                        label="Document Status"
-                        name={`documentStatus:${document.id}`}
-                        defaultValue={document.documentStatus}
-                        options={["Draft", "Ready", "Published", "Archived"]}
-                      />
-                      <SelectField
-                        label="Document Category"
-                        name={`documentCategory:${document.id}`}
-                        defaultValue={document.category}
-                        options={[
-                          "ProclamationOfSale",
-                          "ConditionsOfSale",
-                          "TitleSearch",
-                          "ValuationReport",
-                          "PropertyPhotos",
-                          "LocationMap",
-                          "LegalDocuments",
-                          "OtherDocuments",
-                        ]}
-                      />
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </SubsectionCard>
         </div>
       </Section>
 
       <Section
-        id="campaign-content"
-        title="Campaign Content"
-        description="Control member-facing campaign narrative, important information, timeline, updates, FAQ and risk text."
+        id="documents"
+        title="Documents"
+        description="Upload optional member-facing documents. Missing documents do not block publishing."
       >
-        <div className="grid gap-5 lg:grid-cols-2">
-          <TextAreaField
-            label="About This Listing"
-            name="aboutCampaign"
-            error={fieldErrors.aboutCampaign}
-            rows={7}
-            defaultValue={initialValues?.content?.aboutCampaign}
-            helper="Member-facing campaign overview displayed on the campaign detail page."
-          />
+        <SubsectionCard
+          title="Documents"
+          description="Document categories prepared for member review or internal operations."
+        >
+          <div
+            data-field="documents"
+            className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          >
+            <SelectField
+              label="Document Visibility"
+              name="newDocumentVisibility"
+              options={["Internal Only", "Member Visible"]}
+            />
+            <SelectField
+              label="Document Status"
+              name="newDocumentStatus"
+              options={["Draft", "Ready", "Published"]}
+            />
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {documentCategories.map((category) => (
+              <UploadZone
+                key={category}
+                title={`${category} Upload`}
+                name={`documentFile:${category}`}
+                helper="Upload document."
+                supported={
+                  category === "Property Photos"
+                    ? "JPG, PNG, WEBP"
+                    : "PDF, DOCX"
+                }
+              />
+            ))}
+          </div>
+          {documents.length > 0 ? (
+            <div className="mt-5 space-y-3">
+              {documents.map((document) => (
+                <div
+                  key={document.id}
+                  className="rounded-xl border border-slate-100 bg-white p-4"
+                >
+                  <input type="hidden" name="documentId" value={document.id} />
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <p className="text-sm font-black text-papaipay-ink">
+                      {document.fileAsset?.originalFilename ?? document.title}
+                    </p>
+                    <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                      <input
+                        type="checkbox"
+                        name="deleteDocumentId"
+                        value={document.id}
+                      />{" "}
+                      Delete
+                    </label>
+                  </div>
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    <Field
+                      label="Document Title"
+                      name={`documentTitle:${document.id}`}
+                      defaultValue={document.title}
+                    />
+                    <SelectField
+                      label="Document Visibility"
+                      name={`documentVisibility:${document.id}`}
+                      defaultValue={
+                        document.visibility === "MemberVisible"
+                          ? "Member Visible"
+                          : "Internal Only"
+                      }
+                      options={["Internal Only", "Member Visible"]}
+                    />
+                    <SelectField
+                      label="Document Status"
+                      name={`documentStatus:${document.id}`}
+                      defaultValue={document.documentStatus}
+                      options={["Draft", "Ready", "Published", "Archived"]}
+                    />
+                    <SelectField
+                      label="Document Category"
+                      name={`documentCategory:${document.id}`}
+                      defaultValue={document.category}
+                      options={[
+                        "ProclamationOfSale",
+                        "ConditionsOfSale",
+                        "TitleSearch",
+                        "ValuationReport",
+                        "PropertyPhotos",
+                        "LocationMap",
+                        "LegalDocuments",
+                        "OtherDocuments",
+                      ]}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
+        </SubsectionCard>
+      </Section>
+
+      <Section
+        id="important-information"
+        title="Important Information"
+        description="Maintain member-facing important information with formatting preserved."
+      >
+        <div className="grid gap-5">
           <TextAreaField
             label="Important Information"
             name="importantInformation"
@@ -1361,47 +1508,17 @@ export function ListingForm({
             defaultValue={initialValues?.content?.importantInformation}
           />
         </div>
-        <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-          <h3 className="text-sm font-black text-papaipay-ink">
-            Campaign Timeline
-          </h3>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
-            Read-only lifecycle display. Stage changes will be system-generated
-            later from campaign events.
-          </p>
-          <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            {timelineStages.map((stage, index) => (
-              <div
-                key={stage}
-                className="rounded-xl border border-slate-100 bg-white p-3 text-sm font-bold text-slate-700"
-              >
-                <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
-                  {index + 1}
-                </span>
-                <p>{stage === "Open" ? "Published" : stage}</p>
-                <p className="mt-1 text-xs font-medium text-slate-400">
-                  System-generated stage
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
-          <RepeaterPreview
-            title="Updates"
-            description="Add member-facing update entries for upcoming release workflows."
-            buttonLabel="Add Update"
-            items={[
-              {
-                primary: "Update Title",
-                secondary: "Update Date",
-                body: "Update Description / Body",
-              },
-            ]}
-          />
+      </Section>
+
+      <Section
+        id="faq"
+        title="FAQ"
+        description="Manage optional member-facing questions and answers. Empty FAQ fields do not block publishing."
+      >
+        <div className="grid gap-5">
           <SubsectionCard
             title="FAQ"
-            description="Add the primary member-facing FAQ required before publishing."
+            description="Add, edit or clear the primary member-facing FAQ. FAQ is optional for publishing."
           >
             <input type="hidden" name="faqId" value={primaryFaq?.id ?? ""} />
             <div className="grid gap-4 sm:grid-cols-2">
@@ -1422,176 +1539,23 @@ export function ListingForm({
               />
             </div>
           </SubsectionCard>
-          <div className="lg:col-span-2">
-            <TextAreaField
-              label="Risk Disclaimer"
-              name="riskDisclaimer"
-              error={fieldErrors.riskDisclaimer}
-              rows={5}
-              defaultValue={initialValues?.content?.riskDisclaimer}
-            />
-          </div>
         </div>
       </Section>
 
       <Section
-        id="return-protection"
-        title="Return & Protection"
-        description="Configure the holding return model and the member-facing final distribution explanation."
+        id="risk-disclaimer"
+        title="Risk Disclaimer"
+        description="Optional member-facing risk text. Formatting is preserved on the member detail page."
       >
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Field
-            label="Holding Return Rate"
-            name="holdingReturnRateMonthly"
-            error={fieldErrors.holdingReturnRateMonthly}
-            type="number"
-            step="0.01"
-            defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
-          />
-          <SelectField
-            label="Return Type"
-            name="returnType"
-            defaultValue={initialValues?.returnType ?? "Target"}
-            options={["Fixed", "Target", "UpTo"]}
-            error={fieldErrors.returnType}
-          />
-          <Field
-            label="Maximum Holding Period Months"
-            name="maximumHoldingPeriodMonths"
-            error={fieldErrors.maximumHoldingPeriodMonths}
-            type="number"
-            defaultValue={initialValues?.maximumHoldingPeriodMonths ?? 24}
-          />
-          <label>
-            <span className="text-sm font-bold text-slate-600">
-              Principal Protection Enabled
-            </span>
-            <select
-              name="principalProtectionEnabled"
-              defaultValue={
-                initialValues?.principalProtectionEnabled === false
-                  ? "false"
-                  : "true"
-              }
-              className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
-            >
-              <option value="true">Enabled</option>
-              <option value="false">Disabled</option>
-            </select>
-          </label>
-        </div>
-        <div className="mt-5 grid gap-5 lg:grid-cols-2">
+        <div>
           <TextAreaField
-            label="Holding Return Explanation"
-            name="holdingReturnExplanation"
-            error={fieldErrors.holdingReturnExplanation}
+            label="Risk Disclaimer"
+            name="riskDisclaimer"
+            error={fieldErrors.riskDisclaimer}
             rows={5}
-            defaultValue={initialValues?.content?.holdingReturnExplanation}
-            helper="Holding Return accrues during the holding period and is paid once during final distribution."
-          />
-          <TextAreaField
-            label="Final Distribution Explanation"
-            name="finalDistributionExplanation"
-            error={fieldErrors.finalDistributionExplanation}
-            rows={5}
-            defaultValue={initialValues?.content?.finalDistributionExplanation}
-            helper="Explain Principal Return, Holding Return and Profit Distribution clearly."
+            defaultValue={initialValues?.content?.riskDisclaimer}
           />
         </div>
-        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-          <p className="text-xs font-black uppercase tracking-wide text-blue-700">
-            Locked 24-Month Rule
-          </p>
-          <p className="mt-2 text-sm font-bold leading-6 text-blue-900">
-            If not sold within 24 months, Participation Amount only will be
-            returned.
-          </p>
-          <div className="mt-4">
-            <TextAreaField
-              label="24-Month Rule Display Text"
-              rows={3}
-              helper="Keep this aligned with the approved rule text."
-            />
-          </div>
-        </div>
-      </Section>
-
-      <Section
-        id="settlement-fees"
-        title="Settlement & Fees"
-        description="Optional / Later Stage finance workflow after acquisition, holding, preparation, disposal and final settlement details are available."
-      >
-        <details className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4">
-          <summary className="cursor-pointer text-sm font-black text-amber-900">
-            Optional / Later Stage — expand Settlement & Fees
-          </summary>
-          <p className="mt-3 text-sm leading-6 text-amber-900">
-            Finance and settlement details can be completed later after
-            acquisition, holding, preparation, and sale details are available.
-          </p>
-          <div className="mt-5 space-y-5">
-          <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
-            <div className="grid gap-4 lg:grid-cols-[1fr_2fr] lg:items-start">
-              <SelectField
-                label="Calculation Status"
-                options={["Draft", "Reviewed", "Approved", "Locked"]}
-              />
-              <div className="rounded-xl border border-amber-200 bg-white/70 p-4 text-sm leading-6 text-amber-900">
-                <p className="text-xs font-black uppercase tracking-wide">
-                  Finance workflow / calculation
-                </p>
-                <p className="mt-1">
-                  <strong>Locked calculation note:</strong> if Calculation
-                  Status is Locked, finance values should not be edited
-                  casually. Add remarks before requesting a change.
-                </p>
-              </div>
-            </div>
-          </div>
-          <CostAccordion
-            title="Acquisition Costs"
-            fields={acquisitionCostFields}
-          />
-          <CostAccordion title="Holding Costs" fields={holdingCostFields} />
-          <CostAccordion
-            title="Renovation / Preparation Costs"
-            fields={renovationCostFields}
-          />
-          <CostAccordion
-            title="Disposal / Sale Costs"
-            fields={disposalCostFields}
-          />
-          <CostAccordion
-            title="Platform / Management Costs"
-            fields={platformCostFields}
-          />
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Field
-              label="Member Profit Distribution Percentage"
-              helper="Optional / later-stage field. Percentage of net profit allocated to members after final disposal."
-            />
-            <Field
-              label="Platform Profit Share Percentage"
-              helper="Optional / later-stage field. Percentage of net profit allocated to the platform after final disposal."
-            />
-          </div>
-          <SubsectionCard
-            title="Calculation Preview"
-            description="Read-only values calculated from the entered settlement and distribution fields."
-          >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {calculationFields.map((field) => (
-                <CalculatedField
-                  key={field}
-                  label={field}
-                  helper="Calculated from settlement values."
-                />
-              ))}
-            </div>
-          </SubsectionCard>
-          <TextAreaField label="Calculation Remarks" rows={4} />
-          </div>
-        </details>
       </Section>
 
       <Section
@@ -1607,12 +1571,12 @@ export function ListingForm({
             "Min / Max Participation set",
             "Asset Snapshot complete",
             "Gallery ready",
-            "Required documents ready",
-            "About This Opportunity completed",
-            "Important Information completed",
-            "Return & Protection completed",
-            "24-month rule visible",
-            "Settlement optional / later-stage",
+            "Media thumbnail reviewed",
+            "Short Description completed",
+            "Important Information reviewed",
+            "Investment Information completed",
+            "Optional fields do not block publish",
+            "Draft / Ready / Published status reviewed",
             "Member Preview checked",
           ].map((item) => (
             <ChecklistItem key={item} label={item} />
