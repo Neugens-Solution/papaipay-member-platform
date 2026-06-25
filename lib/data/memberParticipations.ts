@@ -33,6 +33,8 @@ export async function getMemberParticipations() {
       status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
       estimatedYield: "18.0% p.a.",
       dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
+      assetCategory: record.property.propertyType === "Apartment" || record.property.propertyType === "Condominium" ? "Residential Asset" : record.property.propertyType === "Shop Lot" ? "Commercial Asset" : "Residential Asset",
+      occupancyStatus: "To be confirmed",
     }));
 
     return records.map((record: ParticipationWithRelations) => {
@@ -50,6 +52,8 @@ export async function getMemberParticipations() {
         distributionStatus: latestDistribution ? latestDistribution.status : "Pending Payment",
         estimatedYield: `${(decimalToNumber(record.campaign.holdingReturnRateMonthly) * 12).toFixed(2)}% p.a.`,
         dateSubmitted: formatDate(record.createdAt),
+        assetCategory: record.campaign.propertyDetail?.assetCategory || record.campaign.propertyDetail?.propertyType || "Residential Asset",
+        occupancyStatus: record.campaign.propertyDetail?.occupancyStatus || "To be confirmed",
         finalDistributionTotal: latestDistribution ? decimalToNumber(latestDistribution.finalDistributionTotal) : 0,
         holdingPeriodMonths: 0,
       };
@@ -61,6 +65,8 @@ export async function getMemberParticipations() {
       status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
       estimatedYield: "18.0% p.a.",
       dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
+      assetCategory: record.property.propertyType === "Apartment" || record.property.propertyType === "Condominium" ? "Residential Asset" : record.property.propertyType === "Shop Lot" ? "Commercial Asset" : "Residential Asset",
+      occupancyStatus: "To be confirmed",
     }));
   }
 }
