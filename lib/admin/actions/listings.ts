@@ -127,7 +127,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     field: "campaignCloseDate",
   },
   holdingReturnRateMonthly: {
-    label: "Monthly Holding Return",
+    label: "Holding Return Rate",
     field: "holdingReturnRateMonthly",
   },
   returnType: { label: "Return Type", field: "returnType" },
@@ -146,11 +146,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.location": { label: "Location", field: "location" },
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
-  "property.reservePrice": { label: "Market Value", field: "reservePrice" },
-  "property.auctionDate": {
-    label: "Expected Acquisition Date",
-    field: "auctionDate",
-  },
+  "property.reservePrice": { label: "Indicative Value", field: "reservePrice" },
   "content.aboutCampaign": {
     label: "About This Listing",
     field: "aboutCampaign",
@@ -192,6 +188,44 @@ function friendlyZodErrors(error: ZodError): ListingFormState {
     return message;
   });
   return { errors: Array.from(new Set(errors)), fieldErrors };
+}
+
+
+const publishRequiredFields: { key: string; label: string; formField: string }[] = [
+  { key: "title", label: "Listing Title", formField: "title" },
+  { key: "propertyType", label: "Property Type", formField: "propertyType" },
+  { key: "state", label: "State", formField: "state" },
+  { key: "location", label: "Location", formField: "location" },
+  { key: "fullAddress", label: "Full Address", formField: "fullAddress" },
+  { key: "campaignTarget", label: "Campaign Target", formField: "campaignTarget" },
+  { key: "minimumParticipationAmount", label: "Minimum Participation Amount", formField: "minimumParticipationAmount" },
+  { key: "maximumParticipationAmount", label: "Maximum Participation Amount", formField: "maximumParticipationAmount" },
+  { key: "campaignCloseDate", label: "Campaign Close Date", formField: "campaignCloseDate" },
+  { key: "aboutCampaign", label: "About This Listing", formField: "aboutCampaign" },
+  { key: "holdingReturnRateMonthly", label: "Holding Return Rate", formField: "holdingReturnRateMonthly" },
+  { key: "returnType", label: "Return Type", formField: "returnType" },
+  { key: "maximumHoldingPeriodMonths", label: "Maximum Holding Period", formField: "maximumHoldingPeriodMonths" },
+];
+
+function assertPublishRequiredFields(formData: FormData, options: { heroMissing?: boolean } = {}) {
+  const fieldErrors: Record<string, string> = {};
+  const errors: string[] = [];
+  for (const field of publishRequiredFields) {
+    const value = requiredString(formData, field.formField);
+    if (!value || value === "0") {
+      const message = `Please complete ${field.label}.`;
+      fieldErrors[field.key] = message;
+      errors.push(message);
+    }
+  }
+  if (options.heroMissing) {
+    const message = "Please add a Hero Image before publishing.";
+    fieldErrors.heroImage = message;
+    errors.push(message);
+  }
+  if (errors.length > 0) {
+    throw new ListingFormValidationError(Array.from(new Set(errors)), fieldErrors);
+  }
 }
 
 function assertLength(value: string, max: number, label: string) {
@@ -446,11 +480,9 @@ export async function saveListingAction(
       Boolean(
         existing?.media.some((media) => media.mediaType === "PrimaryImage"),
       ) && requiredString(formData, "deleteHeroImage") !== "true";
-    if (action === "publish" && !heroFile && !hasExistingHero)
-      throw new ListingFormValidationError(
-        ["Please add a Hero Image before publishing."],
-        { heroImage: "Please add a Hero Image before publishing." },
-      );
+    if (action === "publish") {
+      assertPublishRequiredFields(formData, { heroMissing: !heroFile && !hasExistingHero });
+    }
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
@@ -614,8 +646,8 @@ export async function saveListingAction(
         });
       }
       for (const category of [
-        "Proclamation of Sale",
-        "Conditions of Sale",
+        "Sale / Listing Document",
+        "Terms Document",
         "Title Search",
         "Valuation Report",
         "Property Photos",

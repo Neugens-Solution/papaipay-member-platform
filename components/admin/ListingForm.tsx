@@ -4,10 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useFormState, useFormStatus } from "react-dom";
 import { Card } from "@/components/admin/AdminUI";
 import { saveListingAction } from "@/lib/admin/actions/listings";
-import {
-  campaignLifecycleStatuses,
-  documentCategories,
-} from "@/lib/adminMockData";
+import { campaignLifecycleStatuses } from "@/lib/adminMockData";
 
 const tabs = [
   { id: "campaign-setup", label: "Campaign Setup" },
@@ -18,6 +15,48 @@ const tabs = [
   { id: "settlement-fees", label: "Settlement & Fees" },
   { id: "review-publish", label: "Review & Publish" },
 ];
+
+const propertyTypeOptions = [
+  "Apartment",
+  "Condominium",
+  "Terrace House",
+  "Semi-D",
+  "Bungalow",
+  "Shop Lot",
+  "Office",
+  "Land",
+  "Other",
+] as const;
+
+const listingDocumentCategories = [
+  "Sale / Listing Document",
+  "Terms Document",
+  "Title Search",
+  "Valuation Report",
+  "Property Photos",
+  "Location Map",
+  "Legal Documents",
+  "Other Documents",
+] as const;
+
+const malaysiaStateOptions = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Penang",
+  "Perak",
+  "Perlis",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "Kuala Lumpur",
+  "Putrajaya",
+  "Labuan",
+] as const;
 
 const campaignAmountFields = [
   "Campaign Target",
@@ -175,13 +214,16 @@ function SelectField({
       ) : null}
       <select
         name={name}
-        defaultValue={defaultValue}
+        defaultValue={defaultValue ?? ""}
         aria-invalid={Boolean(error)}
         aria-describedby={error && name ? `${name}-error` : undefined}
         className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
       >
+        <option value="" disabled>
+          Select {label}
+        </option>
         {options.map((option) => (
-          <option key={option}>{option}</option>
+          <option key={option} value={option}>{option}</option>
         ))}
       </select>
       {error && name ? (
@@ -636,17 +678,6 @@ function SubsectionCard({
   );
 }
 
-function ChecklistItem({ label }: { label: string }) {
-  return (
-    <li className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold text-slate-700">
-      <span className="grid h-5 w-5 place-items-center rounded-full bg-emerald-100 text-xs text-papaipay-green">
-        ✓
-      </span>
-      {label}
-    </li>
-  );
-}
-
 type ListingFormInitialValues = {
   id?: string;
   campaignRef?: string;
@@ -808,7 +839,7 @@ export function ListingForm({
           </ul>
         </div>
       ) : null}
-      <div className="sticky top-[76px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
+      <div className="z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
         <div
           className="flex gap-2 overflow-x-auto"
           aria-label="Listing form sections"
@@ -994,14 +1025,15 @@ export function ListingForm({
         </div>
         <div className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field
+            <SelectField
               label="Property Type"
               name="propertyType"
               error={fieldErrors.propertyType}
-              defaultValue={initialValues?.propertyDetail?.propertyType}
+              defaultValue={initialValues?.propertyDetail?.propertyType ?? ""}
+              options={propertyTypeOptions}
             />
             <Field
-              label="Market Value"
+              label="Indicative Value"
               name="reservePrice"
               error={fieldErrors.reservePrice}
               type="number"
@@ -1033,17 +1065,12 @@ export function ListingForm({
               type="number"
               defaultValue={initialValues?.propertyDetail?.bathrooms}
             />
-            <Field
-              label="Expected Acquisition Date"
-              name="auctionDate"
-              error={fieldErrors.auctionDate}
-              defaultValue={initialValues?.propertyDetail?.auctionDate}
-            />
-            <Field
+            <SelectField
               label="State"
               name="state"
               error={fieldErrors.state}
-              defaultValue={initialValues?.propertyDetail?.state}
+              defaultValue={initialValues?.propertyDetail?.state ?? ""}
+              options={malaysiaStateOptions}
             />
             <Field
               label="Location"
@@ -1220,7 +1247,7 @@ export function ListingForm({
           </SubsectionCard>
           <SubsectionCard
             title="Documents"
-            description="Document categories prepared for member review or internal operations."
+            description="Documents can be uploaded later before member publication or internal review."
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SelectField
@@ -1235,7 +1262,7 @@ export function ListingForm({
               />
             </div>
             <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              {documentCategories.map((category) => (
+              {listingDocumentCategories.map((category) => (
                 <UploadZone
                   key={category}
                   title={`${category} Upload`}
@@ -1301,8 +1328,8 @@ export function ListingForm({
                         name={`documentCategory:${document.id}`}
                         defaultValue={document.category}
                         options={[
-                          "ProclamationOfSale",
-                          "ConditionsOfSale",
+                          "LegalDocuments",
+                          "OtherDocuments",
                           "TitleSearch",
                           "ValuationReport",
                           "PropertyPhotos",
@@ -1497,7 +1524,7 @@ export function ListingForm({
           </summary>
           <p className="mt-3 text-sm leading-6 text-amber-900">
             Finance and settlement details can be completed later after
-            acquisition, holding, preparation, and sale details are available.
+            acquisition, holding, preparation, disposal, and final settlement details are available.
           </p>
           <div className="mt-5 space-y-5">
           <div className="rounded-2xl border border-amber-200 bg-amber-50/80 p-4">
@@ -1569,25 +1596,14 @@ export function ListingForm({
         title="Review & Publish"
         description="Confirm readiness before saving, publishing or previewing the member-facing listing."
       >
-        <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {[
-            "Campaign ID present",
-            "Campaign Code present",
-            "Campaign Target set",
-            "Min / Max Participation set",
-            "Property Snapshot complete",
-            "Gallery ready",
-            "Required documents ready",
-            "About This Listing completed",
-            "Important Information completed",
-            "Return & Protection completed",
-            "24-month rule visible",
-            "Settlement optional / later-stage",
-            "Member Preview checked",
-          ].map((item) => (
-            <ChecklistItem key={item} label={item} />
-          ))}
-        </ul>
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+          <p className="text-sm font-bold text-papaipay-ink">
+            Use Publish Listing to run the final member-facing validation. Any missing fields will be highlighted inline, and the first invalid field will be brought into view.
+          </p>
+          <p className="mt-2 text-xs leading-5 text-slate-500">
+            Save Draft is intentionally loose so incomplete listings can be prepared over time. Documents and Settlement & Fees can be completed later.
+          </p>
+        </div>
         <div className="mt-6 rounded-2xl border border-papaipay-green/20 bg-emerald-50/70 p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
