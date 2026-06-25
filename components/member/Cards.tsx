@@ -62,12 +62,12 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <ProgressBar value={progress} />
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Listing Progress</p>
+            <p>{progress}% Opportunity Progress</p>
           </div>
         </div>
 
         <dl className="space-y-2 text-sm">
-          <DetailRow label="Property Type" value={opportunity.propertyType} />
+          <DetailRow label="Asset Type" value={opportunity.propertyType} />
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
           <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
@@ -76,7 +76,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </dl>
 
         <Link href={detailHref} className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
-          View Listing
+          View Opportunity
         </Link>
       </div>
     </article>

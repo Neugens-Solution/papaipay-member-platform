@@ -11,7 +11,7 @@ import {
 
 const tabs = [
   { id: "campaign-setup", label: "Campaign Setup" },
-  { id: "property-details", label: "Property Details" },
+  { id: "property-details", label: "Asset Details" },
   { id: "media-documents", label: "Media & Documents" },
   { id: "campaign-content", label: "Campaign Content" },
   { id: "return-protection", label: "Return & Protection" },
@@ -28,7 +28,7 @@ const campaignDateFields = ["Campaign Open Date", "Campaign Close Date"];
 
 const propertyFields = [
   "Asset Category",
-  "Property Type",
+  "Asset Type",
   "Market Value",
   "Estimated Yield",
   "Occupancy Status",
@@ -667,6 +667,7 @@ type ListingFormInitialValues = {
   content?: any;
   media?: any[];
   documents?: any[];
+  faqs?: any[];
 };
 
 export function ListingForm({
@@ -696,6 +697,8 @@ export function ListingForm({
     campaignOpenDate: "campaign-setup",
     campaignCloseDate: "campaign-setup",
     propertyType: "property-details",
+    assetCategory: "property-details",
+    occupancyStatus: "property-details",
     tenure: "property-details",
     bumiStatus: "property-details",
     builtUpArea: "property-details",
@@ -709,6 +712,7 @@ export function ListingForm({
     fullAddress: "property-details",
     yearBuilt: "property-details",
     heroImage: "media-documents",
+    documents: "media-documents",
     aboutCampaign: "campaign-content",
     importantInformation: "campaign-content",
     riskDisclaimer: "campaign-content",
@@ -717,6 +721,8 @@ export function ListingForm({
     holdingReturnRateMonthly: "return-protection",
     maximumHoldingPeriodMonths: "return-protection",
     returnType: "return-protection",
+    faqQuestion: "campaign-content",
+    faqAnswer: "campaign-content",
   };
   const sectionsWithErrors = new Set(
     Object.keys(fieldErrors)
@@ -788,6 +794,7 @@ export function ListingForm({
       (media) => media.mediaType === "GalleryImage",
     ) ?? [];
   const documents = initialValues?.documents ?? [];
+  const primaryFaq = initialValues?.faqs?.[0];
 
   return (
     <form action={formAction} className="space-y-5">
@@ -948,8 +955,8 @@ export function ListingForm({
 
       <Section
         id="property-details"
-        title="Property Details"
-        description="Maintain the Malaysian property benchmark fields that appear in the member property snapshot."
+        title="Asset Details"
+        description="Maintain the Malaysian asset benchmark fields that appear in the member asset snapshot."
       >
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <SelectField
@@ -995,10 +1002,22 @@ export function ListingForm({
         <div className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field
-              label="Property Type"
+              label="Asset Type"
               name="propertyType"
               error={fieldErrors.propertyType}
               defaultValue={initialValues?.propertyDetail?.propertyType}
+            />
+            <Field
+              label="Asset Category"
+              name="assetCategory"
+              error={fieldErrors.assetCategory}
+              defaultValue={initialValues?.propertyDetail?.assetCategory}
+            />
+            <Field
+              label="Occupancy Status"
+              name="occupancyStatus"
+              error={fieldErrors.occupancyStatus}
+              defaultValue={initialValues?.propertyDetail?.occupancyStatus}
             />
             <Field
               label="Market Value"
@@ -1222,7 +1241,7 @@ export function ListingForm({
             title="Documents"
             description="Document categories prepared for member review or internal operations."
           >
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div data-field="documents" className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <SelectField
                 label="Document Visibility"
                 name="newDocumentVisibility"
@@ -1359,7 +1378,7 @@ export function ListingForm({
                 <span className="mb-2 inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-xs text-slate-500">
                   {index + 1}
                 </span>
-                <p>{stage}</p>
+                <p>{stage === "Open" ? "Published" : stage}</p>
                 <p className="mt-1 text-xs font-medium text-slate-400">
                   System-generated stage
                 </p>
@@ -1380,21 +1399,32 @@ export function ListingForm({
               },
             ]}
           />
-          <RepeaterPreview
+          <SubsectionCard
             title="FAQ"
-            description="Add member-facing FAQ entries for upcoming release workflows."
-            buttonLabel="Add FAQ"
-            items={[
-              {
-                primary: "Question",
-                secondary: "Display Order",
-                body: "Answer",
-              },
-            ]}
-          />
+            description="Add the primary member-facing FAQ required before publishing."
+          >
+            <input type="hidden" name="faqId" value={primaryFaq?.id ?? ""} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <Field
+                label="Question"
+                name="faqQuestion"
+                error={fieldErrors.faqQuestion}
+                defaultValue={primaryFaq?.question}
+              />
+              <Field label="Display Order" type="number" defaultValue={0} />
+            </div>
+            <div className="mt-4">
+              <TextAreaField
+                label="Answer"
+                name="faqAnswer"
+                error={fieldErrors.faqAnswer}
+                defaultValue={primaryFaq?.answer}
+              />
+            </div>
+          </SubsectionCard>
           <div className="lg:col-span-2">
             <TextAreaField
-              label="Risk / Disclaimer"
+              label="Risk Disclaimer"
               name="riskDisclaimer"
               error={fieldErrors.riskDisclaimer}
               rows={5}
@@ -1575,10 +1605,10 @@ export function ListingForm({
             "Campaign Code present",
             "Campaign Target set",
             "Min / Max Participation set",
-            "Property Snapshot complete",
+            "Asset Snapshot complete",
             "Gallery ready",
             "Required documents ready",
-            "About This Listing completed",
+            "About This Opportunity completed",
             "Important Information completed",
             "Return & Protection completed",
             "24-month rule visible",
@@ -1637,7 +1667,7 @@ export function ListingForm({
                 pendingLabel="Publishing..."
                 className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
               >
-                Publish Listing
+                Publish Opportunity
               </SubmitButton>
             </>
           ) : (
@@ -1655,7 +1685,7 @@ export function ListingForm({
                   pendingLabel="Unpublishing..."
                   className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800"
                 >
-                  Unpublish Listing
+                  Unpublish Opportunity
                 </SubmitButton>
               ) : (
                 <SubmitButton
@@ -1663,7 +1693,7 @@ export function ListingForm({
                   pendingLabel="Publishing..."
                   className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
                 >
-                  Publish Listing
+                  Publish Opportunity
                 </SubmitButton>
               )}
             </>

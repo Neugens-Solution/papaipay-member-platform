@@ -135,7 +135,9 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     label: "Maximum Holding Period",
     field: "maximumHoldingPeriodMonths",
   },
-  "property.propertyType": { label: "Property Type", field: "propertyType" },
+  "property.propertyType": { label: "Asset Type", field: "propertyType" },
+  "property.assetCategory": { label: "Asset Category", field: "assetCategory" },
+  "property.occupancyStatus": { label: "Occupancy Status", field: "occupancyStatus" },
   "property.tenure": { label: "Tenure", field: "tenure" },
   "property.bumiStatus": { label: "Bumi Status", field: "bumiStatus" },
   "property.builtUpArea": { label: "Built-Up", field: "builtUpArea" },
@@ -317,6 +319,12 @@ function buildInput(
       propertyType: isPublish
         ? requiredString(formData, "propertyType")
         : draftString(formData, "propertyType", "To be confirmed"),
+      assetCategory: isPublish
+        ? requiredString(formData, "assetCategory")
+        : draftString(formData, "assetCategory", "Residential Asset"),
+      occupancyStatus: isPublish
+        ? requiredString(formData, "occupancyStatus")
+        : draftString(formData, "occupancyStatus", "To be confirmed"),
       tenure,
       tenureAlias: tenure === "Freehold" ? "FH" : "LH",
       isLaca: checkboxBoolean(formData, "isLaca"),
@@ -346,8 +354,12 @@ function buildInput(
           "aboutCampaign",
           "Draft content to be completed.",
         ),
-      importantInformation: requiredString(formData, "importantInformation"),
-      riskDisclaimer: requiredString(formData, "riskDisclaimer"),
+      importantInformation: isPublish
+        ? requiredString(formData, "importantInformation")
+        : requiredString(formData, "importantInformation"),
+      riskDisclaimer: isPublish
+        ? requiredString(formData, "riskDisclaimer")
+        : requiredString(formData, "riskDisclaimer"),
       holdingReturnExplanation: requiredString(
         formData,
         "holdingReturnExplanation",
@@ -417,6 +429,7 @@ export async function saveListingAction(
             content: true,
             media: { include: { fileAsset: true } },
             documents: { include: { fileAsset: true } },
+            faqs: true,
           },
         })
       : null;
@@ -450,6 +463,36 @@ export async function saveListingAction(
       throw new ListingFormValidationError(
         ["Please add a Hero Image before publishing."],
         { heroImage: "Please add a Hero Image before publishing." },
+      );
+    const hasPublishableDocument =
+      existing?.documents.some(
+        (document) =>
+          document.visibility === "MemberVisible" &&
+          ["Ready", "Published"].includes(document.documentStatus) &&
+          !formData.getAll("deleteDocumentId").includes(document.id),
+      ) ||
+      [
+        "Proclamation of Sale",
+        "Conditions of Sale",
+        "Title Search",
+        "Valuation Report",
+        "Property Photos",
+        "Location Map",
+        "Legal Documents",
+        "Other Documents",
+      ].some((category) => fileFromForm(formData, `documentFile:${category}`));
+    if (action === "publish" && !hasPublishableDocument)
+      throw new ListingFormValidationError(
+        ["Please add at least one member-visible Document before publishing."],
+        { documents: "Please add at least one member-visible Document before publishing." },
+      );
+    const faqQuestion = requiredString(formData, "faqQuestion");
+    const faqAnswer = requiredString(formData, "faqAnswer");
+    const hasExistingFaq = Boolean(existing?.faqs?.length);
+    if (action === "publish" && !hasExistingFaq && (!faqQuestion || !faqAnswer))
+      throw new ListingFormValidationError(
+        ["Please add at least one FAQ before publishing."],
+        { faqQuestion: "Please add a FAQ question.", faqAnswer: "Please add a FAQ answer." },
       );
     const input = buildInput(formData, action, {
       campaignCode:
@@ -653,6 +696,21 @@ export async function saveListingAction(
             afterSnapshot: { documentId: document.id, fileAssetId: asset.id },
           }),
         );
+      }
+      const faqQuestion = requiredString(formData, "faqQuestion");
+      const faqAnswer = requiredString(formData, "faqAnswer");
+      const faqId = requiredString(formData, "faqId");
+      if (faqQuestion || faqAnswer) {
+        if (faqId) {
+          await tx.campaignFaq.update({
+            where: { id: faqId },
+            data: { question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+          });
+        } else {
+          await tx.campaignFaq.create({
+            data: { campaignId: campaign.id, question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+          });
+        }
       }
       if (mediaAuditEvents.length > 0)
         await tx.auditLog.createMany({ data: mediaAuditEvents });

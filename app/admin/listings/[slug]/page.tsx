@@ -44,22 +44,22 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <BackLink href="/admin/listings" label="Back to Listings" />
+      <BackLink href="/admin/listings" label="Back to Opportunity Management" />
       <PageHeader
         eyebrow={`${listing.campaignRef} • ${listing.campaignCode}`}
         title={listing.title}
-        description="Overview, participants, property details, documents, settlement / fees and manual distribution workflow."
+        description="Overview, participants, asset details, documents, settlement / fees and manual distribution workflow."
         action={
           <Link
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
             href={`/admin/listings/${listing.slug}/edit`}
           >
-            Edit Listing
+            Edit Opportunity
           </Link>
         }
       />
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Overview", "Participants", "Property Details", "Documents", "Updates", "Settlement / Fees", "Distribution"].map((tab) => (
+        {["Overview", "Participants", "Asset Details", "Documents", "Updates", "Settlement / Fees", "Distribution"].map((tab) => (
           <span key={tab} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200">
             {tab}
           </span>
@@ -74,10 +74,10 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
               { label: "Campaign ID", value: listing.campaignRef },
               { label: "Campaign Code", value: listing.campaignCode },
               { label: "Location", value: property?.location || property?.state || "To be confirmed" },
-              { label: "Asset Category", value: property?.propertyType || "Residential Property" },
+              { label: "Asset Category", value: property?.assetCategory || property?.propertyType || "Residential Asset" },
               { label: "Market Value", value: marketValue ? formatCurrency(marketValue) : "To be confirmed" },
               { label: "Estimated Yield", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
-              { label: "Occupancy Status", value: "To be confirmed" },
+              { label: "Occupancy Status", value: property?.occupancyStatus || "To be confirmed" },
               { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },
               { label: "Campaign Target", value: formatCurrency(target) },
               { label: "Collected Amount", value: formatCurrency(collected) },
@@ -137,11 +137,11 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
 
       <section className="grid gap-4 lg:grid-cols-3">
         <Card>
-          <h2 className="font-bold">Property Details</h2>
+          <h2 className="font-bold">Asset Details</h2>
           <InfoGrid
             items={[
-              { label: "Asset Category", value: "Residential Property" },
-              { label: "Property Type", value: property?.propertyType || "To be confirmed" },
+              { label: "Asset Category", value: "Residential Asset" },
+              { label: "Asset Type", value: property?.propertyType || "To be confirmed" },
               {
                 label: "Tenure",
                 value: formatTenure(property?.tenure || property?.tenureAlias),

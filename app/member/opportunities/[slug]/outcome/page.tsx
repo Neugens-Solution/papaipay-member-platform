@@ -13,13 +13,13 @@ export default function CampaignOutcomePage({ params }: { params: { slug: string
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <Link href="/member/opportunities?tab=completed" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Completed Listings</Link>
+      <Link href="/member/opportunities?tab=completed" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Completed Opportunities</Link>
       <header className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
         <div className="bg-gradient-to-br from-emerald-50 to-white p-6 sm:p-8">
           <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{campaign.campaignId} • {campaign.campaignCode}</p>
           <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold tracking-tight text-papaipay-ink">Listing Outcome</h1>
+              <h1 className="text-3xl font-bold tracking-tight text-papaipay-ink">Opportunity Outcome</h1>
               <p className="mt-2 text-xl font-semibold text-papaipay-ink">{campaign.campaignName}</p>
             </div>
             <div className="flex gap-2"><StatusBadge status="Completed" /><StatusBadge status="Distributed" /></div>
@@ -35,7 +35,7 @@ export default function CampaignOutcomePage({ params }: { params: { slug: string
       <ContentCard>
         <h2 className="text-lg font-bold">Outcome Breakdown</h2>
         <dl className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Outcome label="Listing Target" value={formatRM(campaign.purchasePrice)} />
+          <Outcome label="Opportunity Target" value={formatRM(campaign.purchasePrice)} />
           <Outcome label="Purchase Price" value={formatRM(campaign.purchasePrice)} />
           <Outcome label="Sale Price" value={formatRM(campaign.salePrice)} />
           <Outcome label="Holding Period" value={campaign.holdingPeriod} />
