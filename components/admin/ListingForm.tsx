@@ -1,3 +1,7 @@
+"use client";
+
+import { useState } from "react";
+import { useFormState } from "react-dom";
 import { Card } from "@/components/admin/AdminUI";
 import { saveListingAction } from "@/lib/admin/actions/listings";
 import {
@@ -108,12 +112,14 @@ function Field({
   type = "text",
   className = "",
   defaultValue,
+  step,
 }: {
   label: string;
   name?: string;
   type?: string;
   className?: string;
   defaultValue?: string | number | null;
+  step?: string;
 }) {
   const normalizedType = label.includes("Date") ? "date" : type;
   return (
@@ -123,6 +129,7 @@ function Field({
         name={name}
         type={normalizedType}
         defaultValue={defaultValue ?? undefined}
+        step={step}
         className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
       />
     </label>
@@ -297,13 +304,17 @@ function UploadZone({
   helper = "Drag and drop here, or choose file",
   name,
   multiple = false,
+  currentFileNames = [],
 }: {
   title: string;
   supported: string;
   helper?: string;
   name?: string;
   multiple?: boolean;
+  currentFileNames?: string[];
 }) {
+  const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
+  const displayedFileNames = selectedFileNames.length > 0 ? selectedFileNames : currentFileNames;
   return (
     <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white text-papaipay-green ring-1 ring-slate-200">
@@ -335,12 +346,29 @@ function UploadZone({
               : "image/jpeg,image/png,image/webp"
           }
           className="sr-only"
+          onChange={(event) =>
+            setSelectedFileNames(
+              Array.from(event.currentTarget.files ?? []).map((file) => file.name),
+            )
+          }
         />
         Choose file
       </label>
       <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported} · Ready to upload
+        Supported: {supported} · {selectedFileNames.length > 0 ? "Ready to upload" : "No new file selected"}
       </p>
+      {displayedFileNames.length > 0 ? (
+        <div className="mt-3 rounded-lg border border-emerald-100 bg-white px-3 py-2 text-left">
+          <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
+            {selectedFileNames.length > 0 ? "Selected" : "Current upload"}
+          </p>
+          <ul className="mt-1 space-y-1 text-xs font-semibold text-slate-600">
+            {displayedFileNames.map((fileName) => (
+              <li key={fileName} className="truncate">✓ {fileName}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -477,6 +505,7 @@ export function ListingForm({
   slug?: string;
   initialValues?: ListingFormInitialValues;
 }) {
+  const [state, formAction] = useFormState(saveListingAction, { errors: [] });
   const memberPreviewHref =
     mode === "edit" && slug ? `/member/opportunities/${slug}` : undefined;
   const campaignIdValue =
@@ -497,8 +526,18 @@ export function ListingForm({
   const documents = initialValues?.documents ?? [];
 
   return (
-    <form action={saveListingAction} className="space-y-5">
+    <form action={formAction} className="space-y-5">
       <input type="hidden" name="campaignId" value={initialValues?.id ?? ""} />
+      {state.errors.length > 0 ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700" role="alert">
+          <p className="text-xs font-black uppercase tracking-wide">Please fix the following before continuing</p>
+          <ul className="mt-2 list-disc space-y-1 pl-5">
+            {state.errors.map((error) => (
+              <li key={error}>{error}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
       <div className="sticky top-[76px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
         <div
           className="flex gap-2 overflow-x-auto"
@@ -751,6 +790,11 @@ export function ListingForm({
                 name="heroImage"
                 supported="JPG, PNG, WEBP"
                 helper="Use one hero image as the primary listing image."
+                currentFileNames={
+                  heroImage?.fileAsset?.originalFilename
+                    ? [heroImage.fileAsset.originalFilename]
+                    : []
+                }
               />
               <input
                 type="hidden"
@@ -763,6 +807,9 @@ export function ListingForm({
                 multiple
                 supported="JPG, PNG, WEBP"
                 helper="Add multiple supporting gallery images for the listing."
+                currentFileNames={galleryImages
+                  .map((media) => media.fileAsset?.originalFilename)
+                  .filter((fileName): fileName is string => Boolean(fileName))}
               />
               <Field
                 label="Image Caption"
@@ -781,6 +828,13 @@ export function ListingForm({
             </div>
             {heroImage ? (
               <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4 text-sm">
+                {heroImage.fileAsset?.objectKey ? (
+                  <div
+                    className="mb-4 h-48 rounded-lg bg-slate-100 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${heroImage.fileAsset.objectKey})` }}
+                    aria-label="Current hero image preview"
+                  />
+                ) : null}
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="font-black text-papaipay-ink">
@@ -809,6 +863,13 @@ export function ListingForm({
                     key={media.id}
                     className="rounded-xl border border-slate-100 bg-white p-4"
                   >
+                    {media.fileAsset?.objectKey ? (
+                      <div
+                        className="mb-3 h-32 rounded-lg bg-slate-100 bg-cover bg-center"
+                        style={{ backgroundImage: `url(${media.fileAsset.objectKey})` }}
+                        aria-label={`Gallery image ${index + 1} thumbnail`}
+                      />
+                    ) : null}
                     <input
                       type="hidden"
                       name="galleryMediaId"
@@ -1049,6 +1110,7 @@ export function ListingForm({
             label="Holding Return Rate"
             name="holdingReturnRateMonthly"
             type="number"
+            step="0.01"
             defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
           />
           <SelectField

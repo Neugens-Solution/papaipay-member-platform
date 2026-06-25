@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { mkdir, writeFile } from "fs/promises";
 import path from "path";
 import { Prisma } from "@prisma/client";
+import { ZodError } from "zod";
 import { db } from "@/lib/db";
 import { type AdminAuditAction } from "@/lib/audit/adminAudit";
 import {
@@ -85,9 +86,21 @@ function filesFromForm(formData: FormData, key: string) {
     .getAll(key)
     .filter((value): value is File => value instanceof File && value.size > 0);
 }
+class ListingFormValidationError extends Error {
+  constructor(public readonly errors: string[]) {
+    super(errors.join(" "));
+  }
+}
+
+export type ListingFormState = { errors: string[] };
+
+function validationError(message: string): never {
+  throw new ListingFormValidationError([message]);
+}
+
 function assertLength(value: string, max: number, label: string) {
   if (value.length > max)
-    throw new Error(`${label} must be ${max} characters or fewer.`);
+    validationError(`${label} must be ${max} characters or fewer.`);
 }
 function normalizeVisibility(value: string) {
   return value === "Member Visible" ? "MemberVisible" : "InternalOnly";
@@ -162,7 +175,7 @@ function buildInput(
   action: string,
   generated: { campaignCode: string; slug: string },
 ) {
-  return listingDraftSchema.parse({
+  const parsed = listingDraftSchema.safeParse({
     title: requiredString(formData, "title"),
     campaignCode: generated.campaignCode,
     slug: generated.slug,
@@ -216,6 +229,15 @@ function buildInput(
       ),
     },
   });
+  if (!parsed.success) {
+    throw new ListingFormValidationError(
+      parsed.error.issues.map((issue) => {
+        const field = issue.path.join(".") || "Listing";
+        return `${field}: ${issue.message}`;
+      }),
+    );
+  }
+  return parsed.data;
 }
 function campaignData(input: ListingDraftInput, action: string) {
   return {
@@ -252,8 +274,13 @@ function propertyData(input: ListingDraftInput) {
         : new Prisma.Decimal(input.property.reservePrice),
   };
 }
-export async function saveListingAction(formData: FormData) {
-  const action = requiredString(formData, "intent");
+export async function saveListingAction(
+  _prevState: ListingFormState,
+  formData: FormData,
+): Promise<ListingFormState> {
+  let redirectSlug: string | null = null;
+  try {
+    const action = requiredString(formData, "intent");
   const campaignId = requiredString(formData, "campaignId") || undefined;
   const existing = campaignId
     ? await db.campaign.findUnique({
@@ -273,10 +300,10 @@ export async function saveListingAction(formData: FormData) {
   assertLength(heroCaption, maxCaptionLength, "Hero image caption");
   assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
   if (heroFile && !allowedImageTypes.has(heroFile.type))
-    throw new Error("Hero image must be JPG, PNG, or WEBP.");
+    validationError("Hero image must be JPG, PNG, or WEBP.");
   for (const file of galleryFiles) {
     if (!allowedImageTypes.has(file.type))
-      throw new Error("Gallery images must be JPG, PNG, or WEBP.");
+      validationError("Gallery images must be JPG, PNG, or WEBP.");
   }
   const existingGalleryCount =
     existing?.media.filter(
@@ -285,7 +312,7 @@ export async function saveListingAction(formData: FormData) {
         !formData.getAll("deleteGalleryMediaId").includes(media.id),
     ).length ?? 0;
   if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
-    throw new Error(
+    validationError(
       `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
     );
   const hasExistingHero =
@@ -293,7 +320,7 @@ export async function saveListingAction(formData: FormData) {
       existing?.media.some((media) => media.mediaType === "PrimaryImage"),
     ) && requiredString(formData, "deleteHeroImage") !== "true";
   if (action === "publish" && !heroFile && !hasExistingHero)
-    throw new Error("A hero image is required before publishing.");
+    validationError("A hero image is required before publishing. Upload a hero image or keep the existing hero image.");
   const input = buildInput(formData, action, {
     campaignCode:
       existing?.campaignCode ||
@@ -463,7 +490,7 @@ export async function saveListingAction(formData: FormData) {
       const file = fileFromForm(formData, `documentFile:${category}`);
       if (!file) continue;
       if (!allowedDocumentTypes.has(file.type))
-        throw new Error(
+        validationError(
           "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
         );
       const asset = await createFileAsset(tx, file, "CampaignDocument");
@@ -503,5 +530,19 @@ export async function saveListingAction(formData: FormData) {
   revalidatePath("/admin/listings");
   revalidatePath(`/admin/listings/${saved.slug}`);
   revalidatePath("/member/opportunities");
-  redirect(`/admin/listings/${saved.slug}`);
+  redirectSlug = saved.slug;
+  } catch (error) {
+    if (error instanceof ListingFormValidationError) {
+      return { errors: error.errors };
+    }
+    if (error instanceof ZodError) {
+      return { errors: error.issues.map((issue) => `${issue.path.join(".") || "Listing"}: ${issue.message}`) };
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return { errors: ["The listing could not be saved because one or more values conflict with existing data. Please review the form and try again."] };
+    }
+    console.error("Unexpected listing save error", error);
+    return { errors: ["We could not save this listing right now. Please review the required fields and try again."] };
+  }
+  redirect(`/admin/listings/${redirectSlug}`);
 }

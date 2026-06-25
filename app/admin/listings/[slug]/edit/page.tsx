@@ -15,6 +15,14 @@ export default async function EditListingPage({
     include: {
       propertyDetail: true,
       content: true,
+      media: {
+        include: { fileAsset: true },
+        orderBy: { sortOrder: "asc" },
+      },
+      documents: {
+        include: { fileAsset: true },
+        orderBy: { createdAt: "asc" },
+      },
     },
   });
 
@@ -65,6 +73,8 @@ export default async function EditListingPage({
               }
             : undefined,
           content: campaign.content,
+          media: campaign.media,
+          documents: campaign.documents,
         }}
       />
     </div>
