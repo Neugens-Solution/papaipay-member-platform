@@ -47,6 +47,7 @@ export default async function EditListingPage({
           campaignCode: campaign.campaignCode,
           title: campaign.title,
           visibility: campaign.visibility,
+          publishStatus: campaign.publishStatus,
           campaignTarget: campaign.campaignTarget.toString(),
           minimumParticipationAmount:
             campaign.minimumParticipationAmount.toString(),

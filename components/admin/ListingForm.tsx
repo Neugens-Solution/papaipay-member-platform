@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useFormState } from "react-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useFormState, useFormStatus } from "react-dom";
 import { Card } from "@/components/admin/AdminUI";
 import { saveListingAction } from "@/lib/admin/actions/listings";
 import {
@@ -305,6 +305,7 @@ function UploadZone({
   name,
   multiple = false,
   currentFileNames = [],
+  error,
 }: {
   title: string;
   supported: string;
@@ -312,65 +313,113 @@ function UploadZone({
   name?: string;
   multiple?: boolean;
   currentFileNames?: string[];
+  error?: string;
 }) {
-  const [selectedFileNames, setSelectedFileNames] = useState<string[]>([]);
-  const displayedFileNames = selectedFileNames.length > 0 ? selectedFileNames : currentFileNames;
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [selectedFiles, setSelectedFiles] = useState<
+    { id: string; name: string; url?: string }[]
+  >([]);
+  const displayedFileNames =
+    selectedFiles.length > 0
+      ? selectedFiles.map((file) => file.name)
+      : currentFileNames;
+
+  useEffect(() => {
+    return () => {
+      selectedFiles.forEach((file) => {
+        if (file.url) URL.revokeObjectURL(file.url);
+      });
+    };
+  }, [selectedFiles]);
+
+  function removeSelectedFile(id: string) {
+    const input = inputRef.current;
+    if (!input?.files) return;
+    const transfer = new DataTransfer();
+    Array.from(input.files)
+      .filter((file) => `${file.name}-${file.size}-${file.lastModified}` !== id)
+      .forEach((file) => transfer.items.add(file));
+    input.files = transfer.files;
+    setSelectedFiles((files) => {
+      const removed = files.find((file) => file.id === id);
+      if (removed?.url) URL.revokeObjectURL(removed.url);
+      return files.filter((file) => file.id !== id);
+    });
+  }
+
   return (
-    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
+    <div
+      data-field={name}
+      className={`min-w-0 rounded-2xl border border-dashed bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40 ${
+        error ? "border-red-300 bg-red-50/60" : "border-slate-300"
+      }`}
+    >
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white text-papaipay-green ring-1 ring-slate-200">
-        <svg
-          viewBox="0 0 24 24"
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <path d="M12 16V4" />
           <path d="m7 9 5-5 5 5" />
           <path d="M5 20h14" />
         </svg>
       </div>
-      <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}</p>
+      <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}{title === "Hero Image" ? " *" : ""}</p>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
       <label className="mt-3 inline-flex cursor-pointer rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
         <input
+          ref={inputRef}
           type="file"
           name={name}
           multiple={multiple}
-          accept={
-            supported.includes("PDF")
-              ? ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp"
-              : "image/jpeg,image/png,image/webp"
-          }
+          accept={supported.includes("PDF") ? ".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp" : "image/jpeg,image/png,image/webp"}
           className="sr-only"
-          onChange={(event) =>
-            setSelectedFileNames(
-              Array.from(event.currentTarget.files ?? []).map((file) => file.name),
-            )
-          }
+          onChange={(event) => {
+            const nextFiles = Array.from(event.currentTarget.files ?? []).map((file) => ({
+              id: `${file.name}-${file.size}-${file.lastModified}`,
+              name: file.name,
+              url: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+            }));
+            setSelectedFiles((previous) => {
+              previous.forEach((file) => file.url && URL.revokeObjectURL(file.url));
+              return nextFiles;
+            });
+          }}
         />
-        Choose file
+        Choose file{multiple ? "s" : ""}
       </label>
       <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported} · {selectedFileNames.length > 0 ? "Ready to upload" : "No new file selected"}
+        Supported: {supported} · {selectedFiles.length > 0 ? `${selectedFiles.length} image${selectedFiles.length === 1 ? "" : "s"} selected` : "No new file selected"}
       </p>
+      {error ? <p className="mt-2 text-xs font-bold text-red-600">{error}</p> : null}
       {displayedFileNames.length > 0 ? (
-        <div className="mt-3 rounded-lg border border-emerald-100 bg-white px-3 py-2 text-left">
-          <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
-            {selectedFileNames.length > 0 ? "Selected" : "Current upload"}
-          </p>
-          <ul className="mt-1 space-y-1 text-xs font-semibold text-slate-600">
-            {displayedFileNames.map((fileName) => (
-              <li key={fileName} className="truncate">✓ {fileName}</li>
+        <div className="mt-3 max-h-80 overflow-y-auto rounded-lg border border-emerald-100 bg-white px-3 py-2 text-left">
+          <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">{selectedFiles.length > 0 ? "Selected" : "Current upload"}</p>
+          <div className="mt-2 grid gap-2">
+            {(selectedFiles.length > 0 ? selectedFiles : displayedFileNames.map((fileName) => ({ id: fileName, name: fileName, url: undefined }))).map((file) => (
+              <div key={file.id} className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-100 bg-slate-50 p-2">
+                {typeof file.url === "string" ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={file.url} alt="" className="h-12 w-12 flex-none rounded-md object-cover" />
+                ) : <div className="grid h-12 w-12 flex-none place-items-center rounded-md bg-emerald-50 text-xs font-black text-papaipay-green">IMG</div>}
+                <span className="min-w-0 flex-1 truncate text-xs font-semibold text-slate-600">{file.name}</span>
+                {selectedFiles.length > 0 ? (
+                  <button type="button" onClick={() => removeSelectedFile(file.id)} className="flex-none rounded-full px-2 py-1 text-xs font-black text-red-600 hover:bg-red-50">Remove</button>
+                ) : null}
+              </div>
             ))}
-          </ul>
+          </div>
         </div>
       ) : null}
     </div>
   );
+}
+
+function SubmitButton({ intent, children, pendingLabel, className }: { intent: string; children: React.ReactNode; pendingLabel: string; className: string }) {
+  const { pending, data } = useFormStatus();
+  const isPending = pending && data?.get("intent") === intent;
+  return <button name="intent" value={intent} disabled={pending} className={`${className} disabled:cursor-not-allowed disabled:opacity-60`}>{isPending ? pendingLabel : children}</button>;
+}
+
+function Toast({ message }: { message: string }) {
+  return <div role="status" className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)]"><span className="text-papaipay-green">✓</span> {message}</div>;
 }
 
 function RepeaterPreview({
@@ -481,6 +530,7 @@ type ListingFormInitialValues = {
   campaignCode?: string;
   title?: string;
   visibility?: string;
+  publishStatus?: string;
   campaignTarget?: string | number;
   minimumParticipationAmount?: string | number;
   maximumParticipationAmount?: string | number;
@@ -506,6 +556,31 @@ export function ListingForm({
   initialValues?: ListingFormInitialValues;
 }) {
   const [state, formAction] = useFormState(saveListingAction, { errors: [] });
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const fieldErrors = useMemo(() => state.fieldErrors ?? {}, [state.fieldErrors]);
+
+  useEffect(() => {
+    const saved = new URLSearchParams(window.location.search).get("saved");
+    const messages: Record<string, string> = {
+      draft: "Listing saved successfully as Draft.",
+      publish: "Listing published successfully.",
+      unpublish: "Listing unpublished successfully.",
+    };
+    if (!saved || !messages[saved]) return;
+    setToastMessage(mode === "edit" && saved === "draft" ? "Listing updated successfully." : messages[saved]);
+    const timer = window.setTimeout(() => setToastMessage(null), 4500);
+    return () => window.clearTimeout(timer);
+  }, [mode]);
+
+  useEffect(() => {
+    const firstField = Object.keys(fieldErrors)[0];
+    if (!firstField) return;
+    const element = document.querySelector<HTMLElement>(`[name="${CSS.escape(firstField)}"], [data-field="${CSS.escape(firstField)}"]`);
+    element?.scrollIntoView({ behavior: "smooth", block: "center" });
+    window.setTimeout(() => {
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) element.focus({ preventScroll: true });
+    }, 350);
+  }, [fieldErrors]);
   const memberPreviewHref =
     mode === "edit" && slug ? `/member/opportunities/${slug}` : undefined;
   const campaignIdValue =
@@ -527,10 +602,11 @@ export function ListingForm({
 
   return (
     <form action={formAction} className="space-y-5">
+      {toastMessage ? <Toast message={toastMessage} /> : null}
       <input type="hidden" name="campaignId" value={initialValues?.id ?? ""} />
       {state.errors.length > 0 ? (
         <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700" role="alert">
-          <p className="text-xs font-black uppercase tracking-wide">Please fix the following before continuing</p>
+          <p className="text-xs font-black uppercase tracking-wide">Please complete the following before publishing</p>
           <ul className="mt-2 list-disc space-y-1 pl-5">
             {state.errors.map((error) => (
               <li key={error}>{error}</li>
@@ -790,6 +866,7 @@ export function ListingForm({
                 name="heroImage"
                 supported="JPG, PNG, WEBP"
                 helper="Use one hero image as the primary listing image."
+                error={fieldErrors.heroImage}
                 currentFileNames={
                   heroImage?.fileAsset?.originalFilename
                     ? [heroImage.fileAsset.originalFilename]
@@ -1282,13 +1359,15 @@ export function ListingForm({
             {memberPreviewHref ? (
               <a
                 href={memberPreviewHref}
+                target="_blank"
+                rel="noreferrer"
                 className="rounded-xl bg-papaipay-green px-5 py-3 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.22)]"
               >
                 Preview Member View
               </a>
             ) : (
               <span className="rounded-xl bg-slate-200 px-5 py-3 text-center text-sm font-bold text-slate-500">
-                Preview available after save
+                Save a draft first to preview
               </span>
             )}
           </div>
@@ -1298,42 +1377,31 @@ export function ListingForm({
           status and makes the listing member visible.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <button
-            name="intent"
-            value="draft"
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
-          >
-            Save Draft
-          </button>
-          <button
-            type="button"
-            className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700"
-          >
-            Submit for Review
-          </button>
-          <button
-            name="intent"
-            value="publish"
-            className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
-          >
-            Publish Listing
-          </button>
-          <button
-            name="intent"
-            value="draft"
-            className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white"
-          >
-            Update Listing
-          </button>
-          {mode === "edit" ? (
-            <button
-              name="intent"
-              value="unpublish"
-              className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800"
-            >
-              Unpublish Listing
-            </button>
-          ) : null}
+          {mode === "create" ? (
+            <>
+              <SubmitButton intent="draft" pendingLabel="Saving draft..." className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+                Save Draft
+              </SubmitButton>
+              <SubmitButton intent="publish" pendingLabel="Publishing..." className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
+                Publish Listing
+              </SubmitButton>
+            </>
+          ) : (
+            <>
+              <SubmitButton intent="draft" pendingLabel="Saving changes..." className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+                Save Changes
+              </SubmitButton>
+              {initialValues?.publishStatus === "Published" ? (
+                <SubmitButton intent="unpublish" pendingLabel="Unpublishing..." className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800">
+                  Unpublish Listing
+                </SubmitButton>
+              ) : (
+                <SubmitButton intent="publish" pendingLabel="Publishing..." className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
+                  Publish Listing
+                </SubmitButton>
+              )}
+            </>
+          )}
         </div>
       </Section>
     </form>
