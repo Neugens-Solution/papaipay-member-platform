@@ -7,8 +7,22 @@ const percentage = z.coerce.number().finite().min(0).max(100);
 export const listingDraftSchema = z.object({
   title: z.string().trim().min(3).max(160),
   campaignCode: z.string().trim().min(3).max(64),
-  slug: z.string().trim().min(3).max(160).regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
-  lifecycleStatus: z.enum(["Draft", "Open", "Funded", "Holding", "Sold", "DistributionProcessing", "Distributed", "Cancelled"]),
+  slug: z
+    .string()
+    .trim()
+    .min(3)
+    .max(160)
+    .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  lifecycleStatus: z.enum([
+    "Draft",
+    "Open",
+    "Funded",
+    "Holding",
+    "Sold",
+    "DistributionProcessing",
+    "Distributed",
+    "Cancelled",
+  ]),
   publishStatus: z.enum(["Draft", "Published", "Archived"]),
   visibility: z.enum(["InternalOnly", "MemberVisible", "ParticipantsOnly"]),
   campaignTarget: moneyAmount,
@@ -16,6 +30,8 @@ export const listingDraftSchema = z.object({
   maximumParticipationAmount: moneyAmount,
   campaignOpenDate: z.coerce.date().optional(),
   campaignCloseDate: z.coerce.date().optional(),
+  memberProfitDistributionPercentagePlanned: percentage.optional(),
+  platformProfitSharePercentagePlanned: percentage.optional(),
   holdingReturnRateMonthly: percentage,
   returnType: z.enum(["Fixed", "Target", "UpTo"]),
   maximumHoldingPeriodMonths: z.coerce.number().int().positive().max(120),
@@ -32,7 +48,6 @@ export const listingDraftSchema = z.object({
     landArea: optionalText,
     bedrooms: z.coerce.number().int().nonnegative().optional(),
     bathrooms: z.coerce.number().int().nonnegative().optional(),
-    auctionDate: z.coerce.date().optional(),
     reservePrice: moneyAmount.optional(),
     state: z.string().trim().min(2).max(80),
     location: z.string().trim().min(2).max(160),

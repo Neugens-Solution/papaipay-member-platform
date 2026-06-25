@@ -31,9 +31,7 @@ function formatReturnType(returnType: string): Opportunity["returnType"] {
 const fallbackImageUrl =
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
 
-function fileAssetUrl(
-  fileAsset?: { objectKey: string } | null,
-): string | null {
+function fileAssetUrl(fileAsset?: { objectKey: string } | null): string | null {
   if (!fileAsset) return null;
   return fileAsset.objectKey.startsWith("/")
     ? fileAsset.objectKey
@@ -84,7 +82,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     location: property?.location || property?.state || "Malaysia",
     state: property?.state || "Malaysia",
     propertyType: property?.propertyType || "Asset",
-    assetCategory: property?.assetCategory || property?.propertyType || "Residential Asset",
+    assetCategory:
+      property?.assetCategory || property?.propertyType || "Residential Asset",
     occupancyStatus: property?.occupancyStatus || "To be confirmed",
     estimatedYield: `${(decimalToNumber(campaign.holdingReturnRateMonthly) * 12).toFixed(2)}% p.a.`,
     tenure: property?.tenure || "To be confirmed",
@@ -95,9 +94,9 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     landArea: property?.landArea || "To be confirmed",
     bedrooms: property?.bedrooms || 0,
     bathrooms: property?.bathrooms || 0,
-    auctionDate: formatDate(property?.auctionDate),
+    auctionDate: "To be confirmed",
     reservePrice,
-    yearBuilt: "To be confirmed",
+    yearBuilt: property?.yearBuilt || "To be confirmed",
     fullAddress: property?.fullAddress || "To be confirmed",
     minimumParticipation: decimalToNumber(campaign.minimumParticipationAmount),
     maximumParticipation: decimalToNumber(campaign.maximumParticipationAmount),
@@ -106,8 +105,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     reservedAmount: decimalToNumber(campaign.reservedAmountSnapshot),
     participants: campaign._count?.participations ?? 0,
     closeDate: formatDate(closeDate),
-    auctionPrice: reservePrice,
-    marketValue: campaignTarget || reservePrice,
+    auctionPrice: 0,
+    marketValue: reservePrice || campaignTarget,
     valuationDate: "To be confirmed",
     valuationReport: "To be uploaded",
     daysRemaining: calculateDaysRemaining(closeDate),

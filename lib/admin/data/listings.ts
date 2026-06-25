@@ -49,6 +49,10 @@ function demoAdminListingDetail(slug: string) {
     returnType: listing.returnType,
     maximumHoldingPeriodMonths: listing.maximumHoldingPeriodMonths,
     principalProtectionEnabled: listing.principalProtectionEnabled,
+    memberProfitDistributionPercentagePlanned:
+      listing.memberProfitDistributionPercentage ?? null,
+    platformProfitSharePercentagePlanned:
+      listing.platformProfitSharePercentage ?? null,
     collectedAmountSnapshot: listing.collectedAmount,
     reservedAmountSnapshot: 0,
     propertyDetail: {
@@ -63,7 +67,6 @@ function demoAdminListingDetail(slug: string) {
       landArea: listing.landArea,
       bedrooms: listing.bedrooms,
       bathrooms: listing.bathrooms,
-      auctionDate: new Date(listing.auctionDate),
       reservePrice: listing.reservePrice,
       state: listing.state,
       location: listing.location,

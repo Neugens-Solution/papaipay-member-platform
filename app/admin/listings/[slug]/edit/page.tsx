@@ -48,13 +48,14 @@ export default async function EditListingPage({
           returnType: campaign.returnType,
           maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
           principalProtectionEnabled: campaign.principalProtectionEnabled,
+          memberProfitDistributionPercentagePlanned:
+            campaign.memberProfitDistributionPercentagePlanned?.toString(),
+          platformProfitSharePercentagePlanned:
+            campaign.platformProfitSharePercentagePlanned?.toString(),
           propertyDetail: campaign.propertyDetail
             ? {
                 ...campaign.propertyDetail,
                 reservePrice: campaign.propertyDetail.reservePrice?.toString(),
-                auctionDate: campaign.propertyDetail.auctionDate
-                  ?.toISOString()
-                  .slice(0, 10),
               }
             : undefined,
           content: campaign.content,

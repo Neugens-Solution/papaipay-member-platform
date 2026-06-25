@@ -137,7 +137,10 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   },
   "property.propertyType": { label: "Asset Type", field: "propertyType" },
   "property.assetCategory": { label: "Asset Category", field: "assetCategory" },
-  "property.occupancyStatus": { label: "Occupancy Status", field: "occupancyStatus" },
+  "property.occupancyStatus": {
+    label: "Occupancy Status",
+    field: "occupancyStatus",
+  },
   "property.tenure": { label: "Tenure", field: "tenure" },
   "property.bumiStatus": { label: "Bumi Status", field: "bumiStatus" },
   "property.builtUpArea": { label: "Built-Up", field: "builtUpArea" },
@@ -149,10 +152,6 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
   "property.reservePrice": { label: "Market Value", field: "reservePrice" },
-  "property.auctionDate": {
-    label: "Expected Acquisition Date",
-    field: "auctionDate",
-  },
   "content.aboutCampaign": {
     label: "About This Listing",
     field: "aboutCampaign",
@@ -300,6 +299,10 @@ function buildInput(
     ),
     campaignOpenDate: optionalDate(formData, "campaignOpenDate"),
     campaignCloseDate: optionalDate(formData, "campaignCloseDate"),
+    memberProfitDistributionPercentagePlanned:
+      formData.get("memberProfitDistributionPercentagePlanned") || undefined,
+    platformProfitSharePercentagePlanned:
+      formData.get("platformProfitSharePercentagePlanned") || undefined,
     holdingReturnRateMonthly: draftNumber(
       formData,
       "holdingReturnRateMonthly",
@@ -333,7 +336,6 @@ function buildInput(
       landArea: requiredString(formData, "landArea"),
       bedrooms: formData.get("bedrooms") || undefined,
       bathrooms: formData.get("bathrooms") || undefined,
-      auctionDate: optionalDate(formData, "auctionDate"),
       reservePrice: formData.get("reservePrice") || undefined,
       state: isPublish
         ? requiredString(formData, "state")
@@ -350,16 +352,12 @@ function buildInput(
       aboutCampaign: isPublish
         ? requiredString(formData, "aboutCampaign")
         : draftString(
-          formData,
-          "aboutCampaign",
-          "Draft content to be completed.",
-        ),
-      importantInformation: isPublish
-        ? requiredString(formData, "importantInformation")
-        : requiredString(formData, "importantInformation"),
-      riskDisclaimer: isPublish
-        ? requiredString(formData, "riskDisclaimer")
-        : requiredString(formData, "riskDisclaimer"),
+            formData,
+            "aboutCampaign",
+            "Draft content to be completed.",
+          ),
+      importantInformation: requiredString(formData, "importantInformation"),
+      riskDisclaimer: requiredString(formData, "riskDisclaimer"),
       holdingReturnExplanation: requiredString(
         formData,
         "holdingReturnExplanation",
@@ -393,6 +391,14 @@ function campaignData(input: ListingDraftInput, action: string) {
     ),
     campaignOpenDate: input.campaignOpenDate,
     campaignCloseDate: input.campaignCloseDate,
+    memberProfitDistributionPercentagePlanned:
+      input.memberProfitDistributionPercentagePlanned == null
+        ? null
+        : new Prisma.Decimal(input.memberProfitDistributionPercentagePlanned),
+    platformProfitSharePercentagePlanned:
+      input.platformProfitSharePercentagePlanned == null
+        ? null
+        : new Prisma.Decimal(input.platformProfitSharePercentagePlanned),
     holdingReturnRateMonthly: new Prisma.Decimal(
       input.holdingReturnRateMonthly,
     ),
@@ -464,40 +470,12 @@ export async function saveListingAction(
         ["Please add a Hero Image before publishing."],
         { heroImage: "Please add a Hero Image before publishing." },
       );
-    const hasPublishableDocument =
-      existing?.documents.some(
-        (document) =>
-          document.visibility === "MemberVisible" &&
-          ["Ready", "Published"].includes(document.documentStatus) &&
-          !formData.getAll("deleteDocumentId").includes(document.id),
-      ) ||
-      [
-        "Proclamation of Sale",
-        "Conditions of Sale",
-        "Title Search",
-        "Valuation Report",
-        "Property Photos",
-        "Location Map",
-        "Legal Documents",
-        "Other Documents",
-      ].some((category) => fileFromForm(formData, `documentFile:${category}`));
-    if (action === "publish" && !hasPublishableDocument)
-      throw new ListingFormValidationError(
-        ["Please add at least one member-visible Document before publishing."],
-        { documents: "Please add at least one member-visible Document before publishing." },
-      );
-    const faqQuestion = requiredString(formData, "faqQuestion");
-    const faqAnswer = requiredString(formData, "faqAnswer");
-    const hasExistingFaq = Boolean(existing?.faqs?.length);
-    if (action === "publish" && !hasExistingFaq && (!faqQuestion || !faqAnswer))
-      throw new ListingFormValidationError(
-        ["Please add at least one FAQ before publishing."],
-        { faqQuestion: "Please add a FAQ question.", faqAnswer: "Please add a FAQ answer." },
-      );
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
-        makeCampaignCode(draftString(formData, "title", "Untitled Listing Draft")),
+        makeCampaignCode(
+          draftString(formData, "title", "Untitled Listing Draft"),
+        ),
       slug: await makeUniqueSlug(
         draftString(formData, "title", "Untitled Listing Draft"),
         campaignId,
@@ -708,7 +686,12 @@ export async function saveListingAction(
           });
         } else {
           await tx.campaignFaq.create({
-            data: { campaignId: campaign.id, question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+            data: {
+              campaignId: campaign.id,
+              question: faqQuestion,
+              answer: faqAnswer,
+              sortOrder: 0,
+            },
           });
         }
       }
