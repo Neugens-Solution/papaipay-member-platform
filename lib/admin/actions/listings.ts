@@ -87,12 +87,18 @@ function filesFromForm(formData: FormData, key: string) {
     .filter((value): value is File => value instanceof File && value.size > 0);
 }
 class ListingFormValidationError extends Error {
-  constructor(public readonly errors: string[]) {
+  constructor(
+    public readonly errors: string[],
+    public readonly fieldErrors?: Record<string, string>,
+  ) {
     super(errors.join(" "));
   }
 }
 
-export type ListingFormState = { errors: string[]; fieldErrors?: Record<string, string> };
+export type ListingFormState = {
+  errors: string[];
+  fieldErrors?: Record<string, string>;
+};
 
 function validationError(message: string): never {
   throw new ListingFormValidationError([message]);
@@ -101,13 +107,28 @@ function validationError(message: string): never {
 const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   title: { label: "Campaign Title", field: "title" },
   campaignTarget: { label: "Campaign Target", field: "campaignTarget" },
-  minimumParticipationAmount: { label: "Minimum Participation Amount", field: "minimumParticipationAmount" },
-  maximumParticipationAmount: { label: "Maximum Participation Amount", field: "maximumParticipationAmount" },
+  minimumParticipationAmount: {
+    label: "Minimum Participation Amount",
+    field: "minimumParticipationAmount",
+  },
+  maximumParticipationAmount: {
+    label: "Maximum Participation Amount",
+    field: "maximumParticipationAmount",
+  },
   campaignOpenDate: { label: "Campaign Open Date", field: "campaignOpenDate" },
-  campaignCloseDate: { label: "Campaign Close Date", field: "campaignCloseDate" },
-  holdingReturnRateMonthly: { label: "Monthly Holding Return", field: "holdingReturnRateMonthly" },
+  campaignCloseDate: {
+    label: "Campaign Close Date",
+    field: "campaignCloseDate",
+  },
+  holdingReturnRateMonthly: {
+    label: "Monthly Holding Return",
+    field: "holdingReturnRateMonthly",
+  },
   returnType: { label: "Return Type", field: "returnType" },
-  maximumHoldingPeriodMonths: { label: "Maximum Holding Period", field: "maximumHoldingPeriodMonths" },
+  maximumHoldingPeriodMonths: {
+    label: "Maximum Holding Period",
+    field: "maximumHoldingPeriodMonths",
+  },
   "property.propertyType": { label: "Property Type", field: "propertyType" },
   "property.tenure": { label: "Tenure", field: "tenure" },
   "property.bumiStatus": { label: "Bumi Status", field: "bumiStatus" },
@@ -120,23 +141,49 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
   "property.reservePrice": { label: "Market Value", field: "reservePrice" },
-  "content.aboutCampaign": { label: "About This Listing", field: "aboutCampaign" },
-  "content.importantInformation": { label: "Important Information", field: "importantInformation" },
-  "content.riskDisclaimer": { label: "Risk Disclaimer", field: "riskDisclaimer" },
-  "content.holdingReturnExplanation": { label: "Holding Return Explanation", field: "holdingReturnExplanation" },
-  "content.finalDistributionExplanation": { label: "Final Distribution Explanation", field: "finalDistributionExplanation" },
+  "property.auctionDate": {
+    label: "Expected Acquisition Date",
+    field: "auctionDate",
+  },
+  "content.aboutCampaign": {
+    label: "About This Listing",
+    field: "aboutCampaign",
+  },
+  "content.importantInformation": {
+    label: "Important Information",
+    field: "importantInformation",
+  },
+  "content.riskDisclaimer": {
+    label: "Risk Disclaimer",
+    field: "riskDisclaimer",
+  },
+  "content.holdingReturnExplanation": {
+    label: "Holding Return Explanation",
+    field: "holdingReturnExplanation",
+  },
+  "content.finalDistributionExplanation": {
+    label: "Final Distribution Explanation",
+    field: "finalDistributionExplanation",
+  },
 };
 
 function friendlyZodErrors(error: ZodError): ListingFormState {
   const fieldErrors: Record<string, string> = {};
   const errors = error.issues.map((issue) => {
     const path = issue.path.join(".");
-    const field = friendlyFieldLabels[path] ?? { label: "Listing", field: path };
-    const message = issue.message.toLowerCase().includes("invalid")
-      ? `Please enter a valid ${field.label}.`
-      : `Please complete "${field.label}".`;
+    const field = friendlyFieldLabels[path] ?? {
+      label: "Listing",
+      field: path,
+    };
+    const lowerMessage = issue.message.toLowerCase();
+    const message =
+      lowerMessage.includes("invalid") ||
+      lowerMessage.includes("number") ||
+      lowerMessage.includes("date")
+        ? `Please enter a valid ${field.label}.`
+        : `Please complete ${field.label}.`;
     if (field.field) fieldErrors[field.field] = message;
-    return field.label;
+    return message;
   });
   return { errors: Array.from(new Set(errors)), fieldErrors };
 }
@@ -273,12 +320,8 @@ function buildInput(
     },
   });
   if (!parsed.success) {
-    throw new ListingFormValidationError(
-      parsed.error.issues.map((issue) => {
-        const field = issue.path.join(".") || "Listing";
-        return `${field}: ${issue.message}`;
-      }),
-    );
+    const friendly = friendlyZodErrors(parsed.error);
+    throw new ListingFormValidationError(friendly.errors, friendly.fieldErrors);
   }
   return parsed.data;
 }
@@ -326,268 +369,285 @@ export async function saveListingAction(
   try {
     const action = requiredString(formData, "intent");
     savedAction = action;
-  const campaignId = requiredString(formData, "campaignId") || undefined;
-  const existing = campaignId
-    ? await db.campaign.findUnique({
-        where: { id: campaignId },
-        include: {
-          propertyDetail: true,
-          content: true,
-          media: { include: { fileAsset: true } },
-          documents: { include: { fileAsset: true } },
-        },
-      })
-    : null;
-  const heroFile = fileFromForm(formData, "heroImage");
-  const galleryFiles = filesFromForm(formData, "galleryImages");
-  const heroCaption = requiredString(formData, "heroCaption");
-  const heroAltText = requiredString(formData, "heroAltText");
-  assertLength(heroCaption, maxCaptionLength, "Hero image caption");
-  assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
-  if (heroFile && !allowedImageTypes.has(heroFile.type))
-    validationError("Hero image must be JPG, PNG, or WEBP.");
-  for (const file of galleryFiles) {
-    if (!allowedImageTypes.has(file.type))
-      validationError("Gallery images must be JPG, PNG, or WEBP.");
-  }
-  const existingGalleryCount =
-    existing?.media.filter(
-      (media) =>
-        media.mediaType === "GalleryImage" &&
-        !formData.getAll("deleteGalleryMediaId").includes(media.id),
-    ).length ?? 0;
-  if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
-    validationError(
-      `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
-    );
-  const hasExistingHero =
-    Boolean(
-      existing?.media.some((media) => media.mediaType === "PrimaryImage"),
-    ) && requiredString(formData, "deleteHeroImage") !== "true";
-  if (action === "publish" && !heroFile && !hasExistingHero)
-    throw new ListingFormValidationError(["Hero Image is required before publishing."]);
-  const input = buildInput(formData, action, {
-    campaignCode:
-      existing?.campaignCode ||
-      makeCampaignCode(requiredString(formData, "title")),
-    slug: await makeUniqueSlug(requiredString(formData, "title"), campaignId),
-  });
-  const auditAction: AdminAuditAction = !existing
-    ? "create"
-    : action === "publish"
-      ? "publish"
-      : action === "unpublish"
-        ? "archive"
-        : "update";
-  const saved = await db.$transaction(async (tx) => {
-    const campaign = existing
-      ? await tx.campaign.update({
-          where: { id: existing.id },
-          data: campaignData(input, action),
+    const campaignId = requiredString(formData, "campaignId") || undefined;
+    const existing = campaignId
+      ? await db.campaign.findUnique({
+          where: { id: campaignId },
+          include: {
+            propertyDetail: true,
+            content: true,
+            media: { include: { fileAsset: true } },
+            documents: { include: { fileAsset: true } },
+          },
         })
-      : await tx.campaign.create({
+      : null;
+    const heroFile = fileFromForm(formData, "heroImage");
+    const galleryFiles = filesFromForm(formData, "galleryImages");
+    const heroCaption = requiredString(formData, "heroCaption");
+    const heroAltText = requiredString(formData, "heroAltText");
+    assertLength(heroCaption, maxCaptionLength, "Hero image caption");
+    assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
+    if (heroFile && !allowedImageTypes.has(heroFile.type))
+      validationError("Hero image must be JPG, PNG, or WEBP.");
+    for (const file of galleryFiles) {
+      if (!allowedImageTypes.has(file.type))
+        validationError("Gallery images must be JPG, PNG, or WEBP.");
+    }
+    const existingGalleryCount =
+      existing?.media.filter(
+        (media) =>
+          media.mediaType === "GalleryImage" &&
+          !formData.getAll("deleteGalleryMediaId").includes(media.id),
+      ).length ?? 0;
+    if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
+      validationError(
+        `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
+      );
+    const hasExistingHero =
+      Boolean(
+        existing?.media.some((media) => media.mediaType === "PrimaryImage"),
+      ) && requiredString(formData, "deleteHeroImage") !== "true";
+    if (action === "publish" && !heroFile && !hasExistingHero)
+      throw new ListingFormValidationError(
+        ["Please add a Hero Image before publishing."],
+        { heroImage: "Please add a Hero Image before publishing." },
+      );
+    const input = buildInput(formData, action, {
+      campaignCode:
+        existing?.campaignCode ||
+        makeCampaignCode(requiredString(formData, "title")),
+      slug: await makeUniqueSlug(requiredString(formData, "title"), campaignId),
+    });
+    const auditAction: AdminAuditAction = !existing
+      ? "create"
+      : action === "publish"
+        ? "publish"
+        : action === "unpublish"
+          ? "archive"
+          : "update";
+    const saved = await db.$transaction(async (tx) => {
+      const campaign = existing
+        ? await tx.campaign.update({
+            where: { id: existing.id },
+            data: campaignData(input, action),
+          })
+        : await tx.campaign.create({
+            data: {
+              campaignRef: makeCampaignRef(),
+              ...campaignData(input, action),
+            },
+          });
+      await tx.propertyDetail.upsert({
+        where: { campaignId: campaign.id },
+        update: propertyData(input),
+        create: { campaignId: campaign.id, ...propertyData(input) },
+      });
+      await tx.campaignContent.upsert({
+        where: { campaignId: campaign.id },
+        update: input.content,
+        create: { campaignId: campaign.id, ...input.content },
+      });
+      const mediaAuditEvents: Prisma.AuditLogUncheckedCreateInput[] = [];
+      const heroMediaId = requiredString(formData, "heroMediaId");
+      if (
+        requiredString(formData, "deleteHeroImage") === "true" &&
+        heroMediaId
+      ) {
+        await tx.campaignMedia.delete({ where: { id: heroMediaId } });
+        mediaAuditEvents.push(
+          buildAuditData({
+            action: "update",
+            entityId: campaign.id,
+            beforeSnapshot: { heroMediaId },
+            afterSnapshot: { deleted: true },
+          }),
+        );
+      }
+      if (heroFile) {
+        const asset = await createFileAsset(tx, heroFile, "CampaignImage");
+        await tx.campaignMedia.deleteMany({
+          where: { campaignId: campaign.id, mediaType: "PrimaryImage" },
+        });
+        const hero = await tx.campaignMedia.create({
           data: {
-            campaignRef: makeCampaignRef(),
-            ...campaignData(input, action),
+            campaignId: campaign.id,
+            fileAssetId: asset.id,
+            mediaType: "PrimaryImage",
+            caption: heroCaption || null,
+            altText: heroAltText || null,
+            sortOrder: 0,
           },
         });
-    await tx.propertyDetail.upsert({
-      where: { campaignId: campaign.id },
-      update: propertyData(input),
-      create: { campaignId: campaign.id, ...propertyData(input) },
-    });
-    await tx.campaignContent.upsert({
-      where: { campaignId: campaign.id },
-      update: input.content,
-      create: { campaignId: campaign.id, ...input.content },
-    });
-    const mediaAuditEvents: Prisma.AuditLogUncheckedCreateInput[] = [];
-    const heroMediaId = requiredString(formData, "heroMediaId");
-    if (requiredString(formData, "deleteHeroImage") === "true" && heroMediaId) {
-      await tx.campaignMedia.delete({ where: { id: heroMediaId } });
-      mediaAuditEvents.push(
-        buildAuditData({
-          action: "update",
-          entityId: campaign.id,
-          beforeSnapshot: { heroMediaId },
-          afterSnapshot: { deleted: true },
-        }),
-      );
-    }
-    if (heroFile) {
-      const asset = await createFileAsset(tx, heroFile, "CampaignImage");
-      await tx.campaignMedia.deleteMany({
-        where: { campaignId: campaign.id, mediaType: "PrimaryImage" },
-      });
-      const hero = await tx.campaignMedia.create({
-        data: {
-          campaignId: campaign.id,
-          fileAssetId: asset.id,
-          mediaType: "PrimaryImage",
-          caption: heroCaption || null,
-          altText: heroAltText || null,
-          sortOrder: 0,
-        },
-      });
-      mediaAuditEvents.push(
-        buildAuditData({
-          action: "update",
-          entityId: campaign.id,
-          afterSnapshot: { heroMediaId: hero.id, fileAssetId: asset.id },
-        }),
-      );
-    } else if (heroMediaId) {
-      await tx.campaignMedia.update({
-        where: { id: heroMediaId },
-        data: {
-          caption: heroCaption || null,
-          altText: heroAltText || null,
-          sortOrder: 0,
-        },
-      });
-    }
-    for (const mediaId of formData.getAll("galleryMediaId").map(String)) {
-      if (formData.getAll("deleteGalleryMediaId").includes(mediaId)) {
-        await tx.campaignMedia.delete({ where: { id: mediaId } });
         mediaAuditEvents.push(
           buildAuditData({
             action: "update",
             entityId: campaign.id,
-            beforeSnapshot: { galleryMediaId: mediaId },
-            afterSnapshot: { deleted: true },
+            afterSnapshot: { heroMediaId: hero.id, fileAssetId: asset.id },
           }),
         );
-        continue;
+      } else if (heroMediaId) {
+        await tx.campaignMedia.update({
+          where: { id: heroMediaId },
+          data: {
+            caption: heroCaption || null,
+            altText: heroAltText || null,
+            sortOrder: 0,
+          },
+        });
       }
-      const caption = requiredString(formData, `galleryCaption:${mediaId}`);
-      const altText = requiredString(formData, `galleryAltText:${mediaId}`);
-      assertLength(caption, maxCaptionLength, "Gallery image caption");
-      assertLength(altText, maxAltTextLength, "Gallery image alt text");
-      await tx.campaignMedia.update({
-        where: { id: mediaId },
-        data: {
-          caption: caption || null,
-          altText: altText || null,
-          sortOrder: Number(formData.get(`gallerySortOrder:${mediaId}`) ?? 0),
-        },
-      });
-    }
-    let nextSortOrder = existingGalleryCount;
-    for (const file of galleryFiles) {
-      const asset = await createFileAsset(tx, file, "CampaignImage");
-      const media = await tx.campaignMedia.create({
-        data: {
-          campaignId: campaign.id,
-          fileAssetId: asset.id,
-          mediaType: "GalleryImage",
-          sortOrder: nextSortOrder++,
-        },
-      });
-      mediaAuditEvents.push(
-        buildAuditData({
-          action: "update",
-          entityId: campaign.id,
-          afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id },
-        }),
-      );
-    }
-    for (const documentId of formData.getAll("documentId").map(String)) {
-      if (formData.getAll("deleteDocumentId").includes(documentId)) {
-        await tx.campaignDocument.delete({ where: { id: documentId } });
+      for (const mediaId of formData.getAll("galleryMediaId").map(String)) {
+        if (formData.getAll("deleteGalleryMediaId").includes(mediaId)) {
+          await tx.campaignMedia.delete({ where: { id: mediaId } });
+          mediaAuditEvents.push(
+            buildAuditData({
+              action: "update",
+              entityId: campaign.id,
+              beforeSnapshot: { galleryMediaId: mediaId },
+              afterSnapshot: { deleted: true },
+            }),
+          );
+          continue;
+        }
+        const caption = requiredString(formData, `galleryCaption:${mediaId}`);
+        const altText = requiredString(formData, `galleryAltText:${mediaId}`);
+        assertLength(caption, maxCaptionLength, "Gallery image caption");
+        assertLength(altText, maxAltTextLength, "Gallery image alt text");
+        await tx.campaignMedia.update({
+          where: { id: mediaId },
+          data: {
+            caption: caption || null,
+            altText: altText || null,
+            sortOrder: Number(formData.get(`gallerySortOrder:${mediaId}`) ?? 0),
+          },
+        });
+      }
+      let nextSortOrder = existingGalleryCount;
+      for (const file of galleryFiles) {
+        const asset = await createFileAsset(tx, file, "CampaignImage");
+        const media = await tx.campaignMedia.create({
+          data: {
+            campaignId: campaign.id,
+            fileAssetId: asset.id,
+            mediaType: "GalleryImage",
+            sortOrder: nextSortOrder++,
+          },
+        });
         mediaAuditEvents.push(
           buildAuditData({
             action: "update",
             entityId: campaign.id,
-            beforeSnapshot: { documentId },
-            afterSnapshot: { deleted: true },
+            afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id },
           }),
         );
-        continue;
       }
-      await tx.campaignDocument.update({
-        where: { id: documentId },
-        data: {
-          title: requiredString(formData, `documentTitle:${documentId}`),
-          visibility: normalizeVisibility(
-            requiredString(formData, `documentVisibility:${documentId}`),
-          ) as any,
-          documentStatus: requiredString(
-            formData,
-            `documentStatus:${documentId}`,
-          ) as any,
-          category: requiredString(
-            formData,
-            `documentCategory:${documentId}`,
-          ) as any,
-        },
-      });
-    }
-    for (const category of [
-      "Proclamation of Sale",
-      "Conditions of Sale",
-      "Title Search",
-      "Valuation Report",
-      "Property Photos",
-      "Location Map",
-      "Legal Documents",
-      "Other Documents",
-    ]) {
-      const file = fileFromForm(formData, `documentFile:${category}`);
-      if (!file) continue;
-      if (!allowedDocumentTypes.has(file.type))
-        validationError(
-          "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
+      for (const documentId of formData.getAll("documentId").map(String)) {
+        if (formData.getAll("deleteDocumentId").includes(documentId)) {
+          await tx.campaignDocument.delete({ where: { id: documentId } });
+          mediaAuditEvents.push(
+            buildAuditData({
+              action: "update",
+              entityId: campaign.id,
+              beforeSnapshot: { documentId },
+              afterSnapshot: { deleted: true },
+            }),
+          );
+          continue;
+        }
+        await tx.campaignDocument.update({
+          where: { id: documentId },
+          data: {
+            title: requiredString(formData, `documentTitle:${documentId}`),
+            visibility: normalizeVisibility(
+              requiredString(formData, `documentVisibility:${documentId}`),
+            ) as any,
+            documentStatus: requiredString(
+              formData,
+              `documentStatus:${documentId}`,
+            ) as any,
+            category: requiredString(
+              formData,
+              `documentCategory:${documentId}`,
+            ) as any,
+          },
+        });
+      }
+      for (const category of [
+        "Proclamation of Sale",
+        "Conditions of Sale",
+        "Title Search",
+        "Valuation Report",
+        "Property Photos",
+        "Location Map",
+        "Legal Documents",
+        "Other Documents",
+      ]) {
+        const file = fileFromForm(formData, `documentFile:${category}`);
+        if (!file) continue;
+        if (!allowedDocumentTypes.has(file.type))
+          validationError(
+            "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
+          );
+        const asset = await createFileAsset(tx, file, "CampaignDocument");
+        const document = await tx.campaignDocument.create({
+          data: {
+            documentRef: makeFileRef("DOC"),
+            campaignId: campaign.id,
+            fileAssetId: asset.id,
+            category: normalizeDocumentCategory(category) as any,
+            title: file.name,
+            visibility: normalizeVisibility(
+              requiredString(formData, "newDocumentVisibility"),
+            ) as any,
+            documentStatus: requiredString(
+              formData,
+              "newDocumentStatus",
+            ) as any,
+          },
+        });
+        mediaAuditEvents.push(
+          buildAuditData({
+            action: "update",
+            entityId: campaign.id,
+            afterSnapshot: { documentId: document.id, fileAssetId: asset.id },
+          }),
         );
-      const asset = await createFileAsset(tx, file, "CampaignDocument");
-      const document = await tx.campaignDocument.create({
-        data: {
-          documentRef: makeFileRef("DOC"),
-          campaignId: campaign.id,
-          fileAssetId: asset.id,
-          category: normalizeDocumentCategory(category) as any,
-          title: file.name,
-          visibility: normalizeVisibility(
-            requiredString(formData, "newDocumentVisibility"),
-          ) as any,
-          documentStatus: requiredString(formData, "newDocumentStatus") as any,
-        },
-      });
-      mediaAuditEvents.push(
-        buildAuditData({
-          action: "update",
+      }
+      if (mediaAuditEvents.length > 0)
+        await tx.auditLog.createMany({ data: mediaAuditEvents });
+      await tx.auditLog.create({
+        data: buildAuditData({
+          action: auditAction,
           entityId: campaign.id,
-          afterSnapshot: { documentId: document.id, fileAssetId: asset.id },
+          beforeSnapshot: existing ?? undefined,
+          afterSnapshot: campaign,
         }),
-      );
-    }
-    if (mediaAuditEvents.length > 0)
-      await tx.auditLog.createMany({ data: mediaAuditEvents });
-    await tx.auditLog.create({
-      data: buildAuditData({
-        action: auditAction,
-        entityId: campaign.id,
-        beforeSnapshot: existing ?? undefined,
-        afterSnapshot: campaign,
-      }),
+      });
+      return campaign;
     });
-    return campaign;
-  });
-  revalidatePath("/admin/listings");
-  revalidatePath(`/admin/listings/${saved.slug}`);
-  revalidatePath("/member/opportunities");
-  redirectSlug = saved.slug;
+    revalidatePath("/admin/listings");
+    revalidatePath(`/admin/listings/${saved.slug}`);
+    revalidatePath("/member/opportunities");
+    redirectSlug = saved.slug;
   } catch (error) {
     if (error instanceof ListingFormValidationError) {
-      return { errors: error.errors, fieldErrors: error.errors[0]?.startsWith("Hero Image") ? { heroImage: error.errors[0] } : undefined };
+      return { errors: error.errors, fieldErrors: error.fieldErrors };
     }
     if (error instanceof ZodError) {
       return friendlyZodErrors(error);
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return { errors: ["The listing could not be saved because one or more values conflict with existing data. Please review the form and try again."] };
+      return {
+        errors: [
+          "The listing could not be saved because one or more values conflict with existing data. Please review the form and try again.",
+        ],
+      };
     }
     console.error("Unexpected listing save error", error);
-    return { errors: ["We could not save this listing right now. Please review the required fields and try again."] };
+    return {
+      errors: [
+        "We could not save this listing right now. Please review the required fields and try again.",
+      ],
+    };
   }
   redirect(`/admin/listings/${redirectSlug}?saved=${savedAction}`);
 }
