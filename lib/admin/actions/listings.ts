@@ -92,10 +92,53 @@ class ListingFormValidationError extends Error {
   }
 }
 
-export type ListingFormState = { errors: string[] };
+export type ListingFormState = { errors: string[]; fieldErrors?: Record<string, string> };
 
 function validationError(message: string): never {
   throw new ListingFormValidationError([message]);
+}
+
+const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
+  title: { label: "Campaign Title", field: "title" },
+  campaignTarget: { label: "Campaign Target", field: "campaignTarget" },
+  minimumParticipationAmount: { label: "Minimum Participation Amount", field: "minimumParticipationAmount" },
+  maximumParticipationAmount: { label: "Maximum Participation Amount", field: "maximumParticipationAmount" },
+  campaignOpenDate: { label: "Campaign Open Date", field: "campaignOpenDate" },
+  campaignCloseDate: { label: "Campaign Close Date", field: "campaignCloseDate" },
+  holdingReturnRateMonthly: { label: "Monthly Holding Return", field: "holdingReturnRateMonthly" },
+  returnType: { label: "Return Type", field: "returnType" },
+  maximumHoldingPeriodMonths: { label: "Maximum Holding Period", field: "maximumHoldingPeriodMonths" },
+  "property.propertyType": { label: "Property Type", field: "propertyType" },
+  "property.tenure": { label: "Tenure", field: "tenure" },
+  "property.bumiStatus": { label: "Bumi Status", field: "bumiStatus" },
+  "property.builtUpArea": { label: "Built-Up", field: "builtUpArea" },
+  "property.landArea": { label: "Land Area", field: "landArea" },
+  "property.bedrooms": { label: "Bedrooms", field: "bedrooms" },
+  "property.bathrooms": { label: "Bathrooms", field: "bathrooms" },
+  "property.state": { label: "State", field: "state" },
+  "property.location": { label: "Location", field: "location" },
+  "property.fullAddress": { label: "Full Address", field: "fullAddress" },
+  "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
+  "property.reservePrice": { label: "Market Value", field: "reservePrice" },
+  "content.aboutCampaign": { label: "About This Listing", field: "aboutCampaign" },
+  "content.importantInformation": { label: "Important Information", field: "importantInformation" },
+  "content.riskDisclaimer": { label: "Risk Disclaimer", field: "riskDisclaimer" },
+  "content.holdingReturnExplanation": { label: "Holding Return Explanation", field: "holdingReturnExplanation" },
+  "content.finalDistributionExplanation": { label: "Final Distribution Explanation", field: "finalDistributionExplanation" },
+};
+
+function friendlyZodErrors(error: ZodError): ListingFormState {
+  const fieldErrors: Record<string, string> = {};
+  const errors = error.issues.map((issue) => {
+    const path = issue.path.join(".");
+    const field = friendlyFieldLabels[path] ?? { label: "Listing", field: path };
+    const message = issue.message.toLowerCase().includes("invalid")
+      ? `Please enter a valid ${field.label}.`
+      : `Please complete "${field.label}".`;
+    if (field.field) fieldErrors[field.field] = message;
+    return field.label;
+  });
+  return { errors: Array.from(new Set(errors)), fieldErrors };
 }
 
 function assertLength(value: string, max: number, label: string) {
@@ -279,8 +322,10 @@ export async function saveListingAction(
   formData: FormData,
 ): Promise<ListingFormState> {
   let redirectSlug: string | null = null;
+  let savedAction = "draft";
   try {
     const action = requiredString(formData, "intent");
+    savedAction = action;
   const campaignId = requiredString(formData, "campaignId") || undefined;
   const existing = campaignId
     ? await db.campaign.findUnique({
@@ -320,7 +365,7 @@ export async function saveListingAction(
       existing?.media.some((media) => media.mediaType === "PrimaryImage"),
     ) && requiredString(formData, "deleteHeroImage") !== "true";
   if (action === "publish" && !heroFile && !hasExistingHero)
-    validationError("A hero image is required before publishing. Upload a hero image or keep the existing hero image.");
+    throw new ListingFormValidationError(["Hero Image is required before publishing."]);
   const input = buildInput(formData, action, {
     campaignCode:
       existing?.campaignCode ||
@@ -533,10 +578,10 @@ export async function saveListingAction(
   redirectSlug = saved.slug;
   } catch (error) {
     if (error instanceof ListingFormValidationError) {
-      return { errors: error.errors };
+      return { errors: error.errors, fieldErrors: error.errors[0]?.startsWith("Hero Image") ? { heroImage: error.errors[0] } : undefined };
     }
     if (error instanceof ZodError) {
-      return { errors: error.issues.map((issue) => `${issue.path.join(".") || "Listing"}: ${issue.message}`) };
+      return friendlyZodErrors(error);
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       return { errors: ["The listing could not be saved because one or more values conflict with existing data. Please review the form and try again."] };
@@ -544,5 +589,5 @@ export async function saveListingAction(
     console.error("Unexpected listing save error", error);
     return { errors: ["We could not save this listing right now. Please review the required fields and try again."] };
   }
-  redirect(`/admin/listings/${redirectSlug}`);
+  redirect(`/admin/listings/${redirectSlug}?saved=${savedAction}`);
 }
