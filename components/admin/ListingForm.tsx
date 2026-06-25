@@ -1,3 +1,7 @@
+"use client";
+
+import Image from "next/image";
+import { useMemo, useRef, useState } from "react";
 import { Card } from "@/components/admin/AdminUI";
 import {
   campaignLifecycleStatuses,
@@ -22,7 +26,6 @@ const campaignAmountFields = [
 const campaignDateFields = ["Campaign Open Date", "Campaign Close Date"];
 
 const propertyFields = [
-  "Asset Category",
   "Property Type",
   "Market Value",
   "Estimated Yield",
@@ -48,8 +51,8 @@ const timelineStages = [
 ];
 
 const acquisitionCostFields = [
-  "Purchase Price / Successful Bid Price",
-  "Auction Deposit",
+  "Purchase Price",
+  "Initial Deposit",
   "Balance Purchase Price",
   "Legal Fee",
   "Stamp Duty",
@@ -100,24 +103,91 @@ const calculationFields = [
   "Platform Share",
   "Final Distribution Pool",
 ];
+type FormValues = Record<string, string>;
+type FormErrors = Record<string, string>;
+
+const fieldNameByLabel: Record<string, string> = {
+  "Listing Title": "title",
+  "Property Type": "property.propertyType",
+  Location: "property.location",
+  "Full Address": "property.fullAddress",
+  "About This Listing": "content.aboutCampaign",
+  "Important Information": "content.importantInformation",
+  "Campaign Target": "campaignTarget",
+  "Minimum Participation Amount": "minimumParticipationAmount",
+  "Maximum Participation Amount": "maximumParticipationAmount",
+};
+
+const validationLabels: Record<string, string> = {
+  title: "Listing Title",
+  "property.propertyType": "Property Type",
+  "property.location": "Location",
+  "property.fullAddress": "Full Address",
+  "content.aboutCampaign": "About This Listing",
+  "content.importantInformation": "Important Information",
+  campaignTarget: "Campaign Target",
+  minimumParticipationAmount: "Minimum Participation Amount",
+  maximumParticipationAmount: "Maximum Participation Amount",
+};
+
+const requiredFields = Object.keys(validationLabels);
+const fieldSection: Record<string, string> = {
+  title: "campaign-setup",
+  campaignTarget: "campaign-setup",
+  minimumParticipationAmount: "campaign-setup",
+  maximumParticipationAmount: "campaign-setup",
+  "property.propertyType": "property-details",
+  "property.location": "property-details",
+  "property.fullAddress": "property-details",
+  "content.aboutCampaign": "campaign-content",
+  "content.importantInformation": "campaign-content",
+};
+
+function messageFor(name: string) {
+  const label = validationLabels[name] || "This field";
+  return name.startsWith("property.propertyType") ? `Please select ${label}.` : `Please enter ${label}.`;
+}
+
+function inputClass(hasError?: boolean) {
+  return `mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm outline-none transition focus:ring-4 ${
+    hasError
+      ? "border-red-400 focus:border-red-500 focus:ring-red-100"
+      : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"
+  }`;
+}
+
 
 function Field({
   label,
   type = "text",
   className = "",
+  values,
+  errors,
+  onChange,
 }: {
   label: string;
   type?: string;
   className?: string;
+  values?: FormValues;
+  errors?: FormErrors;
+  onChange?: (name: string, value: string) => void;
 }) {
   const normalizedType = label.includes("Date") ? "date" : type;
+  const name = fieldNameByLabel[label] || label;
+  const error = errors?.[name];
   return (
-    <label className={className}>
+    <label className={className} data-field-name={name}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
       <input
+        name={name}
+        value={values?.[name] || ""}
+        onChange={(event) => onChange?.(name, event.target.value)}
         type={normalizedType}
-        className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+        aria-invalid={Boolean(error)}
+        aria-describedby={error ? `${name}-error` : undefined}
+        className={inputClass(Boolean(error))}
       />
+      {error ? <p id={`${name}-error`} className="mt-2 text-xs font-bold text-red-600">{error}</p> : null}
     </label>
   );
 }
@@ -127,23 +197,29 @@ function SelectField({
   options,
   helper,
   className = "",
+  values,
+  errors,
+  onChange,
 }: {
   label: string;
   options: readonly string[];
   helper?: string;
   className?: string;
+  values?: FormValues;
+  errors?: FormErrors;
+  onChange?: (name: string, value: string) => void;
 }) {
+  const name = fieldNameByLabel[label] || label;
+  const error = errors?.[name];
   return (
-    <label className={className}>
+    <label className={className} data-field-name={name}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
-      {helper ? (
-        <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
-      ) : null}
-      <select className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10">
-        {options.map((option) => (
-          <option key={option}>{option}</option>
-        ))}
+      {helper ? <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p> : null}
+      <select name={name} value={values?.[name] || ""} onChange={(event) => onChange?.(name, event.target.value)} aria-invalid={Boolean(error)} className={inputClass(Boolean(error)) + " font-semibold text-slate-600"}>
+        <option value="">Select {label}</option>
+        {options.map((option) => <option key={option} value={option}>{option}</option>)}
       </select>
+      {error ? <p className="mt-2 text-xs font-bold text-red-600">{error}</p> : null}
     </label>
   );
 }
@@ -152,21 +228,25 @@ function TextAreaField({
   label,
   helper,
   rows = 4,
+  values,
+  errors,
+  onChange,
 }: {
   label: string;
   helper?: string;
   rows?: number;
+  values?: FormValues;
+  errors?: FormErrors;
+  onChange?: (name: string, value: string) => void;
 }) {
+  const name = fieldNameByLabel[label] || label;
+  const error = errors?.[name];
   return (
-    <label>
+    <label data-field-name={name}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
-      {helper ? (
-        <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p>
-      ) : null}
-      <textarea
-        rows={rows}
-        className="mt-2 w-full rounded-lg border border-slate-200 bg-white p-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
-      />
+      {helper ? <p className="mt-1 text-xs leading-5 text-slate-500">{helper}</p> : null}
+      <textarea name={name} value={values?.[name] || ""} onChange={(event) => onChange?.(name, event.target.value)} rows={rows} aria-invalid={Boolean(error)} className={`mt-2 w-full rounded-lg border bg-white p-3 text-sm outline-none transition focus:ring-4 ${error ? "border-red-400 focus:border-red-500 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`} />
+      {error ? <p className="mt-2 text-xs font-bold text-red-600">{error}</p> : null}
     </label>
   );
 }
@@ -251,9 +331,15 @@ function Section({
 function FieldGrid({
   fields,
   columns = "lg:grid-cols-3",
+  values,
+  errors,
+  onChange,
 }: {
   fields: string[];
   columns?: string;
+  values?: FormValues;
+  errors?: FormErrors;
+  onChange?: (name: string, value: string) => void;
 }) {
   return (
     <div className={`grid gap-4 sm:grid-cols-2 ${columns}`}>
@@ -261,9 +347,10 @@ function FieldGrid({
         <Field
           key={field}
           label={field}
-          className={
-            field === "Full Address" ? "sm:col-span-2 lg:col-span-3" : ""
-          }
+          className={field === "Full Address" ? "sm:col-span-2 lg:col-span-3" : ""}
+          values={values}
+          errors={errors}
+          onChange={onChange}
         />
       ))}
     </div>
@@ -274,37 +361,56 @@ function UploadZone({
   title,
   supported,
   helper = "Drag and drop here, or choose file",
+  multiple = false,
 }: {
   title: string;
   supported: string;
   helper?: string;
+  multiple?: boolean;
 }) {
+  const [files, setFiles] = useState<{ file: File; url?: string }[]>([]);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const isImage = supported.includes("JPG") || supported.includes("PNG") || supported.includes("WEBP");
+
+  function handleFiles(fileList: FileList | null) {
+    const nextFiles = Array.from(fileList || []).map((file) => ({
+      file,
+      url: isImage ? URL.createObjectURL(file) : undefined,
+    }));
+    setFiles((current) => (multiple ? [...current, ...nextFiles] : nextFiles.slice(0, 1)));
+    if (inputRef.current) inputRef.current.value = "";
+  }
+
+  function removeFile(index: number) {
+    setFiles((current) => current.filter((_, currentIndex) => currentIndex !== index));
+  }
+
   return (
-    <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
+    <div className="min-w-0 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 p-5 text-center transition hover:border-papaipay-green/40 hover:bg-emerald-50/40">
+      <input ref={inputRef} type="file" multiple={multiple} accept={isImage ? "image/png,image/jpeg,image/webp" : undefined} className="sr-only" onChange={(event) => handleFiles(event.target.files)} />
       <div className="mx-auto grid h-11 w-11 place-items-center rounded-full bg-white text-papaipay-green ring-1 ring-slate-200">
-        <svg
-          viewBox="0 0 24 24"
-          className="h-5 w-5"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.8"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M12 16V4" />
-          <path d="m7 9 5-5 5 5" />
-          <path d="M5 20h14" />
-        </svg>
+        <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M12 16V4" /><path d="m7 9 5-5 5 5" /><path d="M5 20h14" /></svg>
       </div>
       <p className="mt-3 text-sm font-bold text-papaipay-ink">{title}</p>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
-      <span className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
-        Choose file
-      </span>
-      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-        Supported: {supported} · Upload pending
-      </p>
+      <button type="button" onClick={() => inputRef.current?.click()} className="mt-3 inline-flex rounded-full bg-white px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
+        {files.length ? "Replace" : "Choose file"}
+      </button>
+      <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-slate-400">Supported: {supported}{files.length ? ` · ${files.length} selected` : ""}</p>
+      {files.length ? (
+        <div className="mt-4 grid max-h-80 min-w-0 gap-3 overflow-y-auto text-left">
+          {files.map((item, index) => (
+            <div key={`${item.file.name}-${index}`} className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-100 bg-white p-2">
+              {item.url ? <Image src={item.url} alt="" width={56} height={56} unoptimized className="h-14 w-14 shrink-0 rounded-lg object-cover" /> : <div className="grid h-14 w-14 shrink-0 place-items-center rounded-lg bg-slate-100 text-xs font-bold text-slate-500">DOC</div>}
+              <div className="min-w-0 flex-1">
+                <p className="truncate text-xs font-bold text-slate-700">{item.file.name}</p>
+                <p className="text-xs text-slate-400">{Math.ceil(item.file.size / 1024)} KB</p>
+              </div>
+              <button type="button" onClick={() => removeFile(index)} className="shrink-0 rounded-md border border-red-100 px-2 py-1 text-xs font-bold text-red-600">Remove</button>
+            </div>
+          ))}
+        </div>
+      ) : null}
     </div>
   );
 }
@@ -435,9 +541,60 @@ export function ListingForm({
     mode === "edit" && initialValues?.campaignCode
       ? initialValues.campaignCode
       : "Auto-generated after save";
+  const [values, setValues] = useState<FormValues>({});
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [toast, setToast] = useState("");
+  const [banner, setBanner] = useState("");
+  const [processing, setProcessing] = useState<"draft" | "publish" | "update" | "unpublish" | "" | "review">("");
+  const [savedPreviewHref, setSavedPreviewHref] = useState(memberPreviewHref);
+
+  const tabsWithErrors = useMemo(() => new Set(Object.keys(errors).map((field) => fieldSection[field])), [errors]);
+  const onChange = (name: string, value: string) => {
+    setValues((current) => ({ ...current, [name]: value }));
+    setErrors((current) => {
+      if (!current[name]) return current;
+      const next = { ...current };
+      if (value.trim()) delete next[name];
+      return next;
+    });
+  };
+  const validate = () => {
+    const nextErrors = requiredFields.reduce<FormErrors>((next, name) => {
+      if (!values[name]?.trim()) next[name] = messageFor(name);
+      return next;
+    }, {});
+    setErrors(nextErrors);
+    if (Object.keys(nextErrors).length) {
+      setBanner("Please complete the required information before publishing.");
+      requestAnimationFrame(() => {
+        const firstName = Object.keys(nextErrors)[0];
+        const target = document.querySelector(`[data-field-name="${firstName}"]`);
+        target?.scrollIntoView({ behavior: "smooth", block: "center" });
+        (target?.querySelector("input, textarea, select") as HTMLElement | null)?.focus();
+      });
+      return false;
+    }
+    setBanner("");
+    return true;
+  };
+  const handleAction = (action: "draft" | "publish" | "update" | "unpublish" | "review") => {
+    if (action !== "draft" && !validate()) return;
+    setProcessing(action);
+    window.setTimeout(() => {
+      setProcessing("");
+      if (action === "draft") {
+        setSavedPreviewHref(memberPreviewHref || "/member/opportunities/preview-draft");
+        setToast("Listing saved as Draft.");
+      } else if (action === "publish") setToast("Listing published successfully.");
+      else if (action === "update") setToast("Listing updated successfully.");
+      else if (action === "unpublish") setToast("Listing unpublished successfully.");
+    }, 350);
+  };
 
   return (
     <div className="space-y-5">
+      {toast ? <div className="fixed right-4 top-4 z-50 rounded-xl bg-papaipay-ink px-4 py-3 text-sm font-bold text-white shadow-lg">{toast}</div> : null}
+      {banner ? <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-bold text-red-700">{banner}</div> : null}
       <div className="sticky top-[76px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/95 sm:shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
         <div
           className="flex gap-2 overflow-x-auto"
@@ -447,9 +604,9 @@ export function ListingForm({
             <a
               key={tab.id}
               href={`#${tab.id}`}
-              className="whitespace-nowrap rounded-full border border-slate-200 bg-white px-4 py-2 text-xs font-black text-slate-600 transition hover:border-papaipay-green/40 hover:bg-emerald-50/50 hover:text-papaipay-green"
+              className={`whitespace-nowrap rounded-full border px-4 py-2 text-xs font-black transition hover:border-papaipay-green/40 hover:bg-emerald-50/50 hover:text-papaipay-green ${tabsWithErrors.has(tab.id) ? "border-red-300 bg-red-50 text-red-700" : "border-slate-200 bg-white text-slate-600"}`}
             >
-              {tab.label}
+              {tab.label}{tabsWithErrors.has(tab.id) ? <span className="ml-2 inline-flex h-2 w-2 rounded-full bg-red-500" aria-label="Section has errors" /> : null}
             </a>
           ))}
         </div>
@@ -476,7 +633,7 @@ export function ListingForm({
                 helper="System-generated campaign code. Manual entry is disabled."
                 value={campaignCodeValue}
               />
-              <Field label="Campaign Title" />
+              <Field label="Listing Title" values={values} errors={errors} onChange={onChange} />
               <SelectField
                 label="Member Preview Visibility"
                 options={["Member Visible", "Internal Only"]}
@@ -508,7 +665,7 @@ export function ListingForm({
           >
             <div className="grid gap-4 sm:grid-cols-2">
               {campaignAmountFields.map((field) => (
-                <Field key={field} label={field} />
+                <Field key={field} label={field} values={values} errors={errors} onChange={onChange} />
               ))}
               <ReadOnlyField
                 label="Collected Amount"
@@ -559,7 +716,7 @@ export function ListingForm({
           />
         </div>
         <div className="mt-4">
-          <FieldGrid fields={propertyFields} />
+          <FieldGrid fields={propertyFields} values={values} errors={errors} onChange={onChange} />
         </div>
       </Section>
 
@@ -571,11 +728,11 @@ export function ListingForm({
         <div className="grid gap-5">
           <SubsectionCard
             title="Gallery"
-            description="Images used in the campaign detail gallery."
+            description="Images used in the listing detail gallery."
           >
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <UploadZone
-                title="Primary Image"
+                title="Hero Image"
                 supported="JPG, PNG, WEBP"
                 helper="Drag and drop the hero image, or choose file. Placeholder preview only for now."
               />
@@ -583,6 +740,7 @@ export function ListingForm({
                 title="Gallery Images"
                 supported="JPG, PNG, WEBP"
                 helper="Drag and drop multiple gallery images. Upload pending until storage is connected."
+                multiple
               />
               <Field label="Image Caption" />
               <Field label="Image Alt Text" />
@@ -627,15 +785,18 @@ export function ListingForm({
       <Section
         id="campaign-content"
         title="Campaign Content"
-        description="Control member-facing campaign narrative, important information, timeline, updates, FAQ and risk text."
+        description="Control member-facing listing narrative, important information, timeline, updates, FAQ and risk text."
       >
         <div className="grid gap-5 lg:grid-cols-2">
           <TextAreaField
-            label="About This Campaign"
+            label="About This Listing"
             rows={7}
-            helper="Member-facing campaign overview displayed on the campaign detail page."
+            helper="Member-facing listing overview displayed on the listing detail page."
+            values={values}
+            errors={errors}
+            onChange={onChange}
           />
-          <TextAreaField label="Important Information" rows={7} />
+          <TextAreaField label="Important Information" rows={7} values={values} errors={errors} onChange={onChange} />
         </div>
         <div className="mt-5 rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
           <h3 className="text-sm font-black text-papaipay-ink">
@@ -818,7 +979,7 @@ export function ListingForm({
             "Property Snapshot complete",
             "Gallery ready",
             "Required documents ready",
-            "About This Campaign completed",
+            "About This Listing completed",
             "Important Information completed",
             "Return & Protection completed",
             "24-month rule visible",
@@ -838,13 +999,15 @@ export function ListingForm({
                 Review exactly what members will see
               </h3>
               <p className="mt-2 text-sm leading-6 text-slate-600">
-                Open the member-facing campaign detail page before publishing or
-                updating this campaign.
+                Open the member-facing listing detail page before publishing or
+                updating this listing.
               </p>
             </div>
-            {memberPreviewHref ? (
+            {savedPreviewHref ? (
               <a
-                href={memberPreviewHref}
+                href={savedPreviewHref}
+                target="_blank"
+                rel="noreferrer"
                 className="rounded-xl bg-papaipay-green px-5 py-3 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.22)]"
               >
                 Preview Member View
@@ -857,22 +1020,30 @@ export function ListingForm({
           </div>
         </div>
         <p className="mt-4 text-xs font-semibold text-slate-500">
-          Action buttons are UI-only placeholders for Phase 1; server actions
-          and database writes are not wired yet.
+          Required fields are checked in your browser before any listing action continues.
         </p>
         <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
-            Save Draft
+          <button type="button" disabled={Boolean(processing)} onClick={() => handleAction("draft")} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+            {processing === "draft" ? "Saving..." : "Save Draft"}
           </button>
-          <button className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700">
+          <button type="button" disabled={Boolean(processing)} onClick={() => handleAction("review")} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
             Submit for Review
           </button>
-          <button className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">
-            Publish Campaign
-          </button>
-          <button className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white">
-            Update Campaign
-          </button>
+          {mode === "create" ? (
+            <button type="button" disabled={Boolean(processing)} onClick={() => handleAction("publish")} className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+              {processing === "publish" ? "Publishing..." : "Publish Listing"}
+            </button>
+          ) : null}
+          {mode === "edit" ? (
+            <>
+              <button type="button" disabled={Boolean(processing)} onClick={() => handleAction("update")} className="rounded-md bg-papaipay-ink px-4 py-2 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-60">
+                {processing === "update" ? "Updating..." : "Update Listing"}
+              </button>
+              <button type="button" disabled={Boolean(processing)} onClick={() => handleAction("unpublish")} className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-slate-700 disabled:cursor-not-allowed disabled:opacity-60">
+                Unpublish Listing
+              </button>
+            </>
+          ) : null}
         </div>
       </Section>
     </div>

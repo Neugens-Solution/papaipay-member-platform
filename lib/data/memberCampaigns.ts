@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import type { Opportunity } from "@/lib/memberMockData";
+import { opportunities as fallbackOpportunities, type Opportunity } from "@/lib/memberMockData";
 
 type CampaignWithRelations = Awaited<ReturnType<typeof getMemberCampaignsRaw>>[number];
 
@@ -175,13 +175,24 @@ async function getMemberCampaignsRaw() {
 }
 
 export async function getMemberCampaigns() {
-  const campaigns = await getMemberCampaignsRaw();
+  if (!process.env.DATABASE_URL) return fallbackOpportunities;
 
-  return campaigns.map(toOpportunity);
+  try {
+    const campaigns = await getMemberCampaignsRaw();
+
+    return campaigns.map(toOpportunity);
+  } catch {
+    return fallbackOpportunities;
+  }
 }
 
 export async function getMemberCampaignBySlug(slug: string) {
-  const campaign = await db.campaign.findFirst({
+  if (!process.env.DATABASE_URL) {
+    return fallbackOpportunities.find((opportunity) => opportunity.slug === slug) || null;
+  }
+
+  try {
+    const campaign = await db.campaign.findFirst({
     where: {
       slug,
       publishStatus: "Published",
@@ -212,7 +223,10 @@ export async function getMemberCampaignBySlug(slug: string) {
     },
   });
 
-  if (!campaign) return null;
+    if (!campaign) return fallbackOpportunities.find((opportunity) => opportunity.slug === slug) || null;
 
-  return toOpportunity(campaign);
+    return toOpportunity(campaign);
+  } catch {
+    return fallbackOpportunities.find((opportunity) => opportunity.slug === slug) || null;
+  }
 }

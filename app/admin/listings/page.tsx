@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Badge, PageHeader, ProgressBar, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { db } from "@/lib/db";
+import { listings as fallbackListings } from "@/lib/adminMockData";
+
+export const dynamic = "force-dynamic";
 
 function decimalToNumber(value: unknown): number {
   if (
@@ -41,19 +44,40 @@ function formatStatus(status: string) {
 }
 
 export default async function ListingsPage() {
-  const listings = await db.campaign.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      propertyDetail: true,
-      _count: {
-        select: {
-          participations: true,
+  const listings = process.env.DATABASE_URL
+    ? await db.campaign.findMany({
+        orderBy: {
+          createdAt: "desc",
         },
-      },
-    },
-  });
+        include: {
+          propertyDetail: true,
+          _count: {
+            select: {
+              participations: true,
+            },
+          },
+        },
+      })
+    : fallbackListings.map((listing) => ({
+        slug: listing.slug,
+        campaignRef: listing.campaignId,
+        campaignCode: listing.campaignCode,
+        title: listing.name,
+        campaignTarget: listing.campaignTarget,
+        collectedAmountSnapshot: listing.collectedAmount,
+        lifecycleStatus: listing.status,
+        propertyDetail: {
+          propertyType: listing.propertyType,
+          tenureAlias: listing.tenureAlias,
+          bumiStatus: listing.bumiStatus,
+          isLaca: listing.isLaca,
+          location: listing.location,
+          state: listing.state,
+        },
+        _count: {
+          participations: listing.participants,
+        },
+      }));
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
