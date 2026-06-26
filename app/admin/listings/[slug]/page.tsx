@@ -44,7 +44,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <BackLink href="/admin/listings" label="Back to Opportunity Management" />
+      <BackLink href="/admin/listings" label="Back to Listing Management" />
       <PageHeader
         eyebrow={`${listing.campaignRef} • ${listing.campaignCode}`}
         title={listing.title}
@@ -54,7 +54,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
             href={`/admin/listings/${listing.slug}/edit`}
           >
-            Edit Opportunity
+            Edit Listing
           </Link>
         }
       />

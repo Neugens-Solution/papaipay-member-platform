@@ -16,11 +16,64 @@ const tabs = [
   { id: "settlement-fees", label: "Settlement & Fees" },
   { id: "media", label: "Media" },
   { id: "documents", label: "Documents" },
-  { id: "important-information", label: "Important Information" },
-  { id: "faq", label: "FAQ" },
-  { id: "risk-disclaimer", label: "Risk Disclaimer" },
-  { id: "review-publish", label: "Preview & Publish" },
+  { id: "important-information", label: "Important / FAQ / Risk" },
+  { id: "review-publish", label: "Publish Listing" },
 ];
+
+const propertyTypeOptions = [
+  "Terrace House",
+  "Semi-Detached House",
+  "Detached House",
+  "Condominium",
+  "Apartment",
+  "Serviced Residence",
+  "Shop Lot",
+  "Commercial Unit",
+  "Industrial Property",
+  "Land",
+];
+
+const assetCategoryOptions = [
+  "Residential Asset",
+  "Commercial Asset",
+  "Industrial Asset",
+  "Land Asset",
+  "Mixed Development Asset",
+];
+
+const occupancyStatusOptions = [
+  "Vacant",
+  "Owner Occupied",
+  "Tenanted",
+  "Partially Tenanted",
+  "To be confirmed",
+];
+
+const malaysiaStateOptions = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Kuala Lumpur",
+  "Labuan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Penang",
+  "Perak",
+  "Perlis",
+  "Putrajaya",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+  "To be confirmed",
+];
+
+const defaultFaqQuestion = "How does Participation in this Listing work?";
+const defaultFaqAnswer =
+  "Members submit a Participation Amount within the approved minimum and maximum range. The campaign is reviewed against the Listing terms, documents and member eligibility before final confirmation.";
+const defaultRiskDisclaimer =
+  "Participation in property Listings involves risk. Returns are not guaranteed, timelines may change, and final distribution depends on the actual asset outcome, costs and approved settlement calculations.";
 
 const campaignAmountFields = [
   "Campaign Target",
@@ -719,14 +772,14 @@ export function ListingForm({
     documents: "documents",
     aboutCampaign: "basic-information",
     importantInformation: "important-information",
-    riskDisclaimer: "risk-disclaimer",
+    riskDisclaimer: "important-information",
     holdingReturnExplanation: "investment-information",
     finalDistributionExplanation: "investment-information",
     holdingReturnRateMonthly: "investment-information",
     maximumHoldingPeriodMonths: "investment-information",
     returnType: "investment-information",
-    faqQuestion: "faq",
-    faqAnswer: "faq",
+    faqQuestion: "important-information",
+    faqAnswer: "important-information",
   };
   const sectionsWithErrors = new Set(
     Object.keys(fieldErrors)
@@ -800,6 +853,18 @@ export function ListingForm({
     ) ?? [];
   const documents = initialValues?.documents ?? [];
   const primaryFaq = initialValues?.faqs?.[0];
+  const defaultMemberShare =
+    initialValues?.memberProfitDistributionPercentagePlanned?.toString() ??
+    "70";
+  const defaultPlatformShare =
+    initialValues?.platformProfitSharePercentagePlanned?.toString() ??
+    String(100 - Number(defaultMemberShare || 0));
+  const [memberShare, setMemberShare] = useState(defaultMemberShare);
+  const platformShare = useMemo(() => {
+    const memberValue = Number(memberShare);
+    if (!Number.isFinite(memberValue)) return defaultPlatformShare;
+    return String(Math.max(0, Math.min(100, 100 - memberValue)));
+  }, [defaultPlatformShare, memberShare]);
 
   return (
     <form action={formAction} className="space-y-5">
@@ -846,7 +911,7 @@ export function ListingForm({
       <Section
         id="basic-information"
         title="Basic Information"
-        description="Manage the core opportunity identity, status, readiness and publishing metadata."
+        description="Manage the core listing identity, status, readiness and publishing metadata."
       >
         <div className="grid gap-5 lg:grid-cols-2">
           <SubsectionCard
@@ -865,7 +930,7 @@ export function ListingForm({
                 value={campaignCodeValue}
               />
               <Field
-                label="Opportunity Title"
+                label="Listing Title"
                 name="title"
                 error={fieldErrors.title}
                 defaultValue={initialValues?.title}
@@ -877,7 +942,7 @@ export function ListingForm({
               />
               <ReadOnlyField
                 label="Listing Readiness"
-                helper="Draft records remain internal; publishing sets the opportunity to member-visible when required fields pass validation."
+                helper="Draft records remain internal; publishing sets the listing to member-visible when required fields pass validation."
                 value={
                   initialValues?.publishStatus === "Published"
                     ? "Ready / Published"
@@ -890,16 +955,16 @@ export function ListingForm({
                 error={fieldErrors.aboutCampaign}
                 defaultValue={initialValues?.content?.aboutCampaign}
                 className="sm:col-span-2"
-                helper="Short member-facing overview used on opportunity detail."
+                helper="Short member-facing overview used on listing detail."
               />
               <ReadOnlyField
                 label="Slug"
-                helper="Generated from opportunity title and kept unique automatically."
+                helper="Generated from listing title and kept unique automatically."
                 value={slug ?? "Auto-generated after save"}
               />
               <ReadOnlyField
                 label="Publish Status"
-                helper="Controlled by Save Draft, Publish Opportunity, and Unpublish Opportunity actions."
+                helper="Controlled by Save Draft, Publish Listing, and Unpublish Listing actions."
                 value={initialValues?.publishStatus ?? "Draft"}
               />
             </div>
@@ -910,7 +975,7 @@ export function ListingForm({
           >
             <div className="grid gap-4 sm:grid-cols-2">
               <SelectField
-                label="Opportunity Status"
+                label="Listing Status"
                 options={campaignLifecycleStatuses}
                 className="sm:col-span-2"
               />
@@ -1032,23 +1097,35 @@ export function ListingForm({
         </div>
         <div className="mt-4">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <Field
+            <SelectField
               label="Property Type"
               name="propertyType"
+              options={propertyTypeOptions}
               error={fieldErrors.propertyType}
-              defaultValue={initialValues?.propertyDetail?.propertyType}
+              defaultValue={
+                initialValues?.propertyDetail?.propertyType ??
+                propertyTypeOptions[0]
+              }
             />
-            <Field
+            <SelectField
               label="Asset Category"
               name="assetCategory"
+              options={assetCategoryOptions}
               error={fieldErrors.assetCategory}
-              defaultValue={initialValues?.propertyDetail?.assetCategory}
+              defaultValue={
+                initialValues?.propertyDetail?.assetCategory ??
+                assetCategoryOptions[0]
+              }
             />
-            <Field
+            <SelectField
               label="Occupancy Status"
               name="occupancyStatus"
+              options={occupancyStatusOptions}
               error={fieldErrors.occupancyStatus}
-              defaultValue={initialValues?.propertyDetail?.occupancyStatus}
+              defaultValue={
+                initialValues?.propertyDetail?.occupancyStatus ??
+                occupancyStatusOptions[0]
+              }
             />
             <Field
               label="Market Value"
@@ -1083,11 +1160,14 @@ export function ListingForm({
               type="number"
               defaultValue={initialValues?.propertyDetail?.bathrooms}
             />
-            <Field
+            <SelectField
               label="State"
               name="state"
+              options={malaysiaStateOptions}
               error={fieldErrors.state}
-              defaultValue={initialValues?.propertyDetail?.state}
+              defaultValue={
+                initialValues?.propertyDetail?.state ?? malaysiaStateOptions[0]
+              }
             />
             <Field
               label="Location"
@@ -1208,24 +1288,43 @@ export function ListingForm({
             acquisition, holding, preparation, and sale details are available.
           </p>
           <div className="mt-5 grid gap-4 sm:grid-cols-2">
-            <Field
-              label="Member Profit Distribution Percentage"
-              name="memberProfitDistributionPercentagePlanned"
-              type="number"
-              step="0.01"
-              defaultValue={
-                initialValues?.memberProfitDistributionPercentagePlanned
-              }
-              helper="Optional. Percentage of future net profit allocated to members; no calculation is run here."
-            />
-            <Field
-              label="Platform Profit Share Percentage"
-              name="platformProfitSharePercentagePlanned"
-              type="number"
-              step="0.01"
-              defaultValue={initialValues?.platformProfitSharePercentagePlanned}
-              helper="Optional. Percentage reserved for platform share; no payment logic is triggered."
-            />
+            <label>
+              <span className="text-sm font-bold text-slate-600">
+                Member Profit Distribution Percentage
+              </span>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Percentage of future net profit allocated to members.
+              </p>
+              <input
+                name="memberProfitDistributionPercentagePlanned"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                value={memberShare}
+                onChange={(event) => setMemberShare(event.target.value)}
+                className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+              />
+            </label>
+            <label>
+              <span className="text-sm font-bold text-slate-600">
+                Platform Profit Share Percentage
+              </span>
+              <p className="mt-1 text-xs leading-5 text-slate-500">
+                Auto-balanced against member share so both percentages total
+                100%.
+              </p>
+              <input
+                name="platformProfitSharePercentagePlanned"
+                type="number"
+                step="0.01"
+                min="0"
+                max="100"
+                value={platformShare}
+                readOnly
+                className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-slate-100 px-3 text-sm font-semibold text-slate-500 outline-none"
+              />
+            </label>
             <TextAreaField
               label="Optional Notes"
               name="settlementFeeNotes"
@@ -1496,8 +1595,8 @@ export function ListingForm({
 
       <Section
         id="important-information"
-        title="Important Information"
-        description="Maintain member-facing important information with formatting preserved."
+        title="Important Information, FAQ & Risk"
+        description="Maintain member-facing important information, default FAQ content and risk disclaimer text with formatting preserved."
       >
         <div className="grid gap-5">
           <TextAreaField
@@ -1507,15 +1606,6 @@ export function ListingForm({
             rows={7}
             defaultValue={initialValues?.content?.importantInformation}
           />
-        </div>
-      </Section>
-
-      <Section
-        id="faq"
-        title="FAQ"
-        description="Manage optional member-facing questions and answers. Empty FAQ fields do not block publishing."
-      >
-        <div className="grid gap-5">
           <SubsectionCard
             title="FAQ"
             description="Add, edit or clear the primary member-facing FAQ. FAQ is optional for publishing."
@@ -1526,7 +1616,7 @@ export function ListingForm({
                 label="Question"
                 name="faqQuestion"
                 error={fieldErrors.faqQuestion}
-                defaultValue={primaryFaq?.question}
+                defaultValue={primaryFaq?.question ?? defaultFaqQuestion}
               />
               <Field label="Display Order" type="number" defaultValue={0} />
             </div>
@@ -1535,25 +1625,18 @@ export function ListingForm({
                 label="Answer"
                 name="faqAnswer"
                 error={fieldErrors.faqAnswer}
-                defaultValue={primaryFaq?.answer}
+                defaultValue={primaryFaq?.answer ?? defaultFaqAnswer}
               />
             </div>
           </SubsectionCard>
-        </div>
-      </Section>
-
-      <Section
-        id="risk-disclaimer"
-        title="Risk Disclaimer"
-        description="Optional member-facing risk text. Formatting is preserved on the member detail page."
-      >
-        <div>
           <TextAreaField
             label="Risk Disclaimer"
             name="riskDisclaimer"
             error={fieldErrors.riskDisclaimer}
             rows={5}
-            defaultValue={initialValues?.content?.riskDisclaimer}
+            defaultValue={
+              initialValues?.content?.riskDisclaimer ?? defaultRiskDisclaimer
+            }
           />
         </div>
       </Section>
@@ -1631,7 +1714,7 @@ export function ListingForm({
                 pendingLabel="Publishing..."
                 className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
               >
-                Publish Opportunity
+                Publish Listing
               </SubmitButton>
             </>
           ) : (
@@ -1649,7 +1732,7 @@ export function ListingForm({
                   pendingLabel="Unpublishing..."
                   className="rounded-md border border-amber-200 bg-amber-50 px-4 py-2 text-sm font-bold text-amber-800"
                 >
-                  Unpublish Opportunity
+                  Unpublish Listing
                 </SubmitButton>
               ) : (
                 <SubmitButton
@@ -1657,7 +1740,7 @@ export function ListingForm({
                   pendingLabel="Publishing..."
                   className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
                 >
-                  Publish Opportunity
+                  Publish Listing
                 </SubmitButton>
               )}
             </>

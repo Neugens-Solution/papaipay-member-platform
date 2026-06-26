@@ -35,14 +35,14 @@ export default async function ListingsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
-        title="Opportunity Management"
-        description="Manage opportunity records and monitor collection progress."
+        title="Listing Management"
+        description="Manage listing records and monitor collection progress."
         action={
           <Link
             className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
             href="/admin/listings/create"
           >
-            Create Opportunity
+            Create Listing
           </Link>
         }
       />
@@ -52,7 +52,7 @@ export default async function ListingsPage() {
           <tr>
             <Th>Campaign ID</Th>
             <Th>Campaign Code</Th>
-            <Th>Opportunity Name</Th>
+            <Th>Listing Name</Th>
             <Th>Location</Th>
             <Th>Asset</Th>
             <Th>Status</Th>
