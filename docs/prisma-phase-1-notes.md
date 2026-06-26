@@ -92,3 +92,7 @@ Campaign records hold planned member/platform percentage settings. Settlement re
 Capacity snapshots are non-null Decimal fields with zero defaults, and available amount remains derived from campaign target minus collected and reserved snapshots.
 
 File purposes now distinguish member-uploaded V1 verification files (`ManualKycDocument`) from future provider-based verification files (`ExternalEkycDocument`).
+
+## Deployment migration note
+
+Vercel Preview and Production deployments must configure both `DATABASE_URL` and `DIRECT_DATABASE_URL`. The production build runs `prisma migrate deploy` before `prisma generate` and `next build`, so the deployment environment needs database access to apply pending migrations safely.
