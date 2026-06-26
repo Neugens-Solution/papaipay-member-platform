@@ -249,7 +249,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         <InfoGrid
           items={[
             { label: "Sale Price", value: formatCurrency(salePrice) },
-            { label: "Purchase Price", value: formatCurrency(purchasePrice) },
+            { label: "Acquisition Price", value: formatCurrency(purchasePrice) },
             { label: "Total Costs", value: formatCurrency(totalCosts) },
             { label: "Net Return", value: formatCurrency(netProfit) },
             { label: "Principal Return Total", value: formatCurrency(principalTotal) },
