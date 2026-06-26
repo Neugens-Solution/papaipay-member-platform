@@ -1,11 +1,30 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import {
+  BackLink,
+  Badge,
+  Card,
+  InfoGrid,
+  PageHeader,
+  ProgressBar,
+  TableWrap,
+  Td,
+  Th,
+} from "@/components/admin/AdminUI";
 import { getAdminListingBySlug } from "@/lib/admin/data/listings";
-import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import {
+  decimalToNumber,
+  formatCurrency,
+  formatDate,
+  formatEnumLabel,
+} from "@/lib/utils/formatters";
 
 function DocumentIcon() {
-  return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
+  return (
+    <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">
+      PDF
+    </span>
+  );
 }
 
 function formatTenure(value: string | null | undefined) {
@@ -15,7 +34,13 @@ function formatTenure(value: string | null | undefined) {
   return "To be confirmed";
 }
 
-export default async function ListingDetailPage({ params }: { params: { slug: string } }) {
+export default async function ListingDetailPage({
+  params,
+  searchParams,
+}: {
+  params: { slug: string };
+  searchParams?: { saved?: string };
+}) {
   const listing = await getAdminListingBySlug(params.slug);
 
   if (!listing) notFound();
@@ -25,11 +50,13 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
   const collected = decimalToNumber(listing.collectedAmountSnapshot);
   const reservePrice = decimalToNumber(property?.reservePrice);
   const marketValue = target || reservePrice;
-  const estimatedAnnualYield = decimalToNumber(listing.holdingReturnRateMonthly) * 12;
+  const estimatedAnnualYield =
+    decimalToNumber(listing.holdingReturnRateMonthly) * 12;
   const progress = target > 0 ? (collected / target) * 100 : 0;
 
   const latestSettlement = listing.settlements[0];
-  const salePrice = decimalToNumber(latestSettlement?.salePrice) || reservePrice;
+  const salePrice =
+    decimalToNumber(latestSettlement?.salePrice) || reservePrice;
   const purchasePrice =
     decimalToNumber(latestSettlement?.purchasePrice) || reservePrice;
   const totalCosts = decimalToNumber(latestSettlement?.totalCostsSnapshot);
@@ -42,9 +69,24 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
   const profitPool = decimalToNumber(latestSettlement?.profitDistributionPool);
   const platformShare = decimalToNumber(latestSettlement?.platformShare);
 
+  const savedMessage =
+    searchParams?.saved === "draft"
+      ? "Draft saved successfully."
+      : searchParams?.saved === "publish"
+        ? "Listing published successfully."
+        : null;
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
-      <BackLink href="/admin/listings" label="Back to Opportunity Management" />
+      {savedMessage ? (
+        <div
+          role="status"
+          className="fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border border-emerald-100 bg-white px-5 py-4 text-sm font-bold text-papaipay-ink shadow-[0_18px_45px_rgba(15,23,42,0.18)]"
+        >
+          <span className="text-papaipay-green">✓</span> {savedMessage}
+        </div>
+      ) : null}
+      <BackLink href="/admin/listings" label="Back to Listing Management" />
       <PageHeader
         eyebrow={`${listing.campaignRef} • ${listing.campaignCode}`}
         title={listing.title}
@@ -54,13 +96,24 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
             href={`/admin/listings/${listing.slug}/edit`}
           >
-            Edit Opportunity
+            Edit Listing
           </Link>
         }
       />
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Overview", "Participants", "Asset Details", "Documents", "Updates", "Settlement / Fees", "Distribution"].map((tab) => (
-          <span key={tab} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200">
+        {[
+          "Overview",
+          "Participants",
+          "Asset Details",
+          "Documents",
+          "Updates",
+          "Settlement / Fees",
+          "Distribution",
+        ].map((tab) => (
+          <span
+            key={tab}
+            className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200"
+          >
             {tab}
           </span>
         ))}
@@ -73,25 +126,70 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             items={[
               { label: "Campaign ID", value: listing.campaignRef },
               { label: "Campaign Code", value: listing.campaignCode },
-              { label: "Location", value: property?.location || property?.state || "To be confirmed" },
-              { label: "Asset Category", value: property?.assetCategory || property?.propertyType || "Residential Asset" },
-              { label: "Market Value", value: marketValue ? formatCurrency(marketValue) : "To be confirmed" },
-              { label: "Estimated Yield", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
-              { label: "Occupancy Status", value: property?.occupancyStatus || "To be confirmed" },
-              { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },
-              { label: "Campaign Target", value: formatCurrency(target) },
+              {
+                label: "City",
+                value:
+                  property?.location || property?.state || "To be confirmed",
+              },
+              {
+                label: "Asset Category",
+                value:
+                  property?.assetCategory ||
+                  property?.propertyType ||
+                  "Residential Asset",
+              },
+              {
+                label: "Market Value",
+                value: marketValue
+                  ? formatCurrency(marketValue)
+                  : "To be confirmed",
+              },
+              {
+                label: "Estimated Yield",
+                value: estimatedAnnualYield
+                  ? `${estimatedAnnualYield.toFixed(2)}% p.a.`
+                  : "To be confirmed",
+              },
+              {
+                label: "Occupancy Status",
+                value: property?.occupancyStatus || "To be confirmed",
+              },
+              {
+                label: "Status",
+                value: formatEnumLabel(listing.lifecycleStatus),
+              },
+              { label: "Participation Target", value: formatCurrency(target) },
               { label: "Collected Amount", value: formatCurrency(collected) },
-              { label: "Holding Return Rate", value: `${decimalToNumber(listing.holdingReturnRateMonthly)}% per month` },
-              { label: "Return Type", value: formatEnumLabel(listing.returnType) },
-              { label: "Maximum Holding Period", value: `${listing.maximumHoldingPeriodMonths} months` },
-              { label: "Principal Protection", value: listing.principalProtectionEnabled ? "Enabled" : "Disabled" },
-              { label: "24-Month Rule", value: "After 24 months: Participation Amount only" },
+              {
+                label: "Holding Return Rate",
+                value: `${decimalToNumber(listing.holdingReturnRateMonthly)}% per month`,
+              },
+              {
+                label: "Return Type",
+                value: formatEnumLabel(listing.returnType),
+              },
+              {
+                label: "Maximum Holding Period",
+                value: `${listing.maximumHoldingPeriodMonths} months`,
+              },
+              {
+                label: "Principal Protection",
+                value: listing.principalProtectionEnabled
+                  ? "Enabled"
+                  : "Disabled",
+              },
+              {
+                label: "24-Month Rule",
+                value: "After 24 months: Participation Amount only",
+              },
             ]}
           />
         </Card>
         <Card>
           <h2 className="font-bold">Campaign Progress</h2>
-          <p className="my-4 text-3xl font-semibold tracking-tight">{Math.round(progress)}%</p>
+          <p className="my-4 text-3xl font-semibold tracking-tight">
+            {Math.round(progress)}%
+          </p>
           <ProgressBar value={progress} />
         </Card>
       </section>
@@ -118,16 +216,27 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
               const latestDistribution = participation.distributions[0];
 
               return (
-                <tr key={participation.id} className="border-t border-slate-100">
+                <tr
+                  key={participation.id}
+                  className="border-t border-slate-100"
+                >
                   <Td>{participation.participationRef}</Td>
                   <Td>{participation.member.memberRef}</Td>
                   <Td>{listing.campaignRef}</Td>
                   <Td>{participation.member.fullName}</Td>
                   <Td>{participation.member.user.email}</Td>
-                  <Td>{formatCurrency(decimalToNumber(participation.participationAmount))}</Td>
+                  <Td>
+                    {formatCurrency(
+                      decimalToNumber(participation.participationAmount),
+                    )}
+                  </Td>
                   <Td>{formatDate(participation.createdAt)}</Td>
-                  <Td><Badge>{latestPayment?.status || "Pending"}</Badge></Td>
-                  <Td><Badge>{latestDistribution?.status || "Pending"}</Badge></Td>
+                  <Td>
+                    <Badge>{latestPayment?.status || "Pending"}</Badge>
+                  </Td>
+                  <Td>
+                    <Badge>{latestDistribution?.status || "Pending"}</Badge>
+                  </Td>
                 </tr>
               );
             })}
@@ -141,18 +250,46 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <InfoGrid
             items={[
               { label: "Asset Category", value: "Residential Asset" },
-              { label: "Asset Type", value: property?.propertyType || "To be confirmed" },
+              {
+                label: "Asset Type",
+                value: property?.propertyType || "To be confirmed",
+              },
               {
                 label: "Tenure",
                 value: formatTenure(property?.tenure || property?.tenureAlias),
               },
-              { label: "Bumi Status", value: property?.bumiStatus || "To be confirmed" },
-              { label: "Built-Up", value: property?.builtUpArea || "To be confirmed" },
-              { label: "Land Area", value: property?.landArea || "To be confirmed" },
-              { label: "Bedrooms", value: property?.bedrooms ? String(property.bedrooms) : "To be confirmed" },
-              { label: "Bathrooms", value: property?.bathrooms ? String(property.bathrooms) : "To be confirmed" },
-              { label: "Full Address", value: property?.fullAddress || "To be confirmed" },
-              { label: "Year Built", value: property?.yearBuilt || "To be confirmed" },
+              {
+                label: "Bumi Status",
+                value: property?.bumiStatus || "To be confirmed",
+              },
+              {
+                label: "Built-Up",
+                value: property?.builtUpArea || "To be confirmed",
+              },
+              {
+                label: "Land Area",
+                value: property?.landArea || "To be confirmed",
+              },
+              {
+                label: "Bedrooms",
+                value: property?.bedrooms
+                  ? String(property.bedrooms)
+                  : "To be confirmed",
+              },
+              {
+                label: "Bathrooms",
+                value: property?.bathrooms
+                  ? String(property.bathrooms)
+                  : "To be confirmed",
+              },
+              {
+                label: "Full Address",
+                value: property?.fullAddress || "To be confirmed",
+              },
+              {
+                label: "Year Built",
+                value: property?.yearBuilt || "To be confirmed",
+              },
             ]}
           />
         </Card>
@@ -161,13 +298,24 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <div className="mt-4 space-y-3">
             {listing.media.length > 0 ? (
               listing.media.map((media) => (
-                <div key={media.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                  <p className="text-sm font-bold text-papaipay-ink">{media.caption || media.fileAsset?.originalFilename || "Listing image"}</p>
-                  <p className="mt-1 text-xs text-slate-500">{media.mediaType} • {media.altText || "Alt text not set"}</p>
+                <div
+                  key={media.id}
+                  className="rounded-xl border border-slate-100 bg-slate-50/60 p-3"
+                >
+                  <p className="text-sm font-bold text-papaipay-ink">
+                    {media.caption ||
+                      media.fileAsset?.originalFilename ||
+                      "Listing image"}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {media.mediaType} • {media.altText || "Alt text not set"}
+                  </p>
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No media gallery items added yet.</p>
+              <p className="text-sm text-slate-500">
+                No media gallery items added yet.
+              </p>
             )}
           </div>
         </Card>
@@ -176,10 +324,16 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <div className="mt-4 space-y-3">
             {listing.documents.length > 0 ? (
               listing.documents.map((document) => (
-                <div key={document.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3">
+                <div
+                  key={document.id}
+                  className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3"
+                >
                   <DocumentIcon />
                   <div>
-                    <p className="text-sm font-bold text-papaipay-ink">{document.fileAsset?.originalFilename || document.category}</p>
+                    <p className="text-sm font-bold text-papaipay-ink">
+                      {document.fileAsset?.originalFilename ||
+                        document.category}
+                    </p>
                     <p className="text-xs text-slate-500">Listing document</p>
                   </div>
                 </div>
@@ -193,7 +347,10 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
           <h2 className="font-bold">Updates</h2>
           {listing.updates.length > 0 ? (
             listing.updates.map((update) => (
-              <p key={update.id} className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">
+              <p
+                key={update.id}
+                className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600"
+              >
                 {update.title}
               </p>
             ))
@@ -207,13 +364,15 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         <Card>
           <h2 className="font-bold">Important Information</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            {listing.content?.importantInformation || "No important information recorded yet."}
+            {listing.content?.importantInformation ||
+              "No important information recorded yet."}
           </p>
         </Card>
         <Card>
           <h2 className="font-bold">Risk Disclaimer</h2>
           <p className="mt-3 text-sm leading-6 text-slate-600">
-            {listing.content?.riskDisclaimer || "No risk disclaimer recorded yet."}
+            {listing.content?.riskDisclaimer ||
+              "No risk disclaimer recorded yet."}
           </p>
         </Card>
       </section>
@@ -223,14 +382,23 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         {listing.faqs.length > 0 ? (
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             {listing.faqs.map((faq) => (
-              <div key={faq.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-                <p className="text-sm font-bold text-papaipay-ink">{faq.question}</p>
-                <p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p>
+              <div
+                key={faq.id}
+                className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"
+              >
+                <p className="text-sm font-bold text-papaipay-ink">
+                  {faq.question}
+                </p>
+                <p className="mt-2 text-sm leading-6 text-slate-600">
+                  {faq.answer}
+                </p>
               </div>
             ))}
           </div>
         ) : (
-          <p className="mt-3 text-sm text-slate-500">No FAQ entries recorded yet.</p>
+          <p className="mt-3 text-sm text-slate-500">
+            No FAQ entries recorded yet.
+          </p>
         )}
       </Card>
 
@@ -242,12 +410,29 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             { label: "Purchase Price", value: formatCurrency(purchasePrice) },
             { label: "Total Costs", value: formatCurrency(totalCosts) },
             { label: "Net Profit", value: formatCurrency(netProfit) },
-            { label: "Principal Return Total", value: formatCurrency(principalTotal) },
-            { label: "Holding Return Total", value: formatCurrency(holdingTotal) },
-            { label: "Profit Distribution Pool", value: formatCurrency(profitPool) },
+            {
+              label: "Principal Return Total",
+              value: formatCurrency(principalTotal),
+            },
+            {
+              label: "Holding Return Total",
+              value: formatCurrency(holdingTotal),
+            },
+            {
+              label: "Profit Distribution Pool",
+              value: formatCurrency(profitPool),
+            },
             { label: "Platform Share", value: formatCurrency(platformShare) },
-            { label: "Final Distribution Total", value: formatCurrency((principalTotal + holdingTotal + profitPool)) },
-            { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement calculation recorded yet." },
+            {
+              label: "Final Distribution Total",
+              value: formatCurrency(principalTotal + holdingTotal + profitPool),
+            },
+            {
+              label: "Calculation Remarks",
+              value:
+                latestSettlement?.calculationRemarks ||
+                "No settlement calculation recorded yet.",
+            },
           ]}
         />
       </Card>
@@ -255,11 +440,17 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
       <Card>
         <h2 className="font-bold">Distribution</h2>
         <p className="mt-2 text-sm text-slate-600">
-          Manual process: review final calculation, check member bank details, transfer outside the system, enter payment reference number, payment date and notes, then mark distribution as Paid.
+          Manual process: review final calculation, check member bank details,
+          transfer outside the system, enter payment reference number, payment
+          date and notes, then mark distribution as Paid.
         </p>
         {listing.distributions.slice(0, 3).map((distribution) => (
           <p key={distribution.id} className="mt-3 text-sm text-slate-600">
-            {distribution.distributionRef} • {formatCurrency(decimalToNumber(distribution.finalDistributionTotal))} • {distribution.status}
+            {distribution.distributionRef} •{" "}
+            {formatCurrency(
+              decimalToNumber(distribution.finalDistributionTotal),
+            )}{" "}
+            • {distribution.status}
           </p>
         ))}
       </Card>
