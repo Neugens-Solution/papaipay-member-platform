@@ -205,6 +205,18 @@ function normalizeVisibility(value: string) {
 function normalizeDocumentCategory(value: string) {
   return value.replaceAll(" ", "") || "OtherDocuments";
 }
+function balancedPlatformShare(formData: FormData) {
+  const platformShare = requiredString(
+    formData,
+    "platformProfitSharePercentagePlanned",
+  );
+  if (platformShare) return platformShare;
+  const memberShare = Number(
+    requiredString(formData, "memberProfitDistributionPercentagePlanned"),
+  );
+  if (!Number.isFinite(memberShare)) return undefined;
+  return String(Math.max(0, Math.min(100, 100 - memberShare)));
+}
 async function createFileAsset(
   tx: Prisma.TransactionClient,
   file: File,
@@ -301,8 +313,7 @@ function buildInput(
     campaignCloseDate: optionalDate(formData, "campaignCloseDate"),
     memberProfitDistributionPercentagePlanned:
       formData.get("memberProfitDistributionPercentagePlanned") || undefined,
-    platformProfitSharePercentagePlanned:
-      formData.get("platformProfitSharePercentagePlanned") || undefined,
+    platformProfitSharePercentagePlanned: balancedPlatformShare(formData),
     holdingReturnRateMonthly: draftNumber(
       formData,
       "holdingReturnRateMonthly",
