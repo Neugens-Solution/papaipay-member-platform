@@ -750,9 +750,18 @@ export async function saveListingAction(
       return friendlyZodErrors(error);
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma listing save error", {
+        code: error.code,
+        meta: error.meta,
+        target: error.meta?.target,
+        message: error.message,
+        stack: error.stack,
+      });
       return {
         errors: [
-          "The listing could not be saved because one or more values conflict with existing data. Please review the form and try again.",
+          `Prisma error ${error.code}: ${error.message}`,
+          `Prisma meta: ${JSON.stringify(error.meta ?? {})}`,
+          `Prisma target: ${JSON.stringify(error.meta?.target ?? null)}`,
         ],
       };
     }
