@@ -223,27 +223,40 @@ async function createFileAsset(
   purpose: "CampaignImage" | "CampaignDocument",
 ) {
   const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-  const objectKey = `campaign-assets/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+  const storageRef = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
+  const objectKey = `campaign-assets/${storageRef}`;
+  const fileBuffer = Buffer.from(await file.arrayBuffer());
+  let storedObjectKey = `/uploads/${objectKey}`;
+  let bucket = "public/uploads";
+
   // Temporary Phase 2B storage: local public/uploads keeps FileAsset persistence
-  // unblocked for demo/admin workflows. Vercel/serverless file systems are not
-  // durable, so replace this with object storage (S3/R2/Vercel Blob/etc.) before
-  // production media retention is required.
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "campaign-assets",
-  );
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(
-    path.join(process.cwd(), "public", "uploads", objectKey),
-    Buffer.from(await file.arrayBuffer()),
-  );
+  // unblocked for demo/admin workflows. If local disk writes are unavailable
+  // (for example in read-only/serverless runtimes), keep the draft save working
+  // by storing image previews as data URLs while preserving FileAsset metadata.
+  try {
+    const uploadDir = path.join(
+      process.cwd(),
+      "public",
+      "uploads",
+      "campaign-assets",
+    );
+    await mkdir(uploadDir, { recursive: true });
+    await writeFile(path.join(process.cwd(), "public", "uploads", objectKey), fileBuffer);
+  } catch (error) {
+    if (purpose !== "CampaignImage") throw error;
+    console.warn(
+      "Local campaign image write failed; storing inline image preview fallback.",
+      error,
+    );
+    bucket = "inline-data-url";
+    storedObjectKey = `data:${file.type || "image/jpeg"};name=${encodeURIComponent(storageRef)};base64,${fileBuffer.toString("base64")}`;
+  }
+
   return tx.fileAsset.create({
     data: {
       fileRef: makeFileRef("FILE"),
-      bucket: "public/uploads",
-      objectKey: `/uploads/${objectKey}`,
+      bucket,
+      objectKey: storedObjectKey,
       originalFilename: file.name,
       contentType: file.type || "application/octet-stream",
       sizeBytes: file.size,
