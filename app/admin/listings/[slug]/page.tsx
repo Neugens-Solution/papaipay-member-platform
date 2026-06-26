@@ -48,7 +48,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
       <PageHeader
         eyebrow={`${listing.campaignRef} • ${listing.campaignCode}`}
         title={listing.title}
-        description="Overview, participants, asset details, documents, settlement / fees and manual distribution workflow."
+        description="Overview, members, asset details, documents, settlement / fees and manual return workflow."
         action={
           <Link
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
@@ -59,7 +59,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         }
       />
       <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Overview", "Participants", "Asset Details", "Documents", "Updates", "Settlement / Fees", "Distribution"].map((tab) => (
+        {["Overview", "Members", "Asset Details", "Documents", "Updates", "Settlement / Fees", "Distribution"].map((tab) => (
           <span key={tab} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200">
             {tab}
           </span>
@@ -73,13 +73,13 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             items={[
               { label: "Campaign ID", value: listing.campaignRef },
               { label: "Campaign Code", value: listing.campaignCode },
-              { label: "Location", value: property?.location || property?.state || "To be confirmed" },
+              { label: "City", value: property?.location || property?.state || "To be confirmed" },
               { label: "Asset Category", value: property?.assetCategory || property?.propertyType || "Residential Asset" },
               { label: "Market Value", value: marketValue ? formatCurrency(marketValue) : "To be confirmed" },
-              { label: "Estimated Yield", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
+              { label: "Holding Return", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
               { label: "Occupancy Status", value: property?.occupancyStatus || "To be confirmed" },
               { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },
-              { label: "Campaign Target", value: formatCurrency(target) },
+              { label: "Participation Target", value: formatCurrency(target) },
               { label: "Collected Amount", value: formatCurrency(collected) },
               { label: "Holding Return Rate", value: `${decimalToNumber(listing.holdingReturnRateMonthly)}% per month` },
               { label: "Return Type", value: formatEnumLabel(listing.returnType) },
@@ -97,7 +97,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
       </section>
 
       <Card>
-        <h2 className="font-bold">Participants</h2>
+        <h2 className="font-bold">Members</h2>
         <TableWrap>
           <thead>
             <tr>
@@ -158,12 +158,22 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         </Card>
         <Card>
           <h2 className="font-bold">Media Gallery</h2>
-          <div className="mt-4 space-y-3">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {listing.media.length > 0 ? (
               listing.media.map((media) => (
-                <div key={media.id} className="rounded-xl border border-slate-100 bg-slate-50/60 p-3">
-                  <p className="text-sm font-bold text-papaipay-ink">{media.caption || media.fileAsset?.originalFilename || "Listing image"}</p>
-                  <p className="mt-1 text-xs text-slate-500">{media.mediaType} • {media.altText || "Alt text not set"}</p>
+                <div key={media.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
+                  {media.fileAsset?.objectKey ? (
+                    <div
+                      className="h-36 bg-slate-100 bg-cover bg-center"
+                      style={{ backgroundImage: `url(${media.fileAsset.objectKey})` }}
+                      role="img"
+                      aria-label={media.altText || media.fileAsset?.originalFilename || "Listing image"}
+                    />
+                  ) : null}
+                  <div className="p-3">
+                    <p className="truncate text-sm font-bold text-papaipay-ink">{media.fileAsset?.originalFilename || "Listing image"}</p>
+                    <p className="mt-1 text-xs text-slate-500">{media.mediaType === "PrimaryImage" ? "Main / Hero Image" : "Gallery Image"} • {media.altText || "Alt text not set"}</p>
+                  </div>
                 </div>
               ))
             ) : (
@@ -241,12 +251,12 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             { label: "Sale Price", value: formatCurrency(salePrice) },
             { label: "Purchase Price", value: formatCurrency(purchasePrice) },
             { label: "Total Costs", value: formatCurrency(totalCosts) },
-            { label: "Net Profit", value: formatCurrency(netProfit) },
+            { label: "Net Return", value: formatCurrency(netProfit) },
             { label: "Principal Return Total", value: formatCurrency(principalTotal) },
             { label: "Holding Return Total", value: formatCurrency(holdingTotal) },
-            { label: "Profit Distribution Pool", value: formatCurrency(profitPool) },
+            { label: "Return Distribution Pool", value: formatCurrency(profitPool) },
             { label: "Platform Share", value: formatCurrency(platformShare) },
-            { label: "Final Distribution Total", value: formatCurrency((principalTotal + holdingTotal + profitPool)) },
+            { label: "Final Return Total", value: formatCurrency((principalTotal + holdingTotal + profitPool)) },
             { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement calculation recorded yet." },
           ]}
         />
