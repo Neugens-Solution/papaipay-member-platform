@@ -112,7 +112,7 @@ function validationError(message: string): never {
 
 const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   title: { label: "Listing Title", field: "title" },
-  campaignTarget: { label: "Campaign Target", field: "campaignTarget" },
+  campaignTarget: { label: "Participation Target", field: "campaignTarget" },
   minimumParticipationAmount: {
     label: "Minimum Participation Amount",
     field: "minimumParticipationAmount",
@@ -121,9 +121,9 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     label: "Maximum Participation Amount",
     field: "maximumParticipationAmount",
   },
-  campaignOpenDate: { label: "Campaign Open Date", field: "campaignOpenDate" },
+  campaignOpenDate: { label: "Participation Start Date", field: "campaignOpenDate" },
   campaignCloseDate: {
-    label: "Campaign Close Date",
+    label: "Participation End Date",
     field: "campaignCloseDate",
   },
   holdingReturnRateMonthly: {
@@ -135,7 +135,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     label: "Maximum Holding Period",
     field: "maximumHoldingPeriodMonths",
   },
-  "property.propertyType": { label: "Asset Type", field: "propertyType" },
+  "property.propertyType": { label: "Property Type", field: "propertyType" },
   "property.assetCategory": { label: "Asset Category", field: "assetCategory" },
   "property.occupancyStatus": {
     label: "Occupancy Status",
@@ -148,7 +148,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.bedrooms": { label: "Bedrooms", field: "bedrooms" },
   "property.bathrooms": { label: "Bathrooms", field: "bathrooms" },
   "property.state": { label: "State", field: "state" },
-  "property.location": { label: "Location", field: "location" },
+  "property.location": { label: "City", field: "location" },
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
   "property.reservePrice": { label: "Market Value", field: "reservePrice" },
@@ -169,7 +169,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     field: "holdingReturnExplanation",
   },
   "content.finalDistributionExplanation": {
-    label: "Final Distribution Explanation",
+    label: "Final Return Explanation",
     field: "finalDistributionExplanation",
   },
 };
@@ -655,6 +655,9 @@ export async function saveListingAction(
         "Legal Documents",
         "Other Documents",
       ]) {
+        const uploadCategory = category === "Other Documents"
+          ? requiredString(formData, "newDocumentCategory") || category
+          : category;
         const file = fileFromForm(formData, `documentFile:${category}`);
         if (!file) continue;
         if (!allowedDocumentTypes.has(file.type))
@@ -667,7 +670,7 @@ export async function saveListingAction(
             documentRef: makeFileRef("DOC"),
             campaignId: campaign.id,
             fileAssetId: asset.id,
-            category: normalizeDocumentCategory(category) as any,
+            category: normalizeDocumentCategory(uploadCategory) as any,
             title: file.name,
             visibility: normalizeVisibility(
               requiredString(formData, "newDocumentVisibility"),
@@ -686,14 +689,18 @@ export async function saveListingAction(
           }),
         );
       }
-      const faqQuestion = requiredString(formData, "faqQuestion");
-      const faqAnswer = requiredString(formData, "faqAnswer");
-      const faqId = requiredString(formData, "faqId");
-      if (faqQuestion || faqAnswer) {
+      const faqQuestions = formData.getAll("faqQuestion").map(String);
+      const faqAnswers = formData.getAll("faqAnswer").map(String);
+      const faqIds = formData.getAll("faqId").map(String);
+      for (let index = 0; index < Math.max(faqQuestions.length, faqAnswers.length); index++) {
+        const faqQuestion = faqQuestions[index]?.trim() ?? "";
+        const faqAnswer = faqAnswers[index]?.trim() ?? "";
+        const faqId = faqIds[index]?.trim() ?? "";
+        if (!faqQuestion && !faqAnswer) continue;
         if (faqId) {
           await tx.campaignFaq.update({
             where: { id: faqId },
-            data: { question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+            data: { question: faqQuestion, answer: faqAnswer, sortOrder: index },
           });
         } else {
           await tx.campaignFaq.create({
@@ -701,7 +708,7 @@ export async function saveListingAction(
               campaignId: campaign.id,
               question: faqQuestion,
               answer: faqAnswer,
-              sortOrder: 0,
+              sortOrder: index,
             },
           });
         }
