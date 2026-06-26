@@ -512,6 +512,8 @@ export async function saveListingAction(
         : action === "unpublish"
           ? "archive"
           : "update";
+    const campaignRef =
+      existing?.campaignRef ?? (await makeUniqueCampaignRef());
     const saved = await db.$transaction(async (tx) => {
       const campaign = existing
         ? await tx.campaign.update({
@@ -520,7 +522,7 @@ export async function saveListingAction(
           })
         : await tx.campaign.create({
             data: {
-              campaignRef: await makeUniqueCampaignRef(),
+              campaignRef,
               ...campaignData(input, action),
             },
           });
