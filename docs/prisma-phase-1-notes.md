@@ -95,4 +95,4 @@ File purposes now distinguish member-uploaded V1 verification files (`ManualKycD
 
 ## Deployment migration note
 
-Vercel Preview and Production deployments must configure both `DATABASE_URL` and `DIRECT_DATABASE_URL`. The production build runs `prisma migrate deploy` before `prisma generate` and `next build`, so the deployment environment needs database access to apply pending migrations safely.
+Vercel Preview and Production deployments must configure both `DATABASE_URL` and `DIRECT_DATABASE_URL`. The production build runs `DATABASE_URL="$DIRECT_DATABASE_URL" prisma migrate deploy` before `prisma generate` and `next build`, so migrations use the direct database connection while application runtime can continue using the pooled `DATABASE_URL`.
