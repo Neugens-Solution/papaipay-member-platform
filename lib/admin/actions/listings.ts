@@ -51,16 +51,44 @@ async function makeUniqueSlug(title: string, currentCampaignId?: string) {
     candidate = `${base}-${suffix++}`;
   }
 }
-function makeCampaignRef() {
+function makeCampaignRefCandidate() {
   return `CMP-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
 }
-function makeCampaignCode(title: string) {
+async function makeUniqueCampaignRef() {
+  let candidate = makeCampaignRefCandidate();
+  let suffix = 2;
+  while (
+    await db.campaign.findUnique({
+      where: { campaignRef: candidate },
+      select: { id: true },
+    })
+  ) {
+    candidate = `${makeCampaignRefCandidate()}-${suffix++}`;
+  }
+  return candidate;
+}
+function makeCampaignCodeCandidate(title: string) {
   const prefix = title
     .toUpperCase()
     .replace(/[^A-Z0-9]+/g, "")
     .slice(0, 4)
     .padEnd(4, "X");
   return `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
+}
+async function makeUniqueCampaignCode(
+  title: string,
+  currentCampaignId?: string,
+) {
+  let candidate = makeCampaignCodeCandidate(title);
+  let suffix = 2;
+  while (true) {
+    const existing = await db.campaign.findUnique({
+      where: { campaignCode: candidate },
+      select: { id: true },
+    });
+    if (!existing || existing.id === currentCampaignId) return candidate;
+    candidate = `${makeCampaignCodeCandidate(title)}-${suffix++}`;
+  }
 }
 function makeAuditRef() {
   return `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -470,16 +498,12 @@ export async function saveListingAction(
         ["Please add a Hero Image before publishing."],
         { heroImage: "Please add a Hero Image before publishing." },
       );
+    const draftTitle = draftString(formData, "title", "Untitled Listing Draft");
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
-        makeCampaignCode(
-          draftString(formData, "title", "Untitled Listing Draft"),
-        ),
-      slug: await makeUniqueSlug(
-        draftString(formData, "title", "Untitled Listing Draft"),
-        campaignId,
-      ),
+        (await makeUniqueCampaignCode(draftTitle, campaignId)),
+      slug: await makeUniqueSlug(draftTitle, campaignId),
     });
     const auditAction: AdminAuditAction = !existing
       ? "create"
@@ -496,7 +520,7 @@ export async function saveListingAction(
           })
         : await tx.campaign.create({
             data: {
-              campaignRef: makeCampaignRef(),
+              campaignRef: await makeUniqueCampaignRef(),
               ...campaignData(input, action),
             },
           });
