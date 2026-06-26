@@ -148,7 +148,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.bedrooms": { label: "Bedrooms", field: "bedrooms" },
   "property.bathrooms": { label: "Bathrooms", field: "bathrooms" },
   "property.state": { label: "State", field: "state" },
-  "property.location": { label: "Location", field: "location" },
+  "property.location": { label: "City", field: "location" },
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
   "property.reservePrice": { label: "Market Value", field: "reservePrice" },
@@ -169,7 +169,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     field: "holdingReturnExplanation",
   },
   "content.finalDistributionExplanation": {
-    label: "Final Distribution Explanation",
+    label: "Final Return Explanation",
     field: "finalDistributionExplanation",
   },
 };
@@ -675,22 +675,29 @@ export async function saveListingAction(
           }),
         );
       }
-      const faqQuestion = requiredString(formData, "faqQuestion");
-      const faqAnswer = requiredString(formData, "faqAnswer");
-      const faqId = requiredString(formData, "faqId");
-      if (faqQuestion || faqAnswer) {
-        if (faqId) {
+      for (const faqId of formData.getAll("deleteFaqId").map(String)) {
+        await tx.campaignFaq.delete({ where: { id: faqId } });
+      }
+      for (let index = 0; index < 10; index += 1) {
+        const faqQuestion = requiredString(formData, `faqQuestion:${index}`);
+        const faqAnswer = requiredString(formData, `faqAnswer:${index}`);
+        const faqId = requiredString(formData, `faqId:${index}`);
+        const sortOrder = Number(
+          formData.get(`faqSortOrder:${index}`) ?? index,
+        );
+        if (!faqQuestion && !faqAnswer) continue;
+        if (faqId && !formData.getAll("deleteFaqId").includes(faqId)) {
           await tx.campaignFaq.update({
             where: { id: faqId },
-            data: { question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+            data: { question: faqQuestion, answer: faqAnswer, sortOrder },
           });
-        } else {
+        } else if (!faqId) {
           await tx.campaignFaq.create({
             data: {
               campaignId: campaign.id,
               question: faqQuestion,
               answer: faqAnswer,
-              sortOrder: 0,
+              sortOrder,
             },
           });
         }

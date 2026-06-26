@@ -14,7 +14,7 @@ const wizardSteps = [
     id: "overview",
     title: "Overview",
     description:
-      "Set the opportunity identity, campaign code, readiness and key publishing dates.",
+      "Set the listing identity, campaign code, readiness and key publishing dates.",
   },
   {
     id: "property-details",
@@ -24,9 +24,9 @@ const wizardSteps = [
   },
   {
     id: "investment-details",
-    title: "Investment Details",
+    title: "Participation Details",
     description:
-      "Define funding targets, participation limits, return expectations and period settings.",
+      "Define participation target, participation limits, holding return expectations and period settings.",
   },
   {
     id: "settlement-fees",
@@ -35,30 +35,168 @@ const wizardSteps = [
       "Optional planning for future profit distribution and platform fee handling.",
   },
   {
-    id: "media-documents",
-    title: "Media & Documents",
-    description:
-      "Upload hero image, gallery images and optional member-facing documents.",
+    id: "media",
+    title: "Media",
+    description: "Upload hero image and optional gallery images.",
   },
   {
-    id: "important-information",
-    title: "Important Information",
-    description:
-      "Optional key information members should read before participating.",
+    id: "documents",
+    title: "Documents",
+    description: "Upload optional member-facing documents.",
   },
   {
-    id: "faq-risk",
-    title: "FAQ & Risk Disclaimer",
+    id: "important-faq-risk",
+    title: "Important Info, FAQ & Risk",
     description:
-      "Optional FAQ and risk text displayed on the member opportunity detail page.",
+      "Optional important information, FAQ and risk text displayed on the member listing detail page.",
   },
   {
-    id: "preview-publish",
-    title: "Preview & Publish",
-    description:
-      "Review summaries, readiness and final validation before publishing.",
+    id: "publish",
+    title: "Publish",
+    description: "Set the final listing status and publish when ready.",
   },
 ] as const;
+
+const propertyTypeOptions = [
+  "Apartment",
+  "Condominium",
+  "Terrace House",
+  "Semi-Detached House",
+  "Detached House",
+  "Townhouse",
+  "Shop Lot",
+  "Retail Unit",
+  "Office Suite",
+  "Industrial Property",
+  "Land",
+] as const;
+
+const assetCategoryOptions = [
+  "Residential",
+  "Commercial",
+  "Industrial",
+  "Mixed Development",
+  "Land",
+] as const;
+
+const occupancyStatusOptions = [
+  "Vacant",
+  "Owner Occupied",
+  "Tenanted",
+  "Partially Tenanted",
+  "Under Renovation",
+  "To Be Confirmed",
+] as const;
+
+const malaysiaStateOptions = [
+  "Johor",
+  "Kedah",
+  "Kelantan",
+  "Kuala Lumpur",
+  "Labuan",
+  "Melaka",
+  "Negeri Sembilan",
+  "Pahang",
+  "Penang",
+  "Perak",
+  "Perlis",
+  "Putrajaya",
+  "Sabah",
+  "Sarawak",
+  "Selangor",
+  "Terengganu",
+] as const;
+
+const defaultHoldingReturnExplanation = `Holding Return is the projected return accumulated throughout the campaign holding period. It is not paid monthly, but will be accumulated and distributed together with the Final Return once the campaign has been successfully completed.
+
+Example
+
+Participation Amount:
+RM10,000
+
+Holding Return:
+1.5% per month
+
+Campaign Duration:
+13 months
+
+Estimated Holding Return:
+
+RM10,000 × 1.5% × 13
+=
+RM1,950
+
+This is an illustration only.
+Actual returns may vary depending on the final campaign duration and overall asset performance.`;
+
+const defaultFinalReturnExplanation = `Final Return will be calculated after the campaign has been successfully completed and the property disposal process has been finalised.
+
+All approved campaign-related expenses, taxes, operational costs and platform charges will be deducted before the remaining return is distributed to members based on the approved participation structure.
+
+Members will receive a detailed Final Return calculation together with the final distribution statement once the campaign is completed.`;
+
+const lockedHoldingPeriodRule = `If the property is not successfully disposed of within the maximum holding period of 24 months, members will receive a return of their original Participation Amount only.
+
+No Holding Return or Final Return will be payable unless otherwise stated in the listing terms.`;
+
+const defaultRiskDisclaimer = `Participation in any listing carries inherent risks, including the possibility that projected returns may differ from actual outcomes.
+
+Past performance of any asset or campaign should not be regarded as an indication of future results.
+
+Members are encouraged to read all listing information and supporting documents carefully before making any participation decision.
+
+Each member should assess their own financial circumstances, objectives and risk tolerance before participating in any listing.`;
+
+const defaultFaqs = [
+  {
+    question: "What is Holding Return?",
+    answer: `Holding Return is the projected return accumulated throughout the campaign holding period.
+
+It is not paid monthly but will be distributed together with the Final Return after campaign completion.
+
+Example
+
+Participation Amount
+
+RM10,000
+
+Holding Return
+
+1.5%
+
+Campaign Duration
+
+13 months
+
+Estimated Holding Return
+
+RM1,950`,
+  },
+  {
+    question: "How is Holding Return distributed?",
+    answer:
+      "Holding Return is accumulated throughout the campaign and paid together with the Final Return once the campaign has been successfully completed.",
+  },
+  {
+    question:
+      "Can I withdraw my participation before the campaign is completed?",
+    answer: `No.
+
+Participation cannot be withdrawn once the campaign has started.
+
+However, if the property is not successfully disposed of within 24 months, members will receive their original Participation Amount back.`,
+  },
+  {
+    question: "How is Final Return calculated?",
+    answer:
+      "Final Return will be calculated after deducting all approved campaign-related expenses, taxes, operational costs and platform charges.\n\nMembers will receive a detailed Final Return calculation after campaign completion.",
+  },
+  {
+    question: "Where can I monitor my participation?",
+    answer:
+      "Members can monitor campaign progress and updates through their Member Portal.",
+  },
+];
 
 const requiredFieldsByStep: Record<number, string[]> = {
   0: ["title", "aboutCampaign"],
@@ -81,7 +219,7 @@ const requiredFieldsByStep: Record<number, string[]> = {
 };
 
 const campaignAmountFields = [
-  "Campaign Target",
+  "Participation Target",
   "Minimum Participation Amount",
   "Maximum Participation Amount",
 ];
@@ -98,7 +236,7 @@ const propertyFields = [
   "Bedrooms",
   "Bathrooms",
   "State",
-  "Location",
+  "City",
   "Full Address",
   "Year Built",
 ];
@@ -164,7 +302,7 @@ const calculationFields = [
   "Holding Return Pool",
   "Profit Distribution Pool",
   "Platform Share",
-  "Final Distribution Pool",
+  "Final Return Pool",
 ];
 
 function Field({
@@ -228,6 +366,10 @@ function SelectField({
   defaultValue?: string;
   error?: string;
 }) {
+  const allOptions =
+    defaultValue && !options.includes(defaultValue)
+      ? [defaultValue, ...options]
+      : options;
   return (
     <label className={className}>
       <span className="text-sm font-bold text-slate-600">{label}</span>
@@ -241,7 +383,7 @@ function SelectField({
         aria-describedby={error && name ? `${name}-error` : undefined}
         className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
       >
-        {options.map((option) => (
+        {allOptions.map((option) => (
           <option key={option}>{option}</option>
         ))}
       </select>
@@ -758,6 +900,12 @@ export function ListingForm({
   } | null>(null);
   const formRef = useRef<HTMLFormElement>(null);
   const [currentStep, setCurrentStep] = useState(0);
+  const [memberFinalReturn, setMemberFinalReturn] = useState(
+    Number(initialValues?.memberProfitDistributionPercentagePlanned ?? 90),
+  );
+  const [platformFinalReturn, setPlatformFinalReturn] = useState(
+    Number(initialValues?.platformProfitSharePercentagePlanned ?? 10),
+  );
   const fieldErrors = useMemo(
     () => state.fieldErrors ?? {},
     [state.fieldErrors],
@@ -807,7 +955,7 @@ export function ListingForm({
     const saved = new URLSearchParams(window.location.search).get("saved");
     const messages: Record<string, string> = {
       draft: "Draft saved successfully.",
-      publish: "Opportunity published successfully.",
+      publish: "Listing published successfully.",
       unpublish: "Listing unpublished successfully.",
     };
     if (!saved || !messages[saved]) return;
@@ -828,7 +976,7 @@ export function ListingForm({
       message:
         state.errors[0]?.includes("Hero Image") ||
         Object.keys(fieldErrors).length > 0
-          ? "Unable to publish opportunity. Please review the highlighted fields."
+          ? "Unable to publish listing. Please review the highlighted fields."
           : "Unable to save draft. Please try again.",
       tone: "error",
     });
@@ -923,7 +1071,9 @@ export function ListingForm({
       (media) => media.mediaType === "GalleryImage",
     ) ?? [];
   const documents = initialValues?.documents ?? [];
-  const primaryFaq = initialValues?.faqs?.[0];
+  const editableFaqs = initialValues?.faqs?.length
+    ? [...initialValues.faqs, { question: "", answer: "" }]
+    : defaultFaqs;
 
   return (
     <form
@@ -984,10 +1134,10 @@ export function ListingForm({
                 </span>
                 <span className="mt-1 block text-[10px] font-bold text-slate-400">
                   {isComplete
-                    ? "Complete"
-                    : index === currentStep
-                      ? "In progress"
-                      : "Ready"}
+                    ? "🟢 Complete"
+                    : missingFieldsForStep(index).length > 0
+                      ? "🔴 Required"
+                      : "⚪ Optional"}
                 </span>
               </button>
             );
@@ -1010,17 +1160,17 @@ export function ListingForm({
           </div>
           <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
             {missingFieldsForStep(currentStep).length === 0
-              ? "Ready"
-              : "Needs info"}
+              ? "🟢 Complete"
+              : "🔴 Required"}
           </span>
         </div>
       </Card>
 
-      {currentStep === 0 ? (
+      <div hidden={currentStep !== 0}>
         <Section
           id="basic-information"
           title="Basic Information"
-          description="Manage the core opportunity identity, status, readiness and publishing metadata."
+          description="Manage the core listing identity, status, readiness and publishing metadata."
         >
           <div className="grid gap-5 lg:grid-cols-2">
             <SubsectionCard
@@ -1039,7 +1189,7 @@ export function ListingForm({
                   value={campaignCodeValue}
                 />
                 <Field
-                  label="Opportunity Title"
+                  label="Listing Title"
                   name="title"
                   error={fieldErrors.title}
                   defaultValue={initialValues?.title}
@@ -1051,7 +1201,7 @@ export function ListingForm({
                 />
                 <ReadOnlyField
                   label="Listing Readiness"
-                  helper="Draft records remain internal; publishing sets the opportunity to member-visible when required fields pass validation."
+                  helper="Draft records remain internal; publishing sets the listing to member-visible when required fields pass validation."
                   value={
                     initialValues?.publishStatus === "Published"
                       ? "Ready / Published"
@@ -1064,11 +1214,11 @@ export function ListingForm({
                   error={fieldErrors.aboutCampaign}
                   defaultValue={initialValues?.content?.aboutCampaign}
                   className="sm:col-span-2"
-                  helper="Short member-facing overview used on opportunity detail."
+                  helper="Short member-facing overview used on listing detail."
                 />
                 <ReadOnlyField
                   label="Slug"
-                  helper="Generated from opportunity title and kept unique automatically."
+                  helper="Generated from listing title and kept unique automatically."
                   value={slug ?? "Auto-generated after save"}
                 />
                 <ReadOnlyField
@@ -1084,7 +1234,7 @@ export function ListingForm({
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <SelectField
-                  label="Opportunity Status"
+                  label="Listing Status"
                   options={campaignLifecycleStatuses}
                   className="sm:col-span-2"
                 />
@@ -1107,12 +1257,12 @@ export function ListingForm({
               </div>
             </SubsectionCard>
             <SubsectionCard
-              title="Investment Information"
-              description="Target funding, participation limits, expected return and campaign period."
+              title="Participation Information"
+              description="Participation target, participation limits, expected return and campaign period."
             >
               <div className="grid gap-4 sm:grid-cols-2">
                 <Field
-                  label="Target Funding"
+                  label="Participation Target"
                   name="campaignTarget"
                   error={fieldErrors.campaignTarget}
                   type="number"
@@ -1157,9 +1307,9 @@ export function ListingForm({
             </SubsectionCard>
           </div>
         </Section>
-      ) : null}
+      </div>
 
-      {currentStep === 1 ? (
+      <div hidden={currentStep !== 1}>
         <Section
           id="property-information"
           title="Property Information"
@@ -1208,23 +1358,26 @@ export function ListingForm({
           </div>
           <div className="mt-4">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              <Field
+              <SelectField
                 label="Property Type"
                 name="propertyType"
                 error={fieldErrors.propertyType}
                 defaultValue={initialValues?.propertyDetail?.propertyType}
+                options={propertyTypeOptions}
               />
-              <Field
+              <SelectField
                 label="Asset Category"
                 name="assetCategory"
                 error={fieldErrors.assetCategory}
                 defaultValue={initialValues?.propertyDetail?.assetCategory}
+                options={assetCategoryOptions}
               />
-              <Field
+              <SelectField
                 label="Occupancy Status"
                 name="occupancyStatus"
                 error={fieldErrors.occupancyStatus}
                 defaultValue={initialValues?.propertyDetail?.occupancyStatus}
+                options={occupancyStatusOptions}
               />
               <Field
                 label="Market Value"
@@ -1259,14 +1412,15 @@ export function ListingForm({
                 type="number"
                 defaultValue={initialValues?.propertyDetail?.bathrooms}
               />
-              <Field
+              <SelectField
                 label="State"
                 name="state"
                 error={fieldErrors.state}
                 defaultValue={initialValues?.propertyDetail?.state}
+                options={malaysiaStateOptions}
               />
               <Field
-                label="Location"
+                label="City"
                 name="location"
                 error={fieldErrors.location}
                 defaultValue={initialValues?.propertyDetail?.location}
@@ -1287,17 +1441,17 @@ export function ListingForm({
             </div>
           </div>
         </Section>
-      ) : null}
+      </div>
 
-      {currentStep === 2 ? (
+      <div hidden={currentStep !== 2}>
         <Section
           id="investment-information"
-          title="Investment Information"
+          title="Participation Information"
           description="Review return expectations, distribution wording and investment period settings."
         >
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <Field
-              label="Expected Return"
+              label="Holding Return"
               name="holdingReturnRateMonthly"
               error={fieldErrors.holdingReturnRateMonthly}
               type="number"
@@ -1305,14 +1459,14 @@ export function ListingForm({
               defaultValue={initialValues?.holdingReturnRateMonthly ?? 0}
             />
             <SelectField
-              label="Expected Distribution"
+              label="Return Type"
               name="returnType"
               defaultValue={initialValues?.returnType ?? "Target"}
               options={["Fixed", "Target", "UpTo"]}
               error={fieldErrors.returnType}
             />
             <Field
-              label="Investment Period (Months)"
+              label="Participation Period (Months)"
               name="maximumHoldingPeriodMonths"
               error={fieldErrors.maximumHoldingPeriodMonths}
               type="number"
@@ -1342,16 +1496,20 @@ export function ListingForm({
               name="holdingReturnExplanation"
               error={fieldErrors.holdingReturnExplanation}
               rows={5}
-              defaultValue={initialValues?.content?.holdingReturnExplanation}
+              defaultValue={
+                initialValues?.content?.holdingReturnExplanation ||
+                defaultHoldingReturnExplanation
+              }
               helper="Holding Return accrues during the holding period and is paid once during final distribution."
             />
             <TextAreaField
-              label="Final Distribution Explanation"
+              label="Final Return Explanation"
               name="finalDistributionExplanation"
               error={fieldErrors.finalDistributionExplanation}
               rows={5}
               defaultValue={
-                initialValues?.content?.finalDistributionExplanation
+                initialValues?.content?.finalDistributionExplanation ||
+                defaultFinalReturnExplanation
               }
               helper="Explain Principal Return, Holding Return and Profit Distribution clearly."
             />
@@ -1360,22 +1518,19 @@ export function ListingForm({
             <p className="text-xs font-black uppercase tracking-wide text-blue-700">
               Locked 24-Month Rule
             </p>
-            <p className="mt-2 text-sm font-bold leading-6 text-blue-900">
-              If not sold within 24 months, Participation Amount only will be
-              returned.
+            <p className="mt-2 whitespace-pre-line text-sm font-bold leading-6 text-blue-900">
+              {lockedHoldingPeriodRule}
             </p>
-            <div className="mt-4">
-              <TextAreaField
-                label="24-Month Rule Display Text"
-                rows={3}
-                helper="Keep this aligned with the approved rule text."
-              />
-            </div>
+            <input
+              type="hidden"
+              name="lockedHoldingPeriodRule"
+              value={lockedHoldingPeriodRule}
+            />
           </div>
         </Section>
-      ) : null}
+      </div>
 
-      {currentStep === 3 ? (
+      <div hidden={currentStep !== 3}>
         <Section
           id="settlement-fees"
           title="Settlement & Fees"
@@ -1390,28 +1545,57 @@ export function ListingForm({
               acquisition, holding, preparation, and sale details are available.
             </p>
             <div className="mt-5 grid gap-4 sm:grid-cols-2">
-              <Field
-                label="Member Profit Distribution Percentage"
-                name="memberProfitDistributionPercentagePlanned"
-                type="number"
-                step="0.01"
-                defaultValue={
-                  initialValues?.memberProfitDistributionPercentagePlanned
-                }
-                helper="Optional. Percentage of future net profit allocated to members; no calculation is run here."
-              />
-              <Field
-                label="Platform Profit Share Percentage"
-                name="platformProfitSharePercentagePlanned"
-                type="number"
-                step="0.01"
-                defaultValue={
-                  initialValues?.platformProfitSharePercentagePlanned
-                }
-                helper="Optional. Percentage reserved for platform share; no payment logic is triggered."
+              <label>
+                <span className="text-sm font-bold text-slate-600">
+                  Member Final Return %
+                </span>
+                <input
+                  name="memberProfitDistributionPercentagePlanned"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={memberFinalReturn}
+                  onChange={(event) => {
+                    const value = Math.min(
+                      100,
+                      Math.max(0, Number(event.currentTarget.value) || 0),
+                    );
+                    setMemberFinalReturn(value);
+                    setPlatformFinalReturn(Number((100 - value).toFixed(2)));
+                  }}
+                  className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+                />
+              </label>
+              <label>
+                <span className="text-sm font-bold text-slate-600">
+                  Platform Final Return %
+                </span>
+                <input
+                  name="platformProfitSharePercentagePlanned"
+                  type="number"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  value={platformFinalReturn}
+                  onChange={(event) => {
+                    const value = Math.min(
+                      100,
+                      Math.max(0, Number(event.currentTarget.value) || 0),
+                    );
+                    setPlatformFinalReturn(value);
+                    setMemberFinalReturn(Number((100 - value).toFixed(2)));
+                  }}
+                  className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+                />
+              </label>
+              <ReadOnlyField
+                label="Total"
+                helper="Member and platform final return percentages must total 100%."
+                value={`${Number(memberFinalReturn) + Number(platformFinalReturn)}%`}
               />
               <TextAreaField
-                label="Optional Notes"
+                label="Settlement Notes"
                 name="settlementFeeNotes"
                 rows={4}
                 helper="Optional operational notes for future fee-calculation workflows."
@@ -1419,266 +1603,142 @@ export function ListingForm({
             </div>
           </details>
         </Section>
-      ) : null}
+      </div>
 
-      {currentStep === 4 ? (
-        <>
-          <Section
-            id="media"
-            title="Media"
-            description="Manage the member-facing thumbnail, hero image, gallery previews and display ordering."
-          >
-            <div className="grid gap-5">
-              <SubsectionCard
-                title="Gallery"
-                description="Images used in the campaign detail gallery."
-              >
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                  <UploadZone
-                    title="Hero Image"
-                    name="heroImage"
-                    supported="JPG, PNG, WEBP"
-                    helper="Use one hero image as the primary listing image."
-                    error={fieldErrors.heroImage}
-                    currentFileNames={
-                      heroImage?.fileAsset?.originalFilename
-                        ? [heroImage.fileAsset.originalFilename]
-                        : []
-                    }
-                  />
-                  <input
-                    type="hidden"
-                    name="heroMediaId"
-                    value={heroImage?.id ?? ""}
-                  />
-                  <UploadZone
-                    title="Gallery Images"
-                    name="galleryImages"
-                    multiple
-                    supported="JPG, PNG, WEBP"
-                    helper="Add multiple supporting gallery images for the listing."
-                    currentFileNames={galleryImages
-                      .map((media) => media.fileAsset?.originalFilename)
-                      .filter((fileName): fileName is string =>
-                        Boolean(fileName),
-                      )}
-                  />
-                  <Field
-                    label="Image Caption"
-                    name="heroCaption"
-                    defaultValue={heroImage?.caption}
-                    helper="Optional short label for the image, e.g. Front view, Living area, Kitchen."
-                  />
-                  <Field
-                    label="Image Alt Text"
-                    name="heroAltText"
-                    defaultValue={heroImage?.altText}
-                  />
-                  <CalculatedField
-                    label="Gallery Count"
-                    helper="Calculated from uploaded gallery images."
-                  />
-                </div>
-                {heroImage ? (
-                  <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4 text-sm">
-                    {heroImage.fileAsset?.objectKey ? (
-                      <div
-                        className="mb-4 h-48 rounded-lg bg-slate-100 bg-cover bg-center"
-                        style={{
-                          backgroundImage: `url(${heroImage.fileAsset.objectKey})`,
-                        }}
-                        aria-label="Current hero image preview"
-                      />
-                    ) : null}
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="font-black text-papaipay-ink">
-                          Current hero image
-                        </p>
-                        <p className="mt-1 text-xs text-slate-500">
-                          {heroImage.fileAsset?.originalFilename ??
-                            "Uploaded image"}
-                        </p>
-                      </div>
-                      <label className="flex items-center gap-2 text-xs font-bold text-red-600">
-                        <input
-                          type="checkbox"
-                          name="deleteHeroImage"
-                          value="true"
-                        />{" "}
-                        Delete
-                      </label>
-                    </div>
-                  </div>
-                ) : null}
-                {galleryImages.length > 0 ? (
-                  <div className="mt-4 space-y-3">
-                    {galleryImages.map((media, index) => (
-                      <div
-                        key={media.id}
-                        className="rounded-xl border border-slate-100 bg-white p-4"
-                      >
-                        {media.fileAsset?.objectKey ? (
-                          <div
-                            className="mb-3 h-32 rounded-lg bg-slate-100 bg-cover bg-center"
-                            style={{
-                              backgroundImage: `url(${media.fileAsset.objectKey})`,
-                            }}
-                            aria-label={`Gallery image ${index + 1} thumbnail`}
-                          />
-                        ) : null}
-                        <input
-                          type="hidden"
-                          name="galleryMediaId"
-                          value={media.id}
-                        />
-                        <div className="mb-3 flex items-start justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-black text-papaipay-ink">
-                              Gallery image {index + 1}
-                            </p>
-                            <p className="mt-1 text-xs text-slate-500">
-                              {media.fileAsset?.originalFilename ??
-                                "Uploaded image"}
-                            </p>
-                          </div>
-                          <label className="flex items-center gap-2 text-xs font-bold text-red-600">
-                            <input
-                              type="checkbox"
-                              name="deleteGalleryMediaId"
-                              value={media.id}
-                            />{" "}
-                            Delete
-                          </label>
-                        </div>
-                        <div className="grid gap-4 sm:grid-cols-3">
-                          <Field
-                            label="Image Caption"
-                            name={`galleryCaption:${media.id}`}
-                            defaultValue={media.caption}
-                            helper="Optional short label for the image, e.g. Front view, Living area, Kitchen."
-                          />
-                          <Field
-                            label="Image Alt Text"
-                            name={`galleryAltText:${media.id}`}
-                            defaultValue={media.altText}
-                          />
-                          <Field
-                            label="Sort Order"
-                            name={`gallerySortOrder:${media.id}`}
-                            type="number"
-                            defaultValue={media.sortOrder}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-              </SubsectionCard>
-            </div>
-          </Section>
-
-          <Section
-            id="documents"
-            title="Documents"
-            description="Upload optional member-facing documents. Missing documents do not block publishing."
-          >
+      <div hidden={currentStep !== 4}>
+        <Section
+          id="media"
+          title="Media"
+          description="Manage the member-facing thumbnail, hero image, gallery previews and display ordering."
+        >
+          <div className="grid gap-5">
             <SubsectionCard
-              title="Documents"
-              description="Document categories prepared for member review or internal operations."
+              title="Gallery"
+              description="Images used in the campaign detail gallery."
             >
-              <div
-                data-field="documents"
-                className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-              >
-                <SelectField
-                  label="Document Visibility"
-                  name="newDocumentVisibility"
-                  options={["Internal Only", "Member Visible"]}
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <UploadZone
+                  title="Hero Image"
+                  name="heroImage"
+                  supported="JPG, PNG, WEBP"
+                  helper="Use one hero image as the primary listing image."
+                  error={fieldErrors.heroImage}
                 />
-                <SelectField
-                  label="Document Status"
-                  name="newDocumentStatus"
-                  options={["Draft", "Ready", "Published"]}
+                <input
+                  type="hidden"
+                  name="heroMediaId"
+                  value={heroImage?.id ?? ""}
+                />
+                <UploadZone
+                  title="Gallery Images"
+                  name="galleryImages"
+                  multiple
+                  supported="JPG, PNG, WEBP"
+                  helper="Add multiple supporting gallery images for the listing."
+                />
+                <input
+                  type="hidden"
+                  name="heroCaption"
+                  value={heroImage?.caption ?? ""}
+                />
+                <Field
+                  label="Image Alt Text"
+                  name="heroAltText"
+                  defaultValue={heroImage?.altText}
+                />
+                <CalculatedField
+                  label="Gallery Count"
+                  helper="Calculated from uploaded gallery images."
                 />
               </div>
-              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {documentCategories.map((category) => (
-                  <UploadZone
-                    key={category}
-                    title={`${category} Upload`}
-                    name={`documentFile:${category}`}
-                    helper="Upload document."
-                    supported={
-                      category === "Property Photos"
-                        ? "JPG, PNG, WEBP"
-                        : "PDF, DOCX"
-                    }
-                  />
-                ))}
-              </div>
-              {documents.length > 0 ? (
-                <div className="mt-5 space-y-3">
-                  {documents.map((document) => (
+              {heroImage ? (
+                <div className="mt-4 rounded-xl border border-slate-100 bg-white p-4 text-sm">
+                  {heroImage.fileAsset?.objectKey ? (
                     <div
-                      key={document.id}
+                      className="mb-4 h-48 rounded-lg bg-slate-100 bg-cover bg-center"
+                      style={{
+                        backgroundImage: `url(${heroImage.fileAsset.objectKey})`,
+                      }}
+                      aria-label="Current hero image preview"
+                    />
+                  ) : null}
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="font-black text-papaipay-ink">
+                        Current hero image
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {heroImage.fileAsset?.originalFilename ??
+                          "Uploaded image"}
+                      </p>
+                    </div>
+                    <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                      <input
+                        type="checkbox"
+                        name="deleteHeroImage"
+                        value="true"
+                      />{" "}
+                      Delete
+                    </label>
+                  </div>
+                </div>
+              ) : null}
+              {galleryImages.length > 0 ? (
+                <div className="mt-4 space-y-3">
+                  {galleryImages.map((media, index) => (
+                    <div
+                      key={media.id}
                       className="rounded-xl border border-slate-100 bg-white p-4"
                     >
+                      {media.fileAsset?.objectKey ? (
+                        <div
+                          className="mb-3 h-32 rounded-lg bg-slate-100 bg-cover bg-center"
+                          style={{
+                            backgroundImage: `url(${media.fileAsset.objectKey})`,
+                          }}
+                          aria-label={`Gallery image ${index + 1} thumbnail`}
+                        />
+                      ) : null}
                       <input
                         type="hidden"
-                        name="documentId"
-                        value={document.id}
+                        name="galleryMediaId"
+                        value={media.id}
                       />
                       <div className="mb-3 flex items-start justify-between gap-3">
-                        <p className="text-sm font-black text-papaipay-ink">
-                          {document.fileAsset?.originalFilename ??
-                            document.title}
-                        </p>
+                        <div>
+                          <p className="text-sm font-black text-papaipay-ink">
+                            Gallery image {index + 1}
+                          </p>
+                          <p className="mt-1 text-xs text-slate-500">
+                            {media.fileAsset?.originalFilename ??
+                              "Uploaded image"}
+                          </p>
+                        </div>
                         <label className="flex items-center gap-2 text-xs font-bold text-red-600">
                           <input
                             type="checkbox"
-                            name="deleteDocumentId"
-                            value={document.id}
+                            name="deleteGalleryMediaId"
+                            value={media.id}
                           />{" "}
                           Delete
                         </label>
                       </div>
-                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="grid gap-4 sm:grid-cols-3">
+                        <input
+                          type="hidden"
+                          name={`galleryCaption:${media.id}`}
+                          value={media.caption ?? ""}
+                        />
                         <Field
-                          label="Document Title"
-                          name={`documentTitle:${document.id}`}
-                          defaultValue={document.title}
+                          label="Image Alt Text"
+                          name={`galleryAltText:${media.id}`}
+                          defaultValue={media.altText}
                         />
-                        <SelectField
-                          label="Document Visibility"
-                          name={`documentVisibility:${document.id}`}
-                          defaultValue={
-                            document.visibility === "MemberVisible"
-                              ? "Member Visible"
-                              : "Internal Only"
-                          }
-                          options={["Internal Only", "Member Visible"]}
-                        />
-                        <SelectField
-                          label="Document Status"
-                          name={`documentStatus:${document.id}`}
-                          defaultValue={document.documentStatus}
-                          options={["Draft", "Ready", "Published", "Archived"]}
-                        />
-                        <SelectField
-                          label="Document Category"
-                          name={`documentCategory:${document.id}`}
-                          defaultValue={document.category}
-                          options={[
-                            "ProclamationOfSale",
-                            "ConditionsOfSale",
-                            "TitleSearch",
-                            "ValuationReport",
-                            "PropertyPhotos",
-                            "LocationMap",
-                            "LegalDocuments",
-                            "OtherDocuments",
-                          ]}
+                        <Field
+                          label="Sort Order"
+                          name={`gallerySortOrder:${media.id}`}
+                          type="number"
+                          defaultValue={media.sortOrder}
                         />
                       </div>
                     </div>
@@ -1686,11 +1746,122 @@ export function ListingForm({
                 </div>
               ) : null}
             </SubsectionCard>
-          </Section>
-        </>
-      ) : null}
+          </div>
+        </Section>
+      </div>
 
-      {currentStep === 5 ? (
+      <div hidden={currentStep !== 5}>
+        <Section
+          id="documents"
+          title="Documents"
+          description="Upload optional member-facing documents. Missing documents do not block publishing."
+        >
+          <SubsectionCard
+            title="Documents"
+            description="Document categories prepared for member review or internal operations."
+          >
+            <div
+              data-field="documents"
+              className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            >
+              <SelectField
+                label="Document Visibility"
+                name="newDocumentVisibility"
+                options={["Internal Only", "Member Visible"]}
+              />
+              <SelectField
+                label="Document Status"
+                name="newDocumentStatus"
+                options={["Draft", "Ready", "Published"]}
+              />
+            </div>
+            <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+              {documentCategories.map((category) => (
+                <UploadZone
+                  key={category}
+                  title={`${category} Upload`}
+                  name={`documentFile:${category}`}
+                  helper="Upload document."
+                  supported={
+                    category === "Property Photos"
+                      ? "JPG, PNG, WEBP"
+                      : "PDF, DOCX"
+                  }
+                />
+              ))}
+            </div>
+            {documents.length > 0 ? (
+              <div className="mt-5 space-y-3">
+                {documents.map((document) => (
+                  <div
+                    key={document.id}
+                    className="rounded-xl border border-slate-100 bg-white p-4"
+                  >
+                    <input
+                      type="hidden"
+                      name="documentId"
+                      value={document.id}
+                    />
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <p className="text-sm font-black text-papaipay-ink">
+                        {document.fileAsset?.originalFilename ?? document.title}
+                      </p>
+                      <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                        <input
+                          type="checkbox"
+                          name="deleteDocumentId"
+                          value={document.id}
+                        />{" "}
+                        Delete
+                      </label>
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <Field
+                        label="Document Title"
+                        name={`documentTitle:${document.id}`}
+                        defaultValue={document.title}
+                      />
+                      <SelectField
+                        label="Document Visibility"
+                        name={`documentVisibility:${document.id}`}
+                        defaultValue={
+                          document.visibility === "MemberVisible"
+                            ? "Member Visible"
+                            : "Internal Only"
+                        }
+                        options={["Internal Only", "Member Visible"]}
+                      />
+                      <SelectField
+                        label="Document Status"
+                        name={`documentStatus:${document.id}`}
+                        defaultValue={document.documentStatus}
+                        options={["Draft", "Ready", "Published", "Archived"]}
+                      />
+                      <SelectField
+                        label="Document Category"
+                        name={`documentCategory:${document.id}`}
+                        defaultValue={document.category}
+                        options={[
+                          "ProclamationOfSale",
+                          "ConditionsOfSale",
+                          "TitleSearch",
+                          "ValuationReport",
+                          "PropertyPhotos",
+                          "LocationMap",
+                          "LegalDocuments",
+                          "OtherDocuments",
+                        ]}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : null}
+          </SubsectionCard>
+        </Section>
+      </div>
+
+      <div hidden={currentStep !== 6}>
         <Section
           id="important-information"
           title="Important Information"
@@ -1706,200 +1877,123 @@ export function ListingForm({
             />
           </div>
         </Section>
-      ) : null}
+        <Section
+          id="faq"
+          title="FAQ"
+          description="Manage optional member-facing questions and answers. This section is optional and can be completed later."
+        >
+          <div className="grid gap-5">
+            <SubsectionCard
+              title="FAQ"
+              description="Default FAQs are generated automatically. Admin may edit, delete, or add FAQ content. FAQ is optional for publishing."
+            >
+              <div className="space-y-4">
+                {editableFaqs.map((faq, index) => (
+                  <div
+                    key={`${faq.question}-${index}`}
+                    className="rounded-xl border border-slate-100 bg-white p-4"
+                  >
+                    <input
+                      type="hidden"
+                      name={`faqId:${index}`}
+                      value={faq.id ?? ""}
+                    />
+                    <div className="mb-3 flex items-center justify-between gap-3">
+                      <p className="text-sm font-black text-papaipay-ink">
+                        FAQ {index + 1}
+                      </p>
+                      {faq.id ? (
+                        <label className="flex items-center gap-2 text-xs font-bold text-red-600">
+                          <input
+                            type="checkbox"
+                            name="deleteFaqId"
+                            value={faq.id}
+                          />{" "}
+                          Delete
+                        </label>
+                      ) : null}
+                    </div>
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Field
+                        label="Question"
+                        name={`faqQuestion:${index}`}
+                        defaultValue={faq.question}
+                      />
+                      <Field
+                        label="Display Order"
+                        name={`faqSortOrder:${index}`}
+                        type="number"
+                        defaultValue={index}
+                      />
+                    </div>
+                    <div className="mt-4">
+                      <TextAreaField
+                        label="Answer"
+                        name={`faqAnswer:${index}`}
+                        defaultValue={faq.answer}
+                        rows={6}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </SubsectionCard>
+          </div>
+        </Section>
 
-      {currentStep === 6 ? (
-        <>
-          <Section
-            id="faq"
-            title="FAQ"
-            description="Manage optional member-facing questions and answers. This section is optional and can be completed later."
-          >
-            <div className="grid gap-5">
-              <SubsectionCard
-                title="FAQ"
-                description="Add, edit or clear the primary member-facing FAQ. FAQ is optional for publishing."
-              >
-                <input
-                  type="hidden"
-                  name="faqId"
-                  value={primaryFaq?.id ?? ""}
-                />
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <Field
-                    label="Question"
-                    name="faqQuestion"
-                    error={fieldErrors.faqQuestion}
-                    defaultValue={primaryFaq?.question}
-                  />
-                  <Field label="Display Order" type="number" defaultValue={0} />
-                </div>
-                <div className="mt-4">
-                  <TextAreaField
-                    label="Answer"
-                    name="faqAnswer"
-                    error={fieldErrors.faqAnswer}
-                    defaultValue={primaryFaq?.answer}
-                  />
-                </div>
-              </SubsectionCard>
-            </div>
-          </Section>
+        <Section
+          id="risk-disclaimer"
+          title="Risk Disclaimer"
+          description="Optional member-facing risk text. This section is optional and can be completed later. Formatting is preserved on the member detail page."
+        >
+          <div>
+            <TextAreaField
+              label="Risk Disclaimer"
+              name="riskDisclaimer"
+              error={fieldErrors.riskDisclaimer}
+              rows={5}
+              defaultValue={
+                initialValues?.content?.riskDisclaimer || defaultRiskDisclaimer
+              }
+            />
+          </div>
+        </Section>
+      </div>
 
-          <Section
-            id="risk-disclaimer"
-            title="Risk Disclaimer"
-            description="Optional member-facing risk text. This section is optional and can be completed later. Formatting is preserved on the member detail page."
-          >
-            <div>
-              <TextAreaField
-                label="Risk Disclaimer"
-                name="riskDisclaimer"
-                error={fieldErrors.riskDisclaimer}
-                rows={5}
-                defaultValue={initialValues?.content?.riskDisclaimer}
-              />
-            </div>
-          </Section>
-        </>
-      ) : null}
-
-      {currentStep === 7 ? (
+      <div hidden={currentStep !== 7}>
         <Section
           id="review-publish"
-          title="Review & Publish"
-          description="Confirm readiness before saving, publishing or previewing the member-facing listing."
+          title="Publish"
+          description="Set the listing status and publish when ready."
         >
-          <div className="grid gap-4 lg:grid-cols-2">
+          <div className="grid gap-4 sm:grid-cols-3">
             {[
-              [
-                "Overview summary",
-                initialValues?.title || "Title to be completed",
-              ],
-              [
-                "Property summary",
-                initialValues?.propertyDetail?.propertyType ||
-                  "Property details to be completed",
-              ],
-              [
-                "Investment summary",
-                `Target funding RM ${initialValues?.campaignTarget ?? 0}`,
-              ],
-              [
-                "Settlement & Fees summary",
-                "Optional section — can be completed later",
-              ],
-              [
-                "Media/Documents summary",
-                heroImage
-                  ? "Hero image present"
-                  : "Hero image required before publish",
-              ],
-              [
-                "Important Information summary",
-                initialValues?.content?.importantInformation
-                  ? "Provided"
-                  : "Optional",
-              ],
-              [
-                "FAQ/Risk summary",
-                primaryFaq || initialValues?.content?.riskDisclaimer
-                  ? "Provided"
-                  : "Optional",
-              ],
-            ].map(([title, value]) => (
+              "Draft",
+              missingFieldsForStep(0).length === 0 &&
+              missingFieldsForStep(1).length === 0 &&
+              missingFieldsForStep(2).length === 0 &&
+              missingFieldsForStep(4).length === 0
+                ? "Ready"
+                : "Required",
+              initialValues?.publishStatus === "Published"
+                ? "Published"
+                : "Not Published",
+            ].map((status) => (
               <div
-                key={title}
-                className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4"
+                key={status}
+                className="rounded-2xl border border-slate-100 bg-slate-50/70 p-4 text-center"
               >
-                <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
-                  {title}
+                <p className="text-xs font-black uppercase tracking-wide text-slate-400">
+                  Listing Status
                 </p>
-                <p className="mt-2 text-sm font-bold text-papaipay-ink">
-                  {value}
+                <p className="mt-2 text-lg font-black text-papaipay-ink">
+                  {status}
                 </p>
               </div>
             ))}
           </div>
-          <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
-            <p className="text-xs font-black uppercase tracking-wide text-amber-700">
-              Validation summary
-            </p>
-            {Object.values(requiredFieldsByStep)
-              .flat()
-              .filter(
-                (field) =>
-                  !fieldHasValue(
-                    new FormData(formRef.current ?? undefined),
-                    field,
-                  ),
-              ).length > 0 ? (
-              <p className="mt-2 text-sm font-bold text-amber-900">
-                Some required fields are missing. Publish will be blocked until
-                they are completed.
-              </p>
-            ) : (
-              <p className="mt-2 text-sm font-bold text-emerald-800">
-                Required fields completed. Optional sections can remain empty.
-              </p>
-            )}
-          </div>
-
-          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {[
-              "Campaign ID present",
-              "Campaign Code present",
-              "Campaign Target set",
-              "Min / Max Participation set",
-              "Asset Snapshot complete",
-              "Gallery ready",
-              "Media thumbnail reviewed",
-              "Short Description completed",
-              "Important Information reviewed",
-              "Investment Information completed",
-              "Optional fields do not block publish",
-              "Draft / Ready / Published status reviewed",
-              "Member Preview checked",
-            ].map((item) => (
-              <ChecklistItem key={item} label={item} />
-            ))}
-          </ul>
-          <div className="mt-6 rounded-2xl border border-papaipay-green/20 bg-emerald-50/70 p-5">
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div>
-                <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
-                  Preview Member View
-                </p>
-                <h3 className="mt-1 text-lg font-bold text-papaipay-ink">
-                  Review exactly what members will see
-                </h3>
-                <p className="mt-2 text-sm leading-6 text-slate-600">
-                  Open the member-facing campaign detail page before publishing
-                  or updating this campaign.
-                </p>
-              </div>
-              {memberPreviewHref ? (
-                <a
-                  href={memberPreviewHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="rounded-xl bg-papaipay-green px-5 py-3 text-center text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.22)]"
-                >
-                  Preview Member View
-                </a>
-              ) : (
-                <span className="rounded-xl bg-slate-200 px-5 py-3 text-center text-sm font-bold text-slate-500">
-                  Save a draft first to preview
-                </span>
-              )}
-            </div>
-          </div>
-          <p className="mt-4 text-xs font-semibold text-slate-500">
-            Save Draft stores Draft status. Publish Listing stores Published
-            status and makes the listing member visible.
-          </p>
         </Section>
-      ) : null}
+      </div>
 
       <div className="sticky bottom-0 z-20 -mx-4 border-t border-slate-200 bg-white/95 px-4 py-3 shadow-[0_-12px_30px_rgba(15,23,42,0.08)] backdrop-blur sm:mx-0 sm:rounded-2xl sm:border">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
@@ -1933,7 +2027,7 @@ export function ListingForm({
                 pendingLabel="Publishing..."
                 className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
               >
-                Publish Opportunity
+                Publish Listing
               </SubmitButton>
             )}
           </div>
