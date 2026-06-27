@@ -2,8 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import { db } from "@/lib/db";
@@ -222,40 +220,18 @@ async function createFileAsset(
   file: File,
   purpose: "CampaignImage" | "CampaignDocument",
 ) {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-  const storageRef = `${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
-  const objectKey = `campaign-assets/${storageRef}`;
-  const fileBuffer = Buffer.from(await file.arrayBuffer());
-  let storedObjectKey = `/uploads/${objectKey}`;
-  let bucket = "public/uploads";
+  const extension = file.name.match(/\.[a-zA-Z0-9]+$/)?.[0]?.toLowerCase() ?? "";
+  const storageRef = `${purpose === "CampaignImage" ? "image" : "document"}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${extension}`;
+  const storedObjectKey = `listings/${storageRef}`;
 
-  // Temporary Phase 2B storage: local public/uploads keeps FileAsset persistence
-  // unblocked for demo/admin workflows. If local disk writes are unavailable
-  // (for example in read-only/serverless runtimes), keep the draft save working
-  // by storing image previews as data URLs while preserving FileAsset metadata.
-  try {
-    const uploadDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "campaign-assets",
-    );
-    await mkdir(uploadDir, { recursive: true });
-    await writeFile(path.join(process.cwd(), "public", "uploads", objectKey), fileBuffer);
-  } catch (error) {
-    if (purpose !== "CampaignImage") throw error;
-    console.warn(
-      "Local campaign image write failed; storing inline image preview fallback.",
-      error,
-    );
-    bucket = "inline-data-url";
-    storedObjectKey = `data:${file.type || "image/jpeg"};name=${encodeURIComponent(storageRef)};base64,${fileBuffer.toString("base64")}`;
-  }
-
+  // Persistent object storage is not configured yet. Do not write to /public in
+  // serverless/read-only runtimes and never store binary/base64 data in Postgres.
+  // The FileAsset row keeps short metadata so draft saves can succeed and media
+  // can be replaced with real object storage later without changing form fields.
   return tx.fileAsset.create({
     data: {
       fileRef: makeFileRef("FILE"),
-      bucket,
+      bucket: "pending-object-storage",
       objectKey: storedObjectKey,
       originalFilename: file.name,
       contentType: file.type || "application/octet-stream",

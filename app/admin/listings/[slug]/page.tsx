@@ -8,6 +8,10 @@ function DocumentIcon() {
   return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
 }
 
+function isRenderableAssetUrl(value: string | null | undefined) {
+  return Boolean(value && (/^(\/|https?:\/\/|data:image\/)/.test(value)));
+}
+
 function formatTenure(value: string | null | undefined) {
   if (value === "FH" || value === "Freehold") return "Freehold";
   if (value === "LH" || value === "Leasehold") return "Leasehold";
@@ -162,10 +166,10 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             {listing.media.length > 0 ? (
               listing.media.map((media) => (
                 <div key={media.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
-                  {media.fileAsset?.objectKey ? (
+                  {isRenderableAssetUrl(media.fileAsset?.objectKey) ? (
                     <div
                       className="h-36 bg-slate-100 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${media.fileAsset.objectKey})` }}
+                      style={{ backgroundImage: `url(${media.fileAsset?.objectKey})` }}
                       role="img"
                       aria-label={media.altText || media.fileAsset?.originalFilename || "Listing image"}
                     />
