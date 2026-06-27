@@ -505,6 +505,7 @@ export async function saveListingAction(
         campaignId,
       ),
     });
+    const twentyFourMonthRuleText = requiredString(formData, "lockedRuleText");
     const auditAction: AdminAuditAction = !existing
       ? "create"
       : action === "publish"
@@ -516,12 +517,16 @@ export async function saveListingAction(
       const campaign = existing
         ? await tx.campaign.update({
             where: { id: existing.id },
-            data: campaignData(input, action),
+            data: {
+              ...campaignData(input, action),
+              ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
+            },
           })
         : await tx.campaign.create({
             data: {
               campaignRef: makeCampaignRef(),
               ...campaignData(input, action),
+              ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
             },
           });
       await tx.propertyDetail.upsert({
@@ -757,9 +762,11 @@ export async function saveListingAction(
       };
     }
     console.error("Unexpected listing save error", error);
+    const action = requiredString(formData, "intent") || "draft";
+    const safeAction = action === "publish" ? "publish listing" : "save draft";
     return {
       errors: [
-        "We could not save this listing right now. Please review the required fields and try again.",
+        `Unable to ${safeAction}. The server logged the root cause; please try again or contact support if it repeats.`,
       ],
     };
   }

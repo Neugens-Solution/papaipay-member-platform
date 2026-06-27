@@ -48,6 +48,7 @@ export default async function EditListingPage({
           returnType: campaign.returnType,
           maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
           principalProtectionEnabled: campaign.principalProtectionEnabled,
+          twentyFourMonthRuleText: campaign.twentyFourMonthRuleText,
           memberProfitDistributionPercentagePlanned:
             campaign.memberProfitDistributionPercentagePlanned?.toString(),
           platformProfitSharePercentagePlanned:

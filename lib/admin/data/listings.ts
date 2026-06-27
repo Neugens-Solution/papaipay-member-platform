@@ -49,6 +49,7 @@ function demoAdminListingDetail(slug: string) {
     returnType: listing.returnType,
     maximumHoldingPeriodMonths: listing.maximumHoldingPeriodMonths,
     principalProtectionEnabled: listing.principalProtectionEnabled,
+    twentyFourMonthRuleText: listing.twentyFourMonthRuleText ?? "If not sold within 24 months, Participation Amount only will be returned.",
     memberProfitDistributionPercentagePlanned:
       listing.memberProfitDistributionPercentage ?? null,
     platformProfitSharePercentagePlanned:
