@@ -445,15 +445,6 @@ export async function saveListingAction(
     const heroAltText = requiredString(formData, "heroAltText");
     assertLength(heroCaption, maxCaptionLength, "Hero image caption");
     assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
-    const hasExistingHero =
-      Boolean(
-        existing?.media.some((media) => media.mediaType === "PrimaryImage"),
-      ) && requiredString(formData, "deleteHeroImage") !== "true";
-    if (action === "publish" && !hasExistingHero)
-      throw new ListingFormValidationError(
-        ["Please add a Hero Image before publishing."],
-        { heroImage: "Please add a Hero Image before publishing." },
-      );
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
