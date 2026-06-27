@@ -45,6 +45,9 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
   const holdingTotal = decimalToNumber(latestSettlement?.holdingReturnPool);
   const profitPool = decimalToNumber(latestSettlement?.profitDistributionPool);
   const platformShare = decimalToNumber(latestSettlement?.platformShare);
+  const renderableMedia = listing.media.filter((media) =>
+    isRenderableAssetUrl(media.fileAsset?.objectKey),
+  );
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -163,8 +166,8 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         <Card>
           <h2 className="font-bold">Media Gallery</h2>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {listing.media.length > 0 ? (
-              listing.media.map((media) => (
+            {renderableMedia.length > 0 ? (
+              renderableMedia.map((media) => (
                 <div key={media.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
                   {isRenderableAssetUrl(media.fileAsset?.objectKey) ? (
                     <div
@@ -181,7 +184,7 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
                 </div>
               ))
             ) : (
-              <p className="text-sm text-slate-500">No media gallery items added yet.</p>
+              <p className="text-sm text-slate-500">No media uploaded yet.</p>
             )}
           </div>
         </Card>

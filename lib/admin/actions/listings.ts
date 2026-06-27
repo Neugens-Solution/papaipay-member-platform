@@ -439,33 +439,17 @@ export async function saveListingAction(
           },
         })
       : null;
-    const heroFile = fileFromForm(formData, "heroImage");
-    const galleryFiles = filesFromForm(formData, "galleryImages");
+    // Media image persistence is disabled until object storage is integrated.
+    // Ignore heroImage/galleryImages File objects so Save Draft never depends on file storage.
     const heroCaption = requiredString(formData, "heroCaption");
     const heroAltText = requiredString(formData, "heroAltText");
     assertLength(heroCaption, maxCaptionLength, "Hero image caption");
     assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
-    if (heroFile && !allowedImageTypes.has(heroFile.type))
-      validationError("Hero image must be JPG, PNG, or WEBP.");
-    for (const file of galleryFiles) {
-      if (!allowedImageTypes.has(file.type))
-        validationError("Gallery images must be JPG, PNG, or WEBP.");
-    }
-    const existingGalleryCount =
-      existing?.media.filter(
-        (media) =>
-          media.mediaType === "GalleryImage" &&
-          !formData.getAll("deleteGalleryMediaId").includes(media.id),
-      ).length ?? 0;
-    if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
-      validationError(
-        `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
-      );
     const hasExistingHero =
       Boolean(
         existing?.media.some((media) => media.mediaType === "PrimaryImage"),
       ) && requiredString(formData, "deleteHeroImage") !== "true";
-    if (action === "publish" && !heroFile && !hasExistingHero)
+    if (action === "publish" && !hasExistingHero)
       throw new ListingFormValidationError(
         ["Please add a Hero Image before publishing."],
         { heroImage: "Please add a Hero Image before publishing." },
@@ -531,29 +515,7 @@ export async function saveListingAction(
           }),
         );
       }
-      if (heroFile) {
-        const asset = await createFileAsset(tx, heroFile, "CampaignImage");
-        await tx.campaignMedia.deleteMany({
-          where: { campaignId: campaign.id, mediaType: "PrimaryImage" },
-        });
-        const hero = await tx.campaignMedia.create({
-          data: {
-            campaignId: campaign.id,
-            fileAssetId: asset.id,
-            mediaType: "PrimaryImage",
-            caption: heroCaption || null,
-            altText: heroAltText || null,
-            sortOrder: 0,
-          },
-        });
-        mediaAuditEvents.push(
-          buildAuditData({
-            action: "update",
-            entityId: campaign.id,
-            afterSnapshot: { heroMediaId: hero.id, fileAssetId: asset.id },
-          }),
-        );
-      } else if (heroMediaId) {
+      if (heroMediaId) {
         await tx.campaignMedia.update({
           where: { id: heroMediaId },
           data: {
@@ -588,25 +550,6 @@ export async function saveListingAction(
             sortOrder: Number(formData.get(`gallerySortOrder:${mediaId}`) ?? 0),
           },
         });
-      }
-      let nextSortOrder = existingGalleryCount;
-      for (const file of galleryFiles) {
-        const asset = await createFileAsset(tx, file, "CampaignImage");
-        const media = await tx.campaignMedia.create({
-          data: {
-            campaignId: campaign.id,
-            fileAssetId: asset.id,
-            mediaType: "GalleryImage",
-            sortOrder: nextSortOrder++,
-          },
-        });
-        mediaAuditEvents.push(
-          buildAuditData({
-            action: "update",
-            entityId: campaign.id,
-            afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id },
-          }),
-        );
       }
       for (const documentId of formData.getAll("documentId").map(String)) {
         if (formData.getAll("deleteDocumentId").includes(documentId)) {
