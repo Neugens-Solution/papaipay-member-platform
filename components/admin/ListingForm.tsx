@@ -86,9 +86,6 @@ Members will receive a detailed Final Return calculation together with the final
 const defaultLockedRuleText = `If the property is not successfully disposed of within the maximum holding period of 24 months, members will receive a return of their original Participation Amount only.
 
 No Holding Return or Final Return will be payable unless otherwise stated in the listing terms.`;
-
-const defaultSettlementNotes = `Settlement and fee details are for internal planning only. Final Return calculations will be prepared after the property disposal process is completed and all approved campaign-related expenses, taxes, operational costs and platform charges have been confirmed.`;
-const defaultMemberInformation = `This listing is prepared for member participation based on the approved listing terms. Members should review the property details, participation structure, expected holding period, return information, supporting documents and risk disclaimer before making any participation decision.`;
 const defaultRiskDisclaimer = `Participation in any listing carries inherent risks, including the possibility that projected returns may differ from actual outcomes.
 
 Past performance of any asset or campaign should not be regarded as an indication of future results.
