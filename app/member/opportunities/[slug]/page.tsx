@@ -82,26 +82,32 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               </div>
             </div>
             <div className="relative mx-3 mb-3 overflow-hidden rounded-2xl sm:mx-5 sm:mb-5">
-              <div className="flex snap-x snap-mandatory overflow-x-auto bg-slate-100">
-                {campaign.gallery.map((item, index) => (
-                  <div key={item} id={`photo-${index + 1}`} className="h-64 min-w-full snap-center bg-cover bg-center sm:h-[26rem]" style={{ backgroundImage: `url(${item})` }} aria-label={`Asset photo ${index + 1}`} />
-                ))}
-              </div>
-              <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-bold text-white">1 / {campaign.galleryCount}</span>
-              <a href="#photo-1" aria-label="Previous photo" className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">‹</a>
-              <a href="#photo-2" aria-label="Next photo" className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">›</a>
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-white/80 px-2 py-1 backdrop-blur" aria-label="Photo indicators">
-                {campaign.gallery.map((item, index) => <span key={item} className={`h-2 w-2 rounded-full ${index === 0 ? "bg-papaipay-green" : "bg-slate-300"}`} />)}
-              </div>
+              {campaign.gallery.length > 0 ? (
+                <>
+                  <div className="flex snap-x snap-mandatory overflow-x-auto bg-slate-100">
+                    {campaign.gallery.map((item, index) => (
+                      <div key={item} id={`photo-${index + 1}`} className="h-64 min-w-full snap-center bg-cover bg-center sm:h-[26rem]" style={{ backgroundImage: `url(${item})` }} aria-label={`Asset photo ${index + 1}`} />
+                    ))}
+                  </div>
+                  <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-bold text-white">1 / {campaign.galleryCount}</span>
+                  <a href="#photo-1" aria-label="Previous photo" className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">‹</a>
+                  <a href="#photo-2" aria-label="Next photo" className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">›</a>
+                  <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-white/80 px-2 py-1 backdrop-blur" aria-label="Photo indicators">
+                    {campaign.gallery.map((item, index) => <span key={item} className={`h-2 w-2 rounded-full ${index === 0 ? "bg-papaipay-green" : "bg-slate-300"}`} />)}
+                  </div>
+                </>
+              ) : (
+                <div className="grid h-64 place-items-center bg-slate-100 text-center sm:h-[26rem]"><div><p className="text-base font-black text-slate-500">Image pending</p><p className="mt-2 text-sm font-semibold text-slate-400">Media will be available soon</p></div></div>
+              )}
             </div>
-            <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
+            {campaign.gallery.length > 0 ? <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
               <details className="relative">
                 <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold text-papaipay-green"><Icon name="image" className="h-4 w-4" />View All Photos</summary>
                 <div className="absolute left-1/2 z-20 mt-3 grid w-[min(86vw,640px)] -translate-x-1/2 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-soft sm:grid-cols-2">
                   {campaign.gallery.map((item) => <div key={item} className="h-32 rounded-lg bg-cover bg-center" style={{ backgroundImage: `url(${item})` }} />)}
                 </div>
               </details>
-            </div>
+            </div> : null}
           </article>
 
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">

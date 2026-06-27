@@ -36,7 +36,7 @@ export type Opportunity = {
   marketValue: number;
   valuationDate: string;
   valuationReport: string;
-  imageUrl: string;
+  imageUrl: string | null;
   gallery: string[];
   galleryCount: number;
   daysRemaining: number;
