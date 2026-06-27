@@ -28,17 +28,14 @@ function formatReturnType(returnType: string): Opportunity["returnType"] {
   return "Target";
 }
 
-const fallbackImageUrl =
-  "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80";
-
 function fileAssetUrl(fileAsset?: { objectKey: string } | null): string | null {
   if (!fileAsset) return null;
-  return fileAsset.objectKey.startsWith("/")
-    ? fileAsset.objectKey
-    : `/${fileAsset.objectKey}`;
+  const key = fileAsset.objectKey;
+  if (key.startsWith("/") || key.startsWith("http://") || key.startsWith("https://") || key.startsWith("data:image/")) return key;
+  return null;
 }
 
-function getPrimaryImageUrl(campaign: CampaignWithRelations): string {
+function getPrimaryImageUrl(campaign: CampaignWithRelations): string | null {
   return (
     fileAssetUrl(
       campaign.media.find((media) => media.mediaType === "PrimaryImage")
@@ -47,8 +44,7 @@ function getPrimaryImageUrl(campaign: CampaignWithRelations): string {
     fileAssetUrl(
       campaign.media.find((media) => media.mediaType === "GalleryImage")
         ?.fileAsset,
-    ) ||
-    fallbackImageUrl
+    )
   );
 }
 
@@ -73,12 +69,13 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
         .filter((media) => media.mediaType === "GalleryImage")
         .map((media) => fileAssetUrl(media.fileAsset))
         .filter((url): url is string => Boolean(url)),
-    ],
-    galleryCount:
-      1 +
-      campaign.media.filter(
-        (media) => media.mediaType === "GalleryImage" && media.fileAsset,
-      ).length,
+    ].filter((url): url is string => Boolean(url)),
+    galleryCount: [
+      imageUrl,
+      ...campaign.media
+        .filter((media) => media.mediaType === "GalleryImage")
+        .map((media) => fileAssetUrl(media.fileAsset)),
+    ].filter(Boolean).length,
     location: property?.location || property?.state || "Malaysia",
     state: property?.state || "Malaysia",
     propertyType: property?.propertyType || "Asset",
