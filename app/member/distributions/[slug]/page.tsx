@@ -31,7 +31,7 @@ export default function Page({ params }: { params: { slug: string } }) {
           <Info label="Distribution ID" value={record.distributionId} /><Info label="Campaign ID" value={record.campaignId} /><Info label="Campaign Code" value={record.campaignCode} /><Info label="Distribution Batch" value={record.distributionBatchId} /><Info label="Participation ID" value={record.participationId} /><Info label="Member ID" value={record.memberId} /><Info label="Property Name" value={record.propertyName} />
           <Info label="Location" value={record.location} />
           <Info label="Participation Amount" value={formatRM(record.participationAmount)} />
-          <Info label="Principal Return" value={formatRM(record.principalReturn)} /><Info label="Holding Return" value={formatRM(record.holdingReturn)} /><Info label="Profit Distribution" value={formatRM(record.profitDistribution)} /><Info label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
+          <Info label="Principal Return" value={formatRM(record.principalReturn)} /><Info label="Holding Return" value={formatRM(record.holdingReturn)} /><Info label="Return Distribution" value={formatRM(record.profitDistribution)} /><Info label="Final Return Total" value={formatRM(record.distributionAmount)} />
           <Info label="Distribution Status" value={record.status} />
           <Info label="Paid Date" value={record.paidDate} />
           <Info label="Reference Number" value={record.referenceNumber} /><Info label="Payment Reference" value={record.paymentReference} />

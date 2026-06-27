@@ -154,13 +154,13 @@ export const opportunities: Opportunity[] = [
   holdingReturnRate: "1.5% per month",
   returnType: index % 3 === 0 ? "Fixed" : index % 3 === 1 ? "Target" : "Up To",
   maximumHoldingPeriodMonths: 24,
-  principalProtectionRule: "If the asset is not sold after 24 months, return principal / participation amount only with no Holding Return or Profit Distribution.",
+  principalProtectionRule: "If the asset is not sold after 24 months, return principal / participation amount only with no Holding Return or Return Distribution.",
   documents: ["Proclamation of Sale", "Conditions of Sale", "Title Search", "Valuation Report", "Property Photos", "Location Map", "Legal Documents"],
   riskSummary: "Property participation may be affected by title review, vacancy, repairs, market liquidity, timing, and disposal conditions. Distributions are not guaranteed.",
 }));
 
 export const dashboardMetrics = [
-  { label: "Total Investment", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
+  { label: "Total Participation", value: "RM125,000", helper: "Across all participation records", trend: "+12.4% vs previous quarter" },
   { label: "Active Listings", value: "4", helper: "Currently active records", trend: "+1 listing this month" },
   { label: "Completed Properties", value: "2", helper: "Completed participation records", trend: "+1 this quarter" },
   { label: "Total Distribution", value: "RM8,500", helper: "Recorded to date", trend: "+RM850 this month" },

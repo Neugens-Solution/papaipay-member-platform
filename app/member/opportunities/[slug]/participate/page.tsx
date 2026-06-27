@@ -24,11 +24,11 @@ export default async function ParticipatePage({ params, searchParams }: { params
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <Link href={`/member/opportunities/${opportunity.slug}`} className="text-sm font-bold text-papaipay-green">← Back to Opportunity Detail</Link>
+      <Link href={`/member/opportunities/${opportunity.slug}`} className="text-sm font-bold text-papaipay-green">← Back to Listing Detail</Link>
       <header className="space-y-2">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Participate</p>
         <h1 className="text-2xl font-bold tracking-tight text-papaipay-ink sm:text-3xl">Start Participation</h1>
-        <p className="text-sm leading-6 text-slate-600">Enter the participation amount for this opportunity before reviewing your declaration and final confirmation.</p>
+        <p className="text-sm leading-6 text-slate-600">Enter the participation amount for this listing before reviewing your declaration and final confirmation.</p>
       </header>
       <div className="grid gap-5 lg:grid-cols-[1fr_.8fr]">
         <ContentCard>
@@ -52,6 +52,6 @@ export default async function ParticipatePage({ params, searchParams }: { params
 }
 
 function Summary({ opportunity }: { opportunity: NonNullable<Awaited<ReturnType<typeof getMemberCampaignBySlug>>> }) {
-  return <ContentCard><h2 className="text-lg font-bold">Opportunity Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Opportunity" value={opportunity.title} /><Row label="Location" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Estimated Yield" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
+  return <ContentCard><h2 className="text-lg font-bold">Listing Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Listing" value={opportunity.title} /><Row label="City" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Holding Return" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
 }
 function Row({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-4 py-3"><dt className="text-slate-500">{label}</dt><dd className="text-right font-bold text-papaipay-ink">{value}</dd></div>; }

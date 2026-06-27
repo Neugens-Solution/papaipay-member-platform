@@ -34,7 +34,7 @@ export default function Page() {
                 <p className="mt-1 text-xs text-slate-500">{record.campaignCode} • Participation Amount: {formatRM(record.participationAmount)}</p>
               </div>
               <ListField label="Participation Amount" value={formatRM(record.participationAmount)} className="hidden lg:block" />
-              <ListField label="Principal Return" value={formatRM(record.principalReturn)} /><ListField label="Holding Return" value={formatRM(record.holdingReturn)} /><ListField label="Profit Distribution" value={formatRM(record.profitDistribution)} /><ListField label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
+              <ListField label="Principal Return" value={formatRM(record.principalReturn)} /><ListField label="Holding Return" value={formatRM(record.holdingReturn)} /><ListField label="Return Distribution" value={formatRM(record.profitDistribution)} /><ListField label="Final Return Total" value={formatRM(record.distributionAmount)} />
               <div>
                 <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 lg:hidden">Distribution Status</p>
                 <StatusBadge status={record.status} />

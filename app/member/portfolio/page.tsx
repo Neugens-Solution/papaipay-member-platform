@@ -30,7 +30,7 @@ export default async function PortfolioPage() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Portfolio summary">
         {[
           ["Total Participation", summary.totalParticipationLabel, "Across all submitted records"],
-          ["Estimated Yield", summary.estimatedAnnualYield, "Mock yield until live returns are connected"],
+          ["Holding Return", summary.estimatedAnnualYield, "Mock yield until live returns are connected"],
           ["Current Status", summary.currentStatus, "Most relevant portfolio state"],
           ["Pending Review", String(summary.pendingReviewCount), "Items awaiting review"],
         ].map(([label, value, helper]) => <div key={label} className="rounded-2xl border border-slate-200/70 bg-white p-5"><p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{value}</p><p className="mt-2 text-sm text-slate-500">{helper}</p></div>)}
@@ -47,7 +47,7 @@ export default async function PortfolioPage() {
 
       <section className="grid gap-4 lg:grid-cols-2" aria-label="Portfolio records">
         {portfolioRecords.length === 0 ? (
-          <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white p-10 text-center lg:col-span-2"><h2 className="text-xl font-semibold text-papaipay-ink">No participation records yet.</h2><p className="mt-2 text-sm text-slate-500">Browse opportunities and submit a participation to begin building your portfolio.</p><Link href="/member/opportunities" className="mt-5 inline-flex rounded-full bg-papaipay-green px-5 py-3 text-sm font-bold text-white">Browse Opportunities</Link></div>
+          <div className="rounded-[2rem] border border-dashed border-slate-300 bg-white p-10 text-center lg:col-span-2"><h2 className="text-xl font-semibold text-papaipay-ink">No participation records yet.</h2><p className="mt-2 text-sm text-slate-500">Browse listings and submit a participation to begin building your portfolio.</p><Link href="/member/opportunities" className="mt-5 inline-flex rounded-full bg-papaipay-green px-5 py-3 text-sm font-bold text-white">Browse Listings</Link></div>
         ) : portfolioRecords.map((record) => (
           <article key={record.slug} className="rounded-[1.5rem] border border-slate-200/80 bg-white p-5 shadow-[0_10px_40px_rgba(15,23,42,0.04)] sm:p-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{record.campaignCode} • {record.participationId}</p><h2 className="mt-2 text-xl font-semibold tracking-tight text-papaipay-ink">{record.propertyName}</h2><p className="mt-1 text-sm text-slate-500">{record.location}</p></div><span className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-bold ${statusClasses(record.status)}`}>{record.status}</span></div>

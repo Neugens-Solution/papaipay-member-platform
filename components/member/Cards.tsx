@@ -63,7 +63,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <ProgressBar value={progress} />
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Opportunity Progress</p>
+            <p>{progress}% Participation Progress</p>
           </div>
         </div>
 
@@ -73,7 +73,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
           <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
-          <DetailRow label="Estimated Yield" value={opportunity.estimatedYield} />
+          <DetailRow label="Holding Return" value={opportunity.estimatedYield} />
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 
