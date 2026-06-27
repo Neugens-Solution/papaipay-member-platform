@@ -2,8 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import { db } from "@/lib/db";
@@ -112,7 +110,7 @@ function validationError(message: string): never {
 
 const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   title: { label: "Listing Title", field: "title" },
-  campaignTarget: { label: "Campaign Target", field: "campaignTarget" },
+  campaignTarget: { label: "Participation Target", field: "campaignTarget" },
   minimumParticipationAmount: {
     label: "Minimum Participation Amount",
     field: "minimumParticipationAmount",
@@ -121,9 +119,9 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     label: "Maximum Participation Amount",
     field: "maximumParticipationAmount",
   },
-  campaignOpenDate: { label: "Campaign Open Date", field: "campaignOpenDate" },
+  campaignOpenDate: { label: "Participation Start Date", field: "campaignOpenDate" },
   campaignCloseDate: {
-    label: "Campaign Close Date",
+    label: "Participation End Date",
     field: "campaignCloseDate",
   },
   holdingReturnRateMonthly: {
@@ -135,7 +133,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     label: "Maximum Holding Period",
     field: "maximumHoldingPeriodMonths",
   },
-  "property.propertyType": { label: "Asset Type", field: "propertyType" },
+  "property.propertyType": { label: "Property Type", field: "propertyType" },
   "property.assetCategory": { label: "Asset Category", field: "assetCategory" },
   "property.occupancyStatus": {
     label: "Occupancy Status",
@@ -148,7 +146,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
   "property.bedrooms": { label: "Bedrooms", field: "bedrooms" },
   "property.bathrooms": { label: "Bathrooms", field: "bathrooms" },
   "property.state": { label: "State", field: "state" },
-  "property.location": { label: "Location", field: "location" },
+  "property.location": { label: "City", field: "location" },
   "property.fullAddress": { label: "Full Address", field: "fullAddress" },
   "property.yearBuilt": { label: "Year Built", field: "yearBuilt" },
   "property.reservePrice": { label: "Market Value", field: "reservePrice" },
@@ -169,7 +167,7 @@ const friendlyFieldLabels: Record<string, { label: string; field: string }> = {
     field: "holdingReturnExplanation",
   },
   "content.finalDistributionExplanation": {
-    label: "Final Distribution Explanation",
+    label: "Final Return Explanation",
     field: "finalDistributionExplanation",
   },
 };
@@ -222,28 +220,19 @@ async function createFileAsset(
   file: File,
   purpose: "CampaignImage" | "CampaignDocument",
 ) {
-  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, "-");
-  const objectKey = `campaign-assets/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`;
-  // Temporary Phase 2B storage: local public/uploads keeps FileAsset persistence
-  // unblocked for demo/admin workflows. Vercel/serverless file systems are not
-  // durable, so replace this with object storage (S3/R2/Vercel Blob/etc.) before
-  // production media retention is required.
-  const uploadDir = path.join(
-    process.cwd(),
-    "public",
-    "uploads",
-    "campaign-assets",
-  );
-  await mkdir(uploadDir, { recursive: true });
-  await writeFile(
-    path.join(process.cwd(), "public", "uploads", objectKey),
-    Buffer.from(await file.arrayBuffer()),
-  );
+  const extension = file.name.match(/\.[a-zA-Z0-9]+$/)?.[0]?.toLowerCase() ?? "";
+  const storageRef = `${purpose === "CampaignImage" ? "image" : "document"}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${extension}`;
+  const storedObjectKey = `listings/${storageRef}`;
+
+  // Persistent object storage is not configured yet. Do not write to /public in
+  // serverless/read-only runtimes and never store binary/base64 data in Postgres.
+  // The FileAsset row keeps short metadata so draft saves can succeed and media
+  // can be replaced with real object storage later without changing form fields.
   return tx.fileAsset.create({
     data: {
       fileRef: makeFileRef("FILE"),
-      bucket: "public/uploads",
-      objectKey: `/uploads/${objectKey}`,
+      bucket: "pending-object-storage",
+      objectKey: storedObjectKey,
       originalFilename: file.name,
       contentType: file.type || "application/octet-stream",
       sizeBytes: file.size,
@@ -450,37 +439,12 @@ export async function saveListingAction(
           },
         })
       : null;
-    const heroFile = fileFromForm(formData, "heroImage");
-    const galleryFiles = filesFromForm(formData, "galleryImages");
+    // Media image persistence is disabled until object storage is integrated.
+    // Ignore heroImage/galleryImages File objects so Save Draft never depends on file storage.
     const heroCaption = requiredString(formData, "heroCaption");
     const heroAltText = requiredString(formData, "heroAltText");
     assertLength(heroCaption, maxCaptionLength, "Hero image caption");
     assertLength(heroAltText, maxAltTextLength, "Hero image alt text");
-    if (heroFile && !allowedImageTypes.has(heroFile.type))
-      validationError("Hero image must be JPG, PNG, or WEBP.");
-    for (const file of galleryFiles) {
-      if (!allowedImageTypes.has(file.type))
-        validationError("Gallery images must be JPG, PNG, or WEBP.");
-    }
-    const existingGalleryCount =
-      existing?.media.filter(
-        (media) =>
-          media.mediaType === "GalleryImage" &&
-          !formData.getAll("deleteGalleryMediaId").includes(media.id),
-      ).length ?? 0;
-    if (existingGalleryCount + galleryFiles.length > maxGalleryImages)
-      validationError(
-        `A listing can have a maximum of ${maxGalleryImages} gallery images.`,
-      );
-    const hasExistingHero =
-      Boolean(
-        existing?.media.some((media) => media.mediaType === "PrimaryImage"),
-      ) && requiredString(formData, "deleteHeroImage") !== "true";
-    if (action === "publish" && !heroFile && !hasExistingHero)
-      throw new ListingFormValidationError(
-        ["Please add a Hero Image before publishing."],
-        { heroImage: "Please add a Hero Image before publishing." },
-      );
     const input = buildInput(formData, action, {
       campaignCode:
         existing?.campaignCode ||
@@ -492,6 +456,7 @@ export async function saveListingAction(
         campaignId,
       ),
     });
+    const twentyFourMonthRuleText = requiredString(formData, "lockedRuleText");
     const auditAction: AdminAuditAction = !existing
       ? "create"
       : action === "publish"
@@ -503,12 +468,16 @@ export async function saveListingAction(
       const campaign = existing
         ? await tx.campaign.update({
             where: { id: existing.id },
-            data: campaignData(input, action),
+            data: {
+              ...campaignData(input, action),
+              ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
+            },
           })
         : await tx.campaign.create({
             data: {
               campaignRef: makeCampaignRef(),
               ...campaignData(input, action),
+              ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
             },
           });
       await tx.propertyDetail.upsert({
@@ -537,29 +506,7 @@ export async function saveListingAction(
           }),
         );
       }
-      if (heroFile) {
-        const asset = await createFileAsset(tx, heroFile, "CampaignImage");
-        await tx.campaignMedia.deleteMany({
-          where: { campaignId: campaign.id, mediaType: "PrimaryImage" },
-        });
-        const hero = await tx.campaignMedia.create({
-          data: {
-            campaignId: campaign.id,
-            fileAssetId: asset.id,
-            mediaType: "PrimaryImage",
-            caption: heroCaption || null,
-            altText: heroAltText || null,
-            sortOrder: 0,
-          },
-        });
-        mediaAuditEvents.push(
-          buildAuditData({
-            action: "update",
-            entityId: campaign.id,
-            afterSnapshot: { heroMediaId: hero.id, fileAssetId: asset.id },
-          }),
-        );
-      } else if (heroMediaId) {
+      if (heroMediaId) {
         await tx.campaignMedia.update({
           where: { id: heroMediaId },
           data: {
@@ -594,25 +541,6 @@ export async function saveListingAction(
             sortOrder: Number(formData.get(`gallerySortOrder:${mediaId}`) ?? 0),
           },
         });
-      }
-      let nextSortOrder = existingGalleryCount;
-      for (const file of galleryFiles) {
-        const asset = await createFileAsset(tx, file, "CampaignImage");
-        const media = await tx.campaignMedia.create({
-          data: {
-            campaignId: campaign.id,
-            fileAssetId: asset.id,
-            mediaType: "GalleryImage",
-            sortOrder: nextSortOrder++,
-          },
-        });
-        mediaAuditEvents.push(
-          buildAuditData({
-            action: "update",
-            entityId: campaign.id,
-            afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id },
-          }),
-        );
       }
       for (const documentId of formData.getAll("documentId").map(String)) {
         if (formData.getAll("deleteDocumentId").includes(documentId)) {
@@ -655,6 +583,9 @@ export async function saveListingAction(
         "Legal Documents",
         "Other Documents",
       ]) {
+        const uploadCategory = category === "Other Documents"
+          ? requiredString(formData, "newDocumentCategory") || category
+          : category;
         const file = fileFromForm(formData, `documentFile:${category}`);
         if (!file) continue;
         if (!allowedDocumentTypes.has(file.type))
@@ -667,7 +598,7 @@ export async function saveListingAction(
             documentRef: makeFileRef("DOC"),
             campaignId: campaign.id,
             fileAssetId: asset.id,
-            category: normalizeDocumentCategory(category) as any,
+            category: normalizeDocumentCategory(uploadCategory) as any,
             title: file.name,
             visibility: normalizeVisibility(
               requiredString(formData, "newDocumentVisibility"),
@@ -686,14 +617,18 @@ export async function saveListingAction(
           }),
         );
       }
-      const faqQuestion = requiredString(formData, "faqQuestion");
-      const faqAnswer = requiredString(formData, "faqAnswer");
-      const faqId = requiredString(formData, "faqId");
-      if (faqQuestion || faqAnswer) {
+      const faqQuestions = formData.getAll("faqQuestion").map(String);
+      const faqAnswers = formData.getAll("faqAnswer").map(String);
+      const faqIds = formData.getAll("faqId").map(String);
+      for (let index = 0; index < Math.max(faqQuestions.length, faqAnswers.length); index++) {
+        const faqQuestion = faqQuestions[index]?.trim() ?? "";
+        const faqAnswer = faqAnswers[index]?.trim() ?? "";
+        const faqId = faqIds[index]?.trim() ?? "";
+        if (!faqQuestion && !faqAnswer) continue;
         if (faqId) {
           await tx.campaignFaq.update({
             where: { id: faqId },
-            data: { question: faqQuestion, answer: faqAnswer, sortOrder: 0 },
+            data: { question: faqQuestion, answer: faqAnswer, sortOrder: index },
           });
         } else {
           await tx.campaignFaq.create({
@@ -701,7 +636,7 @@ export async function saveListingAction(
               campaignId: campaign.id,
               question: faqQuestion,
               answer: faqAnswer,
-              sortOrder: 0,
+              sortOrder: index,
             },
           });
         }
@@ -737,9 +672,11 @@ export async function saveListingAction(
       };
     }
     console.error("Unexpected listing save error", error);
+    const action = requiredString(formData, "intent") || "draft";
+    const safeAction = action === "publish" ? "publish listing" : "save draft";
     return {
       errors: [
-        "We could not save this listing right now. Please review the required fields and try again.",
+        `Unable to ${safeAction}. The server logged the root cause; please try again or contact support if it repeats.`,
       ],
     };
   }

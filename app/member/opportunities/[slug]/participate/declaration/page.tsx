@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { ContentCard } from "@/components/member/Cards";
 import { getMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
 
-const declarations = ["I understand this opportunity involves risk.", "I have read the important information.", "I understand estimated yield is not guaranteed.", "I confirm the information I provided is accurate."];
+const declarations = ["I understand this listing involves risk.", "I have read the important information.", "I understand projected return is not guaranteed.", "I confirm the information I provided is accurate."];
 function amount(raw?: string) { const n = Number((raw ?? "").replace(/,/g, "")); return Number.isFinite(n) && n > 0 ? n : null; }
 export default async function DeclarationPage({ params, searchParams }: { params: { slug: string }; searchParams?: { amount?: string } }) {
   const opportunity = await getMemberCampaignBySlug(params.slug); if (!opportunity) notFound(); const value = amount(searchParams?.amount); if (!value) redirect(`/member/opportunities/${opportunity.slug}/participate`);

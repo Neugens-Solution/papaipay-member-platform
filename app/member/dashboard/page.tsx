@@ -5,7 +5,7 @@ import { getMemberParticipations } from "@/lib/data/memberParticipations";
 import { formatRMCompact, getAssetCategory, getPortfolioAllocation, getPortfolioSummary, getRecentActivities } from "@/lib/data/memberPortfolio";
 
 const quickActions = [
-  { label: "Browse Opportunities", href: "/member/opportunities", helper: "Review available property participations" },
+  { label: "Browse Listings", href: "/member/opportunities", helper: "Review available property participations" },
   { label: "Portfolio", href: "/member/portfolio", helper: "Track active and submitted records" },
   { label: "Transactions", href: null, helper: "Coming soon in a future sprint" },
   { label: "Profile", href: "/member/profile", helper: "Manage member details" },
@@ -20,8 +20,8 @@ export default async function MemberDashboardPage() {
 
   const metrics = [
     { label: "Total Portfolio Value", value: summary.totalParticipationLabel, helper: "Based on current participation records", trend: summary.currentStatus },
-    { label: "Estimated Annual Yield", value: summary.estimatedAnnualYield, helper: "Preview yield using member participation data", trend: "Mock yield until live returns" },
-    { label: "Active Opportunities", value: String(summary.activeCount), helper: "Opportunities currently active or progressing", trend: `${portfolioRecords.length} total records` },
+    { label: "Estimated Annual Return", value: summary.estimatedAnnualYield, helper: "Preview return using member participation data", trend: "Mock return until live returns" },
+    { label: "Active Listings", value: String(summary.activeCount), helper: "Listings currently active or progressing", trend: `${portfolioRecords.length} total records` },
     { label: "Pending Review", value: String(summary.pendingReviewCount), helper: "Submitted items awaiting review", trend: summary.pendingReviewCount ? "Action may be required" : "No pending items" },
   ];
 
@@ -31,7 +31,7 @@ export default async function MemberDashboardPage() {
         <div className="max-w-3xl">
           <p className="text-sm font-semibold text-papaipay-green">Good Morning, {memberProfile.firstName}</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-papaipay-ink sm:text-5xl">Welcome back.</h1>
-          <p className="mt-4 text-base leading-7 text-slate-500 sm:text-lg">Here&apos;s your investment overview.</p>
+          <p className="mt-4 text-base leading-7 text-slate-500 sm:text-lg">Here&apos;s your participation overview.</p>
         </div>
       </section>
 
@@ -57,16 +57,16 @@ export default async function MemberDashboardPage() {
           </div>
         </section>
 
-        <section className="rounded-2xl border border-slate-200/70 bg-white p-5 sm:p-6" aria-label="My opportunities">
+        <section className="rounded-2xl border border-slate-200/70 bg-white p-5 sm:p-6" aria-label="My listings">
           <div className="flex items-center justify-between gap-4">
-            <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">My Opportunities</p><h2 className="mt-2 text-xl font-semibold tracking-tight text-papaipay-ink">Participated opportunities</h2></div>
+            <div><p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">My Listings</p><h2 className="mt-2 text-xl font-semibold tracking-tight text-papaipay-ink">Participated listings</h2></div>
             <Link href="/member/portfolio" className="text-sm font-bold text-papaipay-green">View all</Link>
           </div>
           <div className="mt-6 grid gap-4 lg:grid-cols-2">
-            {portfolioRecords.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"><h3 className="font-semibold">Your portfolio is ready.</h3><p className="mt-2 text-sm text-slate-500">Browse opportunities to submit your first participation.</p></div> : portfolioRecords.slice(0, 4).map((record) => (
+            {portfolioRecords.length === 0 ? <div className="rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-8 text-center"><h3 className="font-semibold">Your portfolio is ready.</h3><p className="mt-2 text-sm text-slate-500">Browse listings to submit your first participation.</p></div> : portfolioRecords.slice(0, 4).map((record) => (
               <article key={record.slug} className="rounded-2xl border border-slate-200 bg-slate-50/60 p-4">
                 <div className="flex items-start justify-between gap-3"><div><p className="text-xs font-bold text-slate-400">{getAssetCategory(record)}</p><h3 className="mt-1 font-semibold text-papaipay-ink">{record.propertyName}</h3></div><StatusBadge status={String(record.status)} /></div>
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><div><dt className="text-slate-500">Participation</dt><dd className="font-semibold">{formatRMCompact(record.participationAmount)}</dd></div><div><dt className="text-slate-500">Yield</dt><dd className="font-semibold">{record.estimatedYield}</dd></div><div><dt className="text-slate-500">Submitted</dt><dd className="font-semibold">{record.dateSubmitted}</dd></div></dl>
+                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm"><div><dt className="text-slate-500">Participation</dt><dd className="font-semibold">{formatRMCompact(record.participationAmount)}</dd></div><div><dt className="text-slate-500">Holding Return</dt><dd className="font-semibold">{record.estimatedYield}</dd></div><div><dt className="text-slate-500">Submitted</dt><dd className="font-semibold">{record.dateSubmitted}</dd></div></dl>
                 <Link href={record.slug.startsWith("par-") || record.slug.length > 20 ? `/member/participations/${record.slug}` : `/member/portfolio/${record.slug}`} className="mt-4 inline-flex text-sm font-bold text-papaipay-green">View Details →</Link>
               </article>
             ))}

@@ -62,11 +62,11 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   const progress = Math.round((campaign.collectedAmount / campaign.targetAmount) * 100);
   const remainingAmount = Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0);
-  const finalDistributionText = "Principal Return + Holding Return + Profit Distribution, paid once during final distribution";
+  const finalDistributionText = "Principal Return + Holding Return + Final Return, paid once during final return distribution";
 
   return (
     <div className="space-y-5 pb-44 md:pb-0">
-      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Investment Opportunities</Link>
+      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Available Listings</Link>
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_.55fr]">
         <div className="space-y-5">
@@ -82,41 +82,47 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               </div>
             </div>
             <div className="relative mx-3 mb-3 overflow-hidden rounded-2xl sm:mx-5 sm:mb-5">
-              <div className="flex snap-x snap-mandatory overflow-x-auto bg-slate-100">
-                {campaign.gallery.map((item, index) => (
-                  <div key={item} id={`photo-${index + 1}`} className="h-64 min-w-full snap-center bg-cover bg-center sm:h-[26rem]" style={{ backgroundImage: `url(${item})` }} aria-label={`Asset photo ${index + 1}`} />
-                ))}
-              </div>
-              <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-bold text-white">1 / {campaign.galleryCount}</span>
-              <a href="#photo-1" aria-label="Previous photo" className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">‹</a>
-              <a href="#photo-2" aria-label="Next photo" className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">›</a>
-              <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-white/80 px-2 py-1 backdrop-blur" aria-label="Photo indicators">
-                {campaign.gallery.map((item, index) => <span key={item} className={`h-2 w-2 rounded-full ${index === 0 ? "bg-papaipay-green" : "bg-slate-300"}`} />)}
-              </div>
+              {campaign.gallery.length > 0 ? (
+                <>
+                  <div className="flex snap-x snap-mandatory overflow-x-auto bg-slate-100">
+                    {campaign.gallery.map((item, index) => (
+                      <div key={item} id={`photo-${index + 1}`} className="h-64 min-w-full snap-center bg-cover bg-center sm:h-[26rem]" style={{ backgroundImage: `url(${item})` }} aria-label={`Asset photo ${index + 1}`} />
+                    ))}
+                  </div>
+                  <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-bold text-white">1 / {campaign.galleryCount}</span>
+                  <a href="#photo-1" aria-label="Previous photo" className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">‹</a>
+                  <a href="#photo-2" aria-label="Next photo" className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">›</a>
+                  <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-white/80 px-2 py-1 backdrop-blur" aria-label="Photo indicators">
+                    {campaign.gallery.map((item, index) => <span key={item} className={`h-2 w-2 rounded-full ${index === 0 ? "bg-papaipay-green" : "bg-slate-300"}`} />)}
+                  </div>
+                </>
+              ) : (
+                <div className="grid h-64 place-items-center bg-slate-100 text-center sm:h-[26rem]"><div><p className="text-base font-black text-slate-500">Image pending</p><p className="mt-2 text-sm font-semibold text-slate-400">Media will be available soon</p></div></div>
+              )}
             </div>
-            <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
+            {campaign.gallery.length > 0 ? <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
               <details className="relative">
                 <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold text-papaipay-green"><Icon name="image" className="h-4 w-4" />View All Photos</summary>
                 <div className="absolute left-1/2 z-20 mt-3 grid w-[min(86vw,640px)] -translate-x-1/2 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-soft sm:grid-cols-2">
                   {campaign.gallery.map((item) => <div key={item} className="h-32 rounded-lg bg-cover bg-center" style={{ backgroundImage: `url(${item})` }} />)}
                 </div>
               </details>
-            </div>
+            </div> : null}
           </article>
 
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-            <h2 className="text-lg font-bold">Opportunity Summary</h2>
+            <h2 className="text-lg font-bold">Listing Summary</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div><ProgressBar value={progress} /></div>
               <p className="text-sm font-bold text-papaipay-green">{progress}%</p>
             </div>
             <dl className="mt-3 divide-y divide-slate-100">
-              <CompactRow label="Opportunity Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
+              <CompactRow label="Participation Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
               <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
-              <CompactRow label="Estimated Yield" value={campaign.estimatedYield} icon="trend" />
+              <CompactRow label="Holding Return" value={campaign.estimatedYield} icon="trend" />
               <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} icon="check" />
               <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} icon="check" />
             </dl>
@@ -145,28 +151,28 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <CompactRow label="Holding Return Rate" value={campaign.holdingReturnRate} icon="trend" />
               <CompactRow label="Return Type" value={campaign.returnType} icon="wallet" />
               <CompactRow label="Maximum Holding Period" value={`${campaign.maximumHoldingPeriodMonths} Months`} icon="clock" />
-              <CompactRow label="Holding Return" value="Accrues during holding period; paid at final distribution" icon="dollar" />
+              <CompactRow label="Holding Return" value="Accrues during holding period; paid at final return distribution" icon="dollar" />
               <CompactRow label="Principal Protection" value={campaign.principalProtectionEnabled ? "Enabled" : "Disabled"} icon="shield" />
               <CompactRow label="24-Month Rule" value="If not sold within 24 months, Participation Amount only will be returned." icon="check" />
-              <CompactRow label="Final Distribution" value={finalDistributionText} icon="wallet" />
+              <CompactRow label="Final Return" value={finalDistributionText} icon="wallet" />
             </dl>
             <details className="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-papaipay-green">Learn More <Icon name="chevronDown" className="h-4 w-4" /></summary>
-              <p className="mt-3">Example: Participation Amount RM10,000 at 1.5% per month for 15 months accrues RM2,250 Holding Return. Holding Return is not paid monthly and is paid once during final distribution.</p>
+              <p className="mt-3">Example: Participation Amount RM10,000 at 1.5% per month for 15 months accrues RM2,250 Holding Return. Holding Return is not paid monthly and is paid once during final return distribution.</p>
             </details>
           </ContentCard>
 
           <div className="hidden space-y-5 md:block">
-            <ContentCard><h2 className="text-lg font-bold">About This Opportunity</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">About This Listing</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
-            <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Profit Distribution are not paid.</p></details></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Final Return are not paid.</p></details></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Risk Disclaimer</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></ContentCard>
           </div>
 
           <div className="space-y-3 md:hidden">
             <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></MobileAccordion>
-            <MobileAccordion title="About This Opportunity"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
+            <MobileAccordion title="About This Listing"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
             <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
             <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If not sold within 24 months, Participation Amount only will be returned.</p></div></MobileAccordion>
             <MobileAccordion title="Risk Disclaimer"><p className="text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></MobileAccordion>
@@ -179,7 +185,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
       <details className="group fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 md:hidden">
         <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-papaipay-green/40 bg-white p-4 shadow-soft group-open:hidden">
           <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span>
-          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Opportunity</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Listing</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
           <span className="rounded-xl bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Participate Now</span>
         </summary>
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>

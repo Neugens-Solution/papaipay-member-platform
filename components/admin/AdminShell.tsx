@@ -7,7 +7,7 @@ import type { SVGProps } from "react";
 const navItems = [
   ["Dashboard", "/admin/dashboard"],
   ["Members", "/admin/members"],
-  ["Opportunity Management", "/admin/listings"],
+  ["Listing Management", "/admin/listings"],
   ["Distributions", "/admin/distributions"],
   ["Reports", "/admin/reports"],
   ["Announcements", "/admin/announcements"],

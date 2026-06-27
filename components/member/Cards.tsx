@@ -40,7 +40,8 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   return (
     <article className="overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300">
       <Link href={detailHref} className="group block">
-        <div className="relative h-44 bg-cover bg-center sm:h-48" style={{ backgroundImage: `url(${opportunity.imageUrl})` }}>
+        <div className={`relative grid h-44 place-items-center sm:h-48 ${opportunity.imageUrl ? "bg-cover bg-center" : "bg-slate-100"}`} style={opportunity.imageUrl ? { backgroundImage: `url(${opportunity.imageUrl})` } : undefined}>
+          {!opportunity.imageUrl ? <div className="text-center"><p className="text-sm font-black text-slate-500">Image pending</p><p className="mt-1 text-xs font-semibold text-slate-400">Media will be available soon</p></div> : null}
           <span className="absolute left-3 top-3 rounded-md bg-white/95 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">{statusLabel}</span>
         </div>
       </Link>
@@ -62,7 +63,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <ProgressBar value={progress} />
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Opportunity Progress</p>
+            <p>{progress}% Participation Progress</p>
           </div>
         </div>
 
@@ -72,7 +73,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
           <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
-          <DetailRow label="Estimated Yield" value={opportunity.estimatedYield} />
+          <DetailRow label="Holding Return" value={opportunity.estimatedYield} />
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 
