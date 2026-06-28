@@ -39,6 +39,27 @@ function visibilityLabel(visibility: string) {
   return "Internal";
 }
 
+
+function formatPercentValue(value?: number | null) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Not finalized";
+  return `${value.toLocaleString("en-MY", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}%`;
+}
+
+function optionalDecimalToNumber(value: unknown): number | null {
+  if (value === null || value === undefined) return null;
+  return decimalToNumber(value);
+}
+
+function financialValue(value?: number | null, fallback = "Not finalized") {
+  if (value === null || value === undefined || Number.isNaN(value)) return fallback;
+  return formatCurrency(value);
+}
+
+function derivedFinancialValue(value?: number | null) {
+  if (value === null || value === undefined || Number.isNaN(value)) return "Not finalized";
+  return `${formatCurrency(value)} (Derived estimate)`;
+}
+
 function bodyPreview(body: string) {
   return body.length > 180 ? `${body.slice(0, 180)}…` : body;
 }
@@ -96,8 +117,20 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
   const latestSettlement = project.settlements[0];
   const participantCount = project._count.participations;
   const totalParticipationAmount = project.participations.reduce((sum, participation) => sum + decimalToNumber(participation.participationAmount), 0);
-  const confirmedParticipationCount = project.participations.filter((participation) => ["Confirmed", "Approved"].includes(String(participation.participationStatus))).length;
+  const confirmedParticipations = project.participations.filter((participation) => ["Confirmed", "Approved"].includes(String(participation.participationStatus)));
+  const confirmedParticipationCount = confirmedParticipations.length;
+  const confirmedParticipationAmount = confirmedParticipations.reduce((sum, participation) => sum + decimalToNumber(participation.participationAmount), 0);
   const pendingParticipationCount = project.participations.filter((participation) => ["PendingPayment", "Pending", "Processing"].includes(String(participation.participationStatus))).length;
+  const acquisitionPrice = optionalDecimalToNumber(latestSettlement?.purchasePrice);
+  const salePrice = optionalDecimalToNumber(latestSettlement?.salePrice);
+  const storedGrossReturn = optionalDecimalToNumber(latestSettlement?.grossProfitSnapshot);
+  const derivedGrossReturn = salePrice !== null && acquisitionPrice !== null ? salePrice - acquisitionPrice : null;
+  const hasDerivedGrossReturn = storedGrossReturn === null && derivedGrossReturn !== null;
+  const totalApprovedCosts = optionalDecimalToNumber(latestSettlement?.totalCostsSnapshot);
+  const storedNetReturn = optionalDecimalToNumber(latestSettlement?.netProfitSnapshot);
+  const netReturnBase = storedGrossReturn ?? derivedGrossReturn;
+  const derivedNetReturn = netReturnBase !== null && totalApprovedCosts !== null ? netReturnBase - totalApprovedCosts : null;
+  const hasDerivedNetReturn = storedNetReturn === null && derivedNetReturn !== null;
 
   async function updateProjectStatusFormAction(formData: FormData): Promise<void> {
     "use server";
@@ -263,15 +296,64 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Financials">Financial operations and project costs will be managed in a later phase.</SectionHeading>
-        <InfoGrid items={[
-          { label: "Campaign Target", value: formatCurrency(target) },
-          { label: "Collected Amount", value: formatCurrency(collected) },
-          { label: "Funding Progress", value: `${Math.round(fundingProgress)}%` },
-          { label: "Settlement Status", value: latestSettlement ? formatEnumLabel(String(latestSettlement.calculationStatus)) : "No settlement recorded" },
-          { label: "Final Distribution Pool", value: latestSettlement ? formatCurrency(decimalToNumber(latestSettlement.finalDistributionPool)) : "Not available" },
-          { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement summary available" },
-        ]} />
+        <SectionHeading title="Financials">Admin-only read-only financial and return summary. Financials stay separate from distribution processing.</SectionHeading>
+        <div className="space-y-6">
+          <section>
+            <SectionHeading title="Funding Context">Project funding figures use the existing project and participation records.</SectionHeading>
+            <InfoGrid items={[
+              { label: "Project Funding Target", value: formatCurrency(target) },
+              { label: "Collected Participation Amount", value: formatCurrency(collected) },
+              { label: "Funding Progress", value: `${Math.round(fundingProgress)}%` },
+              { label: "Total Participants", value: String(participantCount) },
+              { label: "Confirmed Participation Amount", value: confirmedParticipations.length > 0 ? formatCurrency(confirmedParticipationAmount) : "Not available" },
+            ]} />
+          </section>
+
+          {latestSettlement ? (
+            <>
+              <section>
+                <SectionHeading title="Financial Summary">Latest settlement record displayed read-only. Derived estimates are not saved.</SectionHeading>
+                <InfoGrid items={[
+                  { label: "Acquisition Price", value: financialValue(acquisitionPrice) },
+                  { label: "Sale Price / Disposal Price", value: financialValue(salePrice) },
+                  { label: "Gross Return", value: storedGrossReturn !== null ? formatCurrency(storedGrossReturn) : hasDerivedGrossReturn ? derivedFinancialValue(derivedGrossReturn) : "Not finalized" },
+                  { label: "Total Approved Costs", value: financialValue(totalApprovedCosts) },
+                  { label: "Net Return", value: storedNetReturn !== null ? formatCurrency(storedNetReturn) : hasDerivedNetReturn ? derivedFinancialValue(derivedNetReturn) : "Not finalized" },
+                  { label: "Member Return Share %", value: formatPercentValue(optionalDecimalToNumber(latestSettlement.memberProfitDistributionPercentage)) },
+                  { label: "Platform Return Share %", value: formatPercentValue(optionalDecimalToNumber(latestSettlement.platformProfitSharePercentage)) },
+                  { label: "Platform Share Amount", value: financialValue(optionalDecimalToNumber(latestSettlement.platformShare)) },
+                  { label: "Final Distribution Pool", value: financialValue(optionalDecimalToNumber(latestSettlement.finalDistributionPool)) },
+                ]} />
+              </section>
+
+              <section>
+                <SectionHeading title="Return Pools">Stored return pool values from the settlement record.</SectionHeading>
+                <InfoGrid items={[
+                  { label: "Principal Return Pool", value: financialValue(optionalDecimalToNumber(latestSettlement.principalReturnPool)) },
+                  { label: "Holding Return Pool", value: financialValue(optionalDecimalToNumber(latestSettlement.holdingReturnPool)) },
+                  { label: "Member Profit Distribution Pool", value: financialValue(optionalDecimalToNumber(latestSettlement.profitDistributionPool)) },
+                  { label: "Final Distribution Pool", value: financialValue(optionalDecimalToNumber(latestSettlement.finalDistributionPool)) },
+                ]} />
+              </section>
+
+              <section>
+                <SectionHeading title="Status & Notes">Settlement status details are informational only.</SectionHeading>
+                <InfoGrid items={[
+                  { label: "Calculation Status", value: formatEnumLabel(String(latestSettlement.calculationStatus)) },
+                  { label: "Settlement Scenario", value: formatEnumLabel(String(latestSettlement.settlementScenario)) },
+                  { label: "Sale Completed Date", value: latestSettlement.saleCompletedAt ? formatDate(latestSettlement.saleCompletedAt) : "Not finalized" },
+                  { label: "Distribution Calculation Date", value: latestSettlement.distributionCalculationDate ? formatDate(latestSettlement.distributionCalculationDate) : "Not finalized" },
+                  { label: "Financial Calculation Remarks", value: latestSettlement.calculationRemarks || "No remarks recorded" },
+                ]} />
+              </section>
+            </>
+          ) : (
+            <div className="rounded-2xl border border-dashed border-slate-200 bg-slate-50/70 p-5">
+              <p className="font-bold text-papaipay-ink">No financial settlement has been recorded for this project yet.</p>
+              <p className="mt-2 text-sm leading-6 text-slate-600">Financials will use the project settlement record once the sale and approved costs are available.</p>
+            </div>
+          )}
+        </div>
       </Card>
 
       <Card>
