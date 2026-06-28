@@ -3,14 +3,12 @@ import Link from "next/link";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminListingBySlug } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import { fileAssetPublicUrl } from "@/lib/storage/fileAssetUrl";
 
 function DocumentIcon() {
   return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
 }
 
-function isRenderableAssetUrl(value: string | null | undefined) {
-  return Boolean(value && (/^(\/|https?:\/\/|data:image\/)/.test(value)));
-}
 
 function formatTenure(value: string | null | undefined) {
   if (value === "FH" || value === "Freehold") return "Freehold";
@@ -45,9 +43,9 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
   const holdingTotal = decimalToNumber(latestSettlement?.holdingReturnPool);
   const profitPool = decimalToNumber(latestSettlement?.profitDistributionPool);
   const platformShare = decimalToNumber(latestSettlement?.platformShare);
-  const renderableMedia = listing.media.filter((media) =>
-    isRenderableAssetUrl(media.fileAsset?.objectKey),
-  );
+  const renderableMedia = listing.media
+    .map((media) => ({ ...media, publicUrl: fileAssetPublicUrl(media.fileAsset) }))
+    .filter((media) => Boolean(media.publicUrl));
 
   return (
     <div className="mx-auto max-w-7xl space-y-6">
@@ -169,14 +167,12 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
             {renderableMedia.length > 0 ? (
               renderableMedia.map((media) => (
                 <div key={media.id} className="min-w-0 overflow-hidden rounded-xl border border-slate-100 bg-slate-50/60">
-                  {isRenderableAssetUrl(media.fileAsset?.objectKey) ? (
-                    <div
-                      className="h-36 bg-slate-100 bg-cover bg-center"
-                      style={{ backgroundImage: `url(${media.fileAsset?.objectKey})` }}
-                      role="img"
-                      aria-label={media.altText || media.fileAsset?.originalFilename || "Listing image"}
-                    />
-                  ) : null}
+                  <div
+                    className="h-36 bg-slate-100 bg-cover bg-center"
+                    style={{ backgroundImage: `url(${media.publicUrl})` }}
+                    role="img"
+                    aria-label={media.altText || media.fileAsset?.originalFilename || "Listing image"}
+                  />
                   <div className="p-3">
                     <p className="truncate text-sm font-bold text-papaipay-ink">{media.fileAsset?.originalFilename || "Listing image"}</p>
                     <p className="mt-1 text-xs text-slate-500">{media.mediaType === "PrimaryImage" ? "Main / Hero Image" : "Gallery Image"} • {media.altText || "Alt text not set"}</p>
