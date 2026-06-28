@@ -67,6 +67,9 @@ function makeAuditRef() {
 function makeFileRef(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
+function logListingSaveStep(step: string, details?: Record<string, unknown>) {
+  console.info("[ListingSave]", step, details ?? {});
+}
 const allowedImageMimeTypes = [
   "image/jpeg",
   "image/png",
@@ -225,6 +228,7 @@ async function createFileAsset(
 ) {
   if (purpose === "CampaignImage") {
     const stored = await uploadListingImage(file, listingSlug);
+    logListingSaveStep("before fileAsset.create image", { campaignId, listingSlug, filename: file.name, objectKey: stored.objectKey });
     return tx.fileAsset.create({
       data: {
         fileRef: makeFileRef("IMG"),
@@ -241,6 +245,7 @@ async function createFileAsset(
 
   const extension = file.name.match(/\.[a-zA-Z0-9]+$/)?.[0]?.toLowerCase() ?? "";
   const storageRef = `document-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${extension}`;
+  logListingSaveStep("before fileAsset.create document", { campaignId, listingSlug, filename: file.name });
   return tx.fileAsset.create({
     data: {
       fileRef: makeFileRef("FILE"),
@@ -477,25 +482,27 @@ export async function saveListingAction(
           : "update";
     const saved = await db.$transaction(async (tx) => {
       const campaign = existing
-        ? await tx.campaign.update({
+        ? (logListingSaveStep("before campaign.update", { campaignId: existing.id }), await tx.campaign.update({
             where: { id: existing.id },
             data: {
               ...campaignData(input, action),
               ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
             },
-          })
-        : await tx.campaign.create({
+          }))
+        : (logListingSaveStep("before campaign.create", { title: input.title, slug: input.slug }), await tx.campaign.create({
             data: {
               campaignRef: makeCampaignRef(),
               ...campaignData(input, action),
               ...(twentyFourMonthRuleText ? { twentyFourMonthRuleText } : {}),
             },
-          });
+          }));
+      logListingSaveStep("before propertyDetail.upsert", { campaignId: campaign.id });
       await tx.propertyDetail.upsert({
         where: { campaignId: campaign.id },
         update: propertyData(input),
         create: { campaignId: campaign.id, ...propertyData(input) },
       });
+      logListingSaveStep("before campaignContent.upsert", { campaignId: campaign.id });
       await tx.campaignContent.upsert({
         where: { campaignId: campaign.id },
         update: input.content,
@@ -520,13 +527,18 @@ export async function saveListingAction(
       const heroFile = fileFromForm(formData, "heroImage");
       if (heroFile) {
         validateImageFile(heroFile);
-        if (heroMediaId) await tx.campaignMedia.delete({ where: { id: heroMediaId } });
+        if (heroMediaId) {
+          logListingSaveStep("before campaignMedia.delete hero replace", { heroMediaId });
+          await tx.campaignMedia.delete({ where: { id: heroMediaId } });
+        }
         const asset = await createFileAsset(tx, heroFile, "CampaignImage", campaign.id, campaign.slug);
+        logListingSaveStep("before campaignMedia.create hero", { campaignId: campaign.id, fileAssetId: asset.id });
         const media = await tx.campaignMedia.create({
           data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "PrimaryImage", caption: heroCaption || null, altText: heroAltText || null, sortOrder: 0 },
         });
         mediaAuditEvents.push(buildAuditData({ action: "update", entityId: campaign.id, afterSnapshot: { heroMediaId: media.id, fileAssetId: asset.id } }));
       } else if (heroMediaId) {
+        logListingSaveStep("before campaignMedia.update hero", { heroMediaId });
         await tx.campaignMedia.update({
           where: { id: heroMediaId },
           data: {
@@ -542,6 +554,7 @@ export async function saveListingAction(
 
       for (const mediaId of formData.getAll("galleryMediaId").map(String)) {
         if (formData.getAll("deleteGalleryMediaId").includes(mediaId)) {
+          logListingSaveStep("before campaignMedia.delete gallery", { mediaId });
           await tx.campaignMedia.delete({ where: { id: mediaId } });
           mediaAuditEvents.push(
             buildAuditData({
@@ -557,6 +570,7 @@ export async function saveListingAction(
         const altText = requiredString(formData, `galleryAltText:${mediaId}`);
         assertLength(caption, maxCaptionLength, "Gallery image caption");
         assertLength(altText, maxAltTextLength, "Gallery image alt text");
+        logListingSaveStep("before campaignMedia.update gallery", { mediaId });
         await tx.campaignMedia.update({
           where: { id: mediaId },
           data: {
@@ -569,6 +583,7 @@ export async function saveListingAction(
       let nextGallerySortOrder = formData.getAll("galleryMediaId").length + 1;
       for (const file of newGalleryFiles) {
         const asset = await createFileAsset(tx, file, "CampaignImage", campaign.id, campaign.slug);
+        logListingSaveStep("before campaignMedia.create gallery", { campaignId: campaign.id, fileAssetId: asset.id, filename: file.name });
         const media = await tx.campaignMedia.create({
           data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "GalleryImage", altText: file.name, sortOrder: nextGallerySortOrder++ },
         });
@@ -577,6 +592,7 @@ export async function saveListingAction(
 
       for (const documentId of formData.getAll("documentId").map(String)) {
         if (formData.getAll("deleteDocumentId").includes(documentId)) {
+          logListingSaveStep("before campaignDocument.delete", { documentId });
           await tx.campaignDocument.delete({ where: { id: documentId } });
           mediaAuditEvents.push(
             buildAuditData({
@@ -588,6 +604,7 @@ export async function saveListingAction(
           );
           continue;
         }
+        logListingSaveStep("before campaignDocument.update", { documentId });
         await tx.campaignDocument.update({
           where: { id: documentId },
           data: {
@@ -626,6 +643,7 @@ export async function saveListingAction(
             "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
           );
         const asset = await createFileAsset(tx, file, "CampaignDocument", campaign.id, campaign.slug);
+        logListingSaveStep("before campaignDocument.create", { campaignId: campaign.id, fileAssetId: asset.id, filename: file.name });
         const document = await tx.campaignDocument.create({
           data: {
             documentRef: makeFileRef("DOC"),
@@ -659,11 +677,13 @@ export async function saveListingAction(
         const faqId = faqIds[index]?.trim() ?? "";
         if (!faqQuestion && !faqAnswer) continue;
         if (faqId) {
+          logListingSaveStep("before campaignFaq.update", { faqId, campaignId: campaign.id });
           await tx.campaignFaq.update({
             where: { id: faqId },
             data: { question: faqQuestion, answer: faqAnswer, sortOrder: index },
           });
         } else {
+          logListingSaveStep("before campaignFaq.create", { campaignId: campaign.id, sortOrder: index });
           await tx.campaignFaq.create({
             data: {
               campaignId: campaign.id,
@@ -674,8 +694,11 @@ export async function saveListingAction(
           });
         }
       }
-      if (mediaAuditEvents.length > 0)
+      if (mediaAuditEvents.length > 0) {
+        logListingSaveStep("before auditLog.createMany", { count: mediaAuditEvents.length });
         await tx.auditLog.createMany({ data: mediaAuditEvents });
+      }
+      logListingSaveStep("before auditLog.create", { action: auditAction, entityId: campaign.id });
       await tx.auditLog.create({
         data: buildAuditData({
           action: auditAction,
@@ -692,15 +715,19 @@ export async function saveListingAction(
     redirectSlug = saved.slug;
   } catch (error) {
     if (error instanceof ListingFormValidationError) {
+      logListingSaveStep("return validation error", { errors: error.errors, fieldErrors: error.fieldErrors });
       return { errors: error.errors, fieldErrors: error.fieldErrors };
     }
     if (error instanceof ZodError) {
+      logListingSaveStep("return zod error", { issues: error.issues });
       return friendlyZodErrors(error);
     }
     if (error instanceof Error && /^(Images must|Image storage is not configured|Unable to upload image|Vercel Blob upload)/.test(error.message)) {
+      logListingSaveStep("return storage/image error", { message: error.message });
       return { errors: [error.message] };
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      logListingSaveStep("return prisma known request error", { code: error.code, meta: error.meta, message: error.message });
       return {
         errors: [
           "The listing could not be saved because one or more values conflict with existing data. Please review the form and try again.",
@@ -708,6 +735,7 @@ export async function saveListingAction(
       };
     }
     console.error("Unexpected listing save error", error);
+    logListingSaveStep("return unexpected error", { message: error instanceof Error ? error.message : String(error) });
     const action = requiredString(formData, "intent") || "draft";
     const safeAction = action === "publish" ? "publish listing" : "save draft";
     return {
