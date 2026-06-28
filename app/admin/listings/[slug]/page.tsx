@@ -55,13 +55,22 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         title={listing.title}
         description="Overview, members, asset details, documents, settlement / fees and manual return workflow."
         action={
-          <PendingLink
-            className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
-            href={`/admin/listings/${listing.slug}/edit`}
-            pendingLabel="Loading Workspace..."
-          >
-            Edit Listing
-          </PendingLink>
+          <div className="flex flex-wrap gap-2">
+            <PendingLink
+              className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+              href={`/admin/projects/${listing.slug}`}
+              pendingLabel="Opening Project..."
+            >
+              Manage Project
+            </PendingLink>
+            <PendingLink
+              className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
+              href={`/admin/listings/${listing.slug}/edit`}
+              pendingLabel="Loading Workspace..."
+            >
+              Edit Listing
+            </PendingLink>
+          </div>
         }
       />
       <div className="flex gap-2 overflow-x-auto pb-1">
