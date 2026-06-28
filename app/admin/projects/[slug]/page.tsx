@@ -43,6 +43,34 @@ function bodyPreview(body: string) {
   return body.length > 180 ? `${body.slice(0, 180)}…` : body;
 }
 
+function statusBadgeClass(status: string) {
+  const normalized = status.toLowerCase();
+
+  if (["confirmed", "approved", "succeeded", "paid", "completed"].some((value) => normalized.includes(value))) {
+    return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+  }
+
+  if (["pending", "processing", "review"].some((value) => normalized.includes(value))) {
+    return "border-amber-200 bg-amber-50 text-amber-700";
+  }
+
+  if (["cancelled", "refunded", "failed", "rejected", "expired"].some((value) => normalized.includes(value))) {
+    return "border-rose-200 bg-rose-50 text-rose-700";
+  }
+
+  return "border-slate-200 bg-slate-50 text-slate-600";
+}
+
+function StatusBadge({ status, fallback = "Not available" }: { status?: string | null; fallback?: string }) {
+  const label = status ? formatEnumLabel(status) : fallback;
+
+  return (
+    <span className={`inline-flex whitespace-nowrap rounded-md border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide ${statusBadgeClass(label)}`}>
+      {label}
+    </span>
+  );
+}
+
 function SectionHeading({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="mb-4">
@@ -67,6 +95,9 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
   const property = project.propertyDetail;
   const latestSettlement = project.settlements[0];
   const participantCount = project._count.participations;
+  const totalParticipationAmount = project.participations.reduce((sum, participation) => sum + decimalToNumber(participation.participationAmount), 0);
+  const confirmedParticipationCount = project.participations.filter((participation) => ["Confirmed", "Approved"].includes(String(participation.participationStatus))).length;
+  const pendingParticipationCount = project.participations.filter((participation) => ["PendingPayment", "Pending", "Processing"].includes(String(participation.participationStatus))).length;
 
   async function updateProjectStatusFormAction(formData: FormData): Promise<void> {
     "use server";
@@ -186,11 +217,49 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Participants">Future filters, export and participant detail actions will be added in a later phase.</SectionHeading>
-        <p className="mb-4 text-sm font-bold text-slate-600">Participant count: {participantCount}</p>
+        <SectionHeading title="Participants">Admin-only read-only view of members who have participated in this project.</SectionHeading>
+        <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
+            <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participants</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{participantCount}</p>
+          </div>
+          <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+            <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participation Amount</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{formatCurrency(totalParticipationAmount)}</p>
+          </div>
+          <div className="rounded-2xl border border-emerald-100 bg-white p-4">
+            <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Confirmed / Approved</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-green">{confirmedParticipationCount}</p>
+          </div>
+          <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
+            <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Pending / Processing</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-amber-700">{pendingParticipationCount}</p>
+          </div>
+        </div>
         {project.participations.length > 0 ? (
-          <TableWrap><thead><tr><Th>Participation ID</Th><Th>Member ID</Th><Th>Member Name</Th><Th>Email</Th><Th>Amount</Th><Th>Status</Th><Th>Date</Th></tr></thead><tbody>{project.participations.map((p) => <tr key={p.id} className="border-t border-slate-100"><Td>{p.participationRef}</Td><Td>{p.member.memberRef}</Td><Td>{p.member.fullName}</Td><Td>{p.member.user.email}</Td><Td>{formatCurrency(decimalToNumber(p.participationAmount))}</Td><Td><Badge>{formatEnumLabel(String(p.participationStatus))}</Badge></Td><Td>{formatDate(p.createdAt)}</Td></tr>)}</tbody></TableWrap>
-        ) : <p className="text-sm text-slate-500">No participants recorded yet.</p>}
+          <TableWrap>
+            <thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Amount</Th><Th>Date</Th><Th>Participation Status</Th><Th>Payment Status</Th><Th>Distribution Status</Th><Th>Last Updated</Th></tr></thead>
+            <tbody>{project.participations.map((p) => {
+              const latestPayment = p.payments[0];
+              const latestDistribution = p.distributions[0];
+
+              return (
+                <tr key={p.id} className="border-t border-slate-100">
+                  <Td>{p.participationRef || p.id.slice(0, 8)}</Td>
+                  <Td><span className="font-bold text-papaipay-ink">{p.member.fullName || p.member.memberRef}</span><span className="block text-xs font-semibold text-slate-400">{p.member.memberRef}</span></Td>
+                  <Td>{p.member.user.email}</Td>
+                  <Td>{formatCurrency(decimalToNumber(p.participationAmount))}</Td>
+                  <Td>{formatDate(p.createdAt)}</Td>
+                  <Td><StatusBadge status={String(p.participationStatus)} /></Td>
+                  <Td><StatusBadge status={latestPayment ? String(latestPayment.status) : null} /></Td>
+                  <Td><StatusBadge status={latestDistribution ? String(latestDistribution.status) : null} /></Td>
+                  <Td>{formatDate(p.updatedAt)}</Td>
+                </tr>
+              );
+            })}</tbody>
+          </TableWrap>
+        ) : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-500">No participants have joined this project yet.</p>}
+        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm leading-6 text-slate-600">Participant detail, filtering, export, and distribution review will be added in later phases.</p>
       </Card>
 
       <Card>
