@@ -1142,11 +1142,21 @@ export function ListingForm({
                   defaultValue={initialValues?.propertyDetail?.yearBuilt}
                 />
               </div>
-              <input
-                type="hidden"
-                name="isLaca"
-                value={initialValues?.propertyDetail?.isLaca ? "true" : "false"}
-              />
+              <label>
+                <span className="text-sm font-bold text-slate-600">
+                  LACA Property
+                </span>
+                <select
+                  name="isLaca"
+                  defaultValue={
+                    initialValues?.propertyDetail?.isLaca ? "true" : "false"
+                  }
+                  className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+                >
+                  <option value="false">No</option>
+                  <option value="true">Yes</option>
+                </select>
+              </label>
             </section>
           </Card>
         </div>
