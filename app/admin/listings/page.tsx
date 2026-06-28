@@ -108,6 +108,13 @@ export default async function ListingsPage() {
                     >
                       Edit
                     </PendingLink>
+                    <PendingLink
+                      className="font-bold text-papaipay-green"
+                      href={`/admin/projects/${listing.slug}`}
+                      pendingLabel="Opening Project..."
+                    >
+                      Manage Project
+                    </PendingLink>
                   </div>
                 </Td>
               </tr>

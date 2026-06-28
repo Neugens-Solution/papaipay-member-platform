@@ -45,6 +45,7 @@ function demoAdminListingDetail(slug: string) {
     maximumParticipationAmount: listing.maximumParticipationAmount,
     campaignOpenDate: new Date(listing.campaignOpenDate),
     campaignCloseDate: new Date(listing.campaignCloseDate),
+    publishedAt: listing.status === "Draft" ? null : new Date(listing.campaignOpenDate),
     holdingReturnRateMonthly: Number.parseFloat(listing.holdingReturnRate),
     returnType: listing.returnType,
     maximumHoldingPeriodMonths: listing.maximumHoldingPeriodMonths,
@@ -247,6 +248,73 @@ export async function getAdminListingBySlug(slug: string) {
   } catch (error) {
     console.warn(
       "Falling back to demo admin listing because database reads are unavailable.",
+      error,
+    );
+    return demoAdminListingDetail(slug);
+  }
+}
+
+export async function getAdminProjectWorkspaceBySlug(slug: string) {
+  if (!process.env.DATABASE_URL) return demoAdminListingDetail(slug);
+
+  try {
+    return await db.campaign.findUnique({
+      where: { slug },
+      select: {
+        id: true,
+        campaignRef: true,
+        campaignCode: true,
+        title: true,
+        slug: true,
+        lifecycleStatus: true,
+        publishStatus: true,
+        campaignTarget: true,
+        collectedAmountSnapshot: true,
+        campaignOpenDate: true,
+        campaignCloseDate: true,
+        publishedAt: true,
+        propertyDetail: true,
+        updates: {
+          where: { visibility: "MemberVisible" },
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: { id: true, title: true, body: true, publishedAt: true, createdAt: true },
+        },
+        participations: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          select: {
+            id: true,
+            participationRef: true,
+            participationAmount: true,
+            participationStatus: true,
+            createdAt: true,
+            member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
+          },
+        },
+        settlements: {
+          orderBy: { createdAt: "desc" },
+          take: 1,
+        },
+        distributions: {
+          orderBy: { createdAt: "desc" },
+          take: 10,
+          select: {
+            id: true,
+            distributionRef: true,
+            finalDistributionTotal: true,
+            status: true,
+            paymentDate: true,
+            createdAt: true,
+            member: { select: { memberRef: true, fullName: true } },
+          },
+        },
+        _count: { select: { participations: true, distributions: true, updates: true } },
+      },
+    });
+  } catch (error) {
+    console.warn(
+      "Falling back to demo admin project workspace because database reads are unavailable.",
       error,
     );
     return demoAdminListingDetail(slug);
