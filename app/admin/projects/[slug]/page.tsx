@@ -67,18 +67,14 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       <PageHeader
         eyebrow={`${project.campaignRef} • ${project.campaignCode}`}
         title="Project Workspace"
-        description={project.title}
+        description="Project operations workspace. Project status updates, participant management, financials and distributions will be added in upcoming phases."
         action={
-          <div className="flex flex-wrap gap-2">
-            <PendingLink className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" href={`/admin/listings/${project.slug}`} pendingLabel="Opening...">
-              View Listing
-            </PendingLink>
-            <PendingLink className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white" href={`/admin/listings/${project.slug}/edit`} pendingLabel="Loading Workspace...">
-              Edit Listing
-            </PendingLink>
-          </div>
+          <PendingLink className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" href={`/admin/listings/${project.slug}`} pendingLabel="Opening...">
+            View Listing Details
+          </PendingLink>
         }
       />
+      <p className="text-sm font-semibold text-slate-600">Listing: {project.title}</p>
 
       <section className="grid gap-4 lg:grid-cols-3">
         <Card>
