@@ -48,24 +48,36 @@ export function WorkspaceStepNav({
   hasUnsavedChanges: boolean;
   onVisitStep: (index: number) => void;
 }) {
+  const { pending, data } = useFormStatus();
+  const pendingIntent = pending ? data?.get("intent") : undefined;
   return (
     <div className="space-y-3">
+      <div className="flex items-center justify-between gap-3 text-[0.68rem] font-black uppercase tracking-[0.16em] text-slate-400">
+        <span>Workspace Steps</span>
+        <span className="text-papaipay-green">Scroll →</span>
+      </div>
       <div
-        className="-mx-1 overflow-x-auto px-1 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="-mx-1 overflow-x-auto scroll-smooth px-1 pb-3 [scrollbar-color:#10b981_#e2e8f0] [scrollbar-width:thin]"
         aria-label="Listing wizard steps"
       >
-        <div className="flex w-max gap-2">
+        <div className="flex w-max gap-2 pr-6">
           {steps.map((step, index) => (
             <button
               key={step.id}
               type="button"
               onClick={() => onVisitStep(index)}
-              className={`min-w-[8.75rem] rounded-2xl border px-3 py-2.5 text-left transition sm:min-w-[10rem] ${activeStep === index ? "border-papaipay-green bg-emerald-50 shadow-sm" : "border-slate-200 bg-white hover:border-emerald-100"}`}
+              className={`min-w-[8rem] rounded-2xl border px-3 py-2.5 text-left transition sm:min-w-[9rem] ${activeStep === index ? "border-papaipay-green bg-emerald-50 shadow-sm" : "border-slate-200 bg-white hover:border-emerald-100"}`}
             >
               <span className="block text-xs font-black text-papaipay-ink">
                 {index + 1}. {step.label}
               </span>
-              <WorkspaceStatusBadge status={statuses[index] ?? "Not Started"} />
+              <WorkspaceStatusBadge
+                status={
+                  pendingIntent === saveIntent && index === activeStep
+                    ? "Saving"
+                    : (statuses[index] ?? "Not Started")
+                }
+              />
               {moduleSummaries[index] ? (
                 <span className="mt-1 block text-[0.68rem] font-semibold text-slate-500">
                   {moduleSummaries[index]}

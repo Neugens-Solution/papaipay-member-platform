@@ -159,6 +159,7 @@ const defaultLockedRuleText = `If the property is not successfully disposed of w
 
 No Holding Return or Final Return will be payable unless otherwise stated in the listing terms.`;
 const defaultSettlementNotes = `Settlement and fee details are prepared during the final campaign review. Any final distribution calculations, approved costs and platform fee allocations will be confirmed before member distributions are processed.`;
+const defaultImportantInformation = `This listing is prepared for member participation based on the approved listing terms. Members should review the listing details, participation structure, projected returns, timeline, risks, and supporting information before making any participation decision.`;
 const defaultRiskDisclaimer = `Participation in any listing carries inherent risks, including the possibility that projected returns may differ from actual outcomes.
 
 Past performance of any asset or campaign should not be regarded as an indication of future results.
@@ -473,6 +474,16 @@ function UploadZone({
               : "image/jpeg,image/png,image/webp"
           }
           className="sr-only"
+          onSubmit={(event) => {
+            const submitter = (event.nativeEvent as SubmitEvent)
+              .submitter as HTMLButtonElement | null;
+            const intent = submitter?.name === "intent" ? submitter.value : "";
+            const submittedStep = saveIntents.indexOf(
+              intent as (typeof saveIntents)[number],
+            );
+            submittedStepRef.current =
+              submittedStep >= 0 ? submittedStep : null;
+          }}
           onChange={(event) => {
             const next = Array.from(event.currentTarget.files ?? []).map(
               (file) => ({
@@ -596,6 +607,8 @@ export function ListingForm({
     Record<string, string>
   >({});
   const [dirtySteps, setDirtySteps] = useState<Set<number>>(() => new Set());
+  const [savedSteps, setSavedSteps] = useState<Set<number>>(() => new Set());
+  const submittedStepRef = useRef<number | null>(null);
   const serverFieldErrors = useMemo(
     () => state.fieldErrors ?? {},
     [state.fieldErrors],
@@ -663,11 +676,14 @@ export function ListingForm({
   }, []);
   useEffect(() => {
     if (state.status !== "saved" || !state.message) return;
+    const savedIndex = submittedStepRef.current ?? activeStep;
     setDirtySteps((prev) => {
       const next = new Set(prev);
-      next.delete(activeStep);
+      next.delete(savedIndex);
       return next;
     });
+    setSavedSteps((prev) => new Set(prev).add(savedIndex));
+    submittedStepRef.current = null;
     setToast({ message: state.message, tone: "success" });
     const timer = window.setTimeout(() => setToast(null), 4500);
     return () => window.clearTimeout(timer);
@@ -747,7 +763,6 @@ export function ListingForm({
     "publish",
   ] as const;
   const saveIntent = saveIntents[activeStep] ?? "save-overview";
-  const savedStep = state.status === "saved" ? activeStep : undefined;
   const readiness = state.readiness;
   const listingStatus =
     initialValues?.publishStatus === "Published"
@@ -773,7 +788,7 @@ export function ListingForm({
         ? "Error"
         : dirtySteps.has(index)
           ? "Unsaved"
-          : savedStep === index
+          : savedSteps.has(index)
             ? "Saved"
             : "Not Started";
   const visitStep = (index: number) => {
@@ -851,6 +866,15 @@ export function ListingForm({
       action={formAction}
       encType="multipart/form-data"
       className="space-y-4 overflow-x-hidden"
+      onSubmit={(event) => {
+        const submitter = (event.nativeEvent as SubmitEvent)
+          .submitter as HTMLButtonElement | null;
+        const intent = submitter?.name === "intent" ? submitter.value : "";
+        const submittedStep = saveIntents.indexOf(
+          intent as (typeof saveIntents)[number],
+        );
+        submittedStepRef.current = submittedStep >= 0 ? submittedStep : null;
+      }}
       onChange={(event) => {
         const target = event.target as
           | HTMLInputElement
@@ -858,6 +882,12 @@ export function ListingForm({
           | HTMLSelectElement;
         const name = target.name;
         setDirtySteps((prev) => new Set(prev).add(activeStep));
+        setSavedSteps((prev) => {
+          if (!prev.has(activeStep)) return prev;
+          const next = new Set(prev);
+          next.delete(activeStep);
+          return next;
+        });
         if (!name || !clientFieldErrors[name]) return;
         if (String(target.value ?? "").trim())
           setClientFieldErrors((prev) => {
@@ -888,7 +918,7 @@ export function ListingForm({
             moduleSummaries={moduleSummaries}
             saveIntent={saveIntent}
             isCurrentStepSaved={
-              state.status === "saved" && !dirtySteps.has(activeStep)
+              savedSteps.has(activeStep) && !dirtySteps.has(activeStep)
             }
             hasUnsavedChanges={dirtySteps.has(activeStep)}
             onVisitStep={visitStep}
@@ -1259,6 +1289,17 @@ export function ListingForm({
                     min="0"
                     max="100"
                     value={memberShare}
+                    onSubmit={(event) => {
+                      const submitter = (event.nativeEvent as SubmitEvent)
+                        .submitter as HTMLButtonElement | null;
+                      const intent =
+                        submitter?.name === "intent" ? submitter.value : "";
+                      const submittedStep = saveIntents.indexOf(
+                        intent as (typeof saveIntents)[number],
+                      );
+                      submittedStepRef.current =
+                        submittedStep >= 0 ? submittedStep : null;
+                    }}
                     onChange={(event) => {
                       setMemberShare(event.target.value);
                       const value = Number(event.target.value);
@@ -1282,6 +1323,17 @@ export function ListingForm({
                     min="0"
                     max="100"
                     value={platformShare}
+                    onSubmit={(event) => {
+                      const submitter = (event.nativeEvent as SubmitEvent)
+                        .submitter as HTMLButtonElement | null;
+                      const intent =
+                        submitter?.name === "intent" ? submitter.value : "";
+                      const submittedStep = saveIntents.indexOf(
+                        intent as (typeof saveIntents)[number],
+                      );
+                      submittedStepRef.current =
+                        submittedStep >= 0 ? submittedStep : null;
+                    }}
                     onChange={(event) => {
                       setPlatformShare(event.target.value);
                       const value = Number(event.target.value);
@@ -1524,7 +1576,10 @@ export function ListingForm({
                 name="importantInformation"
                 error={fieldErrors.importantInformation}
                 rows={6}
-                defaultValue={initialValues?.content?.importantInformation}
+                defaultValue={withDefault(
+                  initialValues?.content?.importantInformation,
+                  defaultImportantInformation,
+                )}
               />
               <SubsectionCard
                 title="FAQ"
