@@ -2,19 +2,9 @@ import { notFound } from "next/navigation";
 import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
+import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
+import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
-
-const projectProgressByStatus = {
-  "Asset Secured": 10,
-  "Preparing Asset": 25,
-  "Seeking Buyer": 40,
-  "Buyer Found": 60,
-  "Legal Completion": 80,
-  Distribution: 95,
-  Completed: 100,
-} as const;
-
-const projectStatuses = Object.keys(projectProgressByStatus) as (keyof typeof projectProgressByStatus)[];
 
 type ProjectWorkspace = NonNullable<Awaited<ReturnType<typeof getAdminProjectWorkspaceBySlug>>>;
 
@@ -24,17 +14,33 @@ function deriveFundingStatus(status: string, progress: number) {
   return "Open";
 }
 
-function deriveProjectStatus(status: string): keyof typeof projectProgressByStatus {
-  if (status === "Distributed") return "Completed";
-  if (status === "DistributionProcessing") return "Distribution";
-  if (status === "Sold") return "Legal Completion";
-  if (status === "Holding") return "Seeking Buyer";
-  if (status === "Funded") return "Preparing Asset";
-  return "Asset Secured";
-}
-
 function completedDatePlaceholder(projectStatus: string) {
   return projectStatus === "Completed" ? "Completed date not recorded" : "Not completed yet";
+}
+
+
+function deriveCurrentProjectStatus(project: ProjectWorkspace) {
+  const latestStatusEvent = project.timelineEvents.find((event) => isProjectProgressStatus(event.title));
+  if (latestStatusEvent) {
+    const status = latestStatusEvent.title as ProjectProgressStatus;
+    return { status, event: latestStatusEvent, source: "Timeline event" };
+  }
+
+  return {
+    status: deriveLifecycleFallbackProjectStatus(String(project.lifecycleStatus)),
+    event: null,
+    source: "Lifecycle fallback",
+  };
+}
+
+function visibilityLabel(visibility: string) {
+  if (visibility === "MemberVisible") return "Public";
+  if (visibility === "ParticipantsOnly") return "Participants Only";
+  return "Internal";
+}
+
+function bodyPreview(body: string) {
+  return body.length > 180 ? `${body.slice(0, 180)}…` : body;
 }
 
 function SectionHeading({ title, children }: { title: string; children?: React.ReactNode }) {
@@ -55,8 +61,9 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
   const collected = decimalToNumber(project.collectedAmountSnapshot);
   const fundingProgress = target > 0 ? (collected / target) * 100 : 0;
   const fundingStatus = deriveFundingStatus(String(project.lifecycleStatus), fundingProgress);
-  const projectStatus = deriveProjectStatus(String(project.lifecycleStatus));
-  const projectProgress = projectProgressByStatus[projectStatus];
+  const currentProjectStatus = deriveCurrentProjectStatus(project);
+  const projectStatus = currentProjectStatus.status;
+  const projectProgress = progressForProjectStatus(projectStatus);
   const property = project.propertyDetail;
   const latestSettlement = project.settlements[0];
   const participantCount = project._count.participations;
@@ -67,7 +74,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       <PageHeader
         eyebrow={`${project.campaignRef} • ${project.campaignCode}`}
         title="Project Workspace"
-        description="Project operations workspace. Project status updates, participant management, financials and distributions will be added in upcoming phases."
+        description="Project operations workspace for admin-side project progress, participant management placeholders, financials placeholders and distributions placeholders."
         action={
           <PendingLink className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" href={`/admin/listings/${project.slug}`} pendingLabel="Opening...">
             View Listing Details
@@ -91,7 +98,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
           <ProgressBar value={fundingProgress} />
         </Card>
         <Card>
-          <SectionHeading title="Project Progress">Placeholder progress from the current lifecycle mapping.</SectionHeading>
+          <SectionHeading title="Project Progress">Operational progress derived from the latest recognized project timeline status.</SectionHeading>
           <p className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-papaipay-ink">{projectProgress}%</p>
           <ProgressBar value={projectProgress} />
         </Card>
@@ -125,14 +132,44 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Project Progress">Project progress management will be available in the next phase.</SectionHeading>
-        <div className="grid gap-3 md:grid-cols-7">
-          {projectStatuses.map((status) => (
-            <div key={status} className={`rounded-xl border p-3 ${status === projectStatus ? "border-emerald-200 bg-emerald-50/70" : "border-slate-100 bg-slate-50/70"}`}>
+        <SectionHeading title="Project Progress">Manage admin-only operational project progress. This is separate from funding progress and does not change listing lifecycle status.</SectionHeading>
+        <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
+          <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-papaipay-green">Current Project Status</p>
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{projectStatus}</p>
+            <p className="mt-2 text-sm text-slate-600">Project progress: <span className="font-bold text-papaipay-green">{projectProgress}%</span></p>
+            <div className="mt-4"><ProgressBar value={projectProgress} /></div>
+            <p className="mt-3 text-sm leading-6 text-slate-600">Last status update: {currentProjectStatus.event?.eventDate ? formatDate(currentProjectStatus.event.eventDate) : currentProjectStatus.event ? formatDate(currentProjectStatus.event.createdAt) : "No timeline status recorded"}</p>
+            <p className="mt-2 text-xs font-semibold text-slate-500">Source: {currentProjectStatus.source}. Operational progress is not funding progress.</p>
+          </div>
+
+          <form action={updateProjectStatusAction.bind(null, {})} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+            <input type="hidden" name="campaignId" value={project.id} />
+            <p className="font-bold text-papaipay-ink">Change Project Status</p>
+            <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="status">Status</label>
+            <select id="status" name="status" defaultValue={projectStatus} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green">
+              {PROJECT_PROGRESS_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
+            </select>
+            <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="note">Optional note</label>
+            <textarea id="note" name="note" rows={4} placeholder="Add operational context for the internal project timeline." className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" />
+            <button className="mt-4 rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink" type="submit">Update Project Status</button>
+          </form>
+        </div>
+
+        <div className="mt-5 grid gap-3 md:grid-cols-7">
+          {PROJECT_PROGRESS_STATUSES.map((status) => (
+            <div key={status} className={`rounded-xl border p-3 ${status === projectStatus ? "border-emerald-200 bg-emerald-50/70" : "border-slate-100 bg-white"}`}>
               <p className="text-xs font-bold text-papaipay-ink">{status}</p>
-              <p className="mt-2 text-sm font-semibold text-papaipay-green">{projectProgressByStatus[status]}%</p>
+              <p className="mt-2 text-sm font-semibold text-papaipay-green">{PROJECT_PROGRESS_BY_STATUS[status]}%</p>
             </div>
           ))}
+        </div>
+
+        <div className="mt-6">
+          <SectionHeading title="Project Timeline">Status events are shown newest first. Status changes created here are Internal visibility for now.</SectionHeading>
+          {project.timelineEvents.length > 0 ? (
+            <div className="space-y-3">{project.timelineEvents.map((event) => <div key={event.id} className="rounded-xl border border-slate-100 bg-white p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-papaipay-ink">{event.title}</p><Badge>{visibilityLabel(String(event.visibility))}</Badge></div>{event.description ? <p className="mt-2 text-sm leading-6 text-slate-600">{event.description}</p> : null}<p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(event.eventDate || event.createdAt)}</p></div>)}</div>
+          ) : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-500">No timeline events have been recorded yet.</p>}
         </div>
       </Card>
 
@@ -164,10 +201,33 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Activity Log">Activity updates and visibility controls will be available in a later phase.</SectionHeading>
+        <SectionHeading title="Project Updates">Create admin-side operational communications. These are stored now but are not displayed in the member portal in this sprint.</SectionHeading>
+        <form action={createProjectUpdateAction.bind(null, {})} className="mb-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+          <input type="hidden" name="campaignId" value={project.id} />
+          <div className="grid gap-4 md:grid-cols-2">
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="updateTitle">Title</label>
+              <input id="updateTitle" name="title" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-papaipay-green" placeholder="e.g. Buyer due diligence update" />
+            </div>
+            <div>
+              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="visibility">Visibility</label>
+              <select id="visibility" name="visibility" defaultValue="InternalOnly" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green">
+                <option value="MemberVisible">Public</option>
+                <option value="ParticipantsOnly">Participants Only</option>
+                <option value="InternalOnly">Internal</option>
+              </select>
+            </div>
+          </div>
+          <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="body">Body</label>
+          <textarea id="body" name="body" rows={5} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" placeholder="Write a concise project update." />
+          <div className="mt-4 flex flex-wrap gap-3">
+            <button className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-papaipay-green" type="submit" name="publishMode" value="draft">Save Draft</button>
+            <button className="rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink" type="submit" name="publishMode" value="publish">Publish</button>
+          </div>
+        </form>
         {project.updates.length > 0 ? (
-          <div className="space-y-3">{project.updates.map((update) => <div key={update.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"><p className="font-bold text-papaipay-ink">{update.title}</p><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p><p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(update.publishedAt || update.createdAt)}</p></div>)}</div>
-        ) : <p className="text-sm text-slate-500">No project activity has been recorded yet.</p>}
+          <div className="space-y-3">{project.updates.map((update) => <div key={update.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-papaipay-ink">{update.title}</p><div className="flex gap-2"><Badge>{visibilityLabel(String(update.visibility))}</Badge><Badge>{update.publishedAt ? "Published" : "Draft"}</Badge></div></div><p className="mt-2 text-sm leading-6 text-slate-600">{bodyPreview(update.body)}</p><p className="mt-2 text-xs font-semibold text-slate-400">{update.publishedAt ? `Published ${formatDate(update.publishedAt)}` : `Created ${formatDate(update.createdAt)}`}</p></div>)}</div>
+        ) : <p className="text-sm text-slate-500">No project updates have been recorded yet.</p>}
       </Card>
     </div>
   );
