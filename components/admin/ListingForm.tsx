@@ -474,16 +474,6 @@ function UploadZone({
               : "image/jpeg,image/png,image/webp"
           }
           className="sr-only"
-          onSubmit={(event) => {
-            const submitter = (event.nativeEvent as SubmitEvent)
-              .submitter as HTMLButtonElement | null;
-            const intent = submitter?.name === "intent" ? submitter.value : "";
-            const submittedStep = saveIntents.indexOf(
-              intent as (typeof saveIntents)[number],
-            );
-            submittedStepRef.current =
-              submittedStep >= 0 ? submittedStep : null;
-          }}
           onChange={(event) => {
             const next = Array.from(event.currentTarget.files ?? []).map(
               (file) => ({
@@ -1289,17 +1279,6 @@ export function ListingForm({
                     min="0"
                     max="100"
                     value={memberShare}
-                    onSubmit={(event) => {
-                      const submitter = (event.nativeEvent as SubmitEvent)
-                        .submitter as HTMLButtonElement | null;
-                      const intent =
-                        submitter?.name === "intent" ? submitter.value : "";
-                      const submittedStep = saveIntents.indexOf(
-                        intent as (typeof saveIntents)[number],
-                      );
-                      submittedStepRef.current =
-                        submittedStep >= 0 ? submittedStep : null;
-                    }}
                     onChange={(event) => {
                       setMemberShare(event.target.value);
                       const value = Number(event.target.value);
@@ -1323,17 +1302,6 @@ export function ListingForm({
                     min="0"
                     max="100"
                     value={platformShare}
-                    onSubmit={(event) => {
-                      const submitter = (event.nativeEvent as SubmitEvent)
-                        .submitter as HTMLButtonElement | null;
-                      const intent =
-                        submitter?.name === "intent" ? submitter.value : "";
-                      const submittedStep = saveIntents.indexOf(
-                        intent as (typeof saveIntents)[number],
-                      );
-                      submittedStepRef.current =
-                        submittedStep >= 0 ? submittedStep : null;
-                    }}
                     onChange={(event) => {
                       setPlatformShare(event.target.value);
                       const value = Number(event.target.value);
