@@ -68,6 +68,18 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
   const latestSettlement = project.settlements[0];
   const participantCount = project._count.participations;
 
+  async function updateProjectStatusFormAction(formData: FormData): Promise<void> {
+    "use server";
+
+    await updateProjectStatusAction({}, formData);
+  }
+
+  async function createProjectUpdateFormAction(formData: FormData): Promise<void> {
+    "use server";
+
+    await createProjectUpdateAction({}, formData);
+  }
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <BackLink href="/admin/listings" label="Back to Listing Management" />
@@ -143,7 +155,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
             <p className="mt-2 text-xs font-semibold text-slate-500">Source: {currentProjectStatus.source}. Operational progress is not funding progress.</p>
           </div>
 
-          <form action={updateProjectStatusAction.bind(null, {})} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+          <form action={updateProjectStatusFormAction} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
             <input type="hidden" name="campaignId" value={project.id} />
             <p className="font-bold text-papaipay-ink">Change Project Status</p>
             <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="status">Status</label>
@@ -202,7 +214,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
 
       <Card>
         <SectionHeading title="Project Updates">Create admin-side operational communications. These are stored now but are not displayed in the member portal in this sprint.</SectionHeading>
-        <form action={createProjectUpdateAction.bind(null, {})} className="mb-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+        <form action={createProjectUpdateFormAction} className="mb-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
           <input type="hidden" name="campaignId" value={project.id} />
           <div className="grid gap-4 md:grid-cols-2">
             <div>
