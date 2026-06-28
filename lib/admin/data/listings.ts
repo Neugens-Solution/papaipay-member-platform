@@ -1,5 +1,5 @@
 import { db } from "@/lib/db";
-import { listings as demoListings } from "@/lib/adminMockData";
+import { listings as demoListings, participants as demoParticipants } from "@/lib/adminMockData";
 
 function demoAdminListingSummaries() {
   return demoListings.map((listing) => ({
@@ -31,6 +31,25 @@ function demoAdminListingSummaries() {
 function demoAdminListingDetail(slug: string) {
   const listing = demoListings.find((item) => item.slug === slug);
   if (!listing) return null;
+
+  const listingParticipants = demoParticipants
+    .filter((participation) => participation.campaignId === listing.campaignId)
+    .map((participation) => ({
+      id: participation.participationId,
+      participationRef: participation.participationId,
+      participationAmount: participation.amount,
+      participationStatus: "Confirmed",
+      createdAt: new Date(participation.date),
+      updatedAt: new Date(participation.date),
+      member: {
+        memberRef: participation.memberId,
+        fullName: participation.name,
+        user: { email: participation.email },
+      },
+      payments: [{ status: participation.paymentStatus, updatedAt: new Date(participation.date) }],
+      distributions: [{ status: participation.distributionStatus, updatedAt: new Date(participation.date) }],
+    }));
+
   return {
     id: listing.id,
     campaignRef: listing.campaignId,
@@ -120,10 +139,10 @@ function demoAdminListingDetail(slug: string) {
     updates: [],
     timelineEvents: [],
     faqs: [],
-    participations: [],
+    participations: listingParticipants,
     settlements: [],
     distributions: [],
-    _count: { participations: listing.participants, distributions: 0, updates: 0 },
+    _count: { participations: listingParticipants.length, distributions: 0, updates: 0 },
   };
 }
 
@@ -287,14 +306,24 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
         },
         participations: {
           orderBy: { createdAt: "desc" },
-          take: 10,
           select: {
             id: true,
             participationRef: true,
             participationAmount: true,
             participationStatus: true,
             createdAt: true,
+            updatedAt: true,
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
+            payments: {
+              orderBy: { updatedAt: "desc" },
+              take: 1,
+              select: { status: true, updatedAt: true },
+            },
+            distributions: {
+              orderBy: { updatedAt: "desc" },
+              take: 1,
+              select: { status: true, updatedAt: true },
+            },
           },
         },
         settlements: {
