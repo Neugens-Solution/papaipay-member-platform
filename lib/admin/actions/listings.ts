@@ -221,9 +221,10 @@ async function createFileAsset(
   file: File,
   purpose: "CampaignImage" | "CampaignDocument",
   campaignId: string,
+  listingSlug: string,
 ) {
   if (purpose === "CampaignImage") {
-    const stored = await uploadListingImage(file, campaignId);
+    const stored = await uploadListingImage(file, listingSlug);
     return tx.fileAsset.create({
       data: {
         fileRef: makeFileRef("IMG"),
@@ -520,7 +521,7 @@ export async function saveListingAction(
       if (heroFile) {
         validateImageFile(heroFile);
         if (heroMediaId) await tx.campaignMedia.delete({ where: { id: heroMediaId } });
-        const asset = await createFileAsset(tx, heroFile, "CampaignImage", campaign.id);
+        const asset = await createFileAsset(tx, heroFile, "CampaignImage", campaign.id, campaign.slug);
         const media = await tx.campaignMedia.create({
           data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "PrimaryImage", caption: heroCaption || null, altText: heroAltText || null, sortOrder: 0 },
         });
@@ -567,7 +568,7 @@ export async function saveListingAction(
       }
       let nextGallerySortOrder = formData.getAll("galleryMediaId").length + 1;
       for (const file of newGalleryFiles) {
-        const asset = await createFileAsset(tx, file, "CampaignImage", campaign.id);
+        const asset = await createFileAsset(tx, file, "CampaignImage", campaign.id, campaign.slug);
         const media = await tx.campaignMedia.create({
           data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "GalleryImage", altText: file.name, sortOrder: nextGallerySortOrder++ },
         });
@@ -624,7 +625,7 @@ export async function saveListingAction(
           validationError(
             "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
           );
-        const asset = await createFileAsset(tx, file, "CampaignDocument", campaign.id);
+        const asset = await createFileAsset(tx, file, "CampaignDocument", campaign.id, campaign.slug);
         const document = await tx.campaignDocument.create({
           data: {
             documentRef: makeFileRef("DOC"),

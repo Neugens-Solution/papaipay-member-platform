@@ -30,19 +30,49 @@ export type StoredMediaObject = {
   sizeBytes: number;
 };
 
+const allowedImageExtensions = new Set([".jpg", ".jpeg", ".png", ".webp"]);
+const safePathnamePattern = /^listings\/[a-z0-9]+(?:-[a-z0-9]+)*\/[0-9]+-[a-z0-9]{6}\.(jpg|jpeg|png|webp)$/;
+
 function extensionForMimeType(mimeType: string) {
   if (mimeType === "image/png") return ".png";
   if (mimeType === "image/webp") return ".webp";
   return ".jpg";
 }
 
-function safeName(value: string) {
+function extensionFromFilename(filename: string, mimeType: string) {
+  const detectedExtension = filename.match(/\.([a-zA-Z0-9]+)$/)?.[0]?.toLowerCase() ?? null;
+  const finalExtension = detectedExtension && allowedImageExtensions.has(detectedExtension)
+    ? detectedExtension
+    : extensionForMimeType(mimeType);
+
+  return { detectedExtension, finalExtension };
+}
+
+function slugifyPathSegment(value: string) {
   return value
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .replace(/\.[a-z0-9]+$/i, "")
     .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 48) || "image";
+    .replace(/^-+|-+$/g, "") || "listing";
+}
+
+function createListingImagePathname(listingSlug: string, file: File) {
+  const slug = slugifyPathSegment(listingSlug);
+  const { detectedExtension, finalExtension } = extensionFromFilename(file.name, file.type);
+  const random = Math.random().toString(36).replace(/[^a-z0-9]/g, "").slice(2, 8).padEnd(6, "0");
+  const pathname = `listings/${slug}/${Date.now()}-${random}${finalExtension}`;
+
+  console.info("Generated pathname:", pathname);
+  console.info("Original filename:", file.name);
+  console.info("Detected extension:", detectedExtension ?? "none");
+  console.info("Final extension:", finalExtension);
+
+  if (!safePathnamePattern.test(pathname)) {
+    throw new Error(`Invalid generated Blob pathname: ${pathname}`);
+  }
+
+  return { pathname, extension: finalExtension };
 }
 
 export function validateImageFile(file: File) {
@@ -54,7 +84,7 @@ export function validateImageFile(file: File) {
   }
 }
 
-export async function uploadListingImage(file: File, campaignId: string): Promise<StoredMediaObject> {
+export async function uploadListingImage(file: File, listingSlug: string): Promise<StoredMediaObject> {
   validateImageFile(file);
 
   const token = process.env.BLOB_READ_WRITE_TOKEN;
@@ -62,14 +92,21 @@ export async function uploadListingImage(file: File, campaignId: string): Promis
     throw new Error("Image storage is not configured. Set BLOB_READ_WRITE_TOKEN for Vercel Blob uploads.");
   }
 
-  const pathname = `listings/${campaignId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}-${safeName(file.name)}${extensionForMimeType(file.type)}`;
+  const { pathname } = createListingImagePathname(listingSlug, file);
   const { put } = await loadVercelBlobSdk();
-  const blob = await put(pathname, file, {
-    access: "public",
-    addRandomSuffix: false,
-    cacheControlMaxAge: 31536000,
-    contentType: file.type,
-  });
+  let blob: Awaited<ReturnType<VercelBlobPut>>;
+  try {
+    blob = await put(pathname, file, {
+      access: "public",
+      addRandomSuffix: false,
+      cacheControlMaxAge: 31536000,
+      contentType: file.type,
+    });
+  } catch (error) {
+    console.error("Vercel Blob upload failed for pathname:", pathname);
+    const message = error instanceof Error ? error.message : String(error);
+    throw new Error(`Unable to upload image to Vercel Blob. ${message}`);
+  }
 
   return {
     provider: "vercel-blob",
