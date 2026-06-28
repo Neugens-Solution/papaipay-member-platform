@@ -1,5 +1,22 @@
-const VERCEL_BLOB_API_URL = "https://blob.vercel-storage.com";
-const VERCEL_BLOB_API_VERSION = "11";
+type VercelBlobPut = (
+  pathname: string,
+  body: File,
+  options: { access: "public"; addRandomSuffix: boolean; cacheControlMaxAge: number; contentType: string },
+) => Promise<{ url: string; pathname: string; contentType?: string; size?: number }>;
+
+type VercelBlobSdk = { put: VercelBlobPut };
+
+async function loadVercelBlobSdk(): Promise<VercelBlobSdk> {
+  try {
+    // Keep the official SDK isolated to the server-side storage adapter.
+    const sdkPackage = "@vercel/blob";
+    return (await import(/* webpackIgnore: true */ sdkPackage)) as VercelBlobSdk;
+  } catch (error) {
+    throw new Error(
+      "The official @vercel/blob SDK is not installed. Run `npm install @vercel/blob` and redeploy before uploading images.",
+    );
+  }
+}
 
 export const supportedImageMimeTypes = ["image/jpeg", "image/png", "image/webp"] as const;
 export const maxImageBytes = 5 * 1024 * 1024;
@@ -46,32 +63,20 @@ export async function uploadListingImage(file: File, campaignId: string): Promis
   }
 
   const pathname = `listings/${campaignId}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}-${safeName(file.name)}${extensionForMimeType(file.type)}`;
-  const response = await fetch(`${VERCEL_BLOB_API_URL}/${pathname}`, {
-    method: "PUT",
-    headers: {
-      authorization: `Bearer ${token}`,
-      "content-type": file.type,
-      "x-api-version": VERCEL_BLOB_API_VERSION,
-      "x-add-random-suffix": "0",
-      "x-cache-control-max-age": "31536000",
-    },
-    body: file,
+  const { put } = await loadVercelBlobSdk();
+  const blob = await put(pathname, file, {
+    access: "public",
+    addRandomSuffix: false,
+    cacheControlMaxAge: 31536000,
+    contentType: file.type,
   });
-
-  if (!response.ok) {
-    const message = await response.text().catch(() => "");
-    throw new Error(`Unable to upload image to Vercel Blob (${response.status}). ${message}`.trim());
-  }
-
-  const result = (await response.json()) as { url?: string; pathname?: string };
-  if (!result.url) throw new Error("Vercel Blob upload did not return a public URL.");
 
   return {
     provider: "vercel-blob",
-    bucket: "vercel-blob",
-    objectKey: pathname,
-    url: result.url,
-    contentType: file.type,
-    sizeBytes: file.size,
+    bucket: new URL(blob.url).origin,
+    objectKey: blob.pathname || pathname,
+    url: blob.url,
+    contentType: blob.contentType || file.type,
+    sizeBytes: blob.size || file.size,
   };
 }
