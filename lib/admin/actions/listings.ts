@@ -2,7 +2,10 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
-import { ListingWorkspaceEngine, toWorkspaceError } from "@/lib/admin/listings/workspace/engine";
+import {
+  ListingWorkspaceEngine,
+  toWorkspaceError,
+} from "@/lib/admin/listings/workspace/engine";
 import type { WorkspaceReadinessResult } from "@/lib/admin/listings/workspace/types";
 
 export type ListingFormState = {
@@ -11,13 +14,15 @@ export type ListingFormState = {
   readiness?: WorkspaceReadinessResult;
   status?: "not_started" | "unsaved" | "saving" | "saved" | "error";
   message?: string;
+  updatedAt?: string;
 };
 
 export async function saveListingWorkspaceAction(
   _prevState: ListingFormState,
   formData: FormData,
 ): Promise<ListingFormState> {
-  const result = await ListingWorkspaceEngine.dispatch(formData).catch(toWorkspaceError);
+  const result =
+    await ListingWorkspaceEngine.dispatch(formData).catch(toWorkspaceError);
   if (!result.ok) {
     return {
       errors: [result.message ?? "Unable to save this listing section."],
@@ -25,6 +30,7 @@ export async function saveListingWorkspaceAction(
       readiness: result.readiness,
       status: result.status,
       message: result.message,
+      updatedAt: result.updatedAt,
     };
   }
 
@@ -36,6 +42,7 @@ export async function saveListingWorkspaceAction(
     readiness: result.readiness,
     status: result.status,
     message: result.message,
+    updatedAt: result.updatedAt,
   };
 }
 
