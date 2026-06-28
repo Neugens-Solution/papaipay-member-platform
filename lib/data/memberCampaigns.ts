@@ -8,6 +8,7 @@ import {
   decimalToNumber,
   formatDate,
 } from "@/lib/utils/formatters";
+import { fileAssetPublicUrl } from "@/lib/storage/fileAssetUrl";
 
 type CampaignWithRelations = Awaited<
   ReturnType<typeof getMemberCampaignsRaw>
@@ -28,11 +29,8 @@ function formatReturnType(returnType: string): Opportunity["returnType"] {
   return "Target";
 }
 
-function fileAssetUrl(fileAsset?: { objectKey: string } | null): string | null {
-  if (!fileAsset) return null;
-  const key = fileAsset.objectKey;
-  if (key.startsWith("/") || key.startsWith("http://") || key.startsWith("https://") || key.startsWith("data:image/")) return key;
-  return null;
+function fileAssetUrl(fileAsset?: { bucket?: string | null; objectKey?: string | null } | null): string | null {
+  return fileAssetPublicUrl(fileAsset);
 }
 
 function getPrimaryImageUrl(campaign: CampaignWithRelations): string | null {
