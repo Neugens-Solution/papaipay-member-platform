@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import { BackLink, PageHeader } from "@/components/admin/AdminUI";
 import { ListingForm } from "@/components/admin/ListingForm";
-import { getAdminListingBySlug } from "@/lib/admin/data/listings";
+import { getAdminListingForEdit } from "@/lib/admin/data/listings";
 
 export default async function EditListingPage({
   params,
 }: {
   params: { slug: string };
 }) {
-  const campaign = await getAdminListingBySlug(params.slug);
+  const campaign = await getAdminListingForEdit(params.slug);
 
   if (!campaign) notFound();
 

@@ -133,7 +133,15 @@ export async function getAdminListingSummaries() {
       orderBy: {
         createdAt: "desc",
       },
-      include: {
+      select: {
+        id: true,
+        campaignRef: true,
+        campaignCode: true,
+        title: true,
+        slug: true,
+        lifecycleStatus: true,
+        campaignTarget: true,
+        collectedAmountSnapshot: true,
         propertyDetail: true,
         _count: {
           select: {
@@ -148,6 +156,35 @@ export async function getAdminListingSummaries() {
       error,
     );
     return demoAdminListingSummaries();
+  }
+}
+
+export async function getAdminListingForEdit(slug: string) {
+  if (!process.env.DATABASE_URL) return demoAdminListingDetail(slug);
+
+  try {
+    return await db.campaign.findUnique({
+      where: { slug },
+      include: {
+        propertyDetail: true,
+        documents: {
+          include: { fileAsset: true },
+          orderBy: { createdAt: "asc" },
+        },
+        media: {
+          include: { fileAsset: true },
+          orderBy: { sortOrder: "asc" },
+        },
+        content: true,
+        faqs: { orderBy: { sortOrder: "asc" } },
+      },
+    });
+  } catch (error) {
+    console.warn(
+      "Falling back to demo admin listing because database reads are unavailable.",
+      error,
+    );
+    return demoAdminListingDetail(slug);
   }
 }
 
