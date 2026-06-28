@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import type { ComponentProps } from "react";
 
 type PendingLinkProps = ComponentProps<typeof Link> & {
@@ -10,7 +10,19 @@ type PendingLinkProps = ComponentProps<typeof Link> & {
   idleLabel?: React.ReactNode;
 };
 
-export function PendingLink({
+export function PendingLink(props: PendingLinkProps) {
+  return (
+    <Suspense fallback={<PendingLinkFallback {...props} />}>
+      <PendingLinkInner {...props} />
+    </Suspense>
+  );
+}
+
+function PendingLinkFallback({ children, idleLabel, pendingLabel: _pendingLabel, ...props }: PendingLinkProps) {
+  return <Link {...props}>{idleLabel ?? children}</Link>;
+}
+
+function PendingLinkInner({
   children,
   className,
   onClick,
