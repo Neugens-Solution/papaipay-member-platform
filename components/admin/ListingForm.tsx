@@ -572,6 +572,59 @@ type ListingFormInitialValues = {
   faqs?: any[];
 };
 
+function getInitialSavedSteps(initialValues?: ListingFormInitialValues) {
+  const steps = new Set<number>();
+  if (!initialValues?.id) return steps;
+  if (
+    initialValues.title &&
+    initialValues.content?.aboutCampaign &&
+    initialValues.campaignOpenDate &&
+    initialValues.campaignCloseDate
+  ) {
+    steps.add(0);
+  }
+  const property = initialValues.propertyDetail;
+  if (
+    property?.propertyType &&
+    property?.assetCategory &&
+    property?.occupancyStatus &&
+    property?.location &&
+    property?.state &&
+    property?.fullAddress
+  ) {
+    steps.add(1);
+  }
+  if (
+    initialValues.campaignTarget &&
+    initialValues.minimumParticipationAmount &&
+    initialValues.maximumParticipationAmount &&
+    initialValues.holdingReturnRateMonthly &&
+    initialValues.returnType &&
+    initialValues.maximumHoldingPeriodMonths &&
+    initialValues.content?.holdingReturnExplanation &&
+    initialValues.content?.finalDistributionExplanation
+  ) {
+    steps.add(2);
+  }
+  if (
+    initialValues.memberProfitDistributionPercentagePlanned ||
+    initialValues.platformProfitSharePercentagePlanned
+  ) {
+    steps.add(3);
+  }
+  if (initialValues.media?.length) steps.add(4);
+  if (initialValues.documents?.length) steps.add(5);
+  if (
+    initialValues.content?.importantInformation ||
+    initialValues.content?.riskDisclaimer ||
+    initialValues.faqs?.length
+  ) {
+    steps.add(6);
+  }
+  if (initialValues.publishStatus === "Published") steps.add(7);
+  return steps;
+}
+
 export function ListingForm({
   mode,
   slug,
@@ -597,7 +650,9 @@ export function ListingForm({
     Record<string, string>
   >({});
   const [dirtySteps, setDirtySteps] = useState<Set<number>>(() => new Set());
-  const [savedSteps, setSavedSteps] = useState<Set<number>>(() => new Set());
+  const [savedSteps, setSavedSteps] = useState<Set<number>>(() =>
+    getInitialSavedSteps(initialValues),
+  );
   const submittedStepRef = useRef<number | null>(null);
   const serverFieldErrors = useMemo(
     () => state.fieldErrors ?? {},
@@ -753,6 +808,10 @@ export function ListingForm({
     "publish",
   ] as const;
   const saveIntent = saveIntents[activeStep] ?? "save-overview";
+  const intentStepIndex: Record<string, number> = {
+    ...Object.fromEntries(saveIntents.map((intent, index) => [intent, index])),
+    unpublish: wizardSteps.length - 1,
+  };
   const readiness = state.readiness;
   const listingStatus =
     initialValues?.publishStatus === "Published"
@@ -860,10 +919,7 @@ export function ListingForm({
         const submitter = (event.nativeEvent as SubmitEvent)
           .submitter as HTMLButtonElement | null;
         const intent = submitter?.name === "intent" ? submitter.value : "";
-        const submittedStep = saveIntents.indexOf(
-          intent as (typeof saveIntents)[number],
-        );
-        submittedStepRef.current = submittedStep >= 0 ? submittedStep : null;
+        submittedStepRef.current = intentStepIndex[intent] ?? null;
       }}
       onChange={(event) => {
         const target = event.target as
