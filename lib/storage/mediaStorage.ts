@@ -97,6 +97,6 @@ export async function uploadListingImage(file: File, listingSlug: string): Promi
     objectKey: blob.pathname || pathname,
     url: blob.url,
     contentType: blob.contentType || file.type,
-    sizeBytes: blob.size || file.size,
+    sizeBytes: file.size,
   };
 }
