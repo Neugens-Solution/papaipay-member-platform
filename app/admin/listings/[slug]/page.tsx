@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
+import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminListingBySlug } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
@@ -55,12 +55,13 @@ export default async function ListingDetailPage({ params }: { params: { slug: st
         title={listing.title}
         description="Overview, members, asset details, documents, settlement / fees and manual return workflow."
         action={
-          <Link
+          <PendingLink
             className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600"
             href={`/admin/listings/${listing.slug}/edit`}
+            pendingLabel="Loading Workspace..."
           >
             Edit Listing
-          </Link>
+          </PendingLink>
         }
       />
       <div className="flex gap-2 overflow-x-auto pb-1">

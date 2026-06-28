@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { PendingLink } from "@/components/common/PendingLink";
 import { Badge, PageHeader, ProgressBar, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminListingSummaries } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatEnumLabel } from "@/lib/utils/formatters";
@@ -38,12 +38,13 @@ export default async function ListingsPage() {
         title="Listing Management"
         description="Manage listing records and monitor collection progress."
         action={
-          <Link
+          <PendingLink
             className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
             href="/admin/listings/create"
+            pendingLabel="Opening..."
           >
             Create Listing
-          </Link>
+          </PendingLink>
         }
       />
       <SearchFilter placeholder="Search opportunities" />
@@ -93,18 +94,20 @@ export default async function ListingsPage() {
                 <Td>{listing._count.participations}</Td>
                 <Td>
                   <div className="flex gap-3">
-                    <Link
+                    <PendingLink
                       className="font-bold text-papaipay-green"
                       href={`/admin/listings/${listing.slug}`}
+                      pendingLabel="Opening..."
                     >
                       View
-                    </Link>
-                    <Link
+                    </PendingLink>
+                    <PendingLink
                       className="font-bold text-papaipay-green"
                       href={`/admin/listings/${listing.slug}/edit`}
+                      pendingLabel="Loading Workspace..."
                     >
                       Edit
-                    </Link>
+                    </PendingLink>
                   </div>
                 </Td>
               </tr>

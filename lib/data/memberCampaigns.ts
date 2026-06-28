@@ -112,12 +112,12 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     importantInformation:
       campaign.content?.importantInformation ||
       "Please review the listing documents before participating.",
-    updates: campaign.updates.map((update) => ({
+    updates: (campaign.updates ?? []).map((update) => ({
       date: formatDate(update.createdAt),
       title: update.title,
       body: update.body,
     })),
-    faqs: campaign.faqs.map((faq) => ({
+    faqs: (campaign.faqs ?? []).map((faq) => ({
       question: faq.question,
       answer: faq.answer,
     })),
@@ -126,7 +126,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
     principalProtectionRule:
       "If the asset is not sold within 24 months, Participation Amount only will be returned.",
-    documents: campaign.documents
+    documents: (campaign.documents ?? [])
       .filter(
         (document) =>
           document.visibility === "MemberVisible" &&
@@ -187,6 +187,71 @@ async function getMemberCampaignsRaw() {
       _count: { select: { participations: true } },
     },
   });
+}
+
+async function getMemberCampaignSummariesRaw() {
+  if (!process.env.DATABASE_URL) return [];
+
+  return db.campaign.findMany({
+    where: {
+      publishStatus: "Published",
+      visibility: "MemberVisible",
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      slug: true,
+      title: true,
+      campaignRef: true,
+      campaignCode: true,
+      lifecycleStatus: true,
+      campaignTarget: true,
+      minimumParticipationAmount: true,
+      maximumParticipationAmount: true,
+      collectedAmountSnapshot: true,
+      reservedAmountSnapshot: true,
+      campaignCloseDate: true,
+      holdingReturnRateMonthly: true,
+      returnType: true,
+      maximumHoldingPeriodMonths: true,
+      principalProtectionEnabled: true,
+      propertyDetail: true,
+      media: {
+        where: { mediaType: { in: ["PrimaryImage", "GalleryImage"] } },
+        include: { fileAsset: true },
+        orderBy: { sortOrder: "asc" },
+      },
+      _count: { select: { participations: true } },
+    },
+  });
+}
+
+export async function getMemberCampaignSummaries() {
+  try {
+    const campaigns = await getMemberCampaignSummariesRaw();
+
+    if (campaigns.length === 0 && !process.env.DATABASE_URL) {
+      return demoOpportunities;
+    }
+
+    return campaigns.map((campaign) => ({
+      ...toOpportunity(campaign as CampaignWithRelations),
+      aboutCampaign: "",
+      importantInformation: "",
+      updates: [],
+      faqs: [],
+      documents: [],
+      riskSummary: "",
+    }));
+  } catch (error) {
+    console.warn(
+      "Falling back to demo member campaigns because database reads are unavailable.",
+      error,
+    );
+    return demoOpportunities;
+  }
 }
 
 function demoCampaignBySlug(slug: string) {

@@ -1,7 +1,7 @@
-import Link from "next/link";
+import { PendingLink } from "@/components/common/PendingLink";
 import { OpportunityCard, StatusBadge } from "@/components/member/Cards";
 import { completedCampaigns, formatRM } from "@/lib/memberMockData";
-import { getMemberCampaigns } from "@/lib/data/memberCampaigns";
+import { getMemberCampaignSummaries } from "@/lib/data/memberCampaigns";
 
 const inputClass = "min-h-11 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm outline-none transition focus:border-papaipay-green/50 focus:ring-4 focus:ring-papaipay-green/10";
 const tabs = ["open", "completed", "all"] as const;
@@ -20,7 +20,7 @@ function FilterFields({ compact = false }: { compact?: boolean }) {
 
 export default async function InvestmentOpportunitiesPage({ searchParams }: { searchParams?: { tab?: string } }) {
   const activeTab: Tab = tabs.includes(searchParams?.tab as Tab) ? (searchParams?.tab as Tab) : "open";
-  const opportunities = await getMemberCampaigns();
+  const opportunities = await getMemberCampaignSummaries();
   const openCampaigns = opportunities.filter((campaign) => campaign.status !== "closed");
   const showOpen = activeTab === "open" || activeTab === "all";
   const showCompleted = activeTab === "completed" || activeTab === "all";
@@ -33,7 +33,7 @@ export default async function InvestmentOpportunitiesPage({ searchParams }: { se
           {tabs.map((tab) => {
             const label = tab.replace(/^./, (char) => char.toUpperCase());
             const active = activeTab === tab;
-            return <Link key={tab} href={`/member/opportunities?tab=${tab}`} className={`rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-papaipay-green text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</Link>;
+            return <PendingLink key={tab} href={`/member/opportunities?tab=${tab}`} pendingLabel="Loading..." className={`rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-papaipay-green text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</PendingLink>;
           })}
         </div>
         <div className="sticky top-[65px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/90 sm:p-3 sm:shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
@@ -67,7 +67,7 @@ export default async function InvestmentOpportunitiesPage({ searchParams }: { se
           </div>
           <div className="grid gap-4 lg:grid-cols-2">
             {completedCampaigns.map((campaign) => (
-              <Link key={campaign.slug} href={`/member/opportunities/${campaign.slug}/outcome`} className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-papaipay-green/40">
+              <PendingLink key={campaign.slug} href={`/member/opportunities/${campaign.slug}/outcome`} pendingLabel="Opening..." className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-papaipay-green/40">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <p className="text-xs font-bold text-slate-400">{campaign.campaignId} • {campaign.campaignCode}</p>
@@ -84,7 +84,7 @@ export default async function InvestmentOpportunitiesPage({ searchParams }: { se
                   <Summary label="Final Distribution Amount" value={formatRM(campaign.finalDistributionAmount)} />
                   <Summary label="Distribution Date" value={campaign.distributionDate} />
                 </dl>
-              </Link>
+              </PendingLink>
             ))}
           </div>
         </section>
