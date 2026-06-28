@@ -118,11 +118,12 @@ function demoAdminListingDetail(slug: string) {
       },
     })),
     updates: [],
+    timelineEvents: [],
     faqs: [],
     participations: [],
     settlements: [],
     distributions: [],
-    _count: { participations: listing.participants },
+    _count: { participations: listing.participants, distributions: 0, updates: 0 },
   };
 }
 
@@ -275,10 +276,14 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
         publishedAt: true,
         propertyDetail: true,
         updates: {
-          where: { visibility: "MemberVisible" },
           orderBy: { createdAt: "desc" },
-          take: 5,
-          select: { id: true, title: true, body: true, publishedAt: true, createdAt: true },
+          take: 10,
+          select: { id: true, title: true, body: true, visibility: true, publishedAt: true, createdAt: true },
+        },
+        timelineEvents: {
+          orderBy: [{ eventDate: "desc" }, { createdAt: "desc" }],
+          take: 20,
+          select: { id: true, title: true, description: true, eventDate: true, visibility: true, createdAt: true },
         },
         participations: {
           orderBy: { createdAt: "desc" },
