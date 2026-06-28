@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { ZodError } from "zod";
 import { db } from "@/lib/db";
+import { uploadListingImage, validateImageFile, type StoredMediaObject } from "@/lib/storage/mediaStorage";
 import { type AdminAuditAction } from "@/lib/audit/adminAudit";
 import {
   listingDraftSchema,
@@ -215,29 +216,41 @@ function balancedPlatformShare(formData: FormData) {
   if (!Number.isFinite(memberShare)) return undefined;
   return String(Math.max(0, Math.min(100, 100 - memberShare)));
 }
-async function createFileAsset(
+async function createImageFileAsset(
   tx: Prisma.TransactionClient,
   file: File,
-  purpose: "CampaignImage" | "CampaignDocument",
+  stored: StoredMediaObject,
+) {
+  return tx.fileAsset.create({
+    data: {
+      fileRef: makeFileRef("IMG"),
+      bucket: new URL(stored.url).origin,
+      objectKey: stored.objectKey,
+      originalFilename: file.name,
+      contentType: stored.contentType,
+      sizeBytes: stored.sizeBytes,
+      visibility: "Public",
+      purpose: "CampaignImage",
+    },
+  });
+}
+async function createDocumentFileAsset(
+  tx: Prisma.TransactionClient,
+  file: File,
+  campaignId: string,
 ) {
   const extension = file.name.match(/\.[a-zA-Z0-9]+$/)?.[0]?.toLowerCase() ?? "";
-  const storageRef = `${purpose === "CampaignImage" ? "image" : "document"}-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${extension}`;
-  const storedObjectKey = `listings/${storageRef}`;
-
-  // Persistent object storage is not configured yet. Do not write to /public in
-  // serverless/read-only runtimes and never store binary/base64 data in Postgres.
-  // The FileAsset row keeps short metadata so draft saves can succeed and media
-  // can be replaced with real object storage later without changing form fields.
+  const storageRef = `document-${Date.now()}-${Math.random().toString(36).slice(2, 10)}${extension}`;
   return tx.fileAsset.create({
     data: {
       fileRef: makeFileRef("FILE"),
       bucket: "pending-object-storage",
-      objectKey: storedObjectKey,
+      objectKey: `listings/${campaignId}/${storageRef}`,
       originalFilename: file.name,
       contentType: file.type || "application/octet-stream",
       sizeBytes: file.size,
-      visibility: purpose === "CampaignImage" ? "Public" : "InternalOnly",
-      purpose,
+      visibility: "InternalOnly",
+      purpose: "CampaignDocument",
     },
   });
 }
@@ -439,8 +452,6 @@ export async function saveListingAction(
           },
         })
       : null;
-    // Media image persistence is disabled until object storage is integrated.
-    // Ignore heroImage/galleryImages File objects so Save Draft never depends on file storage.
     const heroCaption = requiredString(formData, "heroCaption");
     const heroAltText = requiredString(formData, "heroAltText");
     assertLength(heroCaption, maxCaptionLength, "Hero image caption");
@@ -456,6 +467,22 @@ export async function saveListingAction(
         campaignId,
       ),
     });
+    const heroFile = fileFromForm(formData, "heroImage");
+    if (heroFile) validateImageFile(heroFile);
+    const newGalleryFiles = filesFromForm(formData, "galleryImages");
+    if (newGalleryFiles.length + formData.getAll("galleryMediaId").length > maxGalleryImages) validationError(`Gallery images cannot exceed ${maxGalleryImages}.`);
+    for (const file of newGalleryFiles) validateImageFile(file);
+
+    const uploadedHeroImage = heroFile
+      ? await uploadListingImage(heroFile, input.slug)
+      : null;
+    const uploadedGalleryImages = await Promise.all(
+      newGalleryFiles.map(async (file) => ({
+        file,
+        stored: await uploadListingImage(file, input.slug),
+      })),
+    );
+
     const twentyFourMonthRuleText = requiredString(formData, "lockedRuleText");
     const auditAction: AdminAuditAction = !existing
       ? "create"
@@ -506,7 +533,16 @@ export async function saveListingAction(
           }),
         );
       }
-      if (heroMediaId) {
+      if (heroFile && uploadedHeroImage) {
+        if (heroMediaId) {
+          await tx.campaignMedia.delete({ where: { id: heroMediaId } });
+        }
+        const asset = await createImageFileAsset(tx, heroFile, uploadedHeroImage);
+        const media = await tx.campaignMedia.create({
+          data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "PrimaryImage", caption: heroCaption || null, altText: heroAltText || null, sortOrder: 0 },
+        });
+        mediaAuditEvents.push(buildAuditData({ action: "update", entityId: campaign.id, afterSnapshot: { heroMediaId: media.id, fileAssetId: asset.id } }));
+      } else if (heroMediaId) {
         await tx.campaignMedia.update({
           where: { id: heroMediaId },
           data: {
@@ -542,6 +578,15 @@ export async function saveListingAction(
           },
         });
       }
+      let nextGallerySortOrder = formData.getAll("galleryMediaId").length + 1;
+      for (const { file, stored } of uploadedGalleryImages) {
+        const asset = await createImageFileAsset(tx, file, stored);
+        const media = await tx.campaignMedia.create({
+          data: { campaignId: campaign.id, fileAssetId: asset.id, mediaType: "GalleryImage", altText: file.name, sortOrder: nextGallerySortOrder++ },
+        });
+        mediaAuditEvents.push(buildAuditData({ action: "update", entityId: campaign.id, afterSnapshot: { galleryMediaId: media.id, fileAssetId: asset.id } }));
+      }
+
       for (const documentId of formData.getAll("documentId").map(String)) {
         if (formData.getAll("deleteDocumentId").includes(documentId)) {
           await tx.campaignDocument.delete({ where: { id: documentId } });
@@ -592,7 +637,7 @@ export async function saveListingAction(
           validationError(
             "Campaign documents must be PDF, DOCX, JPG, PNG, or WEBP.",
           );
-        const asset = await createFileAsset(tx, file, "CampaignDocument");
+        const asset = await createDocumentFileAsset(tx, file, campaign.id);
         const document = await tx.campaignDocument.create({
           data: {
             documentRef: makeFileRef("DOC"),
@@ -664,7 +709,11 @@ export async function saveListingAction(
     if (error instanceof ZodError) {
       return friendlyZodErrors(error);
     }
+    if (error instanceof Error && /^(Images must|Image storage is not configured|Unable to upload image|Vercel Blob upload)/.test(error.message)) {
+      return { errors: [error.message] };
+    }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Listing save Prisma error", { code: error.code, meta: error.meta, message: error.message });
       return {
         errors: [
           "The listing could not be saved because one or more values conflict with existing data. Please review the form and try again.",
