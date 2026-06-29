@@ -28,8 +28,10 @@ function iconClass(active: boolean) {
   return active ? "text-papaipay-green" : "text-slate-500";
 }
 
-export function MemberShell({ children }: { children: React.ReactNode }) {
+export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
   const pathname = usePathname();
+  const displayName = identity.name || identity.email;
+  const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ME";
 
   return (
     <div className="min-h-screen bg-[#f7f8f5] text-papaipay-ink">
@@ -67,12 +69,16 @@ export function MemberShell({ children }: { children: React.ReactNode }) {
                 <HeaderIconLink href="/member/notifications" label="Notifications" icon={BellIcon} hasUnread />
                 <HeaderIconLink href="/member/announcements" label="Announcements" icon={NewspaperIcon} />
                 <details className="group relative hidden lg:block">
-                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">AR</summary>
+                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+                    <div className="px-3 py-2">
+                      <p className="text-sm font-bold text-papaipay-ink">{displayName}</p>
+                      <p className="mt-1 text-xs text-slate-500">{identity.email}</p>
+                    </div>
                     <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
                       My Profile
                     </Link>
-                    <Link href="/" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
+                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
                       Logout
                     </Link>
                   </div>

@@ -3,10 +3,10 @@
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { requireMember } from "@/lib/auth/guards";
 
 export type ParticipationFormState = { error?: string };
 
-const DEMO_MEMBER_REF = process.env.DEMO_MEMBER_REF || "MEM-000001";
 const RESERVATION_MINUTES = 60;
 
 function makeRef(prefix: string) {
@@ -31,24 +31,28 @@ function parseAmount(value: FormDataEntryValue | null) {
   return { amount };
 }
 
-async function getCurrentMemberId(tx: Prisma.TransactionClient) {
-  // Temporary Phase 2C strategy until member authentication is integrated:
-  // only use the seeded/demo member outside production. Production must wire a real session.
-  if (process.env.NODE_ENV === "production" && !process.env.DEMO_MEMBER_REF) {
-    throw new Error("Member authentication is not integrated yet.");
+async function resolveDevelopmentDemoMemberId(tx: Prisma.TransactionClient) {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Authenticated member session is required.");
+  }
+
+  const demoMemberRef = process.env.DEMO_MEMBER_REF;
+  if (!demoMemberRef) {
+    throw new Error("Authenticated member session is required.");
   }
 
   const member = await tx.member.findUnique({
-    where: { memberRef: DEMO_MEMBER_REF },
+    where: { memberRef: demoMemberRef },
     select: { id: true },
   });
 
   if (!member) {
-    throw new Error(`Demo member ${DEMO_MEMBER_REF} was not found.`);
+    throw new Error(`Demo member ${demoMemberRef} was not found.`);
   }
 
   return member.id;
 }
+
 
 export async function createParticipationAction(
   _state: ParticipationFormState,
@@ -56,6 +60,7 @@ export async function createParticipationAction(
 ): Promise<ParticipationFormState> {
   const campaignId = formData.get("campaignId");
   const parsedAmount = parseAmount(formData.get("amount"));
+  const authenticatedMember = await requireMember();
 
   if (typeof campaignId !== "string" || !campaignId) {
     return { error: "Campaign is required." };
@@ -125,7 +130,7 @@ export async function createParticipationAction(
         throw new Error(`Participation amount must not exceed the remaining campaign amount of RM${remaining.toLocaleString()}.`);
       }
 
-      const memberId = await getCurrentMemberId(tx);
+      const memberId = authenticatedMember.member.id || (await resolveDevelopmentDemoMemberId(tx));
       const reservedAt = now;
       const reservedUntil = new Date(now.getTime() + RESERVATION_MINUTES * 60 * 1000);
       const participation = await tx.participation.create({
