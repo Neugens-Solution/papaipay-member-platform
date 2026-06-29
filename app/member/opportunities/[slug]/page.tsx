@@ -36,9 +36,9 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
   return <svg {...common}>{paths[name]}</svg>;
 }
 
-function CompactRow({ label, value, icon, helper }: { label: string; value: string; icon?: IconName; helper?: string }) {
+function CompactRow({ label, value, icon, helper, wideValue = false }: { label: string; value: string; icon?: IconName; helper?: string; wideValue?: boolean }) {
   return (
-    <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-3 last:border-b-0">
+    <div className={`${wideValue ? "sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(20rem,32rem)]" : "flex justify-between"} items-start gap-4 border-b border-slate-100 py-3 last:border-b-0`}>
       <dt className="flex min-w-0 items-start gap-2 text-sm text-slate-500">
         {icon ? <Icon name={icon} className="mt-0.5 h-4 w-4 flex-none text-papaipay-green" /> : null}
         <span className="min-w-0">
@@ -46,7 +46,7 @@ function CompactRow({ label, value, icon, helper }: { label: string; value: stri
           {helper ? <span className="mt-1 block text-xs leading-5 text-slate-400">{helper}</span> : null}
         </span>
       </dt>
-      <dd className="max-w-[13rem] text-right text-sm font-bold leading-6 text-papaipay-ink">{value}</dd>
+      <dd className={`${wideValue ? "sm:max-w-none" : "max-w-[13rem]"} text-right text-sm font-bold leading-6 text-papaipay-ink`}>{value}</dd>
     </div>
   );
 }
@@ -116,7 +116,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <div><ProgressBar value={progress} /></div>
               <p className="text-sm font-bold text-papaipay-green">{progress}%</p>
             </div>
-            <dl className="mt-3 divide-y divide-slate-100">
+            <dl className="mt-3 grid gap-x-6 sm:grid-cols-2">
               <CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
@@ -148,13 +148,13 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
             <h2 className="text-lg font-bold">Return & Distribution Information</h2>
             <dl className="mt-4 divide-y divide-slate-100">
-              <CompactRow label="Projected Holding Return" value={campaign.holdingReturnRate} icon="trend" helper="Projected rate during the holding period." />
-              <CompactRow label="Return Basis" value={campaign.returnType} icon="wallet" />
-              <CompactRow label="Maximum Holding Period" value={`${campaign.maximumHoldingPeriodMonths} Months`} icon="clock" helper="The expected limit stated in the listing terms." />
-              <CompactRow label="Holding Return Timing" value="Accumulated and paid after project completion" icon="dollar" helper="Not paid monthly." />
-              <CompactRow label="Original Participation Amount Protection" value={protectionText} icon="shield" />
-              <CompactRow label="Maximum Holding Period Protection" value="Original Participation Amount returned according to listing terms." icon="check" />
-              <CompactRow label="Final Distribution at Project Completion" value={finalDistributionText} icon="wallet" />
+              <CompactRow wideValue label="Projected Holding Return" value={campaign.holdingReturnRate} icon="trend" helper="Projected rate during the holding period." />
+              <CompactRow wideValue label="Return Basis" value={campaign.returnType} icon="wallet" />
+              <CompactRow wideValue label="Maximum Holding Period" value={`${campaign.maximumHoldingPeriodMonths} Months`} icon="clock" helper="The expected limit stated in the listing terms." />
+              <CompactRow wideValue label="Holding Return Timing" value="Accumulated and paid after project completion" icon="dollar" helper="Not paid monthly." />
+              <CompactRow wideValue label="Original Participation Amount Protection" value={protectionText} icon="shield" />
+              <CompactRow wideValue label="Maximum Holding Period Protection" value="Original Participation Amount returned according to listing terms." icon="check" />
+              <CompactRow wideValue label="Final Distribution at Project Completion" value={finalDistributionText} icon="wallet" />
             </dl>
             <details className="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-papaipay-green">Learn More <Icon name="chevronDown" className="h-4 w-4" /></summary>
