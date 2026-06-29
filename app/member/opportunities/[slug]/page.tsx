@@ -35,11 +35,17 @@ function Icon({ name, className = "" }: { name: IconName; className?: string }) 
   return <svg {...common}>{paths[name]}</svg>;
 }
 
-function CompactRow({ label, value, icon }: { label: string; value: string; icon?: IconName }) {
+function CompactRow({ label, value, icon, helper }: { label: string; value: string; icon?: IconName; helper?: string }) {
   return (
     <div className="flex items-start justify-between gap-4 border-b border-slate-100 py-3 last:border-b-0">
-      <dt className="flex min-w-0 items-center gap-2 text-sm text-slate-500">{icon ? <Icon name={icon} className="h-4 w-4 flex-none text-papaipay-green" /> : null}<span>{label}</span></dt>
-      <dd className="max-w-[12rem] text-right text-sm font-bold text-papaipay-ink">{value}</dd>
+      <dt className="flex min-w-0 items-start gap-2 text-sm text-slate-500">
+        {icon ? <Icon name={icon} className="mt-0.5 h-4 w-4 flex-none text-papaipay-green" /> : null}
+        <span className="min-w-0">
+          <span className="block">{label}</span>
+          {helper ? <span className="mt-1 block text-xs leading-5 text-slate-400">{helper}</span> : null}
+        </span>
+      </dt>
+      <dd className="max-w-[13rem] text-right text-sm font-bold leading-6 text-papaipay-ink">{value}</dd>
     </div>
   );
 }
@@ -62,11 +68,14 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
 
   const progress = Math.round((campaign.collectedAmount / campaign.targetAmount) * 100);
   const remainingAmount = Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0);
-  const finalDistributionText = "Principal Return + Holding Return + Profit Distribution, paid once during final distribution";
+  const finalDistributionText = "Original Participation Amount + accumulated Holding Return + any approved project distribution";
+  const protectionText = campaign.principalProtectionEnabled
+    ? "Original Participation Amount Protection Applies"
+    : "Original Participation Amount Protection Not Included";
 
   return (
     <div className="space-y-5 pb-44 md:pb-0">
-      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Investment Opportunities</Link>
+      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Member Listings</Link>
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_.55fr]">
         <div className="space-y-5">
@@ -74,7 +83,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <div className="p-5 sm:p-6">
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <p className="text-xs font-bold uppercase tracking-wide text-slate-400">{campaign.campaignId} • {campaign.campaignCode}</p>
+                  <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Listing Reference: {campaign.campaignId} • {campaign.campaignCode}</p>
                   <h1 className="mt-2 text-2xl font-bold tracking-tight text-papaipay-ink sm:text-4xl">{campaign.title}</h1>
                   <p className="mt-2 flex items-center gap-2 text-sm leading-6 text-slate-600"><Icon name="map" className="h-4 w-4 text-papaipay-green" />{campaign.location}</p>
                 </div>
@@ -111,13 +120,13 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           </article>
 
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
-            <h2 className="text-lg font-bold">Opportunity Summary</h2>
+            <h2 className="text-lg font-bold">Listing Summary</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div><ProgressBar value={progress} /></div>
               <p className="text-sm font-bold text-papaipay-green">{progress}%</p>
             </div>
             <dl className="mt-3 divide-y divide-slate-100">
-              <CompactRow label="Opportunity Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
+              <CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
@@ -148,17 +157,17 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
           <ContentCard className="shadow-[0_8px_24px_rgba(15,23,42,0.04)]">
             <h2 className="text-lg font-bold">Return & Distribution Information</h2>
             <dl className="mt-4 divide-y divide-slate-100">
-              <CompactRow label="Holding Return Rate" value={campaign.holdingReturnRate} icon="trend" />
-              <CompactRow label="Return Type" value={campaign.returnType} icon="wallet" />
-              <CompactRow label="Maximum Holding Period" value={`${campaign.maximumHoldingPeriodMonths} Months`} icon="clock" />
-              <CompactRow label="Holding Return" value="Accrues during holding period; paid at final distribution" icon="dollar" />
-              <CompactRow label="Principal Protection" value={campaign.principalProtectionEnabled ? "Enabled" : "Disabled"} icon="shield" />
-              <CompactRow label="24-Month Rule" value="If not sold within 24 months, Participation Amount only will be returned." icon="check" />
-              <CompactRow label="Final Distribution" value={finalDistributionText} icon="wallet" />
+              <CompactRow label="Projected Holding Return" value={campaign.holdingReturnRate} icon="trend" helper="Projected rate during the holding period." />
+              <CompactRow label="Return Basis" value={campaign.returnType} icon="wallet" />
+              <CompactRow label="Maximum Holding Period" value={`${campaign.maximumHoldingPeriodMonths} Months`} icon="clock" helper="The expected limit stated in the listing terms." />
+              <CompactRow label="Holding Return Timing" value="Accumulated and paid after project completion" icon="dollar" helper="Not paid monthly." />
+              <CompactRow label="Original Participation Amount Protection" value={protectionText} icon="shield" />
+              <CompactRow label="Maximum Holding Period Protection" value="Original Participation Amount returned according to listing terms." icon="check" />
+              <CompactRow label="Final Distribution at Project Completion" value={finalDistributionText} icon="wallet" />
             </dl>
             <details className="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-papaipay-green">Learn More <Icon name="chevronDown" className="h-4 w-4" /></summary>
-              <p className="mt-3">Example: Participation Amount RM10,000 at 1.5% per month for 15 months accrues RM2,250 Holding Return. Holding Return is not paid monthly and is paid once during final distribution.</p>
+              <p className="mt-3">Holding Return is a projected return that accumulates during the project holding period. It is not paid monthly and will be distributed together with the Final Distribution after the project is completed.</p><p className="mt-3">If the property is not successfully disposed of within the maximum holding period, members will receive their original Participation Amount back according to the listing terms.</p><p className="mt-3">Actual returns may vary depending on project outcome and approved costs.</p>
             </details>
           </ContentCard>
 
@@ -166,7 +175,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <ContentCard><h2 className="text-lg font-bold">About This Opportunity</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
-            <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the asset is not successfully sold within 24 months, members receive Participation Amount only. Holding Return and Profit Distribution are not paid.</p></details></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the property is not successfully disposed of within the maximum holding period, members receive their original Participation Amount back according to the listing terms.</p></details></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Risk Disclaimer</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></ContentCard>
           </div>
 
@@ -174,7 +183,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></MobileAccordion>
             <MobileAccordion title="About This Opportunity"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
             <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
-            <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If not sold within 24 months, Participation Amount only will be returned.</p></div></MobileAccordion>
+            <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If the property is not successfully disposed of within the maximum holding period, members receive their original Participation Amount back according to the listing terms.</p></div></MobileAccordion>
             <MobileAccordion title="Risk Disclaimer"><p className="text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></MobileAccordion>
           </div>
         </div>

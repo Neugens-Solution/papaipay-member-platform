@@ -47,7 +47,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
       </PendingLink>
       <div className="space-y-4 p-5">
         <div>
-          <p className="text-xs font-bold text-slate-400">{opportunity.campaignId} • {opportunity.campaignCode}</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Listing Reference: {opportunity.campaignId} • {opportunity.campaignCode}</p>
           <PendingLink href={detailHref} pendingLabel="Opening..." className="group">
             <h3 className="text-lg font-bold tracking-tight group-hover:text-papaipay-green">{opportunity.title}</h3>
           </PendingLink>
@@ -63,7 +63,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <ProgressBar value={progress} />
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Opportunity Progress</p>
+            <p>{progress}% Listing Progress</p>
           </div>
         </div>
 
@@ -73,12 +73,12 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
           <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
-          <DetailRow label="Estimated Yield" value={opportunity.estimatedYield} />
+          <DetailRow label="Projected Holding Return" value={opportunity.estimatedYield} />
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 
         <PendingLink href={detailHref} pendingLabel="Opening..." className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
-          View Details
+          View Listing Details
         </PendingLink>
       </div>
     </article>
