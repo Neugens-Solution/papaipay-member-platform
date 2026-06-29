@@ -178,7 +178,15 @@ async function getMemberCampaignsRaw() {
           createdAt: "asc",
         },
       },
-      updates: true,
+      updates: {
+        where: {
+          publishedAt: { not: null },
+          visibility: "MemberVisible",
+        },
+        orderBy: {
+          publishedAt: "desc",
+        },
+      },
       faqs: {
         orderBy: {
           sortOrder: "asc",
@@ -302,7 +310,15 @@ export async function getMemberCampaignBySlug(slug: string) {
             fileAsset: true,
           },
         },
-        updates: true,
+        updates: {
+          where: {
+            publishedAt: { not: null },
+            visibility: "MemberVisible",
+          },
+          orderBy: {
+            publishedAt: "desc",
+          },
+        },
         faqs: {
           orderBy: {
             sortOrder: "asc",

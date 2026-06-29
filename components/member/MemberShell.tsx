@@ -6,7 +6,7 @@ import type { SVGProps } from "react";
 
 const navItems = [
   ["Dashboard", "/member/dashboard"],
-  ["Investment Opportunities", "/member/opportunities"],
+  ["Member Listings", "/member/opportunities"],
   ["Portfolio", "/member/portfolio"],
   ["Distributions", "/member/distributions"],
   ["Profile", "/member/profile"],
@@ -14,7 +14,7 @@ const navItems = [
 
 const bottomNavItems = [
   ["Dashboard", "/member/dashboard", HomeIcon],
-  ["Investment Opportunities", "/member/opportunities", BuildingIcon],
+  ["Member Listings", "/member/opportunities", BuildingIcon],
   ["Portfolio", "/member/portfolio", BriefcaseIcon],
   ["Distributions", "/member/distributions", WalletIcon],
   ["Profile", "/member/profile", UserCircleIcon],

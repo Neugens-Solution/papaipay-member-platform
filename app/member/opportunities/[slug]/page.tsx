@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
+import { ImageCarousel } from "@/components/member/ImageCarousel";
 import { formatRM } from "@/lib/memberMockData";
 import { getMemberCampaignBySlug, getMemberCampaigns } from "@/lib/data/memberCampaigns";
 
@@ -93,17 +94,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
             <div className="relative mx-3 mb-3 overflow-hidden rounded-2xl sm:mx-5 sm:mb-5">
               {campaign.gallery.length > 0 ? (
                 <>
-                  <div className="flex snap-x snap-mandatory overflow-x-auto bg-slate-100">
-                    {campaign.gallery.map((item, index) => (
-                      <div key={item} id={`photo-${index + 1}`} className="h-64 min-w-full snap-center bg-cover bg-center sm:h-[26rem]" style={{ backgroundImage: `url(${item})` }} aria-label={`Asset photo ${index + 1}`} />
-                    ))}
-                  </div>
-                  <span className="absolute bottom-3 right-3 rounded-full bg-slate-950/75 px-3 py-1 text-xs font-bold text-white">1 / {campaign.galleryCount}</span>
-                  <a href="#photo-1" aria-label="Previous photo" className="absolute left-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">‹</a>
-                  <a href="#photo-2" aria-label="Next photo" className="absolute right-3 top-1/2 hidden h-11 w-11 -translate-y-1/2 place-items-center rounded-full bg-white/95 text-2xl font-bold text-papaipay-ink shadow-md md:grid">›</a>
-                  <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5 rounded-full bg-white/80 px-2 py-1 backdrop-blur" aria-label="Photo indicators">
-                    {campaign.gallery.map((item, index) => <span key={item} className={`h-2 w-2 rounded-full ${index === 0 ? "bg-papaipay-green" : "bg-slate-300"}`} />)}
-                  </div>
+                  <ImageCarousel images={campaign.gallery} />
                 </>
               ) : (
                 <div className="grid h-64 place-items-center bg-slate-100 text-center sm:h-[26rem]"><div><p className="text-base font-black text-slate-500">Image pending</p><p className="mt-2 text-sm font-semibold text-slate-400">Media will be available soon</p></div></div>
