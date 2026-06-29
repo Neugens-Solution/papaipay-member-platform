@@ -5,6 +5,7 @@ import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { saveProjectFinancialSummaryAction } from "@/lib/admin/project-financials/actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
 import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
+import { calculateDistributionPreview, type DistributionPreviewResult } from "@/lib/distributions/preview";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
 type ProjectWorkspace = NonNullable<Awaited<ReturnType<typeof getAdminProjectWorkspaceBySlug>>>;
@@ -99,6 +100,143 @@ function PercentInput({ id, name, label, defaultValue }: { id: string; name: str
       <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
       <input id={id} name={name} type="number" min="0" max="100" step="0.0001" defaultValue={decimalInputValue(defaultValue)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="0" />
     </div>
+  );
+}
+
+
+function moneyFromPreview(value?: string | null) {
+  return value ? formatCurrency(Number(value)) : "Not available";
+}
+
+function reconciliationStatus(line: { difference: string }) {
+  return Number(line.difference) === 0 ? "Reconciled" : "Difference";
+}
+
+function previewStatus(preview: DistributionPreviewResult) {
+  if (preview.summary.blockerCount > 0) return "Blocked";
+  if (preview.summary.warningCount > 0) return "Warning";
+  return "Valid";
+}
+
+function previewStatusClass(status: string) {
+  if (status === "Valid") return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+  if (status === "Warning") return "border-amber-200 bg-amber-50 text-amber-700";
+  return "border-rose-200 bg-rose-50 text-rose-700";
+}
+
+function distributionFindingCopy(code: string, message: string) {
+  const copy: Record<string, string> = {
+    NO_SETTLEMENT_FOUND: "Financials must be completed before a distribution preview can be generated.",
+    SETTLEMENT_DRAFT_NOT_ALLOWED: "This settlement is still Draft or Reviewed. Approve or lock the settlement before treating the preview as valid.",
+    SETTLEMENT_NOT_APPROVED: "Settlement must be Approved or Locked before a valid distribution preview is available.",
+    NO_ELIGIBLE_PARTICIPANTS: "No confirmed participants with succeeded payment coverage are eligible for preview.",
+    COMPONENT_POOLS_DO_NOT_MATCH_FINAL_POOL: "Component pools must add up exactly to the Final Distribution Pool.",
+    ALL_PARTICIPANTS_MISSING_PAYMENT_COVERAGE: "No participation has succeeded payment coverage.",
+    SOME_PARTICIPANTS_EXCLUDED: "Some participants are excluded from this preview. Review the excluded participant table below.",
+    SETTLEMENT_APPROVED_NOT_LOCKED: "Settlement is approved but not locked. Preview is available, but finance should verify final lock timing.",
+    MISSING_OPTIONAL_REMARKS: "Settlement calculation remarks are missing. Add finance context for audit clarity.",
+  };
+
+  return copy[code] ?? message;
+}
+
+function DistributionPreviewSection({ project, latestSettlement }: { project: ProjectWorkspace; latestSettlement: ProjectWorkspace["settlements"][number] | undefined }) {
+  const preview = calculateDistributionPreview({
+    campaign: { id: project.id, title: project.title, currency: "MYR" },
+    settlement: latestSettlement ? {
+      id: latestSettlement.id,
+      campaignId: project.id,
+      calculationStatus: String(latestSettlement.calculationStatus),
+      settlementScenario: String(latestSettlement.settlementScenario),
+      principalReturnPool: latestSettlement.principalReturnPool,
+      holdingReturnPool: latestSettlement.holdingReturnPool,
+      profitDistributionPool: latestSettlement.profitDistributionPool,
+      finalDistributionPool: latestSettlement.finalDistributionPool,
+      calculationRemarks: latestSettlement.calculationRemarks,
+    } : null,
+    participations: project.participations.map((participation) => ({
+      id: participation.id,
+      memberId: participation.memberId,
+      participationAmount: participation.participationAmount,
+      participationStatus: String(participation.participationStatus),
+      confirmedAt: participation.confirmedAt,
+      member: {
+        id: participation.memberId,
+        memberRef: participation.member.memberRef,
+        fullName: participation.member.fullName,
+        user: { email: participation.member.user.email },
+      },
+      payments: participation.payments.map((payment) => ({ amount: payment.amount, status: String(payment.status) })),
+      distributions: participation.distributions.map((distribution) => ({ id: distribution.id, status: String(distribution.status) })),
+    })),
+    formulaProfile: "STANDARD_FINAL_DISTRIBUTION_V1",
+  });
+  const status = previewStatus(preview);
+  const blockers = preview.findings.filter((finding) => finding.severity === "blocker");
+  const warnings = preview.findings.filter((finding) => finding.severity === "warning");
+  const succeededCoverageTotal = preview.rows.reduce((sum, row) => sum + Number(row.succeededPaymentAmount), 0) + preview.excludedRows.reduce((sum, row) => sum + Number(row.succeededPaymentAmount), 0);
+  const excludedById = new Map(preview.excludedRows.map((row) => [row.participationId, row]));
+  const reconciliationRows = [
+    ["Principal Return", preview.reconciliation.principalReturn],
+    ["Holding Return", preview.reconciliation.holdingReturn],
+    ["Profit Distribution", preview.reconciliation.profitDistribution],
+    ["Final Distribution", preview.reconciliation.finalDistributionTotal],
+  ] as const;
+
+  return (
+    <Card>
+      <SectionHeading title="Distributions">Read-only Phase 1 distribution preview powered by the existing preview engine.</SectionHeading>
+      <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
+        Preview only — no records are created and no payouts are executed.
+      </div>
+
+      <div className="grid gap-4 xl:grid-cols-[1fr_.8fr]">
+        <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+          <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="font-bold text-papaipay-ink">Settlement Readiness</p>
+            <span className={`inline-flex rounded-md border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide ${previewStatusClass(status)}`}>Preview status: {status}</span>
+          </div>
+          <InfoGrid items={[
+            { label: "Settlement Status", value: latestSettlement ? formatEnumLabel(String(latestSettlement.calculationStatus)) : "No settlement recorded" },
+            { label: "Settlement Scenario", value: latestSettlement ? formatEnumLabel(String(latestSettlement.settlementScenario)) : "Not available" },
+            { label: "Principal Return Pool", value: moneyFromPreview(preview.summary.sourcePools.principalReturnPool) },
+            { label: "Holding Return Pool", value: moneyFromPreview(preview.summary.sourcePools.holdingReturnPool) },
+            { label: "Member Profit Distribution Pool", value: moneyFromPreview(preview.summary.sourcePools.profitDistributionPool) },
+            { label: "Final Distribution Pool", value: moneyFromPreview(preview.summary.sourcePools.finalDistributionPool) },
+            { label: "Distribution Calculation Date", value: latestSettlement?.distributionCalculationDate ? formatDate(latestSettlement.distributionCalculationDate) : "Not recorded" },
+            { label: "Formula Profile", value: preview.summary.formulaProfile },
+            { label: "Persistence", value: preview.summary.isPersistable ? "Persistable" : "Read-only / not persistable" },
+          ]} />
+        </div>
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1">
+          {[
+            ["Eligible Participants", String(preview.summary.eligibleParticipantCount)],
+            ["Excluded Participants", String(preview.summary.excludedParticipantCount)],
+            ["Total Eligible Participation Amount", moneyFromPreview(preview.summary.totalEligibleParticipationAmount)],
+            ["Succeeded Payment Coverage Total", formatCurrency(succeededCoverageTotal)],
+          ].map(([label, value]) => <div key={label} className="rounded-2xl border border-emerald-100 bg-white p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{value}</p></div>)}
+        </div>
+      </div>
+
+      <div className="mt-5 space-y-3">
+        {blockers.map((finding) => <p key={finding.code} className="rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-700">Blocker: {distributionFindingCopy(finding.code, finding.message)}</p>)}
+        {warnings.map((finding) => <p key={finding.code} className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm font-semibold text-amber-700">Warning: {distributionFindingCopy(finding.code, finding.message)}</p>)}
+      </div>
+
+      {preview.rows.length > 0 ? <div className="mt-6"><SectionHeading title="Distribution Preview Table" /><TableWrap><thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Share %</Th><Th>Principal Return</Th><Th>Holding Return</Th><Th>Profit Distribution</Th><Th>Final Distribution Total</Th></tr></thead><tbody>{preview.rows.map((row) => { const participation = project.participations.find((item) => item.id === row.participationId); return <tr key={row.participationId} className="border-t border-slate-100"><Td>{participation?.participationRef || row.participationId.slice(0, 8)}</Td><Td><span className="font-bold text-papaipay-ink">{row.name || row.memberRef || row.memberId}</span><span className="block text-xs font-semibold text-slate-400">{row.memberRef}</span></Td><Td>{row.email || "Not available"}</Td><Td>{moneyFromPreview(row.participationAmount)}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.memberSharePercent}</Td><Td>{moneyFromPreview(row.principalReturn)}</Td><Td>{moneyFromPreview(row.holdingReturn)}</Td><Td>{moneyFromPreview(row.profitDistribution)}</Td><Td>{moneyFromPreview(row.finalDistributionTotal)}</Td></tr>; })}</tbody></TableWrap></div> : null}
+
+      {preview.excludedRows.length > 0 ? <div className="mt-6"><SectionHeading title="Excluded Participants" /><TableWrap><thead><tr><Th>Member</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Reason</Th></tr></thead><tbody>{project.participations.filter((p) => excludedById.has(p.id)).map((participation) => { const row = excludedById.get(participation.id)!; return <tr key={participation.id} className="border-t border-slate-100"><Td><span className="font-bold text-papaipay-ink">{participation.member.fullName || participation.member.memberRef}</span><span className="block text-xs font-semibold text-slate-400">{participation.member.user.email}</span></Td><Td>{row.participationAmount ? moneyFromPreview(row.participationAmount) : "Invalid amount"}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.reasonMessage}</Td></tr>; })}</tbody></TableWrap></div> : null}
+
+      <div className="mt-6">
+        <SectionHeading title="Reconciliation Summary" />
+        <TableWrap><thead><tr><Th>Pool</Th><Th>Source Pool</Th><Th>Allocated</Th><Th>Difference</Th><Th>Status</Th></tr></thead><tbody>{reconciliationRows.map(([label, line]) => <tr key={label} className="border-t border-slate-100"><Td>{label}</Td><Td>{moneyFromPreview(line.source)}</Td><Td>{moneyFromPreview(line.allocated)}</Td><Td>{moneyFromPreview(line.difference)}</Td><Td><StatusBadge status={reconciliationStatus(line)} /></Td></tr>)}</tbody></TableWrap>
+      </div>
+
+      <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+        <div className="flex flex-wrap gap-3">{["Save Draft Batch", "Approve Distribution", "Mark Paid"].map((label) => <button key={label} disabled className="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-400" type="button">{label}</button>)}</div>
+        <p className="mt-3 text-sm leading-6 text-slate-600">These actions will be available in later phases after preview persistence and approval workflow are implemented.</p>
+      </div>
+    </Card>
   );
 }
 
@@ -362,12 +500,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         </form>
       </Card>
 
-      <Card>
-        <SectionHeading title="Distributions">Distribution processing will be available in a later phase.</SectionHeading>
-        {project.distributions.length > 0 ? (
-          <TableWrap><thead><tr><Th>Distribution ID</Th><Th>Member</Th><Th>Amount</Th><Th>Status</Th><Th>Payment Date</Th></tr></thead><tbody>{project.distributions.map((d) => <tr key={d.id} className="border-t border-slate-100"><Td>{d.distributionRef}</Td><Td>{d.member.fullName}</Td><Td>{formatCurrency(decimalToNumber(d.finalDistributionTotal))}</Td><Td><Badge>{formatEnumLabel(String(d.status))}</Badge></Td><Td>{d.paymentDate ? formatDate(d.paymentDate) : "Pending"}</Td></tr>)}</tbody></TableWrap>
-        ) : <p className="text-sm text-slate-500">No distribution records are available yet.</p>}
-      </Card>
+      <DistributionPreviewSection project={project} latestSettlement={latestSettlement} />
 
       <Card>
         <SectionHeading title="Project Updates">Create admin-side operational communications. These are stored now but are not displayed in the member portal in this sprint.</SectionHeading>

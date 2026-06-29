@@ -41,13 +41,15 @@ function demoAdminListingDetail(slug: string) {
       participationStatus: "Confirmed",
       createdAt: new Date(participation.date),
       updatedAt: new Date(participation.date),
+      memberId: participation.memberId,
+      confirmedAt: new Date(participation.date),
       member: {
         memberRef: participation.memberId,
         fullName: participation.name,
         user: { email: participation.email },
       },
-      payments: [{ status: participation.paymentStatus, updatedAt: new Date(participation.date) }],
-      distributions: [{ status: participation.distributionStatus, updatedAt: new Date(participation.date) }],
+      payments: [{ amount: participation.amount, status: participation.paymentStatus, updatedAt: new Date(participation.date) }],
+      distributions: [{ id: `${participation.participationId}-dist`, status: participation.distributionStatus, finalDistributionTotal: null, distributionBatch: null, updatedAt: new Date(participation.date) }],
     }));
 
   return {
@@ -313,16 +315,16 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             participationStatus: true,
             createdAt: true,
             updatedAt: true,
+            memberId: true,
+            confirmedAt: true,
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
             payments: {
               orderBy: { updatedAt: "desc" },
-              take: 1,
-              select: { status: true, updatedAt: true },
+              select: { amount: true, status: true, updatedAt: true },
             },
             distributions: {
               orderBy: { updatedAt: "desc" },
-              take: 1,
-              select: { status: true, updatedAt: true },
+              select: { id: true, status: true, finalDistributionTotal: true, distributionBatch: { select: { status: true } }, updatedAt: true },
             },
           },
         },
