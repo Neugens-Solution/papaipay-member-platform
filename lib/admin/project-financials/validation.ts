@@ -71,7 +71,11 @@ function parseDate(formData: FormData, key: string, label: string, errors: strin
   return date;
 }
 
-export function validateFinancialSummaryForm(formData: FormData): { data?: FinancialSummaryInput; errors: string[] } {
+export type FinancialSummaryValidationResult =
+  | { success: true; data: FinancialSummaryInput }
+  | { success: false; error: string; errors: string[] };
+
+export function validateFinancialSummaryForm(formData: FormData): FinancialSummaryValidationResult {
   const errors: string[] = [];
   const moneyOptions = { min: 0 };
   const percentOptions = { min: 0, max: 100 };
@@ -94,7 +98,7 @@ export function validateFinancialSummaryForm(formData: FormData): { data?: Finan
     distributionCalculationDate: parseDate(formData, "distributionCalculationDate", "Distribution Calculation Date", errors),
   };
 
-  return errors.length > 0 ? { errors } : { data, errors };
+  return errors.length > 0 ? { success: false, error: errors.join(" "), errors } : { success: true, data };
 }
 
 export function financialSummaryToPrismaData(data: FinancialSummaryInput): FinancialSummaryPrismaData {

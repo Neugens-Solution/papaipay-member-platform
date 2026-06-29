@@ -15,7 +15,9 @@ export async function saveProjectFinancialSummaryAction(formData: FormData): Pro
   if (!campaignId) throw new Error("Campaign is required.");
 
   const validation = validateFinancialSummaryForm(formData);
-  if (!validation.data) throw new Error(validation.errors.join(" "));
+  if (!validation.success) throw new Error(validation.error);
+
+  const data = financialSummaryToPrismaData(validation.data);
 
   const savedSlug = await db.$transaction(async (tx) => {
     const campaign = await tx.campaign.findUnique({
@@ -28,8 +30,6 @@ export async function saveProjectFinancialSummaryAction(formData: FormData): Pro
       where: { campaignId },
       orderBy: { createdAt: "desc" },
     });
-
-    const data = financialSummaryToPrismaData(validation.data);
 
     if (latestSettlement) {
       const updated = await tx.campaignSettlement.update({
