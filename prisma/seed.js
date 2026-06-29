@@ -1,10 +1,19 @@
 const { PrismaClient } = require('@prisma/client')
-const argon2 = require('argon2')
+const { randomBytes, scrypt } = require('crypto')
+const { promisify } = require('util')
+
+const scryptAsync = promisify(scrypt)
+
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString('base64url')
+  const derivedKey = await scryptAsync(password, salt, 64)
+  return `scrypt$${salt}$${derivedKey.toString('base64url')}`
+}
 
 const prisma = new PrismaClient()
 
 async function main() {
-  const demoPasswordHash = await argon2.hash(process.env.SEED_DEMO_PASSWORD || 'PapaipayDemo123!')
+  const demoPasswordHash = await hashPassword(process.env.SEED_DEMO_PASSWORD || 'PapaipayDemo123!')
   const permissions = [
     { key: 'campaign.read', description: 'View campaign records' },
     { key: 'campaign.manage', description: 'Manage campaign setup records' },
