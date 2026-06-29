@@ -11,7 +11,8 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:seed": "prisma db seed",
     "postinstall": "prisma generate",
-    "uat:demo-data": "node scripts/uat-demo-data.js"
+    "uat:demo-data": "node scripts/uat-demo-data.js",
+    "auth:demo-users": "node scripts/auth-demo-users.js"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",
