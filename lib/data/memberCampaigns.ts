@@ -125,7 +125,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     returnType: formatReturnType(campaign.returnType),
     maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
     principalProtectionRule:
-      "If the asset is not sold within 24 months, Participation Amount only will be returned.",
+      "If the property is not successfully disposed of within the maximum holding period, members will receive their original Participation Amount back according to the listing terms.",
     documents: (campaign.documents ?? [])
       .filter(
         (document) =>
@@ -178,7 +178,15 @@ async function getMemberCampaignsRaw() {
           createdAt: "asc",
         },
       },
-      updates: true,
+      updates: {
+        where: {
+          publishedAt: { not: null },
+          visibility: "MemberVisible",
+        },
+        orderBy: {
+          publishedAt: "desc",
+        },
+      },
       faqs: {
         orderBy: {
           sortOrder: "asc",
@@ -302,7 +310,15 @@ export async function getMemberCampaignBySlug(slug: string) {
             fileAsset: true,
           },
         },
-        updates: true,
+        updates: {
+          where: {
+            publishedAt: { not: null },
+            visibility: "MemberVisible",
+          },
+          orderBy: {
+            publishedAt: "desc",
+          },
+        },
         faqs: {
           orderBy: {
             sortOrder: "asc",
