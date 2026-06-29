@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
-import { saveProjectFinancialSummaryAction } from "@/lib/admin/project-financials/actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
 import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
 import { calculateDistributionPreview, type DistributionPreviewResult } from "@/lib/distributions/preview";
@@ -84,25 +84,6 @@ function decimalInputValue(value: unknown) {
   if (value === null || value === undefined) return "";
   return String(value);
 }
-
-function MoneyInput({ id, name, label, defaultValue }: { id: string; name: string; label: string; defaultValue: unknown }) {
-  return (
-    <div>
-      <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
-      <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={decimalInputValue(defaultValue)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="0.00" />
-    </div>
-  );
-}
-
-function PercentInput({ id, name, label, defaultValue }: { id: string; name: string; label: string; defaultValue: unknown }) {
-  return (
-    <div>
-      <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
-      <input id={id} name={name} type="number" min="0" max="100" step="0.0001" defaultValue={decimalInputValue(defaultValue)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="0" />
-    </div>
-  );
-}
-
 
 function moneyFromPreview(value?: string | null) {
   return value ? formatCurrency(Number(value)) : "Not available";
@@ -278,12 +259,6 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
     "use server";
 
     await createProjectUpdateAction({}, formData);
-  }
-
-  async function saveFinancialSummaryFormAction(formData: FormData): Promise<void> {
-    "use server";
-
-    await saveProjectFinancialSummaryAction(formData);
   }
 
   return (
@@ -463,41 +438,27 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm leading-6 text-slate-600">
           This is a summary-level financial record. Itemized project costs and distribution preview will be added in later phases.
         </div>
-        <form action={saveFinancialSummaryFormAction} className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-          <input type="hidden" name="campaignId" value={project.id} />
-          <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="font-bold text-papaipay-ink">{latestSettlement ? "Update Financial Summary" : "Create Financial Summary"}</p>
-              <p className="mt-1 text-sm text-slate-500">Enter admin-approved summary values only. Values are saved exactly as entered.</p>
-            </div>
-            <Badge>{latestSettlement ? "Existing summary" : "New summary"}</Badge>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-            <MoneyInput id="purchasePrice" name="purchasePrice" label="Acquisition Price" defaultValue={latestSettlement?.purchasePrice} />
-            <MoneyInput id="salePrice" name="salePrice" label="Sale Price / Disposal Price" defaultValue={latestSettlement?.salePrice} />
-            <MoneyInput id="totalCostsSnapshot" name="totalCostsSnapshot" label="Total Approved Costs" defaultValue={latestSettlement?.totalCostsSnapshot} />
-            <MoneyInput id="grossProfitSnapshot" name="grossProfitSnapshot" label="Gross Return" defaultValue={latestSettlement?.grossProfitSnapshot} />
-            <MoneyInput id="netProfitSnapshot" name="netProfitSnapshot" label="Net Return" defaultValue={latestSettlement?.netProfitSnapshot} />
-            <PercentInput id="memberProfitDistributionPercentage" name="memberProfitDistributionPercentage" label="Member Return Share %" defaultValue={latestSettlement?.memberProfitDistributionPercentage} />
-            <PercentInput id="platformProfitSharePercentage" name="platformProfitSharePercentage" label="Platform Return Share %" defaultValue={latestSettlement?.platformProfitSharePercentage} />
-            <MoneyInput id="platformShare" name="platformShare" label="Platform Share Amount" defaultValue={latestSettlement?.platformShare} />
-            <MoneyInput id="principalReturnPool" name="principalReturnPool" label="Principal Return Pool" defaultValue={latestSettlement?.principalReturnPool} />
-            <MoneyInput id="holdingReturnPool" name="holdingReturnPool" label="Holding Return Pool" defaultValue={latestSettlement?.holdingReturnPool} />
-            <MoneyInput id="profitDistributionPool" name="profitDistributionPool" label="Member Profit Distribution Pool" defaultValue={latestSettlement?.profitDistributionPool} />
-            <MoneyInput id="finalDistributionPool" name="finalDistributionPool" label="Final Distribution Pool" defaultValue={latestSettlement?.finalDistributionPool} />
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="saleCompletedAt">Sale Completed Date</label>
-              <input id="saleCompletedAt" name="saleCompletedAt" type="date" defaultValue={dateInputValue(latestSettlement?.saleCompletedAt)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" />
-            </div>
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="distributionCalculationDate">Distribution Calculation Date</label>
-              <input id="distributionCalculationDate" name="distributionCalculationDate" type="date" defaultValue={dateInputValue(latestSettlement?.distributionCalculationDate)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" />
-            </div>
-          </div>
-          <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="calculationRemarks">Calculation Remarks</label>
-          <textarea id="calculationRemarks" name="calculationRemarks" rows={4} defaultValue={latestSettlement?.calculationRemarks ?? ""} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" placeholder="Add summary assumptions, approval notes, or calculation context." />
-          <button className="mt-4 rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink" type="submit">{latestSettlement ? "Update Financial Summary" : "Create Financial Summary"}</button>
-        </form>
+        <FinancialSummaryForm
+          campaignId={project.id}
+          mode={latestSettlement ? "update" : "create"}
+          initialValues={{
+            purchasePrice: decimalInputValue(latestSettlement?.purchasePrice),
+            salePrice: decimalInputValue(latestSettlement?.salePrice),
+            totalCostsSnapshot: decimalInputValue(latestSettlement?.totalCostsSnapshot),
+            grossProfitSnapshot: decimalInputValue(latestSettlement?.grossProfitSnapshot),
+            netProfitSnapshot: decimalInputValue(latestSettlement?.netProfitSnapshot),
+            memberProfitDistributionPercentage: decimalInputValue(latestSettlement?.memberProfitDistributionPercentage),
+            platformProfitSharePercentage: decimalInputValue(latestSettlement?.platformProfitSharePercentage),
+            platformShare: decimalInputValue(latestSettlement?.platformShare),
+            principalReturnPool: decimalInputValue(latestSettlement?.principalReturnPool),
+            holdingReturnPool: decimalInputValue(latestSettlement?.holdingReturnPool),
+            profitDistributionPool: decimalInputValue(latestSettlement?.profitDistributionPool),
+            finalDistributionPool: decimalInputValue(latestSettlement?.finalDistributionPool),
+            saleCompletedAt: dateInputValue(latestSettlement?.saleCompletedAt),
+            distributionCalculationDate: dateInputValue(latestSettlement?.distributionCalculationDate),
+            calculationRemarks: latestSettlement?.calculationRemarks ?? "",
+          }}
+        />
       </Card>
 
       <DistributionPreviewSection project={project} latestSettlement={latestSettlement} />
