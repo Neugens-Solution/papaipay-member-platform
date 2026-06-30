@@ -1,62 +1,54 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ContentCard, Info, StatusBadge } from "@/components/member/Cards";
-import { distributionRecords, formatRM } from "@/lib/memberMockData";
+import { formatDistributionAmount, getMemberDistributionByRefOrSlug } from "@/lib/data/memberDistributions";
 
-const timeline = ["Pending", "Processing", "Paid", "Completed"];
-const visibleDistributionRecords = distributionRecords.filter((record) => record.status === "Paid" && record.distributionBatchStatus === "Completed");
-
-export function generateStaticParams() {
-  return visibleDistributionRecords.map((record) => ({ slug: record.slug }));
-}
-
-export default function Page({ params }: { params: { slug: string } }) {
-  const record = visibleDistributionRecords.find((item) => item.slug === params.slug);
+export default async function Page({ params }: { params: { slug: string } }) {
+  const record = await getMemberDistributionByRefOrSlug({ slug: params.slug });
   if (!record) notFound();
-
-  const currentIndex = timeline.indexOf(record.status);
 
   return (
     <div className="space-y-6">
       <Link href="/member/distributions" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Distributions</Link>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">{record.propertyName}</h1>
+          <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Paid Distribution</p>
+          <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-[1.7rem]">{record.projectTitle}</h1>
           <p className="mt-2 text-sm text-slate-600">{record.location}</p>
         </div>
-        <StatusBadge status={record.status} />
+        <StatusBadge status="Paid" />
       </header>
 
       <ContentCard>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          <Info label="Distribution ID" value={record.distributionId} /><Info label="Campaign ID" value={record.campaignId} /><Info label="Campaign Code" value={record.campaignCode} /><Info label="Distribution Batch" value={record.distributionBatchId} /><Info label="Participation ID" value={record.participationId} /><Info label="Member ID" value={record.memberId} /><Info label="Property Name" value={record.propertyName} />
-          <Info label="Location" value={record.location} />
-          <Info label="Participation Amount" value={formatRM(record.participationAmount)} />
-          <Info label="Principal Return" value={formatRM(record.principalReturn)} /><Info label="Holding Return" value={formatRM(record.holdingReturn)} /><Info label="Profit Distribution" value={formatRM(record.profitDistribution)} /><Info label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
-          <Info label="Distribution Status" value={record.status} />
+          <Info label="Distribution Ref" value={record.distributionRef} />
+          <Info label="Distribution Batch" value={record.batchRef} />
+          <Info label="Batch Status" value={record.batchStatus} />
+          <Info label="Campaign Ref" value={record.campaignRef} />
+          <Info label="Campaign Code" value={record.campaignCode} />
+          <Info label="Participation Ref" value={record.participationRef} />
+          <Info label="Project / Listing" value={record.projectTitle} />
+          <Info label="Property Summary" value={record.propertySummary} />
+          <Info label="Original Participation Amount" value={formatDistributionAmount(record.participationAmount)} />
+          <Info label="Principal Return" value={formatDistributionAmount(record.principalReturn)} />
+          <Info label="Holding Return" value={formatDistributionAmount(record.holdingReturn)} />
+          <Info label="Profit Distribution" value={formatDistributionAmount(record.profitDistribution)} />
+          <Info label="Final Distribution Total" value={formatDistributionAmount(record.finalDistributionTotal)} />
           <Info label="Paid Date" value={record.paidDate} />
-          <Info label="Reference Number" value={record.referenceNumber} /><Info label="Payment Reference" value={record.paymentReference} />
+          <Info label="Payment Reference" value={record.paymentReference} />
+          <Info label="Distribution Status" value="Paid" />
         </div>
         <div className="mt-4 rounded-md border border-slate-100 bg-slate-50/80 p-3">
-          <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">Notes</p>
-          <p className="mt-1 text-sm leading-6 text-slate-700">{record.notes}</p>
+          <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">Manual payment recorded</p>
+          <p className="mt-1 text-sm leading-6 text-slate-700">{record.adminNotes}</p>
         </div>
-      </ContentCard>
-
-      <ContentCard>
-        <h2 className="text-base font-bold">Distribution Timeline</h2>
-        <div className="mt-4 space-y-3">
-          {timeline.map((step, index) => (
-            <div key={step} className="flex items-center gap-3">
-              <span className={`grid h-7 w-7 place-items-center rounded-md text-xs font-bold ${index <= currentIndex ? "bg-papaipay-green text-white" : "bg-slate-100 text-slate-400"}`}>{index + 1}</span>
-              <span className={`text-sm font-semibold ${index <= currentIndex ? "text-papaipay-ink" : "text-slate-400"}`}>{step}</span>
-            </div>
-          ))}
+        <div className="mt-4 rounded-md border border-amber-100 bg-amber-50/70 p-3">
+          <p className="text-sm leading-6 text-amber-900">This record confirms that manual payment has been recorded by PAPAIPAY. It does not represent an automated transfer executed by the platform.</p>
         </div>
       </ContentCard>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button className="min-h-10 rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Download Receipt</button>
+        <button disabled className="min-h-10 cursor-not-allowed rounded-md bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400">Receipt download coming soon</button>
         <Link href="/member/distributions" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-papaipay-green hover:text-papaipay-green">Back to Distributions</Link>
       </div>
     </div>
