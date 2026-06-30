@@ -361,6 +361,10 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             approvedBy: { select: { email: true } },
             createdAt: true,
             createdBy: { select: { email: true } },
+            distributions: {
+              orderBy: { updatedAt: "desc" },
+              select: { paymentDate: true, paymentReference: true, adminNotes: true, markedPaidAt: true },
+            },
           },
         },
         distributions: {

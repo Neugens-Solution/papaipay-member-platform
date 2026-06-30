@@ -4,7 +4,7 @@ import { ContentCard, Info, StatusBadge } from "@/components/member/Cards";
 import { distributionRecords, formatRM } from "@/lib/memberMockData";
 
 const timeline = ["Pending", "Processing", "Paid", "Completed"];
-const visibleDistributionRecords = distributionRecords.filter((record) => ["Paid", "Completed"].includes(record.status));
+const visibleDistributionRecords = distributionRecords.filter((record) => record.status === "Paid" && record.distributionBatchStatus === "Completed");
 
 export function generateStaticParams() {
   return visibleDistributionRecords.map((record) => ({ slug: record.slug }));

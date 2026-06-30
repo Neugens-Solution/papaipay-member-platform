@@ -248,6 +248,56 @@ function buildApprovalSnapshot(batch: {
   };
 }
 
+function parseRequiredPaymentDate(formData: FormData) {
+  const value = requiredString(formData, "paymentDate");
+  if (!value) throw new Error("Payment date is required.");
+  const date = new Date(`${value}T00:00:00.000Z`);
+  if (Number.isNaN(date.getTime())) throw new Error("Payment date is invalid.");
+  return date;
+}
+
+function distributionStatusSummary(rows: Array<{ status: unknown }>) {
+  return rows.reduce<Record<string, number>>((summary, row) => {
+    const status = String(row.status);
+    summary[status] = (summary[status] ?? 0) + 1;
+    return summary;
+  }, {});
+}
+
+function paymentFieldSummary(rows: Array<{ paymentDate: Date | null; paymentReference: string | null; markedPaidById: string | null; markedPaidAt: Date | null; adminNotes: string | null }>) {
+  return {
+    rowsWithPaymentDate: rows.filter((row) => row.paymentDate).length,
+    rowsWithPaymentReference: rows.filter((row) => row.paymentReference).length,
+    rowsWithAdminNotes: rows.filter((row) => row.adminNotes).length,
+    rowsWithMarkedPaidById: rows.filter((row) => row.markedPaidById).length,
+    rowsWithMarkedPaidAt: rows.filter((row) => row.markedPaidAt).length,
+  };
+}
+
+function buildMarkPaidSnapshot(batch: {
+  status: unknown;
+  pendingCount: number | null;
+  processingCount: number | null;
+  paidCount: number | null;
+  totalMembers: number | null;
+  totalFinalDistribution: unknown;
+}, rows: Array<{ status: unknown; finalDistributionTotal: unknown; paymentDate: Date | null; paymentReference: string | null; markedPaidById: string | null; markedPaidAt: Date | null; adminNotes: string | null }>, rowTotal: string) {
+  return {
+    batch: {
+      status: String(batch.status),
+      pendingCount: batch.pendingCount,
+      processingCount: batch.processingCount,
+      paidCount: batch.paidCount,
+      totalMembers: batch.totalMembers,
+      totalFinalDistribution: String(batch.totalFinalDistribution ?? "0"),
+    },
+    rowCount: rows.length,
+    rowsStatusSummary: distributionStatusSummary(rows),
+    existingPaymentFieldSummary: paymentFieldSummary(rows),
+    totalFinalDistribution: rowTotal,
+  };
+}
+
 export async function approveDistributionBatchAction(_previousState: DistributionBatchActionState, formData: FormData): Promise<DistributionBatchActionState> {
   const { user } = await requireAdmin();
   const campaignId = requiredString(formData, "campaignId");
@@ -335,6 +385,111 @@ export async function approveDistributionBatchAction(_previousState: Distributio
     return { status: "success", message: "Distribution batch approved for future processing. No payout was executed.", errors: [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Distribution batch could not be approved.";
+    return { status: "error", message, errors: [message] };
+  }
+}
+
+export async function markDistributionBatchPaidAction(_previousState: DistributionBatchActionState, formData: FormData): Promise<DistributionBatchActionState> {
+  const { user } = await requireAdmin();
+  const campaignId = requiredString(formData, "campaignId");
+  const settlementId = requiredString(formData, "settlementId");
+  const batchId = requiredString(formData, "batchId");
+  const paymentReference = requiredString(formData, "paymentReference");
+  const adminNotes = requiredString(formData, "adminNotes");
+  const confirmed = formData.get("confirmation") === "on";
+
+  try {
+    if (!campaignId || !settlementId || !batchId) throw new Error("Project, settlement, and batch are required.");
+    const paymentDate = parseRequiredPaymentDate(formData);
+    if (!paymentReference) throw new Error("Payment reference is required.");
+    if (!adminNotes) throw new Error("Admin notes are required.");
+    if (!confirmed) throw new Error("Confirmation is required before marking the batch paid.");
+
+    const slug = await db.$transaction(async (tx) => {
+      const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { id: true, slug: true } });
+      if (!campaign) throw new Error("Project could not be found.");
+
+      const latestSettlement = await tx.campaignSettlement.findFirst({
+        where: { campaignId },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, calculationStatus: true, finalDistributionPool: true },
+      });
+      if (!latestSettlement) throw new Error("No settlement exists for this project.");
+      if (latestSettlement.id !== settlementId) throw new Error("Submitted settlement is not the latest settlement. Refresh the workspace and try again.");
+      if (latestSettlement.calculationStatus !== SettlementCalculationStatus.Locked) throw new Error("Settlement must be locked before marking a distribution batch paid.");
+
+      const batch = await tx.distributionBatch.findUnique({ where: { id: batchId }, include: { distributions: true } });
+      if (!batch) throw new Error("Distribution batch could not be found.");
+      if (batch.status === DistributionBatchStatus.Completed) throw new Error("This batch has already been marked paid.");
+      if (batch.campaignId !== campaignId) throw new Error("Distribution batch does not belong to this project.");
+      if (batch.settlementId !== settlementId || batch.settlementId !== latestSettlement.id) throw new Error("Distribution batch is not attached to the latest submitted settlement.");
+      if (batch.status !== DistributionBatchStatus.Approved) throw new Error("Only Approved distribution batches can be marked paid.");
+      if (batch.lockedStatus !== true) throw new Error("Distribution batch must be locked before it can be marked paid.");
+      if (batch.distributions.length === 0) throw new Error("Distribution batch has no distribution rows.");
+
+      const processingRow = batch.distributions.find((row) => row.status === DistributionStatus.Processing);
+      if (processingRow) throw new Error(`Distribution row ${processingRow.distributionRef} is Processing and cannot be marked paid in Phase 1.`);
+      const paidRow = batch.distributions.find((row) => row.status === DistributionStatus.Paid);
+      if (paidRow) throw new Error("This batch has already been marked paid.");
+      const invalidStatusRow = batch.distributions.find((row) => row.status !== DistributionStatus.Pending);
+      if (invalidStatusRow) throw new Error(`Distribution row ${invalidStatusRow.distributionRef} is not Pending.`);
+      const paymentFieldRow = batch.distributions.find((row) => row.paymentDate || row.paymentReference || row.markedPaidById || row.markedPaidAt);
+      if (paymentFieldRow) throw new Error(`Distribution row ${paymentFieldRow.distributionRef} already has payment fields set.`);
+
+      const rowCount = batch.distributions.length;
+      const pendingCount = batch.distributions.filter((row) => row.status === DistributionStatus.Pending).length;
+      const processingCount = batch.distributions.filter((row) => row.status === DistributionStatus.Processing).length;
+      const paidCount = batch.distributions.filter((row) => row.status === DistributionStatus.Paid).length;
+      const rowTotal = batch.distributions.reduce((sum, row) => sum + Number(row.finalDistributionTotal), 0).toFixed(2);
+
+      if (batch.totalMembers !== rowCount) throw new Error("Batch totalMembers does not match distribution row count.");
+      if (batch.pendingCount !== rowCount || pendingCount !== rowCount) throw new Error("Batch pending count does not match distribution row count.");
+      if ((batch.processingCount ?? 0) !== 0 || processingCount !== 0) throw new Error("Processing distribution count must be zero before marking paid.");
+      if ((batch.paidCount ?? 0) !== 0 || paidCount !== 0) throw new Error("Paid distribution count must be zero before marking paid.");
+      if (!moneyEqual(rowTotal, String(batch.totalFinalDistribution ?? "0"))) throw new Error("Distribution row total does not match batch total final distribution.");
+      if (!moneyEqual(rowTotal, String(latestSettlement.finalDistributionPool ?? "0"))) throw new Error("Distribution row total does not match settlement final distribution pool.");
+
+      const beforeSnapshot = buildMarkPaidSnapshot(batch, batch.distributions, rowTotal);
+      const markedPaidAt = new Date();
+
+      await tx.distribution.updateMany({
+        where: { distributionBatchId: batch.id },
+        data: { status: DistributionStatus.Paid, paymentDate, paymentReference, adminNotes, markedPaidById: user.id, markedPaidAt },
+      });
+      const updatedBatch = await tx.distributionBatch.update({
+        where: { id: batch.id },
+        data: { status: DistributionBatchStatus.Completed, pendingCount: 0, processingCount: 0, paidCount: rowCount },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          auditRef: makeAuditRef(),
+          actorId: user.id,
+          action: "distribution.batch.paid",
+          entityType: "DistributionBatch",
+          entityId: batch.id,
+          beforeSnapshot: toJsonValue(beforeSnapshot) as Prisma.InputJsonValue,
+          afterSnapshot: toJsonValue({
+            batch: { status: String(updatedBatch.status), pendingCount: 0, processingCount: 0, paidCount: rowCount },
+            paymentDate: paymentDate.toISOString(),
+            paymentReference,
+            adminNotes,
+            markedPaidById: user.id,
+            markedPaidAt: markedPaidAt.toISOString(),
+            systemTransferStatement: "PAPAIPAY did not execute a transfer; finance completed the manual payment outside the system.",
+            rowCount,
+            totalFinalDistribution: rowTotal,
+          }) as Prisma.InputJsonValue,
+        },
+      });
+
+      return campaign.slug;
+    }, { timeout: 10_000 });
+
+    revalidatePath(`/admin/projects/${slug}`);
+    return { status: "success", message: "Distribution batch completed. Manual payment has been recorded. No transfer was executed by PAPAIPAY.", errors: [] };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Distribution batch could not be marked paid.";
     return { status: "error", message, errors: [message] };
   }
 }

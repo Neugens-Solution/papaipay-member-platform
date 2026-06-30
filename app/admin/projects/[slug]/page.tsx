@@ -130,6 +130,21 @@ function distributionFindingCopy(code: string, message: string) {
 
 const activeDistributionBatchStatuses = new Set(["Draft", "Approved", "Processing", "Completed"]);
 
+function CompletedBatchPaymentSummary({ batch }: { batch: ProjectWorkspace["distributionBatches"][number] }) {
+  const paidRow = batch.distributions.find((row) => row.paymentDate || row.paymentReference || row.adminNotes);
+  return (
+    <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">
+      <p>Distribution batch completed. Manual payment has been recorded.</p>
+      <div className="mt-2 grid gap-2 text-slate-700 md:grid-cols-3">
+        <span>Paid count: {batch.paidCount ?? 0}</span>
+        <span>Payment date: {paidRow?.paymentDate ? formatDate(paidRow.paymentDate) : "Not recorded"}</span>
+        <span>Payment reference: {paidRow?.paymentReference || "Not recorded"}</span>
+      </div>
+      {paidRow?.adminNotes ? <p className="mt-2 text-slate-700">Admin notes: {paidRow.adminNotes}</p> : null}
+    </div>
+  );
+}
+
 function DistributionPreviewSection({ project, latestSettlement }: { project: ProjectWorkspace; latestSettlement: ProjectWorkspace["settlements"][number] | undefined }) {
   const activeBatch = project.distributionBatches.find((batch) => latestSettlement && batch.settlementId === latestSettlement.id && activeDistributionBatchStatuses.has(String(batch.status)));
 
@@ -148,6 +163,8 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
             { label: "Total Members", value: String(activeBatch.totalMembers ?? 0) },
             { label: "Total Final Distribution", value: nullableCurrency(activeBatch.totalFinalDistribution) },
             { label: "Pending Count", value: String(activeBatch.pendingCount ?? 0) },
+            { label: "Processing Count", value: String(activeBatch.processingCount ?? 0) },
+            { label: "Paid Count", value: String(activeBatch.paidCount ?? 0) },
             { label: "Created At", value: formatDate(activeBatch.createdAt) },
             { label: "Created By", value: activeBatch.createdBy?.email || "Not recorded" },
             { label: "Approved At", value: activeBatch.approvedAt ? formatDate(activeBatch.approvedAt) : "Not approved" },
@@ -157,10 +174,10 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
           ]} />
         </div>
         <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-          <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} batchId={activeBatch.id} saveDisabled draftSaved approveDisabled={String(activeBatch.status) !== "Draft"} approved={String(activeBatch.status) === "Approved"} />
+          <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} batchId={activeBatch.id} saveDisabled draftSaved approveDisabled={String(activeBatch.status) !== "Draft"} approved={String(activeBatch.status) === "Approved"} completed={String(activeBatch.status) === "Completed"} />
           {String(activeBatch.status) === "Draft" ? <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution confirms these amounts for future processing. It does not execute payout.</p> : null}
-          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for future processing. No payout has been executed.</p> : null}
-          <p className="mt-3 text-sm leading-6 text-slate-600">Mark Paid remains disabled for later phases.</p>
+          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for manual payment recording. No payout has been executed.</p> : null}
+          {String(activeBatch.status) === "Completed" ? <CompletedBatchPaymentSummary batch={activeBatch} /> : null}
         </div>
       </Card>
     );

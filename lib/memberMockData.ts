@@ -234,6 +234,7 @@ export type PortfolioRecord = {
   finalDistributionTotal: number;
   distributionId: string;
   distributionBatchId: string;
+  distributionBatchStatus: "Draft" | "Approved" | "Processing" | "Completed" | "Cancelled";
   paymentReference: string;
   adminNotes: string;
   distributionReceived?: number;
@@ -266,6 +267,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 900,
     finalDistributionTotal: 13668,
     distributionId: "DIS-000000",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000000",
     paymentReference: "PAY-000000",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -295,6 +297,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 750,
     finalDistributionTotal: 35000,
     distributionId: "DIS-000001",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000001",
     paymentReference: "PAY-000001",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -324,6 +327,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 0,
     finalDistributionTotal: 18000,
     distributionId: "DIS-000002",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000002",
     paymentReference: "PAY-000002",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -353,6 +357,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 540,
     finalDistributionTotal: 14255,
     distributionId: "DIS-000003",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000003",
     paymentReference: "PAY-000003",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -382,6 +387,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 620,
     finalDistributionTotal: 26026,
     distributionId: "DIS-000004",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000004",
     paymentReference: "PAY-000004",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -411,6 +417,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 1200,
     finalDistributionTotal: 12440,
     distributionId: "DIS-000005",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000005",
     paymentReference: "PAY-000005",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -442,6 +449,7 @@ export const portfolioRecords: PortfolioRecord[] = [
     profitDistribution: 640,
     finalDistributionTotal: 22100,
     distributionId: "DIS-000006",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000006",
     paymentReference: "PAY-000006",
     adminNotes: "Calculation reviewed; manual transfer required before marking paid",
@@ -481,6 +489,7 @@ export type DistributionRecord = {
   paidDate: string;
   referenceNumber: string;
   distributionBatchId: string;
+  distributionBatchStatus: "Draft" | "Approved" | "Processing" | "Completed" | "Cancelled";
   paymentReference: string;
   notes: string;
 };
@@ -500,8 +509,9 @@ export const distributionRecords: DistributionRecord[] = [
     holdingReturn: 960,
     profitDistribution: 640,
     distributionAmount: 2200,
-    status: "Completed",
+    status: "Paid",
     paidDate: "15 Aug 2026",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000001",
     referenceNumber: "PP-DIST-2026-0815",
     paymentReference: "PAY-000001",
@@ -523,6 +533,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 3200,
     status: "Processing",
     paidDate: "Processing",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000002",
     referenceNumber: "PP-DIST-2026-0712",
     paymentReference: "PAY-000002",
@@ -544,6 +555,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 2850,
     status: "Paid",
     paidDate: "28 May 2026",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000003",
     referenceNumber: "PP-DIST-2026-0528",
     paymentReference: "PAY-000003",
@@ -565,6 +577,7 @@ export const distributionRecords: DistributionRecord[] = [
     distributionAmount: 5000,
     status: "Pending",
     paidDate: "Pending",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000004",
     referenceNumber: "PP-DIST-2026-0904",
     paymentReference: "PAY-000004",
@@ -584,8 +597,9 @@ export const distributionRecords: DistributionRecord[] = [
     holdingReturn: 0,
     profitDistribution: 950,
     distributionAmount: 3450,
-    status: "Completed",
+    status: "Paid",
     paidDate: "10 Apr 2026",
+    distributionBatchStatus: "Completed",
     distributionBatchId: "DBT-000005",
     referenceNumber: "PP-DIST-2026-0410",
     paymentReference: "PAY-000005",
@@ -599,7 +613,7 @@ export const completedCampaigns = [
     campaignId: "CAM-000007",
     campaignCode: "PP-SGR-2025-007",
     campaignName: "Bangi Terrace House",
-    status: "Completed",
+    status: "Paid",
     holdingPeriod: "15 months",
     purchasePrice: 510000,
     salePrice: 645000,
@@ -614,7 +628,7 @@ export const completedCampaigns = [
     campaignId: "CAM-000008",
     campaignCode: "PP-KL-2025-008",
     campaignName: "Cheras Apartment",
-    status: "Completed",
+    status: "Paid",
     holdingPeriod: "12 months",
     purchasePrice: 360000,
     salePrice: 438000,

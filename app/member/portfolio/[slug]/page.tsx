@@ -19,7 +19,7 @@ export default function PortfolioDetailPage({ params }: { params: { slug: string
   const record = portfolioRecords.find((item) => item.slug === params.slug);
   if (!record) notFound();
   const currentIndex = timeline.findIndex((item) => item === record.status);
-  const canShowDistributionSummary = ["Paid", "Completed"].includes(record.distributionStatus);
+  const canShowDistributionSummary = record.distributionStatus === "Paid" && record.distributionBatchStatus === "Completed";
   return (
     <div className="space-y-5">
       <Link href="/member/portfolio" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Portfolio</Link>
