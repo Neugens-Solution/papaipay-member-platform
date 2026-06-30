@@ -133,6 +133,7 @@ export async function createParticipationAction(
       const memberId = authenticatedMember.member.id || (await resolveDevelopmentDemoMemberId(tx));
       const reservedAt = now;
       const reservedUntil = new Date(now.getTime() + RESERVATION_MINUTES * 60 * 1000);
+      const paymentRef = makeRef("PAY");
       const participation = await tx.participation.create({
         data: {
           participationRef: makeRef("PAR"),
@@ -146,6 +147,18 @@ export async function createParticipationAction(
         },
       });
 
+      const payment = await tx.payment.create({
+        data: {
+          paymentRef,
+          memberId,
+          campaignId: campaign.id,
+          participationId: participation.id,
+          gateway: "manual",
+          amount: new Prisma.Decimal(amount),
+          status: "Pending",
+        },
+      });
+
       await tx.campaign.update({
         where: { id: campaign.id },
         data: {
@@ -156,6 +169,7 @@ export async function createParticipationAction(
       await tx.auditLog.create({
         data: {
           auditRef: makeRef("AUD"),
+          actorId: authenticatedMember.user.id,
           action: "ParticipationCreated",
           entityType: "Participation",
           entityId: participation.id,
@@ -167,7 +181,27 @@ export async function createParticipationAction(
             amount,
             status: participation.participationStatus,
             reservedUntil: reservedUntil.toISOString(),
-            paymentIntegration: "Pending - no payment gateway in Phase 2C",
+            paymentIntegration: "Manual confirmation pending",
+          },
+        },
+      });
+
+      await tx.auditLog.create({
+        data: {
+          auditRef: makeRef("AUD"),
+          actorId: authenticatedMember.user.id,
+          action: "PaymentCreated",
+          entityType: "Payment",
+          entityId: payment.id,
+          afterSnapshot: {
+            paymentRef: payment.paymentRef,
+            campaignId: campaign.id,
+            campaignRef: campaign.campaignRef,
+            memberId,
+            participationId: participation.id,
+            amount,
+            status: payment.status,
+            gateway: payment.gateway,
           },
         },
       });

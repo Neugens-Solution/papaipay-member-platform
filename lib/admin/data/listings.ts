@@ -320,7 +320,7 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
             payments: {
               orderBy: { updatedAt: "desc" },
-              select: { amount: true, status: true, updatedAt: true },
+              select: { id: true, paymentRef: true, amount: true, status: true, gateway: true, reconciliationReference: true, updatedAt: true },
             },
             distributions: {
               orderBy: { updatedAt: "desc" },

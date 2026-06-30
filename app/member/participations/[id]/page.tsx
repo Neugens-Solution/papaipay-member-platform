@@ -9,20 +9,24 @@ export default async function ParticipationConfirmationPage({ params }: { params
   const participation = await getMemberParticipationById(params.id);
   if (!participation) notFound();
 
-  const paymentStatus = participation.payments[0]?.status || "Pending";
+  const payment = participation.payments[0];
+  const paymentStatus = String(payment?.status || "Pending");
+  const paymentReference = payment?.reconciliationReference || payment?.paymentRef || "Pending manual confirmation";
 
   return (
     <div className="mx-auto max-w-3xl space-y-5">
       <ContentCard className="border-papaipay-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
         <p className="text-xs font-bold uppercase tracking-wide text-papaipay-green">Participation Reserved</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-papaipay-ink">Pending Payment</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">Your participation has been recorded and reserved. Payment gateway integration is not enabled yet, so no payment was collected and this is not a confirmed participation.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">Your participation has been recorded and reserved. Manual payment confirmation is handled by the PAPAIPAY admin team after payment is received; no payment gateway is enabled in this phase.</p>
         <dl className="mt-5 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-4">
           <Row label="Participation ID" value={participation.participationRef} />
           <Row label="Campaign" value={`${participation.campaign.campaignRef} • ${participation.campaign.title}`} />
           <Row label="Amount" value={formatRM(decimalToNumber(participation.participationAmount))} />
           <Row label="Status" value="Pending Payment" />
           <Row label="Payment Status" value={paymentStatus} />
+          <Row label="Payment Reference" value={paymentReference} />
+          <Row label="Manual Payment" value="Please follow the provided payment instructions and keep your bank reference for admin reconciliation." />
           <Row label="Reserved Until" value={formatDate(participation.reservedUntil)} />
         </dl>
         <div className="mt-6 flex flex-wrap gap-3">

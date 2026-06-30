@@ -3,6 +3,7 @@ import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
+import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
 import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
 import { calculateDistributionPreview, type DistributionPreviewResult } from "@/lib/distributions/preview";
@@ -367,7 +368,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Participants">Admin-only read-only view of members who have participated in this project.</SectionHeading>
+        <SectionHeading title="Participants">Admin-only participant operations. Manual confirmation records received payment only; it does not create a payout or distribution.</SectionHeading>
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participants</p>
@@ -388,7 +389,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         </div>
         {project.participations.length > 0 ? (
           <TableWrap>
-            <thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Amount</Th><Th>Date</Th><Th>Participation Status</Th><Th>Payment Status</Th><Th>Distribution Status</Th><Th>Last Updated</Th></tr></thead>
+            <thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Amount</Th><Th>Date</Th><Th>Participation Status</Th><Th>Payment Status</Th><Th>Distribution Status</Th><Th>Manual Confirmation</Th><Th>Last Updated</Th></tr></thead>
             <tbody>{project.participations.map((p) => {
               const latestPayment = p.payments[0];
               const latestDistribution = p.distributions[0];
@@ -403,6 +404,22 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
                   <Td><StatusBadge status={String(p.participationStatus)} /></Td>
                   <Td><StatusBadge status={latestPayment ? String(latestPayment.status) : null} /></Td>
                   <Td><StatusBadge status={latestDistribution ? String(latestDistribution.status) : null} /></Td>
+                  <Td>{String(p.participationStatus) === "PendingPayment" && latestPayment ? (
+                    <details className="min-w-64 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
+                      <summary className="cursor-pointer text-sm font-bold text-amber-700">Confirm Payment</summary>
+                      <form action={confirmManualPaymentAction} className="mt-3 space-y-3">
+                        <input type="hidden" name="campaignId" value={project.id} />
+                        <input type="hidden" name="projectSlug" value={project.slug} />
+                        <input type="hidden" name="participationId" value={p.id} />
+                        <p className="text-xs leading-5 text-slate-600">Manual confirmation records that payment has been received. This does not create a payout or distribution.</p>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment amount<input name="paymentAmount" defaultValue={decimalInputValue(p.participationAmount)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment date<input name="paymentDate" required type="date" defaultValue={dateInputValue(new Date())} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Notes<textarea name="notes" rows={2} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-papaipay-green" /></label>
+                        <button className="w-full rounded-lg bg-papaipay-green px-3 py-2 text-sm font-bold text-white hover:bg-papaipay-ink" type="submit">Confirm manual payment</button>
+                      </form>
+                    </details>
+                  ) : <span className="text-xs font-semibold text-slate-400">No action</span>}</Td>
                   <Td>{formatDate(p.updatedAt)}</Td>
                 </tr>
               );
