@@ -231,8 +231,30 @@ function SectionHeading({ title, children }: { title: string; children?: React.R
   );
 }
 
+
+function ProjectWorkspaceUnavailable() {
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      <BackLink href="/admin/listings" label="Back to Listing Management" />
+      <Card>
+        <SectionHeading title="Project Workspace Unavailable">
+          The operational project workspace could not load live database data. Demo fallback is disabled for this admin operations view so participant and payment state cannot be mistaken for real records.
+        </SectionHeading>
+        <p className="text-sm leading-6 text-slate-600">Please verify database connectivity and try again.</p>
+      </Card>
+    </div>
+  );
+}
+
 export default async function ProjectWorkspacePage({ params }: { params: { slug: string } }) {
-  const project = await getAdminProjectWorkspaceBySlug(params.slug);
+  let project: ProjectWorkspace | null = null;
+
+  try {
+    project = await getAdminProjectWorkspaceBySlug(params.slug);
+  } catch (error) {
+    console.error("Project workspace unavailable", error);
+    return <ProjectWorkspaceUnavailable />;
+  }
 
   if (!project) notFound();
 
