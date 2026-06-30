@@ -131,6 +131,36 @@ function distributionFindingCopy(code: string, message: string) {
 const activeDistributionBatchStatuses = new Set(["Draft", "Approved", "Processing", "Completed"]);
 
 function DistributionPreviewSection({ project, latestSettlement }: { project: ProjectWorkspace; latestSettlement: ProjectWorkspace["settlements"][number] | undefined }) {
+  const activeBatch = project.distributionBatches.find((batch) => latestSettlement && batch.settlementId === latestSettlement.id && activeDistributionBatchStatuses.has(String(batch.status)));
+
+  if (activeBatch) {
+    return (
+      <Card>
+        <SectionHeading title="Distributions">Draft distribution batch has been saved for this settlement.</SectionHeading>
+        <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
+          A draft distribution batch has already been saved. New preview generation is disabled to prevent duplicate distributions.
+        </div>
+        <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
+          <SectionHeading title="Draft Batch Summary">This draft batch is internal and not visible to members.</SectionHeading>
+          <InfoGrid items={[
+            { label: "Batch Ref", value: activeBatch.batchRef },
+            { label: "Status", value: formatEnumLabel(String(activeBatch.status)) },
+            { label: "Total Members", value: String(activeBatch.totalMembers ?? 0) },
+            { label: "Total Final Distribution", value: nullableCurrency(activeBatch.totalFinalDistribution) },
+            { label: "Pending Count", value: String(activeBatch.pendingCount ?? 0) },
+            { label: "Created At", value: formatDate(activeBatch.createdAt) },
+            { label: "Created By", value: activeBatch.createdBy?.email || "Not recorded" },
+            { label: "Settlement Ref/ID", value: activeBatch.settlementId || latestSettlement?.id || "Not recorded" },
+          ]} />
+        </div>
+        <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+          <SaveDraftDistributionBatchForm campaignId={project.id} settlementId={latestSettlement?.id} disabled saved />
+          <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution and Mark Paid remain disabled for later phases. No payout has been approved or executed.</p>
+        </div>
+      </Card>
+    );
+  }
+
   const preview = calculateDistributionPreview({
     campaign: { id: project.id, title: project.title, currency: "MYR" },
     settlement: latestSettlement ? {
@@ -172,7 +202,6 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
     ["Profit Distribution", preview.reconciliation.profitDistribution],
     ["Final Distribution", preview.reconciliation.finalDistributionTotal],
   ] as const;
-  const activeBatch = project.distributionBatches.find((batch) => latestSettlement && batch.settlementId === latestSettlement.id && activeDistributionBatchStatuses.has(String(batch.status)));
   const isSettlementLocked = latestSettlement ? String(latestSettlement.calculationStatus) === "Locked" : false;
   const isReconciled = Object.values(preview.summary.reconciliationDifferences).every((difference) => Number(difference) === 0);
   const canSaveDraftBatch = isSettlementLocked && preview.summary.isPreviewValid && blockers.length === 0 && preview.rows.length > 0 && isReconciled && !activeBatch;
@@ -226,19 +255,6 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
         <TableWrap><thead><tr><Th>Pool</Th><Th>Source Pool</Th><Th>Allocated</Th><Th>Difference</Th><Th>Status</Th></tr></thead><tbody>{reconciliationRows.map(([label, line]) => <tr key={label} className="border-t border-slate-100"><Td>{label}</Td><Td>{moneyFromPreview(line.source)}</Td><Td>{moneyFromPreview(line.allocated)}</Td><Td>{moneyFromPreview(line.difference)}</Td><Td><StatusBadge status={reconciliationStatus(line)} /></Td></tr>)}</tbody></TableWrap>
       </div>
 
-      {activeBatch ? <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
-        <SectionHeading title="Draft Batch Summary">This draft batch is internal and not visible to members.</SectionHeading>
-        <InfoGrid items={[
-          { label: "Batch Ref", value: activeBatch.batchRef },
-          { label: "Status", value: formatEnumLabel(String(activeBatch.status)) },
-          { label: "Total Members", value: String(activeBatch.totalMembers ?? 0) },
-          { label: "Total Final Distribution", value: nullableCurrency(activeBatch.totalFinalDistribution) },
-          { label: "Pending Count", value: String(activeBatch.pendingCount ?? 0) },
-          { label: "Created At", value: formatDate(activeBatch.createdAt) },
-          { label: "Created By", value: activeBatch.createdBy?.email || "Not recorded" },
-          { label: "Settlement Ref/ID", value: activeBatch.settlementId || latestSettlement?.id || "Not recorded" },
-        ]} />
-      </div> : null}
 
       <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
         <SaveDraftDistributionBatchForm campaignId={project.id} settlementId={latestSettlement?.id} disabled={!canSaveDraftBatch} saved={Boolean(activeBatch)} />
