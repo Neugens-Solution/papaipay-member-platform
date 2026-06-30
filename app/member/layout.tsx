@@ -1,5 +1,7 @@
 import { MemberShell } from "@/components/member/MemberShell";
+import { requireMember } from "@/lib/auth/guards";
 
-export default function MemberLayout({ children }: { children: React.ReactNode }) {
-  return <MemberShell>{children}</MemberShell>;
+export default async function MemberLayout({ children }: { children: React.ReactNode }) {
+  const { user, member } = await requireMember();
+  return <MemberShell identity={{ name: member.fullName, email: user.email }}>{children}</MemberShell>;
 }

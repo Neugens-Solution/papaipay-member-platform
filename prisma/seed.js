@@ -1,8 +1,19 @@
 const { PrismaClient } = require('@prisma/client')
+const { randomBytes, scrypt } = require('crypto')
+const { promisify } = require('util')
+
+const scryptAsync = promisify(scrypt)
+
+async function hashPassword(password) {
+  const salt = randomBytes(16).toString('base64url')
+  const derivedKey = await scryptAsync(password, salt, 64)
+  return `scrypt$${salt}$${derivedKey.toString('base64url')}`
+}
 
 const prisma = new PrismaClient()
 
 async function main() {
+  const demoPasswordHash = await hashPassword(process.env.SEED_DEMO_PASSWORD || 'PapaipayDemo123!')
   const permissions = [
     { key: 'campaign.read', description: 'View campaign records' },
     { key: 'campaign.manage', description: 'Manage campaign setup records' },
@@ -36,8 +47,8 @@ async function main() {
 
   const adminUser = await prisma.user.upsert({
     where: { email: 'admin@example.local' },
-    update: { status: 'Active' },
-    create: { email: 'admin@example.local', status: 'Active', authProvider: 'future-auth-provider' },
+    update: { status: 'Active', passwordHash: demoPasswordHash, authProvider: 'seed-demo' },
+    create: { email: 'admin@example.local', status: 'Active', authProvider: 'seed-demo', passwordHash: demoPasswordHash },
   })
 
   await prisma.adminProfile.upsert({
@@ -55,8 +66,8 @@ async function main() {
 
   const memberUser = await prisma.user.upsert({
     where: { email: 'member@example.local' },
-    update: { status: 'Active' },
-    create: { email: 'member@example.local', phone: '+60120000001', status: 'Active', authProvider: 'future-auth-provider' },
+    update: { status: 'Active', passwordHash: demoPasswordHash, authProvider: 'seed-demo' },
+    create: { email: 'member@example.local', phone: '+60120000001', status: 'Active', authProvider: 'seed-demo', passwordHash: demoPasswordHash },
   })
 
   const member = await prisma.member.upsert({

@@ -1,8 +1,8 @@
 import { db } from "@/lib/db";
+import { requireMember } from "@/lib/auth/guards";
 import { portfolioRecords } from "@/lib/memberMockData";
 import { decimalToNumber, formatDate } from "@/lib/utils/formatters";
 
-const DEMO_MEMBER_REF = process.env.DEMO_MEMBER_REF || "MEM-000001";
 
 type ParticipationWithRelations = Awaited<ReturnType<typeof getMemberParticipationsRaw>>[number];
 
@@ -11,11 +11,11 @@ function statusLabel(status: string) {
   return status;
 }
 
-async function getMemberParticipationsRaw() {
+async function getMemberParticipationsRaw(memberId: string) {
   if (!process.env.DATABASE_URL) return [];
 
   return db.participation.findMany({
-    where: { member: { memberRef: DEMO_MEMBER_REF } },
+    where: { memberId },
     orderBy: { createdAt: "desc" },
     include: {
       campaign: { include: { propertyDetail: true } },
@@ -27,8 +27,9 @@ async function getMemberParticipationsRaw() {
 
 export async function getMemberParticipations() {
   try {
-    const records = await getMemberParticipationsRaw();
-    if (records.length === 0 && !process.env.DATABASE_URL) return portfolioRecords.map((record, index) => ({
+    const { member } = await requireMember();
+    const records = await getMemberParticipationsRaw(member.id);
+    if (records.length === 0 && !process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return portfolioRecords.map((record, index) => ({
       ...record,
       status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
       estimatedYield: "18.0% p.a.",
@@ -59,6 +60,7 @@ export async function getMemberParticipations() {
       };
     });
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn("Falling back to demo portfolio records because database reads are unavailable.", error);
     return portfolioRecords.map((record, index) => ({
       ...record,
@@ -72,10 +74,11 @@ export async function getMemberParticipations() {
 }
 
 export async function getMemberParticipationById(id: string) {
+  const { member } = await requireMember();
   if (!process.env.DATABASE_URL) return null;
 
   return db.participation.findFirst({
-    where: { id, member: { memberRef: DEMO_MEMBER_REF } },
+    where: { id, memberId: member.id },
     include: {
       member: true,
       campaign: { include: { propertyDetail: true } },

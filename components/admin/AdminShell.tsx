@@ -19,8 +19,10 @@ function activePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminShell({ children }: { children: React.ReactNode }) {
+export function AdminShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string; role?: string | null } }) {
   const pathname = usePathname();
+  const displayName = identity.name || identity.email;
+  const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "AD";
 
   return (
     <div className="min-h-screen bg-[#f7f8f5] text-papaipay-ink">
@@ -46,14 +48,14 @@ export function AdminShell({ children }: { children: React.ReactNode }) {
               <div className="ml-auto flex items-center gap-2">
                 <HeaderIconLink href="/admin/activity-log" label="Notifications" icon={BellIcon} hasUnread />
                 <details className="group relative">
-                  <summary aria-label="Admin profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">SA</summary>
+                  <summary aria-label="Admin profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
                     <div className="px-3 py-2">
-                      <p className="text-sm font-bold text-papaipay-ink">Sarah Lim</p>
-                      <p className="mt-1 text-xs text-slate-500">Super Admin</p>
+                      <p className="text-sm font-bold text-papaipay-ink">{displayName}</p>
+                      <p className="mt-1 text-xs text-slate-500">{identity.role || identity.email}</p>
                     </div>
                     <Link href="/admin/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">Admin Profile</Link>
-                    <Link href="/" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">Portal Access</Link>
+                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">Logout</Link>
                   </div>
                 </details>
               </div>
