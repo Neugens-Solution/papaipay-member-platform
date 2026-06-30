@@ -48,9 +48,15 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
     if (!payment) throw new Error("Pending manual payment was not found for this participation.");
 
     if (participation.participationStatus === ParticipationStatus.Confirmed && payment.status === PaymentStatus.Succeeded) return;
-    if ([ParticipationStatus.Cancelled, ParticipationStatus.Refunded].includes(participation.participationStatus)) throw new Error("Cancelled or refunded participations cannot be confirmed.");
+    if (
+      participation.participationStatus === ParticipationStatus.Cancelled ||
+      participation.participationStatus === ParticipationStatus.Refunded
+    ) throw new Error("Cancelled or refunded participations cannot be confirmed.");
     if (participation.participationStatus !== ParticipationStatus.PendingPayment) throw new Error("Only pending payment participations can be manually confirmed.");
-    if (![PaymentStatus.Pending, PaymentStatus.Processing].includes(payment.status)) throw new Error(`Manual confirmation is not allowed for ${payment.status} payments.`);
+    if (
+      payment.status !== PaymentStatus.Pending &&
+      payment.status !== PaymentStatus.Processing
+    ) throw new Error(`Manual confirmation is not allowed for ${payment.status} payments.`);
 
     const participationAmount = Number(participation.participationAmount);
     if (submittedAmount !== participationAmount) throw new Error("Manual confirmation amount must exactly equal the participation amount for Phase 1.");
