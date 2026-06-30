@@ -48,19 +48,16 @@ function MoneyInput({
   name,
   label,
   defaultValue,
-  helpText,
 }: {
   id: string;
   name: keyof FinancialSummaryFormValues;
   label: string;
   defaultValue: string;
-  helpText?: string;
 }) {
   return (
     <div>
       <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
       <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="Enter amount" />
-      {helpText ? <p className="mt-1 text-xs font-semibold text-slate-400">{helpText}</p> : null}
     </div>
   );
 }
@@ -75,7 +72,6 @@ function PercentInput({ id, name, label, defaultValue }: { id: string; name: key
 }
 
 const initialState: ProjectFinancialSummaryState = { status: "idle", message: null, errors: [] };
-const zeroValueHelpText = "Enter 0 to save RM0. Leave blank only when not available.";
 
 export function FinancialSummaryForm({ campaignId, mode, initialValues, calculationStatus }: FinancialSummaryFormProps) {
   const [state, formAction] = useFormState(saveProjectFinancialSummaryAction, initialState);
@@ -101,6 +97,7 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
         <div>
           <p className="font-bold text-papaipay-ink">{mode === "update" ? "Update Financial Summary" : "Create Financial Summary"}</p>
           <p className="mt-1 text-sm text-slate-500">Enter admin-approved summary values only. Values are saved exactly as entered.</p>
+          <p className="mt-1 text-xs font-semibold text-slate-400">Enter 0 where the approved amount is RM0. Leave fields blank only when the value is not available.</p>
         </div>
         <span className="inline-flex whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-papaipay-green">
           {mode === "update" ? "Existing summary" : "New summary"}
@@ -128,16 +125,16 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         <MoneyInput id="purchasePrice" name="purchasePrice" label="Acquisition Price" defaultValue={initialValues.purchasePrice} />
         <MoneyInput id="salePrice" name="salePrice" label="Sale Price / Disposal Price" defaultValue={initialValues.salePrice} />
-        <MoneyInput id="totalCostsSnapshot" name="totalCostsSnapshot" label="Total Approved Costs" defaultValue={initialValues.totalCostsSnapshot} helpText={zeroValueHelpText} />
-        <MoneyInput id="grossProfitSnapshot" name="grossProfitSnapshot" label="Gross Return" defaultValue={initialValues.grossProfitSnapshot} helpText={zeroValueHelpText} />
-        <MoneyInput id="netProfitSnapshot" name="netProfitSnapshot" label="Net Return" defaultValue={initialValues.netProfitSnapshot} helpText={zeroValueHelpText} />
+        <MoneyInput id="totalCostsSnapshot" name="totalCostsSnapshot" label="Total Approved Costs" defaultValue={initialValues.totalCostsSnapshot} />
+        <MoneyInput id="grossProfitSnapshot" name="grossProfitSnapshot" label="Gross Return" defaultValue={initialValues.grossProfitSnapshot} />
+        <MoneyInput id="netProfitSnapshot" name="netProfitSnapshot" label="Net Return" defaultValue={initialValues.netProfitSnapshot} />
         <PercentInput id="memberProfitDistributionPercentage" name="memberProfitDistributionPercentage" label="Member Return Share %" defaultValue={initialValues.memberProfitDistributionPercentage} />
         <PercentInput id="platformProfitSharePercentage" name="platformProfitSharePercentage" label="Platform Return Share %" defaultValue={initialValues.platformProfitSharePercentage} />
-        <MoneyInput id="platformShare" name="platformShare" label="Platform Share Amount" defaultValue={initialValues.platformShare} helpText={zeroValueHelpText} />
-        <MoneyInput id="principalReturnPool" name="principalReturnPool" label="Principal Return Pool" defaultValue={initialValues.principalReturnPool} helpText={zeroValueHelpText} />
-        <MoneyInput id="holdingReturnPool" name="holdingReturnPool" label="Holding Return Pool" defaultValue={initialValues.holdingReturnPool} helpText={zeroValueHelpText} />
-        <MoneyInput id="profitDistributionPool" name="profitDistributionPool" label="Member Profit Distribution Pool" defaultValue={initialValues.profitDistributionPool} helpText={zeroValueHelpText} />
-        <MoneyInput id="finalDistributionPool" name="finalDistributionPool" label="Final Distribution Pool" defaultValue={initialValues.finalDistributionPool} helpText={zeroValueHelpText} />
+        <MoneyInput id="platformShare" name="platformShare" label="Platform Share Amount" defaultValue={initialValues.platformShare} />
+        <MoneyInput id="principalReturnPool" name="principalReturnPool" label="Principal Return Pool" defaultValue={initialValues.principalReturnPool} />
+        <MoneyInput id="holdingReturnPool" name="holdingReturnPool" label="Holding Return Pool" defaultValue={initialValues.holdingReturnPool} />
+        <MoneyInput id="profitDistributionPool" name="profitDistributionPool" label="Member Profit Distribution Pool" defaultValue={initialValues.profitDistributionPool} />
+        <MoneyInput id="finalDistributionPool" name="finalDistributionPool" label="Final Distribution Pool" defaultValue={initialValues.finalDistributionPool} />
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="saleCompletedAt">Sale Completed Date</label>
           <input id="saleCompletedAt" name="saleCompletedAt" type="date" defaultValue={initialValues.saleCompletedAt} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" />
