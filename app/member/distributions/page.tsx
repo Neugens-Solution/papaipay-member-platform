@@ -2,6 +2,8 @@ import Link from "next/link";
 import { ContentCard, MetricCard, StatusBadge } from "@/components/member/Cards";
 import { distributionRecords, formatRM } from "@/lib/memberMockData";
 
+const visibleDistributionRecords = distributionRecords.filter((record) => ["Paid", "Completed"].includes(record.status));
+
 const distributionStats = [
   { label: "Distribution Received", value: formatRM(8500), helper: "Paid records" },
   { label: "Distribution Processing", value: formatRM(3200), helper: "In payment review" },
@@ -27,7 +29,7 @@ export default function Page() {
           <h2 className="text-base font-bold">Distribution List</h2>
         </div>
         <div className="divide-y divide-slate-100">
-          {distributionRecords.map((record) => (
+          {visibleDistributionRecords.map((record) => (
             <div key={record.slug} className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr_1fr_0.9fr_0.9fr_auto] lg:items-center">
               <div>
                 <p className="text-xs font-bold text-slate-400">{record.distributionId} • {record.distributionBatchId} • {record.campaignId}</p><p className="text-sm font-bold text-papaipay-ink">{record.propertyName}</p>

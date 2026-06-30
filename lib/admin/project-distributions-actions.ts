@@ -8,7 +8,7 @@ import { calculateDistributionPreview, type DistributionPreviewResult } from "@/
 import { makeAuditRef } from "@/lib/admin/listings/workspace/audit";
 import { toJsonValue } from "@/lib/admin/listings/workspace/types";
 
-export type SaveDraftDistributionBatchState = {
+export type DistributionBatchActionState = {
   status: "idle" | "success" | "error";
   message: string | null;
   errors: string[];
@@ -75,7 +75,7 @@ function buildAuditSnapshot(preview: DistributionPreviewResult, settlement: { id
   };
 }
 
-export async function saveDraftDistributionBatchAction(_previousState: SaveDraftDistributionBatchState, formData: FormData): Promise<SaveDraftDistributionBatchState> {
+export async function saveDraftDistributionBatchAction(_previousState: DistributionBatchActionState, formData: FormData): Promise<DistributionBatchActionState> {
   const { user } = await requireAdmin();
   const campaignId = requiredString(formData, "campaignId");
   const settlementId = requiredString(formData, "settlementId");
@@ -211,6 +211,130 @@ export async function saveDraftDistributionBatchAction(_previousState: SaveDraft
     return { status: "success", message: "Draft distribution batch saved. No payout was approved or executed.", errors: [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Draft distribution batch could not be saved.";
+    return { status: "error", message, errors: [message] };
+  }
+}
+
+function buildApprovalSnapshot(batch: {
+  status: unknown;
+  lockedStatus: boolean;
+  approvedAt: Date | null;
+  approvedById: string | null;
+  totalMembers: number | null;
+  totalFinalDistribution: unknown;
+  pendingCount: number | null;
+  processingCount: number | null;
+  paidCount: number | null;
+}, counts: { rowCount: number; pendingCount: number; processingCount: number; paidCount: number }, rowTotal: string) {
+  return {
+    status: String(batch.status),
+    lockedStatus: batch.lockedStatus,
+    approvedAt: batch.approvedAt?.toISOString() ?? null,
+    approvedById: batch.approvedById,
+    counts: {
+      totalMembers: batch.totalMembers,
+      pendingCount: batch.pendingCount,
+      processingCount: batch.processingCount,
+      paidCount: batch.paidCount,
+      rowCount: counts.rowCount,
+      rowPendingCount: counts.pendingCount,
+      rowProcessingCount: counts.processingCount,
+      rowPaidCount: counts.paidCount,
+    },
+    totals: {
+      batchTotalFinalDistribution: String(batch.totalFinalDistribution ?? "0"),
+      rowFinalDistributionTotal: rowTotal,
+    },
+  };
+}
+
+export async function approveDistributionBatchAction(_previousState: DistributionBatchActionState, formData: FormData): Promise<DistributionBatchActionState> {
+  const { user } = await requireAdmin();
+  const campaignId = requiredString(formData, "campaignId");
+  const settlementId = requiredString(formData, "settlementId");
+  const batchId = requiredString(formData, "batchId");
+  if (!campaignId || !settlementId || !batchId) return { status: "error", message: "Project, settlement, and batch are required.", errors: ["Project, settlement, and batch are required."] };
+
+  try {
+    const slug = await db.$transaction(async (tx) => {
+      const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { id: true, slug: true } });
+      if (!campaign) throw new Error("Project could not be found.");
+
+      const latestSettlement = await tx.campaignSettlement.findFirst({
+        where: { campaignId },
+        orderBy: { createdAt: "desc" },
+        select: { id: true, calculationStatus: true, finalDistributionPool: true },
+      });
+      if (!latestSettlement) throw new Error("No settlement exists for this project.");
+      if (latestSettlement.id !== settlementId) throw new Error("Submitted settlement is not the latest settlement. Refresh the workspace and try again.");
+      if (latestSettlement.calculationStatus !== SettlementCalculationStatus.Locked) throw new Error("Settlement must be locked before approving a distribution batch.");
+
+      const batch = await tx.distributionBatch.findUnique({
+        where: { id: batchId },
+        include: { distributions: true },
+      });
+      if (!batch) throw new Error("Distribution batch could not be found.");
+      if (batch.campaignId !== campaignId) throw new Error("Distribution batch does not belong to this project.");
+      if (batch.settlementId !== settlementId || batch.settlementId !== latestSettlement.id) throw new Error("Distribution batch is not attached to the latest submitted settlement.");
+      if (batch.status !== DistributionBatchStatus.Draft) throw new Error("Only Draft distribution batches can be approved.");
+      if (batch.distributions.length === 0) throw new Error("Distribution batch has no distribution rows.");
+
+      const duplicateBatch = await tx.distributionBatch.findFirst({
+        where: { id: { not: batchId }, campaignId, settlementId, status: { in: [...ACTIVE_BATCH_STATUSES] } },
+        select: { batchRef: true, status: true },
+      });
+      if (duplicateBatch) throw new Error(`Another active distribution batch already exists for this settlement (${duplicateBatch.batchRef}, ${duplicateBatch.status}).`);
+
+      const invalidStatusRow = batch.distributions.find((row) => row.status !== DistributionStatus.Pending);
+      if (invalidStatusRow) throw new Error(`Distribution row ${invalidStatusRow.distributionRef} is not Pending.`);
+      const payoutFieldRow = batch.distributions.find((row) => row.paymentDate || row.paymentReference || row.markedProcessingById || row.markedProcessingAt || row.markedPaidById || row.markedPaidAt);
+      if (payoutFieldRow) throw new Error(`Distribution row ${payoutFieldRow.distributionRef} already has payment or payout fields set.`);
+
+      const rowCount = batch.distributions.length;
+      const pendingCount = batch.distributions.filter((row) => row.status === DistributionStatus.Pending).length;
+      const processingCount = batch.distributions.filter((row) => row.status === DistributionStatus.Processing).length;
+      const paidCount = batch.distributions.filter((row) => row.status === DistributionStatus.Paid).length;
+      const rowTotalNumber = batch.distributions.reduce((sum, row) => sum + Number(row.finalDistributionTotal), 0);
+      const rowTotal = rowTotalNumber.toFixed(2);
+
+      if (batch.totalMembers !== rowCount) throw new Error("Batch totalMembers does not match distribution row count.");
+      if (batch.pendingCount !== rowCount || pendingCount !== rowCount) throw new Error("Batch pending count does not match distribution row count.");
+      if ((batch.processingCount ?? 0) !== 0 || processingCount !== 0) throw new Error("Processing distribution count must be zero before approval.");
+      if ((batch.paidCount ?? 0) !== 0 || paidCount !== 0) throw new Error("Paid distribution count must be zero before approval.");
+      if (!moneyEqual(rowTotal, String(batch.totalFinalDistribution ?? "0"))) throw new Error("Distribution row total does not match batch total final distribution.");
+      if (!moneyEqual(rowTotal, String(latestSettlement.finalDistributionPool ?? "0"))) throw new Error("Distribution row total does not match settlement final distribution pool.");
+
+      const beforeSnapshot = buildApprovalSnapshot(batch, { rowCount, pendingCount, processingCount, paidCount }, rowTotal);
+      const approvedAt = new Date();
+      const updatedBatch = await tx.distributionBatch.update({
+        where: { id: batchId },
+        data: { status: DistributionBatchStatus.Approved, lockedStatus: true, approvedAt, approvedById: user.id },
+      });
+      const afterSnapshot = {
+        ...buildApprovalSnapshot(updatedBatch, { rowCount, pendingCount, processingCount, paidCount }, rowTotal),
+        rowConfirmation: "All distribution rows remain Pending.",
+        payoutConfirmation: "No payout fields were set and no payout was executed.",
+      };
+
+      await tx.auditLog.create({
+        data: {
+          auditRef: makeAuditRef(),
+          actorId: user.id,
+          action: "distribution.batch.approved",
+          entityType: "DistributionBatch",
+          entityId: batch.id,
+          beforeSnapshot: toJsonValue(beforeSnapshot) as Prisma.InputJsonValue,
+          afterSnapshot: toJsonValue(afterSnapshot) as Prisma.InputJsonValue,
+        },
+      });
+
+      return campaign.slug;
+    }, { timeout: 10_000 });
+
+    revalidatePath(`/admin/projects/${slug}`);
+    return { status: "success", message: "Distribution batch approved for future processing. No payout was executed.", errors: [] };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Distribution batch could not be approved.";
     return { status: "error", message, errors: [message] };
   }
 }

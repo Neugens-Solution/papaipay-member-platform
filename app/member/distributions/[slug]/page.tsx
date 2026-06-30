@@ -4,13 +4,14 @@ import { ContentCard, Info, StatusBadge } from "@/components/member/Cards";
 import { distributionRecords, formatRM } from "@/lib/memberMockData";
 
 const timeline = ["Pending", "Processing", "Paid", "Completed"];
+const visibleDistributionRecords = distributionRecords.filter((record) => ["Paid", "Completed"].includes(record.status));
 
 export function generateStaticParams() {
-  return distributionRecords.map((record) => ({ slug: record.slug }));
+  return visibleDistributionRecords.map((record) => ({ slug: record.slug }));
 }
 
 export default function Page({ params }: { params: { slug: string } }) {
-  const record = distributionRecords.find((item) => item.slug === params.slug);
+  const record = visibleDistributionRecords.find((item) => item.slug === params.slug);
   if (!record) notFound();
 
   const currentIndex = timeline.indexOf(record.status);

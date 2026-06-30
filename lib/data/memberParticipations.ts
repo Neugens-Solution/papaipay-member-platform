@@ -20,7 +20,7 @@ async function getMemberParticipationsRaw(memberId: string) {
     include: {
       campaign: { include: { propertyDetail: true } },
       payments: { orderBy: { createdAt: "desc" }, take: 1 },
-      distributions: { where: { status: { not: "Pending" }, distributionBatch: { status: { not: "Draft" } } }, orderBy: { createdAt: "desc" }, take: 1 },
+      distributions: { where: { status: "Paid", distributionBatch: { status: "Completed" } }, orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
 }
