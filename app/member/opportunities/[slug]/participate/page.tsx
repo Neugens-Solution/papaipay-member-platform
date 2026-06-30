@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import { ContentCard } from "@/components/member/Cards";
 import { formatRM } from "@/lib/memberMockData";
-import { getMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
+import { getRealMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
 
 function parseAmount(value?: string) {
   if (!value) return 0;
@@ -10,8 +9,8 @@ function parseAmount(value?: string) {
 }
 
 export default async function ParticipatePage({ params, searchParams }: { params: { slug: string }; searchParams?: { amount?: string } }) {
-  const opportunity = await getMemberCampaignBySlug(params.slug);
-  if (!opportunity) notFound();
+  const opportunity = await getRealMemberCampaignBySlug(params.slug);
+  if (!opportunity) return <ParticipationUnavailable />;
   const amount = parseAmount(searchParams?.amount);
   const hasAmount = typeof searchParams?.amount === "string";
   const error = hasAmount && (!Number.isFinite(amount) || amount <= 0)
@@ -51,7 +50,9 @@ export default async function ParticipatePage({ params, searchParams }: { params
   );
 }
 
-function Summary({ opportunity }: { opportunity: NonNullable<Awaited<ReturnType<typeof getMemberCampaignBySlug>>> }) {
+function Summary({ opportunity }: { opportunity: NonNullable<Awaited<ReturnType<typeof getRealMemberCampaignBySlug>>> }) {
   return <ContentCard><h2 className="text-lg font-bold">Opportunity Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Opportunity" value={opportunity.title} /><Row label="Location" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Estimated Yield" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
 }
 function Row({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-4 py-3"><dt className="text-slate-500">{label}</dt><dd className="text-right font-bold text-papaipay-ink">{value}</dd></div>; }
+
+function ParticipationUnavailable() { return <div className="mx-auto max-w-3xl space-y-5"><ContentCard><h1 className="text-2xl font-bold text-papaipay-ink">Participation unavailable</h1><p className="mt-3 text-sm leading-6 text-slate-600">This opportunity could not be loaded from the live database, so participation is unavailable right now. Please try again later or choose another opportunity.</p><Link href="/member/opportunities" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Back to Opportunities</Link></ContentCard></div>; }

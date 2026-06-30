@@ -59,16 +59,18 @@ async function resolveDevelopmentDemoMemberId(tx: Prisma.TransactionClient) {
 
 async function createParticipationRecord({
   campaignId,
+  campaignSlug,
   amount,
   authenticatedMember,
 }: {
   campaignId: string;
+  campaignSlug?: string;
   amount: number;
   authenticatedMember: AuthenticatedMember;
 }) {
   return db.$transaction(async (tx) => {
-    const campaign = await tx.campaign.findUnique({
-      where: { id: campaignId },
+    const campaign = await tx.campaign.findFirst({
+      where: { id: campaignId, ...(campaignSlug ? { slug: campaignSlug } : {}) },
       select: {
         id: true,
         campaignRef: true,
@@ -208,19 +210,35 @@ async function createParticipationRecord({
   });
 }
 
+export async function createParticipationAction(formData: FormData): Promise<void>;
 export async function createParticipationAction(
   _state: ParticipationFormState,
   formData: FormData,
-): Promise<ParticipationFormState> {
+): Promise<ParticipationFormState>;
+export async function createParticipationAction(
+  stateOrFormData: ParticipationFormState | FormData,
+  maybeFormData?: FormData,
+): Promise<ParticipationFormState | void> {
+  const directSubmit = stateOrFormData instanceof FormData;
+  const formData = directSubmit ? stateOrFormData : maybeFormData;
+
+  if (!formData) {
+    if (directSubmit) throw new Error("Participation form data is required.");
+    return { error: "Participation form data is required." };
+  }
+
   const campaignId = formData.get("campaignId");
+  const campaignSlug = formData.get("campaignSlug");
   const parsedAmount = parseAmount(formData.get("amount"));
   const authenticatedMember = await requireMember();
 
   if (typeof campaignId !== "string" || !campaignId) {
+    if (directSubmit) throw new Error("Campaign is required.");
     return { error: "Campaign is required." };
   }
 
   if (parsedAmount.error || parsedAmount.amount === undefined) {
+    if (directSubmit) throw new Error(parsedAmount.error || "Participation amount is required.");
     return { error: parsedAmount.error };
   }
 
@@ -229,35 +247,22 @@ export async function createParticipationAction(
   try {
     result = await createParticipationRecord({
       campaignId,
+      campaignSlug: typeof campaignSlug === "string" && campaignSlug ? campaignSlug : undefined,
       amount: parsedAmount.amount,
       authenticatedMember,
     });
   } catch (error) {
+    if (directSubmit) throw error;
     return { error: error instanceof Error ? error.message : "Unable to create participation." };
   }
 
   revalidatePath("/member/portfolio");
   revalidatePath(`/member/opportunities/${result.campaignSlug}`);
   revalidatePath(`/admin/projects/${result.campaignSlug}`);
+
+  if (formData.get("redirectTo") === "participationSuccess") {
+    redirect(`/member/opportunities/${result.campaignSlug}/participate/success?participationId=${result.participationId}`);
+  }
+
   redirect(`/member/participations/${result.participationId}`);
-}
-
-export async function confirmParticipationFlowAction(formData: FormData): Promise<void> {
-  const campaignId = formData.get("campaignId");
-  const parsedAmount = parseAmount(formData.get("amount"));
-  const authenticatedMember = await requireMember();
-
-  if (typeof campaignId !== "string" || !campaignId) throw new Error("Campaign is required.");
-  if (parsedAmount.error || parsedAmount.amount === undefined) throw new Error(parsedAmount.error || "Participation amount is required.");
-
-  const result = await createParticipationRecord({
-    campaignId,
-    amount: parsedAmount.amount,
-    authenticatedMember,
-  });
-
-  revalidatePath("/member/portfolio");
-  revalidatePath(`/member/opportunities/${result.campaignSlug}`);
-  revalidatePath(`/admin/projects/${result.campaignSlug}`);
-  redirect(`/member/opportunities/${result.campaignSlug}/participate/success?participationId=${result.participationId}`);
 }

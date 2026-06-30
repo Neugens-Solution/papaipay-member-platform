@@ -284,6 +284,62 @@ export async function getMemberCampaigns() {
   }
 }
 
+export async function getRealMemberCampaignBySlug(slug: string) {
+  if (!process.env.DATABASE_URL) return null;
+
+  try {
+    const campaign = await db.campaign.findFirst({
+      where: {
+        slug,
+        publishStatus: "Published",
+        visibility: "MemberVisible",
+      },
+      include: {
+        propertyDetail: true,
+        media: {
+          include: {
+            fileAsset: true,
+          },
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+        content: true,
+        documents: {
+          include: {
+            fileAsset: true,
+          },
+        },
+        updates: {
+          where: {
+            publishedAt: { not: null },
+            visibility: "MemberVisible",
+          },
+          orderBy: {
+            publishedAt: "desc",
+          },
+        },
+        faqs: {
+          orderBy: {
+            sortOrder: "asc",
+          },
+        },
+        _count: { select: { participations: true } },
+      },
+    });
+
+    if (!campaign) return null;
+
+    return toOpportunity(campaign);
+  } catch (error) {
+    console.warn(
+      "Member participation is unavailable because the real campaign could not be loaded.",
+      error,
+    );
+    return null;
+  }
+}
+
 export async function getMemberCampaignBySlug(slug: string) {
   if (!process.env.DATABASE_URL) return demoCampaignBySlug(slug);
 
