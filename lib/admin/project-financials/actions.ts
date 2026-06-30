@@ -13,6 +13,8 @@ export type ProjectFinancialSummaryState = {
   errors: string[];
 };
 
+export type ProjectFinancialStatusActionState = ProjectFinancialSummaryState;
+
 function requiredString(formData: FormData, key: string) {
   const value = formData.get(key);
   return typeof value === "string" ? value.trim() : "";
@@ -98,6 +100,10 @@ type FinancialStatusTransition = {
   actorField: "reviewedById" | "approvedById" | "lockedById";
 };
 
+function isMissingPoolValue(value: unknown) {
+  return value === null || value === undefined;
+}
+
 function validatePoolsForApproval(settlement: {
   principalReturnPool: unknown;
   holdingReturnPool: unknown;
@@ -112,7 +118,7 @@ function validatePoolsForApproval(settlement: {
   ] as const;
 
   const values = requiredPools.map(([label, value]) => {
-    if (value === null || value === undefined) throw new Error(`${label} is required before approval or locking.`);
+    if (isMissingPoolValue(value)) throw new Error(`${label} is required before approval or locking.`);
     const numeric = Number(value);
     if (!Number.isFinite(numeric)) throw new Error(`${label} must be a valid amount.`);
     if (numeric < 0) throw new Error(`${label} cannot be negative.`);
@@ -125,7 +131,7 @@ function validatePoolsForApproval(settlement: {
   }
 }
 
-async function transitionProjectFinancialsAction(formData: FormData, transition: FinancialStatusTransition): Promise<void> {
+async function transitionProjectFinancialsAction(formData: FormData, transition: FinancialStatusTransition): Promise<string> {
   const { user } = await requireAdmin();
   const campaignId = requiredString(formData, "campaignId");
 
@@ -167,34 +173,70 @@ async function transitionProjectFinancialsAction(formData: FormData, transition:
   });
 
   revalidatePath(`/admin/projects/${slug}`);
+  return slug;
 }
 
-export async function markProjectFinancialsReviewedAction(formData: FormData): Promise<void> {
-  await transitionProjectFinancialsAction(formData, {
-    expectedStatus: SettlementCalculationStatus.Draft,
-    nextStatus: SettlementCalculationStatus.Reviewed,
-    action: "project.financials.reviewed",
-    timestampField: "reviewedAt",
-    actorField: "reviewedById",
-  });
+async function runFinancialStatusTransition(
+  formData: FormData,
+  transition: FinancialStatusTransition,
+  successMessage: string,
+): Promise<ProjectFinancialStatusActionState> {
+  try {
+    await transitionProjectFinancialsAction(formData, transition);
+    return { status: "success", message: successMessage, errors: [] };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Financial approval status could not be updated.";
+    return { status: "error", message, errors: [message] };
+  }
 }
 
-export async function approveProjectFinancialsAction(formData: FormData): Promise<void> {
-  await transitionProjectFinancialsAction(formData, {
-    expectedStatus: SettlementCalculationStatus.Reviewed,
-    nextStatus: SettlementCalculationStatus.Approved,
-    action: "project.financials.approved",
-    timestampField: "approvedAt",
-    actorField: "approvedById",
-  });
+export async function markProjectFinancialsReviewedAction(
+  _previousState: ProjectFinancialStatusActionState,
+  formData: FormData,
+): Promise<ProjectFinancialStatusActionState> {
+  return runFinancialStatusTransition(
+    formData,
+    {
+      expectedStatus: SettlementCalculationStatus.Draft,
+      nextStatus: SettlementCalculationStatus.Reviewed,
+      action: "project.financials.reviewed",
+      timestampField: "reviewedAt",
+      actorField: "reviewedById",
+    },
+    "Financials marked as reviewed.",
+  );
 }
 
-export async function lockProjectFinancialsAction(formData: FormData): Promise<void> {
-  await transitionProjectFinancialsAction(formData, {
-    expectedStatus: SettlementCalculationStatus.Approved,
-    nextStatus: SettlementCalculationStatus.Locked,
-    action: "project.financials.locked",
-    timestampField: "lockedAt",
-    actorField: "lockedById",
-  });
+export async function approveProjectFinancialsAction(
+  _previousState: ProjectFinancialStatusActionState,
+  formData: FormData,
+): Promise<ProjectFinancialStatusActionState> {
+  return runFinancialStatusTransition(
+    formData,
+    {
+      expectedStatus: SettlementCalculationStatus.Reviewed,
+      nextStatus: SettlementCalculationStatus.Approved,
+      action: "project.financials.approved",
+      timestampField: "approvedAt",
+      actorField: "approvedById",
+    },
+    "Financials approved.",
+  );
+}
+
+export async function lockProjectFinancialsAction(
+  _previousState: ProjectFinancialStatusActionState,
+  formData: FormData,
+): Promise<ProjectFinancialStatusActionState> {
+  return runFinancialStatusTransition(
+    formData,
+    {
+      expectedStatus: SettlementCalculationStatus.Approved,
+      nextStatus: SettlementCalculationStatus.Locked,
+      action: "project.financials.locked",
+      timestampField: "lockedAt",
+      actorField: "lockedById",
+    },
+    "Financials locked.",
+  );
 }

@@ -1,8 +1,8 @@
 import { notFound } from "next/navigation";
 import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import { FinancialApprovalStatusCard } from "@/components/admin/project-workspace/FinancialApprovalStatusCard";
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
-import { approveProjectFinancialsAction, lockProjectFinancialsAction, markProjectFinancialsReviewedAction } from "@/lib/admin/project-financials/actions";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
@@ -75,55 +75,6 @@ function StatusBadge({ status, fallback = "Not available" }: { status?: string |
   );
 }
 
-
-function actorLabel(user?: { email?: string | null } | null) {
-  return user?.email || "Unknown admin";
-}
-
-function financialStatusExplanation(status?: string | null) {
-  if (status === "Draft") return "Draft financials can be edited before admin review.";
-  if (status === "Reviewed") return "Reviewed financials can still be edited, but changes may require another review.";
-  if (status === "Approved") return "Approved financials are validated for distribution preview. Edits are blocked until a future reopen workflow exists.";
-  if (status === "Locked") return "Locked financials are ready for distribution preview and future batch processing. Edits are blocked.";
-  return "Create a financial summary to begin the approval workflow.";
-}
-
-function FinancialApprovalStatusCard({ campaignId, settlement }: { campaignId: string; settlement: ProjectWorkspace["settlements"][number] | undefined }) {
-  const status = settlement ? String(settlement.calculationStatus) : null;
-  const action = status === "Draft" ? markProjectFinancialsReviewedAction : status === "Reviewed" ? approveProjectFinancialsAction : status === "Approved" ? lockProjectFinancialsAction : null;
-  const actionLabel = status === "Draft" ? "Mark as Reviewed" : status === "Reviewed" ? "Approve Financials" : status === "Approved" ? "Lock Financials" : null;
-
-  return (
-    <div className="mt-6 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-papaipay-green">Financial Approval / Status</p>
-          <div className="mt-2 flex items-center gap-3">
-            <h3 className="text-lg font-black text-papaipay-ink">{status ? formatEnumLabel(status) : "No settlement"}</h3>
-            <StatusBadge status={status} fallback="Not started" />
-          </div>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{financialStatusExplanation(status)}</p>
-        </div>
-        {action && actionLabel ? (
-          <form action={action}>
-            <input type="hidden" name="campaignId" value={campaignId} />
-            <button type="submit" className="rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink">
-              {actionLabel}
-            </button>
-          </form>
-        ) : status === "Locked" ? (
-          <span className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-papaipay-green">Locked — no action available</span>
-        ) : null}
-      </div>
-      <div className="mt-5 grid gap-3 md:grid-cols-3">
-        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm"><span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Reviewed</span><span className="mt-1 block font-semibold text-slate-700">{settlement?.reviewedAt ? `${formatDate(settlement.reviewedAt)} by ${actorLabel(settlement.reviewedBy)}` : "Not reviewed"}</span></div>
-        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm"><span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Approved</span><span className="mt-1 block font-semibold text-slate-700">{settlement?.approvedAt ? `${formatDate(settlement.approvedAt)} by ${actorLabel(settlement.approvedBy)}` : "Not approved"}</span></div>
-        <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm"><span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Locked</span><span className="mt-1 block font-semibold text-slate-700">{settlement?.lockedAt ? `${formatDate(settlement.lockedAt)} by ${actorLabel(settlement.lockedBy)}` : "Not locked"}</span></div>
-      </div>
-    </div>
-  );
-}
-
 function dateInputValue(value?: Date | string | null) {
   if (!value) return "";
   const date = value instanceof Date ? value : new Date(value);
@@ -134,6 +85,10 @@ function dateInputValue(value?: Date | string | null) {
 function decimalInputValue(value: unknown) {
   if (value === null || value === undefined) return "";
   return String(value);
+}
+
+function nullableCurrency(value: unknown) {
+  return value === null || value === undefined ? "Not available" : formatCurrency(decimalToNumber(value));
 }
 
 function moneyFromPreview(value?: string | null) {
@@ -508,18 +463,18 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
           { label: "Collected Amount", value: formatCurrency(collected) },
           { label: "Funding Progress", value: `${Math.round(fundingProgress)}%` },
           { label: "Settlement Status", value: latestSettlement ? formatEnumLabel(String(latestSettlement.calculationStatus)) : "No settlement recorded" },
-          { label: "Acquisition Price", value: latestSettlement?.purchasePrice ? formatCurrency(decimalToNumber(latestSettlement.purchasePrice)) : "Not available" },
-          { label: "Sale Price / Disposal Price", value: latestSettlement?.salePrice ? formatCurrency(decimalToNumber(latestSettlement.salePrice)) : "Not available" },
-          { label: "Total Approved Costs", value: latestSettlement?.totalCostsSnapshot ? formatCurrency(decimalToNumber(latestSettlement.totalCostsSnapshot)) : "Not available" },
-          { label: "Gross Return", value: latestSettlement?.grossProfitSnapshot ? formatCurrency(decimalToNumber(latestSettlement.grossProfitSnapshot)) : "Not available" },
-          { label: "Net Return", value: latestSettlement?.netProfitSnapshot ? formatCurrency(decimalToNumber(latestSettlement.netProfitSnapshot)) : "Not available" },
+          { label: "Acquisition Price", value: nullableCurrency(latestSettlement?.purchasePrice) },
+          { label: "Sale Price / Disposal Price", value: nullableCurrency(latestSettlement?.salePrice) },
+          { label: "Total Approved Costs", value: nullableCurrency(latestSettlement?.totalCostsSnapshot) },
+          { label: "Gross Return", value: nullableCurrency(latestSettlement?.grossProfitSnapshot) },
+          { label: "Net Return", value: nullableCurrency(latestSettlement?.netProfitSnapshot) },
           { label: "Member Return Share", value: latestSettlement?.memberProfitDistributionPercentage ? `${decimalToNumber(latestSettlement.memberProfitDistributionPercentage)}%` : "Not available" },
           { label: "Platform Return Share", value: latestSettlement?.platformProfitSharePercentage ? `${decimalToNumber(latestSettlement.platformProfitSharePercentage)}%` : "Not available" },
-          { label: "Platform Share Amount", value: latestSettlement?.platformShare ? formatCurrency(decimalToNumber(latestSettlement.platformShare)) : "Not available" },
-          { label: "Principal Return Pool", value: latestSettlement?.principalReturnPool ? formatCurrency(decimalToNumber(latestSettlement.principalReturnPool)) : "Not available" },
-          { label: "Holding Return Pool", value: latestSettlement?.holdingReturnPool ? formatCurrency(decimalToNumber(latestSettlement.holdingReturnPool)) : "Not available" },
-          { label: "Member Profit Distribution Pool", value: latestSettlement?.profitDistributionPool ? formatCurrency(decimalToNumber(latestSettlement.profitDistributionPool)) : "Not available" },
-          { label: "Final Distribution Pool", value: latestSettlement?.finalDistributionPool ? formatCurrency(decimalToNumber(latestSettlement.finalDistributionPool)) : "Not available" },
+          { label: "Platform Share Amount", value: nullableCurrency(latestSettlement?.platformShare) },
+          { label: "Principal Return Pool", value: nullableCurrency(latestSettlement?.principalReturnPool) },
+          { label: "Holding Return Pool", value: nullableCurrency(latestSettlement?.holdingReturnPool) },
+          { label: "Member Profit Distribution Pool", value: nullableCurrency(latestSettlement?.profitDistributionPool) },
+          { label: "Final Distribution Pool", value: nullableCurrency(latestSettlement?.finalDistributionPool) },
           { label: "Sale Completed Date", value: latestSettlement?.saleCompletedAt ? formatDate(latestSettlement.saleCompletedAt) : "Not recorded" },
           { label: "Distribution Calculation Date", value: latestSettlement?.distributionCalculationDate ? formatDate(latestSettlement.distributionCalculationDate) : "Not recorded" },
           { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement summary available" },
