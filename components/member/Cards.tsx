@@ -32,6 +32,10 @@ export function ProgressBar({ value }: { value: number }) {
   );
 }
 
+function participantCountLabel(count: number) {
+  return count === 1 ? "1 member participating" : `${count.toLocaleString()} members participating`;
+}
+
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const progress = Math.round((opportunity.collectedAmount / opportunity.targetAmount) * 100);
   const detailHref = `/member/opportunities/${opportunity.slug}`;
@@ -64,6 +68,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
             <p>{progress}% Listing Progress</p>
+            <p>{participantCountLabel(opportunity.participants)}</p>
           </div>
         </div>
 
