@@ -277,7 +277,12 @@ export async function getAdminListingBySlug(slug: string) {
 }
 
 export async function getAdminProjectWorkspaceBySlug(slug: string) {
-  if (!process.env.DATABASE_URL) return demoAdminListingDetail(slug);
+  const allowDemoFallback = process.env.NODE_ENV !== "production";
+
+  if (!process.env.DATABASE_URL) {
+    if (allowDemoFallback) return demoAdminListingDetail(slug);
+    throw new Error("Project workspace is unavailable because the database is not configured.");
+  }
 
   try {
     return await db.campaign.findUnique({
@@ -320,7 +325,7 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
             payments: {
               orderBy: { updatedAt: "desc" },
-              select: { amount: true, status: true, updatedAt: true },
+              select: { id: true, paymentRef: true, amount: true, status: true, gateway: true, reconciliationReference: true, updatedAt: true },
             },
             distributions: {
               orderBy: { updatedAt: "desc" },
@@ -349,10 +354,14 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
       },
     });
   } catch (error) {
-    console.warn(
-      "Falling back to demo admin project workspace because database reads are unavailable.",
-      error,
-    );
-    return demoAdminListingDetail(slug);
+    if (allowDemoFallback) {
+      console.warn(
+        "Falling back to demo admin project workspace because database reads are unavailable.",
+        error,
+      );
+      return demoAdminListingDetail(slug);
+    }
+
+    throw error;
   }
 }
