@@ -104,6 +104,17 @@ function isMissingPoolValue(value: unknown) {
   return value === null || value === undefined;
 }
 
+function poolValueToNumber(value: unknown) {
+  if (isMissingPoolValue(value)) return null;
+  const numeric = Number(value);
+  if (Number.isFinite(numeric)) return numeric;
+  if (typeof value === "object" && value !== null && "toString" in value) {
+    const stringified = Number(value.toString());
+    if (Number.isFinite(stringified)) return stringified;
+  }
+  return Number.NaN;
+}
+
 function validatePoolsForApproval(settlement: {
   principalReturnPool: unknown;
   holdingReturnPool: unknown;
@@ -118,8 +129,8 @@ function validatePoolsForApproval(settlement: {
   ] as const;
 
   const values = requiredPools.map(([label, value]) => {
-    if (isMissingPoolValue(value)) throw new Error(`${label} is required before approval or locking.`);
-    const numeric = Number(value);
+    const numeric = poolValueToNumber(value);
+    if (numeric === null) throw new Error(`${label} is required before approval or locking.`);
     if (!Number.isFinite(numeric)) throw new Error(`${label} must be a valid amount.`);
     if (numeric < 0) throw new Error(`${label} cannot be negative.`);
     return numeric;

@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export type FinancialSummaryInput = {
   purchasePrice: string | null;
@@ -44,7 +44,7 @@ function readString(formData: FormData, key: string) {
 
 function parseDecimal(formData: FormData, key: string, label: string, errors: string[], options: { min?: number; max?: number } = {}) {
   const value = readString(formData, key);
-  if (!value) return null;
+  if (value === "") return null;
   const normalized = value.replace(/,/g, "");
   if (!/^-?\d+(\.\d+)?$/.test(normalized)) {
     errors.push(`${label} must be a valid number.`);
@@ -62,7 +62,7 @@ function parseDecimal(formData: FormData, key: string, label: string, errors: st
 
 function parseDate(formData: FormData, key: string, label: string, errors: string[]) {
   const value = readString(formData, key);
-  if (!value) return null;
+  if (value === "") return null;
   const date = new Date(`${value}T00:00:00.000Z`);
   if (Number.isNaN(date.getTime())) {
     errors.push(`${label} must be a valid date.`);
@@ -101,6 +101,26 @@ export function validateFinancialSummaryForm(formData: FormData): FinancialSumma
   return errors.length > 0 ? { success: false, error: errors.join(" "), errors } : { success: true, data };
 }
 
+function decimalOrNull(value: string | null) {
+  return value === null ? null : new Prisma.Decimal(value);
+}
+
 export function financialSummaryToPrismaData(data: FinancialSummaryInput): FinancialSummaryPrismaData {
-  return data;
+  return {
+    purchasePrice: decimalOrNull(data.purchasePrice),
+    salePrice: decimalOrNull(data.salePrice),
+    totalCostsSnapshot: decimalOrNull(data.totalCostsSnapshot),
+    grossProfitSnapshot: decimalOrNull(data.grossProfitSnapshot),
+    netProfitSnapshot: decimalOrNull(data.netProfitSnapshot),
+    memberProfitDistributionPercentage: decimalOrNull(data.memberProfitDistributionPercentage),
+    platformProfitSharePercentage: decimalOrNull(data.platformProfitSharePercentage),
+    platformShare: decimalOrNull(data.platformShare),
+    principalReturnPool: decimalOrNull(data.principalReturnPool),
+    holdingReturnPool: decimalOrNull(data.holdingReturnPool),
+    profitDistributionPool: decimalOrNull(data.profitDistributionPool),
+    finalDistributionPool: decimalOrNull(data.finalDistributionPool),
+    calculationRemarks: data.calculationRemarks,
+    saleCompletedAt: data.saleCompletedAt,
+    distributionCalculationDate: data.distributionCalculationDate,
+  };
 }
