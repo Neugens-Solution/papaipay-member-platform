@@ -3,7 +3,7 @@ import type { Opportunity } from "@/lib/memberMockData";
 
 export function StatusBadge({ status }: { status: string }) {
   return (
-    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">
+    <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-50 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-papaipay-green">
       {status}
     </span>
   );
@@ -33,7 +33,7 @@ export function ProgressBar({ value }: { value: number }) {
 }
 
 function participantCountLabel(count: number) {
-  return count === 1 ? "1 member participating" : `${count.toLocaleString()} members participating`;
+  return count === 1 ? "1 participant" : `${count.toLocaleString()} participants`;
 }
 
 export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
@@ -42,18 +42,18 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
   const statusLabel = opportunity.status.replace(/\b\w/g, (char) => char.toUpperCase());
 
   return (
-    <article className="overflow-hidden rounded-lg border border-slate-200 bg-white transition hover:border-slate-300">
+    <article className="overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.03)] transition hover:border-slate-300">
       <PendingLink href={detailHref} pendingLabel="Opening..." className="group block">
         <div className={`relative grid h-44 place-items-center sm:h-48 ${opportunity.imageUrl ? "bg-cover bg-center" : "bg-slate-100"}`} style={opportunity.imageUrl ? { backgroundImage: `url(${opportunity.imageUrl})` } : undefined}>
           {!opportunity.imageUrl ? <div className="text-center"><p className="text-sm font-black text-slate-500">Image pending</p><p className="mt-1 text-xs font-semibold text-slate-400">Media will be available soon</p></div> : null}
-          <span className="absolute left-3 top-3 rounded-md bg-white/95 px-3 py-1 text-[0.7rem] font-bold uppercase tracking-wide text-papaipay-green">{statusLabel}</span>
+          <span className="absolute left-3 top-3 rounded-md bg-white/95 px-3 py-1 text-[0.7rem] font-semibold uppercase tracking-wide text-papaipay-green">{statusLabel}</span>
         </div>
       </PendingLink>
       <div className="space-y-4 p-5">
         <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Listing Reference: {opportunity.campaignId} • {opportunity.campaignCode}</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Ref: {opportunity.campaignId} • {opportunity.campaignCode}</p>
           <PendingLink href={detailHref} pendingLabel="Opening..." className="group">
-            <h3 className="text-lg font-bold tracking-tight group-hover:text-papaipay-green">{opportunity.title}</h3>
+            <h3 className="text-lg font-semibold tracking-tight text-papaipay-ink group-hover:text-papaipay-green">{opportunity.title}</h3>
           </PendingLink>
           <p className="mt-1 text-sm text-slate-500">{opportunity.location}</p>
           <div className="mt-2 flex flex-wrap gap-2">
@@ -65,10 +65,9 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
 
         <div>
           <ProgressBar value={progress} />
-          <div className="mt-2 space-y-1 text-sm font-semibold text-slate-600">
+          <div className="mt-3 flex items-center justify-between gap-3 text-sm text-slate-600">
             <p>RM{opportunity.collectedAmount.toLocaleString()} / RM{opportunity.targetAmount.toLocaleString()}</p>
-            <p>{progress}% Listing Progress</p>
-            <p>{participantCountLabel(opportunity.participants)}</p>
+            <p className="whitespace-nowrap text-xs text-slate-500">{participantCountLabel(opportunity.participants)}</p>
           </div>
         </div>
 
@@ -82,7 +81,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>
 
-        <PendingLink href={detailHref} pendingLabel="Opening..." className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white transition hover:bg-papaipay-green/90">
+        <PendingLink href={detailHref} pendingLabel="Opening..." className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-papaipay-green/90">
           View Listing Details
         </PendingLink>
       </div>
@@ -94,7 +93,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex items-start justify-between gap-4 border-t border-slate-100 pt-2 first:border-t-0 first:pt-0">
       <dt className="text-slate-500">{label}</dt>
-      <dd className="text-right font-semibold text-slate-800">{value}</dd>
+      <dd className="text-right text-slate-700">{value}</dd>
     </div>
   );
 }
