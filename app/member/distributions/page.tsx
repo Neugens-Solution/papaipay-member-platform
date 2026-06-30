@@ -1,54 +1,72 @@
 import Link from "next/link";
 import { ContentCard, MetricCard, StatusBadge } from "@/components/member/Cards";
-import { distributionRecords, formatRM } from "@/lib/memberMockData";
+import { formatDistributionAmount, getMemberDistributions, type MemberDistributionRecord } from "@/lib/data/memberDistributions";
 
-const visibleDistributionRecords = distributionRecords.filter((record) => record.status === "Paid" && record.distributionBatchStatus === "Completed");
+export default async function Page() {
+  const { records, totalCount, totalFinalDistributionReceived, unavailable } = await getMemberDistributions();
 
-const distributionStats = [
-  { label: "Distribution Received", value: formatRM(8500), helper: "Paid records" },
-  { label: "Distribution Processing", value: formatRM(3200), helper: "In payment review" },
-  { label: "Pending Distribution", value: formatRM(5000), helper: "Awaiting processing" },
-  { label: "Completed Payments", value: "4", helper: "Recorded payments" },
-];
+  const distributionStats = [
+    { label: "Paid Distributions", value: totalCount.toLocaleString("en-MY"), helper: "Completed manual payments" },
+    { label: "Distribution Received", value: formatDistributionAmount(totalFinalDistributionReceived), helper: "Total final distribution received" },
+  ];
 
-export default function Page() {
   return (
     <div className="space-y-6">
       <header>
         <h1 className="text-2xl font-bold tracking-tight sm:text-[1.7rem]">Distributions</h1>
+        <p className="mt-2 text-sm text-slate-600">Paid Distribution records appear after manual payment has been recorded for a completed distribution batch.</p>
       </header>
 
-      <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
-        {distributionStats.map((stat) => (
-          <MetricCard key={stat.label} {...stat} />
-        ))}
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {distributionStats.map((stat) => <MetricCard key={stat.label} {...stat} />)}
       </section>
+
+      {unavailable ? (
+        <ContentCard>
+          <h2 className="text-base font-bold">Distributions unavailable</h2>
+          <p className="mt-2 text-sm leading-6 text-slate-600">We could not load paid distributions from the database right now. No demo distribution records are shown.</p>
+        </ContentCard>
+      ) : null}
 
       <ContentCard className="p-0">
         <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-          <h2 className="text-base font-bold">Distribution List</h2>
+          <h2 className="text-base font-bold">Paid Distribution List</h2>
         </div>
-        <div className="divide-y divide-slate-100">
-          {visibleDistributionRecords.map((record) => (
-            <div key={record.slug} className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr_1fr_0.9fr_0.9fr_auto] lg:items-center">
-              <div>
-                <p className="text-xs font-bold text-slate-400">{record.distributionId} • {record.distributionBatchId} • {record.campaignId}</p><p className="text-sm font-bold text-papaipay-ink">{record.propertyName}</p>
-                <p className="mt-1 text-xs text-slate-500">{record.campaignCode} • Participation Amount: {formatRM(record.participationAmount)}</p>
-              </div>
-              <ListField label="Participation Amount" value={formatRM(record.participationAmount)} className="hidden lg:block" />
-              <ListField label="Principal Return" value={formatRM(record.principalReturn)} /><ListField label="Holding Return" value={formatRM(record.holdingReturn)} /><ListField label="Profit Distribution" value={formatRM(record.profitDistribution)} /><ListField label="Final Distribution Total" value={formatRM(record.distributionAmount)} />
-              <div>
-                <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 lg:hidden">Distribution Status</p>
-                <StatusBadge status={record.status} />
-              </div>
-              <ListField label="Paid Date" value={record.paidDate} />
-              <Link href={`/member/distributions/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green transition hover:bg-papaipay-green hover:text-white">
-                View Details
-              </Link>
-            </div>
-          ))}
-        </div>
+        {records.length > 0 ? (
+          <div className="divide-y divide-slate-100">
+            {records.map((record) => <DistributionRow key={record.id} record={record} />)}
+          </div>
+        ) : (
+          <div className="px-4 py-8 sm:px-5">
+            <p className="text-sm leading-6 text-slate-600">Paid distributions will appear here after a project distribution has been completed and manual payment has been recorded.</p>
+          </div>
+        )}
       </ContentCard>
+    </div>
+  );
+}
+
+function DistributionRow({ record }: { record: MemberDistributionRecord }) {
+  return (
+    <div className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr_1fr_1fr_0.9fr_auto] lg:items-center">
+      <div>
+        <p className="text-xs font-bold text-slate-400">{record.distributionRef} • Batch {record.batchRef}</p>
+        <p className="text-sm font-bold text-papaipay-ink">{record.projectTitle}</p>
+        <p className="mt-1 text-xs text-slate-500">{record.campaignCode} • {record.propertySummary}</p>
+      </div>
+      <ListField label="Final Distribution Total" value={formatDistributionAmount(record.finalDistributionTotal)} />
+      <ListField label="Principal Return" value={formatDistributionAmount(record.principalReturn)} />
+      <ListField label="Holding Return" value={formatDistributionAmount(record.holdingReturn)} />
+      <ListField label="Profit Distribution" value={formatDistributionAmount(record.profitDistribution)} />
+      <div>
+        <p className="mb-1 text-xs font-bold uppercase tracking-wide text-slate-400 lg:hidden">Distribution Status</p>
+        <StatusBadge status="Paid" />
+      </div>
+      <ListField label="Paid Date" value={record.paidDate} />
+      <ListField label="Payment Reference" value={record.paymentReference} />
+      <Link href={`/member/distributions/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green transition hover:bg-papaipay-green hover:text-white">
+        View Details
+      </Link>
     </div>
   );
 }
