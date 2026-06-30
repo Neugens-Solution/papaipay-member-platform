@@ -25,6 +25,7 @@ type FinancialSummaryFormProps = {
   campaignId: string;
   mode: "create" | "update";
   initialValues: FinancialSummaryFormValues;
+  calculationStatus?: string | null;
 };
 
 function SubmitButton({ mode }: { mode: "create" | "update" }) {
@@ -62,8 +63,22 @@ function PercentInput({ id, name, label, defaultValue }: { id: string; name: key
 
 const initialState: ProjectFinancialSummaryState = { status: "idle", message: null, errors: [] };
 
-export function FinancialSummaryForm({ campaignId, mode, initialValues }: FinancialSummaryFormProps) {
+export function FinancialSummaryForm({ campaignId, mode, initialValues, calculationStatus }: FinancialSummaryFormProps) {
   const [state, formAction] = useFormState(saveProjectFinancialSummaryAction, initialState);
+  const isApproved = calculationStatus === "Approved";
+  const isLocked = calculationStatus === "Locked";
+  const isReviewed = calculationStatus === "Reviewed";
+  const isEditable = !isApproved && !isLocked;
+
+  if (!isEditable) {
+    return (
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 text-sm font-semibold text-slate-700">
+        {isApproved
+          ? "Financials are approved. Future changes will require a reopen/revision workflow."
+          : "Financials are locked for distribution preview and future batch processing."}
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
@@ -77,6 +92,12 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues }: Financ
           {mode === "update" ? "Existing summary" : "New summary"}
         </span>
       </div>
+
+      {isReviewed ? (
+        <p className="mb-4 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm font-semibold text-amber-700">
+          This settlement has been reviewed. Editing values may require another review.
+        </p>
+      ) : null}
 
       {state.status === "success" ? (
         <p className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-papaipay-green" role="status">
