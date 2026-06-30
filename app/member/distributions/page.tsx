@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ContentCard, MetricCard, StatusBadge } from "@/components/member/Cards";
 import { distributionRecords, formatRM } from "@/lib/memberMockData";
 
-const visibleDistributionRecords = distributionRecords.filter((record) => ["Paid", "Completed"].includes(record.status));
+const visibleDistributionRecords = distributionRecords.filter((record) => record.status === "Paid" && record.distributionBatchStatus === "Completed");
 
 const distributionStats = [
   { label: "Distribution Received", value: formatRM(8500), helper: "Paid records" },
