@@ -7,7 +7,7 @@ import {
   markProjectFinancialsReviewedAction,
   type ProjectFinancialStatusActionState,
 } from "@/lib/admin/project-financials/actions";
-import { formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import { formatEnumLabel } from "@/lib/utils/formatters";
 
 type SettlementActor = { email?: string | null } | null;
 
@@ -46,6 +46,18 @@ function StatusBadge({ status, fallback = "Not started" }: { status?: string | n
       {label}
     </span>
   );
+}
+
+function formatStatusDate(value?: string | Date | null) {
+  if (!value) return "—";
+  const date = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(date.getTime())) return "—";
+
+  return new Intl.DateTimeFormat("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
 }
 
 function actorLabel(user?: SettlementActor) {
@@ -118,15 +130,15 @@ export function FinancialApprovalStatusCard({ campaignId, settlement }: Financia
       <div className="mt-5 grid gap-3 md:grid-cols-3">
         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm">
           <span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Reviewed</span>
-          <span className="mt-1 block font-semibold text-slate-700">{settlement?.reviewedAt ? `${formatDate(settlement.reviewedAt)} by ${actorLabel(settlement.reviewedBy)}` : "Not reviewed"}</span>
+          <span className="mt-1 block font-semibold text-slate-700">{settlement?.reviewedAt ? `${formatStatusDate(settlement.reviewedAt)} by ${actorLabel(settlement.reviewedBy)}` : "Not reviewed"}</span>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm">
           <span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Approved</span>
-          <span className="mt-1 block font-semibold text-slate-700">{settlement?.approvedAt ? `${formatDate(settlement.approvedAt)} by ${actorLabel(settlement.approvedBy)}` : "Not approved"}</span>
+          <span className="mt-1 block font-semibold text-slate-700">{settlement?.approvedAt ? `${formatStatusDate(settlement.approvedAt)} by ${actorLabel(settlement.approvedBy)}` : "Not approved"}</span>
         </div>
         <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-3 text-sm">
           <span className="block text-xs font-bold uppercase tracking-wide text-slate-400">Locked</span>
-          <span className="mt-1 block font-semibold text-slate-700">{settlement?.lockedAt ? `${formatDate(settlement.lockedAt)} by ${actorLabel(settlement.lockedBy)}` : "Not locked"}</span>
+          <span className="mt-1 block font-semibold text-slate-700">{settlement?.lockedAt ? `${formatStatusDate(settlement.lockedAt)} by ${actorLabel(settlement.lockedBy)}` : "Not locked"}</span>
         </div>
       </div>
     </div>
