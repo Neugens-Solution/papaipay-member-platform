@@ -144,6 +144,7 @@ function demoAdminListingDetail(slug: string) {
     participations: listingParticipants,
     settlements: [],
     distributions: [],
+    distributionBatches: [],
     _count: { participations: listingParticipants.length, distributions: 0, updates: 0 },
   };
 }
@@ -340,6 +341,23 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             reviewedBy: { select: { id: true, email: true } },
             approvedBy: { select: { id: true, email: true } },
             lockedBy: { select: { id: true, email: true } },
+          },
+        },
+        distributionBatches: {
+          orderBy: { createdAt: "desc" },
+          take: 5,
+          select: {
+            id: true,
+            batchRef: true,
+            settlementId: true,
+            status: true,
+            totalMembers: true,
+            totalFinalDistribution: true,
+            pendingCount: true,
+            processingCount: true,
+            paidCount: true,
+            createdAt: true,
+            createdBy: { select: { email: true } },
           },
         },
         distributions: {

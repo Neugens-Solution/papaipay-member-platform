@@ -3,6 +3,7 @@ import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { FinancialApprovalStatusCard } from "@/components/admin/project-workspace/FinancialApprovalStatusCard";
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
+import { SaveDraftDistributionBatchForm } from "@/components/admin/project-workspace/SaveDraftDistributionBatchForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
@@ -127,6 +128,8 @@ function distributionFindingCopy(code: string, message: string) {
   return copy[code] ?? message;
 }
 
+const activeDistributionBatchStatuses = new Set(["Draft", "Approved", "Processing", "Completed"]);
+
 function DistributionPreviewSection({ project, latestSettlement }: { project: ProjectWorkspace; latestSettlement: ProjectWorkspace["settlements"][number] | undefined }) {
   const preview = calculateDistributionPreview({
     campaign: { id: project.id, title: project.title, currency: "MYR" },
@@ -169,12 +172,16 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
     ["Profit Distribution", preview.reconciliation.profitDistribution],
     ["Final Distribution", preview.reconciliation.finalDistributionTotal],
   ] as const;
+  const activeBatch = project.distributionBatches.find((batch) => latestSettlement && batch.settlementId === latestSettlement.id && activeDistributionBatchStatuses.has(String(batch.status)));
+  const isSettlementLocked = latestSettlement ? String(latestSettlement.calculationStatus) === "Locked" : false;
+  const isReconciled = Object.values(preview.summary.reconciliationDifferences).every((difference) => Number(difference) === 0);
+  const canSaveDraftBatch = isSettlementLocked && preview.summary.isPreviewValid && blockers.length === 0 && preview.rows.length > 0 && isReconciled && !activeBatch;
 
   return (
     <Card>
-      <SectionHeading title="Distributions">Read-only Phase 1 distribution preview powered by the existing preview engine.</SectionHeading>
+      <SectionHeading title="Distributions">Admin-only distribution preview and draft batch persistence powered by the existing preview engine.</SectionHeading>
       <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
-        Preview only — no records are created and no payouts are executed.
+        Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts.
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_.8fr]">
@@ -219,9 +226,24 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
         <TableWrap><thead><tr><Th>Pool</Th><Th>Source Pool</Th><Th>Allocated</Th><Th>Difference</Th><Th>Status</Th></tr></thead><tbody>{reconciliationRows.map(([label, line]) => <tr key={label} className="border-t border-slate-100"><Td>{label}</Td><Td>{moneyFromPreview(line.source)}</Td><Td>{moneyFromPreview(line.allocated)}</Td><Td>{moneyFromPreview(line.difference)}</Td><Td><StatusBadge status={reconciliationStatus(line)} /></Td></tr>)}</tbody></TableWrap>
       </div>
 
+      {activeBatch ? <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
+        <SectionHeading title="Draft Batch Summary">This draft batch is internal and not visible to members.</SectionHeading>
+        <InfoGrid items={[
+          { label: "Batch Ref", value: activeBatch.batchRef },
+          { label: "Status", value: formatEnumLabel(String(activeBatch.status)) },
+          { label: "Total Members", value: String(activeBatch.totalMembers ?? 0) },
+          { label: "Total Final Distribution", value: nullableCurrency(activeBatch.totalFinalDistribution) },
+          { label: "Pending Count", value: String(activeBatch.pendingCount ?? 0) },
+          { label: "Created At", value: formatDate(activeBatch.createdAt) },
+          { label: "Created By", value: activeBatch.createdBy?.email || "Not recorded" },
+          { label: "Settlement Ref/ID", value: activeBatch.settlementId || latestSettlement?.id || "Not recorded" },
+        ]} />
+      </div> : null}
+
       <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-        <div className="flex flex-wrap gap-3">{["Save Draft Batch", "Approve Distribution", "Mark Paid"].map((label) => <button key={label} disabled className="cursor-not-allowed rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-400" type="button">{label}</button>)}</div>
-        <p className="mt-3 text-sm leading-6 text-slate-600">These actions will be available in later phases after preview persistence and approval workflow are implemented.</p>
+        <SaveDraftDistributionBatchForm campaignId={project.id} settlementId={latestSettlement?.id} disabled={!canSaveDraftBatch} saved={Boolean(activeBatch)} />
+        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts. Approve Distribution and Mark Paid remain disabled for later phases.</p>
+        {!canSaveDraftBatch && !activeBatch ? <p className="mt-2 text-sm font-semibold text-slate-500">Save Draft Batch is available only when the latest settlement is locked, the preview is valid and reconciled, eligible rows exist, and no active batch already exists.</p> : null}
       </div>
     </Card>
   );
