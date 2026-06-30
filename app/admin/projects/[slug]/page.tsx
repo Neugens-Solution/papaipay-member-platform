@@ -3,7 +3,7 @@ import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { FinancialApprovalStatusCard } from "@/components/admin/project-workspace/FinancialApprovalStatusCard";
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
-import { SaveDraftDistributionBatchForm } from "@/components/admin/project-workspace/SaveDraftDistributionBatchForm";
+import { DistributionBatchActionsForm } from "@/components/admin/project-workspace/DistributionBatchActionsForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
@@ -136,12 +136,12 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
   if (activeBatch) {
     return (
       <Card>
-        <SectionHeading title="Distributions">Draft distribution batch has been saved for this settlement.</SectionHeading>
+        <SectionHeading title="Distributions">Distribution batch has been saved for this settlement.</SectionHeading>
         <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
-          A draft distribution batch has already been saved. New preview generation is disabled to prevent duplicate distributions.
+          A distribution batch has already been saved. New preview generation is disabled to prevent duplicate distributions.
         </div>
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
-          <SectionHeading title="Draft Batch Summary">This draft batch is internal and not visible to members.</SectionHeading>
+          <SectionHeading title={`${formatEnumLabel(String(activeBatch.status))} Batch Summary`}>This batch is internal and not visible to members.</SectionHeading>
           <InfoGrid items={[
             { label: "Batch Ref", value: activeBatch.batchRef },
             { label: "Status", value: formatEnumLabel(String(activeBatch.status)) },
@@ -150,12 +150,17 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
             { label: "Pending Count", value: String(activeBatch.pendingCount ?? 0) },
             { label: "Created At", value: formatDate(activeBatch.createdAt) },
             { label: "Created By", value: activeBatch.createdBy?.email || "Not recorded" },
+            { label: "Approved At", value: activeBatch.approvedAt ? formatDate(activeBatch.approvedAt) : "Not approved" },
+            { label: "Approved By", value: activeBatch.approvedBy?.email || "Not approved" },
+            { label: "Locked Status", value: activeBatch.lockedStatus ? "Locked" : "Unlocked" },
             { label: "Settlement Ref/ID", value: activeBatch.settlementId || latestSettlement?.id || "Not recorded" },
           ]} />
         </div>
         <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-          <SaveDraftDistributionBatchForm campaignId={project.id} settlementId={latestSettlement?.id} disabled saved />
-          <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution and Mark Paid remain disabled for later phases. No payout has been approved or executed.</p>
+          <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} batchId={activeBatch.id} saveDisabled draftSaved approveDisabled={String(activeBatch.status) !== "Draft"} approved={String(activeBatch.status) === "Approved"} />
+          {String(activeBatch.status) === "Draft" ? <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution confirms these amounts for future processing. It does not execute payout.</p> : null}
+          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for future processing. No payout has been executed.</p> : null}
+          <p className="mt-3 text-sm leading-6 text-slate-600">Mark Paid remains disabled for later phases.</p>
         </div>
       </Card>
     );
@@ -257,8 +262,8 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
 
 
       <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
-        <SaveDraftDistributionBatchForm campaignId={project.id} settlementId={latestSettlement?.id} disabled={!canSaveDraftBatch} saved={Boolean(activeBatch)} />
-        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts. Approve Distribution and Mark Paid remain disabled for later phases.</p>
+        <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} saveDisabled={!canSaveDraftBatch} draftSaved={Boolean(activeBatch)} approveDisabled approved={false} />
+        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts. Approve Distribution is available after a draft batch is saved. Mark Paid remains disabled for later phases.</p>
         {!canSaveDraftBatch && !activeBatch ? <p className="mt-2 text-sm font-semibold text-slate-500">Save Draft Batch is available only when the latest settlement is locked, the preview is valid and reconciled, eligible rows exist, and no active batch already exists.</p> : null}
       </div>
     </Card>
