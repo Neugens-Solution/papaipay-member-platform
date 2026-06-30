@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { PendingLink } from "@/components/common/PendingLink";
 import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import { FinancialApprovalStatusCard } from "@/components/admin/project-workspace/FinancialApprovalStatusCard";
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
@@ -84,6 +85,10 @@ function dateInputValue(value?: Date | string | null) {
 function decimalInputValue(value: unknown) {
   if (value === null || value === undefined) return "";
   return String(value);
+}
+
+function nullableCurrency(value: unknown) {
+  return value === null || value === undefined ? "Not available" : formatCurrency(decimalToNumber(value));
 }
 
 function moneyFromPreview(value?: string | null) {
@@ -458,28 +463,30 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
           { label: "Collected Amount", value: formatCurrency(collected) },
           { label: "Funding Progress", value: `${Math.round(fundingProgress)}%` },
           { label: "Settlement Status", value: latestSettlement ? formatEnumLabel(String(latestSettlement.calculationStatus)) : "No settlement recorded" },
-          { label: "Acquisition Price", value: latestSettlement?.purchasePrice ? formatCurrency(decimalToNumber(latestSettlement.purchasePrice)) : "Not available" },
-          { label: "Sale Price / Disposal Price", value: latestSettlement?.salePrice ? formatCurrency(decimalToNumber(latestSettlement.salePrice)) : "Not available" },
-          { label: "Total Approved Costs", value: latestSettlement?.totalCostsSnapshot ? formatCurrency(decimalToNumber(latestSettlement.totalCostsSnapshot)) : "Not available" },
-          { label: "Gross Return", value: latestSettlement?.grossProfitSnapshot ? formatCurrency(decimalToNumber(latestSettlement.grossProfitSnapshot)) : "Not available" },
-          { label: "Net Return", value: latestSettlement?.netProfitSnapshot ? formatCurrency(decimalToNumber(latestSettlement.netProfitSnapshot)) : "Not available" },
+          { label: "Acquisition Price", value: nullableCurrency(latestSettlement?.purchasePrice) },
+          { label: "Sale Price / Disposal Price", value: nullableCurrency(latestSettlement?.salePrice) },
+          { label: "Total Approved Costs", value: nullableCurrency(latestSettlement?.totalCostsSnapshot) },
+          { label: "Gross Return", value: nullableCurrency(latestSettlement?.grossProfitSnapshot) },
+          { label: "Net Return", value: nullableCurrency(latestSettlement?.netProfitSnapshot) },
           { label: "Member Return Share", value: latestSettlement?.memberProfitDistributionPercentage ? `${decimalToNumber(latestSettlement.memberProfitDistributionPercentage)}%` : "Not available" },
           { label: "Platform Return Share", value: latestSettlement?.platformProfitSharePercentage ? `${decimalToNumber(latestSettlement.platformProfitSharePercentage)}%` : "Not available" },
-          { label: "Platform Share Amount", value: latestSettlement?.platformShare ? formatCurrency(decimalToNumber(latestSettlement.platformShare)) : "Not available" },
-          { label: "Principal Return Pool", value: latestSettlement?.principalReturnPool ? formatCurrency(decimalToNumber(latestSettlement.principalReturnPool)) : "Not available" },
-          { label: "Holding Return Pool", value: latestSettlement?.holdingReturnPool ? formatCurrency(decimalToNumber(latestSettlement.holdingReturnPool)) : "Not available" },
-          { label: "Member Profit Distribution Pool", value: latestSettlement?.profitDistributionPool ? formatCurrency(decimalToNumber(latestSettlement.profitDistributionPool)) : "Not available" },
-          { label: "Final Distribution Pool", value: latestSettlement?.finalDistributionPool ? formatCurrency(decimalToNumber(latestSettlement.finalDistributionPool)) : "Not available" },
+          { label: "Platform Share Amount", value: nullableCurrency(latestSettlement?.platformShare) },
+          { label: "Principal Return Pool", value: nullableCurrency(latestSettlement?.principalReturnPool) },
+          { label: "Holding Return Pool", value: nullableCurrency(latestSettlement?.holdingReturnPool) },
+          { label: "Member Profit Distribution Pool", value: nullableCurrency(latestSettlement?.profitDistributionPool) },
+          { label: "Final Distribution Pool", value: nullableCurrency(latestSettlement?.finalDistributionPool) },
           { label: "Sale Completed Date", value: latestSettlement?.saleCompletedAt ? formatDate(latestSettlement.saleCompletedAt) : "Not recorded" },
           { label: "Distribution Calculation Date", value: latestSettlement?.distributionCalculationDate ? formatDate(latestSettlement.distributionCalculationDate) : "Not recorded" },
           { label: "Calculation Remarks", value: latestSettlement?.calculationRemarks || "No settlement summary available" },
         ]} />
+        <FinancialApprovalStatusCard campaignId={project.id} settlement={latestSettlement} />
         <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm leading-6 text-slate-600">
           This is a summary-level financial record. Itemized project costs and distribution preview will be added in later phases.
         </div>
         <FinancialSummaryForm
           campaignId={project.id}
           mode={latestSettlement ? "update" : "create"}
+          calculationStatus={latestSettlement ? String(latestSettlement.calculationStatus) : null}
           initialValues={{
             purchasePrice: decimalInputValue(latestSettlement?.purchasePrice),
             salePrice: decimalInputValue(latestSettlement?.salePrice),

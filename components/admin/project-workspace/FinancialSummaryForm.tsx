@@ -25,6 +25,7 @@ type FinancialSummaryFormProps = {
   campaignId: string;
   mode: "create" | "update";
   initialValues: FinancialSummaryFormValues;
+  calculationStatus?: string | null;
 };
 
 function SubmitButton({ mode }: { mode: "create" | "update" }) {
@@ -42,11 +43,21 @@ function SubmitButton({ mode }: { mode: "create" | "update" }) {
   );
 }
 
-function MoneyInput({ id, name, label, defaultValue }: { id: string; name: keyof FinancialSummaryFormValues; label: string; defaultValue: string }) {
+function MoneyInput({
+  id,
+  name,
+  label,
+  defaultValue,
+}: {
+  id: string;
+  name: keyof FinancialSummaryFormValues;
+  label: string;
+  defaultValue: string;
+}) {
   return (
     <div>
       <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
-      <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="0.00" />
+      <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="Enter amount" />
     </div>
   );
 }
@@ -62,8 +73,22 @@ function PercentInput({ id, name, label, defaultValue }: { id: string; name: key
 
 const initialState: ProjectFinancialSummaryState = { status: "idle", message: null, errors: [] };
 
-export function FinancialSummaryForm({ campaignId, mode, initialValues }: FinancialSummaryFormProps) {
+export function FinancialSummaryForm({ campaignId, mode, initialValues, calculationStatus }: FinancialSummaryFormProps) {
   const [state, formAction] = useFormState(saveProjectFinancialSummaryAction, initialState);
+  const isApproved = calculationStatus === "Approved";
+  const isLocked = calculationStatus === "Locked";
+  const isReviewed = calculationStatus === "Reviewed";
+  const isEditable = !isApproved && !isLocked;
+
+  if (!isEditable) {
+    return (
+      <div className="mt-6 rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5 text-sm font-semibold text-slate-700">
+        {isApproved
+          ? "Financials are approved. Future changes will require a reopen/revision workflow."
+          : "Financials are locked for distribution preview and future batch processing."}
+      </div>
+    );
+  }
 
   return (
     <form action={formAction} className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
@@ -72,11 +97,18 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues }: Financ
         <div>
           <p className="font-bold text-papaipay-ink">{mode === "update" ? "Update Financial Summary" : "Create Financial Summary"}</p>
           <p className="mt-1 text-sm text-slate-500">Enter admin-approved summary values only. Values are saved exactly as entered.</p>
+          <p className="mt-1 text-xs font-semibold text-slate-400">Enter 0 where the approved amount is RM0. Leave fields blank only when the value is not available.</p>
         </div>
         <span className="inline-flex whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-papaipay-green">
           {mode === "update" ? "Existing summary" : "New summary"}
         </span>
       </div>
+
+      {isReviewed ? (
+        <p className="mb-4 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm font-semibold text-amber-700">
+          This settlement has been reviewed. Editing values may require another review.
+        </p>
+      ) : null}
 
       {state.status === "success" ? (
         <p className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-papaipay-green" role="status">

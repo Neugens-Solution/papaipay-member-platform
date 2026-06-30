@@ -336,6 +336,11 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
         settlements: {
           orderBy: { createdAt: "desc" },
           take: 1,
+          include: {
+            reviewedBy: { select: { id: true, email: true } },
+            approvedBy: { select: { id: true, email: true } },
+            lockedBy: { select: { id: true, email: true } },
+          },
         },
         distributions: {
           orderBy: { createdAt: "desc" },
