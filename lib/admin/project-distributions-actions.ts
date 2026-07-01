@@ -208,7 +208,7 @@ export async function saveDraftDistributionBatchAction(_previousState: Distribut
     }, { timeout: 10_000 });
 
     revalidatePath(`/admin/projects/${slug}`);
-    return { status: "success", message: "Draft distribution batch saved. No payout was approved or executed.", errors: [] };
+    return { status: "success", message: "Draft distribution batch saved. No payment transfer was approved or executed.", errors: [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Draft distribution batch could not be saved.";
     return { status: "error", message, errors: [message] };
@@ -338,7 +338,7 @@ export async function approveDistributionBatchAction(_previousState: Distributio
       const invalidStatusRow = batch.distributions.find((row) => row.status !== DistributionStatus.Pending);
       if (invalidStatusRow) throw new Error(`Distribution row ${invalidStatusRow.distributionRef} is not Pending.`);
       const payoutFieldRow = batch.distributions.find((row) => row.paymentDate || row.paymentReference || row.markedProcessingById || row.markedProcessingAt || row.markedPaidById || row.markedPaidAt);
-      if (payoutFieldRow) throw new Error(`Distribution row ${payoutFieldRow.distributionRef} already has payment or payout fields set.`);
+      if (payoutFieldRow) throw new Error(`Distribution row ${payoutFieldRow.distributionRef} already has payment or distribution payment fields set.`);
 
       const rowCount = batch.distributions.length;
       const pendingCount = batch.distributions.filter((row) => row.status === DistributionStatus.Pending).length;
@@ -363,7 +363,7 @@ export async function approveDistributionBatchAction(_previousState: Distributio
       const afterSnapshot = {
         ...buildApprovalSnapshot(updatedBatch, { rowCount, pendingCount, processingCount, paidCount }, rowTotal),
         rowConfirmation: "All distribution rows remain Pending.",
-        payoutConfirmation: "No payout fields were set and no payout was executed.",
+        payoutConfirmation: "No distribution payment fields were set and no payment transfer was executed.",
       };
 
       await tx.auditLog.create({
@@ -382,7 +382,7 @@ export async function approveDistributionBatchAction(_previousState: Distributio
     }, { timeout: 10_000 });
 
     revalidatePath(`/admin/projects/${slug}`);
-    return { status: "success", message: "Distribution batch approved for future processing. No payout was executed.", errors: [] };
+    return { status: "success", message: "Distribution batch approved for future processing. No payment transfer was executed.", errors: [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Distribution batch could not be approved.";
     return { status: "error", message, errors: [message] };

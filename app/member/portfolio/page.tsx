@@ -24,13 +24,13 @@ export default async function PortfolioPage() {
     <div className="mx-auto w-full max-w-7xl space-y-8">
       <header className="rounded-[2rem] border border-slate-200/70 bg-white p-6 sm:p-8">
         <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Portfolio</p>
-        <div className="mt-3 max-w-3xl"><h1 className="text-3xl font-semibold tracking-[-0.045em] text-papaipay-ink sm:text-5xl">Your participation portfolio.</h1><p className="mt-4 text-base leading-7 text-slate-500">A consolidated view of participation amount, status, yield expectations, property category, occupancy and submission history.</p></div>
+        <div className="mt-3 max-w-3xl"><h1 className="text-3xl font-semibold tracking-[-0.045em] text-papaipay-ink sm:text-5xl">Your participation portfolio.</h1><p className="mt-4 text-base leading-7 text-slate-500">A consolidated view of participation amount, status, projected holding return details, property category, occupancy and submission history.</p></div>
       </header>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4" aria-label="Portfolio summary">
         {[
           ["Total Participation", summary.totalParticipationLabel, "Across all submitted records"],
-          ["Estimated Yield", summary.estimatedAnnualYield, "Mock yield until live returns are connected"],
+          ["Projected Holding Return", summary.estimatedAnnualYield, "Projected holding return based on current participation records"],
           ["Current Status", summary.currentStatus, "Most relevant portfolio state"],
           ["Pending Review", String(summary.pendingReviewCount), "Items awaiting review"],
         ].map(([label, value, helper]) => <div key={label} className="rounded-2xl border border-slate-200/70 bg-white p-5"><p className="text-[0.68rem] font-bold uppercase tracking-[0.18em] text-slate-400">{label}</p><p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{value}</p><p className="mt-2 text-sm text-slate-500">{helper}</p></div>)}
@@ -53,7 +53,7 @@ export default async function PortfolioPage() {
             <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between"><div><p className="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">{record.campaignCode} • {record.participationId}</p><h2 className="mt-2 text-xl font-semibold tracking-tight text-papaipay-ink">{record.propertyName}</h2><p className="mt-1 text-sm text-slate-500">{record.location}</p></div><span className={`inline-flex w-fit rounded-full border px-3 py-1 text-xs font-bold ${statusClasses(record.status)}`}>{record.status}</span></div>
             <dl className="mt-6 grid grid-cols-2 gap-3 text-sm sm:grid-cols-3">
               <Info label="Total participation" value={formatRMCompact(record.participationAmount)} />
-              <Info label="Estimated yield" value={record.estimatedYield ?? summary.estimatedAnnualYield} />
+              <Info label="Projected Holding Return" value={record.estimatedYield ?? summary.estimatedAnnualYield} />
               <Info label="Current status" value={String(record.status)} />
               <Info label="Asset category" value={getAssetCategory(record)} />
               <Info label="Occupancy status" value={getOccupancyStatus(record)} />

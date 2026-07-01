@@ -51,7 +51,7 @@ export default async function ParticipatePage({ params, searchParams }: { params
 }
 
 function Summary({ opportunity }: { opportunity: NonNullable<Awaited<ReturnType<typeof getRealMemberCampaignBySlug>>> }) {
-  return <ContentCard><h2 className="text-lg font-bold">Opportunity Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Opportunity" value={opportunity.title} /><Row label="Location" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Estimated Yield" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
+  return <ContentCard><h2 className="text-lg font-bold">Opportunity Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Opportunity" value={opportunity.title} /><Row label="Location" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Projected Holding Return" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
 }
 function Row({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-4 py-3"><dt className="text-slate-500">{label}</dt><dd className="text-right font-bold text-papaipay-ink">{value}</dd></div>; }
 

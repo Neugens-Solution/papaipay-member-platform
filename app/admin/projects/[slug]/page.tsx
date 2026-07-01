@@ -175,8 +175,8 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
         </div>
         <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
           <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} batchId={activeBatch.id} saveDisabled draftSaved approveDisabled={String(activeBatch.status) !== "Draft"} approved={String(activeBatch.status) === "Approved"} completed={String(activeBatch.status) === "Completed"} />
-          {String(activeBatch.status) === "Draft" ? <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution confirms these amounts for future processing. It does not execute payout.</p> : null}
-          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for manual payment recording. No payout has been executed.</p> : null}
+          {String(activeBatch.status) === "Draft" ? <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution confirms these amounts for future processing. It does not execute payment transfers.</p> : null}
+          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for manual payment recording. No payment transfer has been executed.</p> : null}
           {String(activeBatch.status) === "Completed" ? <CompletedBatchPaymentSummary batch={activeBatch} /> : null}
         </div>
       </Card>
@@ -232,7 +232,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
     <Card>
       <SectionHeading title="Distributions">Admin-only distribution preview and draft batch persistence powered by the existing preview engine.</SectionHeading>
       <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
-        Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts.
+        Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers.
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_.8fr]">
@@ -280,7 +280,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
 
       <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
         <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} saveDisabled={!canSaveDraftBatch} draftSaved={Boolean(activeBatch)} approveDisabled approved={false} />
-        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve or execute payouts. Approve Distribution is available after a draft batch is saved. Mark Paid remains disabled for later phases.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers. Approve Distribution is available after a draft batch is saved. Mark Paid remains disabled for later phases.</p>
         {!canSaveDraftBatch && !activeBatch ? <p className="mt-2 text-sm font-semibold text-slate-500">Save Draft Batch is available only when the latest settlement is locked, the preview is valid and reconciled, eligible rows exist, and no active batch already exists.</p> : null}
       </div>
     </Card>
@@ -303,7 +303,7 @@ function ProjectWorkspaceUnavailable() {
       <BackLink href="/admin/listings" label="Back to Listing Management" />
       <Card>
         <SectionHeading title="Project Workspace Unavailable">
-          The operational project workspace could not load live database data. Demo fallback is disabled for this admin operations view so participant and payment state cannot be mistaken for real records.
+          The operational project workspace could not load live database data. Fallback sample data is disabled for this admin operations view so participant and payment state cannot be mistaken for real records.
         </SectionHeading>
         <p className="text-sm leading-6 text-slate-600">Please verify database connectivity and try again.</p>
       </Card>
@@ -355,7 +355,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       <PageHeader
         eyebrow={`${project.campaignRef} • ${project.campaignCode}`}
         title="Project Workspace"
-        description="Project operations workspace for admin-side project progress, participant management placeholders, financials placeholders and distributions placeholders."
+        description="Project operations workspace for admin-side progress, participant management, financial review, and distribution workflows."
         action={
           <PendingLink className="rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-600" href={`/admin/listings/${project.slug}`} pendingLabel="Opening...">
             View Listing Details
@@ -455,7 +455,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Participants">Admin-only participant operations. Manual confirmation records received payment only; it does not create a payout or distribution.</SectionHeading>
+        <SectionHeading title="Participants">Admin-only participant operations. Manual confirmation records received payment only; it does not create a payment transfer or distribution.</SectionHeading>
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participants</p>
@@ -498,7 +498,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
                         <input type="hidden" name="campaignId" value={project.id} />
                         <input type="hidden" name="projectSlug" value={project.slug} />
                         <input type="hidden" name="participationId" value={p.id} />
-                        <p className="text-xs leading-5 text-slate-600">Manual confirmation records that payment has been received. This does not create a payout or distribution.</p>
+                        <p className="text-xs leading-5 text-slate-600">Manual confirmation records that payment has been received. This does not create a payment transfer or distribution.</p>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment amount<input name="paymentAmount" defaultValue={decimalInputValue(p.participationAmount)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment date<input name="paymentDate" required type="date" defaultValue={dateInputValue(new Date())} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
@@ -517,7 +517,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
       </Card>
 
       <Card>
-        <SectionHeading title="Financials">Admin-only summary editing for project financial inputs. This does not calculate member payouts or execute distributions.</SectionHeading>
+        <SectionHeading title="Financials">Admin-only summary editing for project financial inputs. This does not calculate member distribution payments or execute distributions.</SectionHeading>
         <InfoGrid items={[
           { label: "Campaign Target", value: formatCurrency(target) },
           { label: "Collected Amount", value: formatCurrency(collected) },

@@ -24,7 +24,7 @@ export default async function Page() {
       {unavailable ? (
         <ContentCard>
           <h2 className="text-base font-bold">Distributions unavailable</h2>
-          <p className="mt-2 text-sm leading-6 text-slate-600">We could not load paid distributions from the database right now. No demo distribution records are shown.</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">We could not load paid distributions from the database right now. No distribution records are shown while distribution data is unavailable.</p>
         </ContentCard>
       ) : null}
 
