@@ -122,7 +122,7 @@ export default async function CampaignDetailPage({ params }: { params: { slug: s
               <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
               <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
-              <CompactRow label="Estimated Yield" value={campaign.estimatedYield} icon="trend" />
+              <CompactRow label="Projected Holding Return" value={campaign.estimatedYield} icon="trend" />
               <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} icon="check" />
               <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} icon="check" />
             </dl>
