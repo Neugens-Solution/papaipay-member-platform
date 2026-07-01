@@ -280,7 +280,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
 
       <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
         <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} saveDisabled={!canSaveDraftBatch} draftSaved={Boolean(activeBatch)} approveDisabled approved={false} />
-        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers. Approve Distribution is available after a draft batch is saved. Mark Paid remains disabled for later phases.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers. Approve Distribution is available after a draft batch is saved. After approval, admin can record completed manual payment and mark the batch paid.</p>
         {!canSaveDraftBatch && !activeBatch ? <p className="mt-2 text-sm font-semibold text-slate-500">Save Draft Batch is available only when the latest settlement is locked, the preview is valid and reconciled, eligible rows exist, and no active batch already exists.</p> : null}
       </div>
     </Card>
