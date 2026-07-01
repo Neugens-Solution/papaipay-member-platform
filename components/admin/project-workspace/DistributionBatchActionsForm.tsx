@@ -36,7 +36,6 @@ export function DistributionBatchActionsForm({ campaignId, settlementId, batchId
         </form>
       ) : null}
 
-      {completed ? <p className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Distribution batch completed. Manual payment has been recorded.</p> : null}
       {saveState.status === "success" ? <p className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold text-papaipay-green">{saveState.message}</p> : null}
       {saveState.status === "error" ? <p className="rounded-xl border border-rose-100 bg-rose-50 p-3 text-sm font-semibold text-rose-700">{saveState.message}</p> : null}
       {approveState.status === "success" ? <p className="rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold text-papaipay-green">{approveState.message}</p> : null}
