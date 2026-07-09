@@ -3,6 +3,7 @@
 import { Visibility } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildProjectProgressAuditData } from "./audit";
 import { isProjectProgressStatus, progressForProjectStatus } from "./statuses";
 
@@ -37,6 +38,7 @@ export async function updateProjectStatusAction(
   _prevState: ProjectProgressActionState,
   formData: FormData,
 ): Promise<ProjectProgressActionState> {
+  const { user } = await requireAdminPermission("campaign.manage");
   const campaignId = requiredString(formData, "campaignId");
   const status = requiredString(formData, "status");
   const note = optionalString(formData, "note");
@@ -60,6 +62,7 @@ export async function updateProjectStatusAction(
 
       await tx.auditLog.create({
         data: buildProjectProgressAuditData({
+          actorId: user.id,
           action: "project_progress.status.updated",
           entityId: campaignId,
           afterSnapshot: {
@@ -87,6 +90,7 @@ export async function createProjectUpdateAction(
   _prevState: ProjectProgressActionState,
   formData: FormData,
 ): Promise<ProjectProgressActionState> {
+  const { user } = await requireAdminPermission("campaign.manage");
   const campaignId = requiredString(formData, "campaignId");
   const title = requiredString(formData, "title");
   const body = requiredString(formData, "body");
@@ -108,6 +112,7 @@ export async function createProjectUpdateAction(
 
       await tx.auditLog.create({
         data: buildProjectProgressAuditData({
+          actorId: user.id,
           action: "project_progress.update.created",
           entityId: created.id,
           entityType: "CampaignUpdate",
@@ -117,6 +122,7 @@ export async function createProjectUpdateAction(
 
       await tx.auditLog.create({
         data: buildProjectProgressAuditData({
+          actorId: user.id,
           action: publishedAt ? "project_progress.update.published" : "project_progress.update.drafted",
           entityId: created.id,
           entityType: "CampaignUpdate",

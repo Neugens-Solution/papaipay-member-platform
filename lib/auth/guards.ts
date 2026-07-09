@@ -24,24 +24,32 @@ export async function requireUser() {
 
 export async function getCurrentMember() {
   const user = await getCurrentUser();
-  if (!user?.member) return null;
+  if (!user?.member || user.sessionAccountType !== "member") return null;
   return { user, member: user.member };
 }
 
 export async function requireMember() {
   const current = await getCurrentMember();
-  if (!current) redirect("/login");
+  if (!current) redirect("/member/login");
   return current;
 }
 
 export async function getCurrentAdmin() {
   const user = await getCurrentUser();
-  if (!user?.adminProfile || user.adminProfile.status !== "Active") return null;
+  if (!user?.adminProfile || user.adminProfile.status !== "Active" || user.sessionAccountType !== "admin") return null;
   return { user, admin: user.adminProfile };
 }
 
 export async function requireAdmin() {
   const current = await getCurrentAdmin();
-  if (!current) redirect("/login");
+  if (!current) redirect("/admin/login");
+  return current;
+}
+
+export async function requireAdminPermission(permissionKey: string) {
+  const current = await requireAdmin();
+  // TODO: Enforce granular permissionKey checks once seeded role permissions are finalized.
+  // This PR intentionally fails closed at the active admin boundary for every admin mutation.
+  void permissionKey;
   return current;
 }

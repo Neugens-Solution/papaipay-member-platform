@@ -1,4 +1,5 @@
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData, makeFileRef } from "../audit";
 import { fileFromForm, requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
 
@@ -7,6 +8,7 @@ function normalizeVisibility(value: string) { return value === "Member Visible" 
 function normalizeDocumentCategory(value: string) { return value.replaceAll(" ", "") || "OtherDocuments"; }
 
 export async function saveDocumentsModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId) throw new WorkspaceValidationError("Save Overview before saving Documents.");
   const saved = await db.$transaction(async (tx) => {

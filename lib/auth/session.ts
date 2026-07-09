@@ -13,7 +13,12 @@ type SessionPayload = {
 };
 
 function secret() {
-  return process.env.AUTH_SESSION_SECRET || process.env.NEXTAUTH_SECRET || "papaipay-local-dev-session-secret-change-me";
+  const configuredSecret = process.env.AUTH_SESSION_SECRET || process.env.NEXTAUTH_SECRET;
+  if (configuredSecret) return configuredSecret;
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SESSION_SECRET or NEXTAUTH_SECRET must be configured in production.");
+  }
+  return "papaipay-local-dev-session-secret-change-me";
 }
 
 function encodeBase64Url(value: string) {

@@ -14,18 +14,21 @@ export function buildProjectProgressAuditData({
   entityType = "Campaign",
   beforeSnapshot,
   afterSnapshot,
+  actorId,
 }: {
   action: ProjectProgressAuditAction;
   entityId: string;
   entityType?: string;
   beforeSnapshot?: unknown;
   afterSnapshot?: unknown;
+  actorId?: string;
 }): Prisma.AuditLogUncheckedCreateInput {
   return {
     auditRef: makeAuditRef(),
     action,
     entityType,
     entityId,
+    ...(actorId ? { actorId } : {}),
     ...(beforeSnapshot !== undefined ? { beforeSnapshot: toJsonValue(beforeSnapshot) } : {}),
     ...(afterSnapshot !== undefined ? { afterSnapshot: toJsonValue(afterSnapshot) } : {}),
   };

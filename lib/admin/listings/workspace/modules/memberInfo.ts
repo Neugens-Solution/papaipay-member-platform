@@ -1,8 +1,10 @@
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData } from "../audit";
 import { requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
 
 export async function saveMemberInfoModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId) throw new WorkspaceValidationError("Save Overview before saving Member Info.");
   const importantInformation = requiredString(formData, "importantInformation");

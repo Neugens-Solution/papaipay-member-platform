@@ -1,10 +1,12 @@
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData } from "../audit";
 import { optionalDecimal, requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
 
 const defaultSettlementNotes = "Settlement and fee details are prepared during the final campaign review. Any final distribution calculations, approved costs and platform fee allocations will be confirmed before member distributions are processed.";
 
 export async function saveSettlementModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId) throw new WorkspaceValidationError("Save Overview before saving Settlement.");
   const member = Number(requiredString(formData, "memberProfitDistributionPercentagePlanned") || 0);
