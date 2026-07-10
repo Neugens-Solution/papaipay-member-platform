@@ -11,16 +11,36 @@ function statusLabel(status: string) {
   return status;
 }
 
+function assertProductionDatabaseConfigured() {
+  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL must be configured for member participation data in production.");
+  }
+}
+
+function mapDemoPortfolioRecords() {
+  return portfolioRecords.map((record, index) => ({
+    ...record,
+    status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
+    estimatedYield: "18.0% p.a.",
+    dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
+    assetCategory: record.property.propertyType === "Apartment" || record.property.propertyType === "Condominium" ? "Residential Asset" : record.property.propertyType === "Shop Lot" ? "Commercial Asset" : "Residential Asset",
+    occupancyStatus: "To be confirmed",
+  }));
+}
+
 async function getMemberParticipationsRaw(memberId: string) {
-  if (!process.env.DATABASE_URL) return [];
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return [];
+  }
 
   return db.participation.findMany({
     where: { memberId },
     orderBy: { createdAt: "desc" },
     include: {
       campaign: { include: { propertyDetail: true } },
-      payments: { orderBy: { createdAt: "desc" }, take: 1 },
-      distributions: { where: { status: "Paid", distributionBatch: { status: "Completed" } }, orderBy: { createdAt: "desc" }, take: 1 },
+      payments: { where: { memberId }, orderBy: { createdAt: "desc" }, take: 1 },
+      distributions: { where: { memberId, status: "Paid", distributionBatch: { status: "Completed" } }, orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
 }
@@ -29,14 +49,7 @@ export async function getMemberParticipations() {
   try {
     const { member } = await requireMember();
     const records = await getMemberParticipationsRaw(member.id);
-    if (records.length === 0 && !process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return portfolioRecords.map((record, index) => ({
-      ...record,
-      status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
-      estimatedYield: "18.0% p.a.",
-      dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
-      assetCategory: record.property.propertyType === "Apartment" || record.property.propertyType === "Condominium" ? "Residential Asset" : record.property.propertyType === "Shop Lot" ? "Commercial Asset" : "Residential Asset",
-      occupancyStatus: "To be confirmed",
-    }));
+    if (records.length === 0 && !process.env.DATABASE_URL && process.env.NODE_ENV !== "production") return mapDemoPortfolioRecords();
 
     return records.map((record: ParticipationWithRelations) => {
       const latestDistribution = record.distributions[0];
@@ -62,27 +75,23 @@ export async function getMemberParticipations() {
   } catch (error) {
     if (process.env.NODE_ENV === "production") throw error;
     console.warn("Falling back to demo portfolio records because database reads are unavailable.", error);
-    return portfolioRecords.map((record, index) => ({
-      ...record,
-      status: index === 0 ? "Submitted" : index === 1 ? "Pending Review" : record.status === "Completed" ? "Completed" : "Active",
-      estimatedYield: "18.0% p.a.",
-      dateSubmitted: record.updates?.[0]?.date || "18 Jun 2026",
-      assetCategory: record.property.propertyType === "Apartment" || record.property.propertyType === "Condominium" ? "Residential Asset" : record.property.propertyType === "Shop Lot" ? "Commercial Asset" : "Residential Asset",
-      occupancyStatus: "To be confirmed",
-    }));
+    return mapDemoPortfolioRecords();
   }
 }
 
 export async function getMemberParticipationById(id: string) {
   const { member } = await requireMember();
-  if (!process.env.DATABASE_URL) return null;
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return null;
+  }
 
   return db.participation.findFirst({
     where: { id, memberId: member.id },
     include: {
       member: true,
       campaign: { include: { propertyDetail: true } },
-      payments: { orderBy: { createdAt: "desc" }, take: 1 },
+      payments: { where: { memberId: member.id }, orderBy: { createdAt: "desc" }, take: 1 },
     },
   });
 }
