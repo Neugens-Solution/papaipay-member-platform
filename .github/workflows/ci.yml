@@ -11,11 +11,26 @@ jobs:
     name: Install, lint, validate Prisma, and build
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci
+          POSTGRES_PASSWORD: ci
+          POSTGRES_DB: papaipay_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci -d papaipay_ci"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     env:
       CI: true
       NEXT_TELEMETRY_DISABLED: "1"
-      # Placeholder values for schema validation and build-time checks only.
-      # The workflow does not run migrations, seed data, or connect to a real database.
+      # CI-only local Postgres connection for schema validation and build-time page collection.
+      # The workflow does not run migrations, seed data, or connect to any real/staging/production database.
       DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
       DIRECT_DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
       AUTH_SESSION_SECRET: "ci-only-dummy-session-secret-change-in-production"
@@ -46,6 +61,9 @@ jobs:
 
       - name: Validate Prisma schema
         run: npx prisma validate
+
+      - name: Prepare CI database schema
+        run: npx prisma db push --skip-generate
 
       - name: Build application
         run: npm run build
