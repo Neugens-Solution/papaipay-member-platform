@@ -12,7 +12,8 @@
     "prisma:seed": "prisma db seed",
     "postinstall": "prisma generate",
     "uat:demo-data": "node scripts/uat-demo-data.js",
-    "auth:demo-users": "node scripts/auth-demo-users.js"
+    "auth:demo-users": "node scripts/auth-demo-users.js",
+    "test": "node scripts/production-readiness-check.js"
   },
   "dependencies": {
     "@prisma/client": "^6.10.1",
