@@ -35,8 +35,9 @@ export default async function ListingsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader
+        eyebrow="Admin Portal"
         title="Listing Management"
-        description="Manage listing records and monitor collection progress."
+        description="Manage listing records, publishing readiness, and collection progress. Campaign references remain internal identifiers."
         action={
           <PendingLink
             className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
@@ -47,17 +48,17 @@ export default async function ListingsPage() {
           </PendingLink>
         }
       />
-      <SearchFilter placeholder="Search opportunities" />
+      <SearchFilter placeholder="Search listings" />
       <TableWrap>
         <thead>
           <tr>
-            <Th>Campaign ID</Th>
-            <Th>Campaign Code</Th>
+            <Th>Listing ID</Th>
+            <Th>Listing Code</Th>
             <Th>Listing Name</Th>
             <Th>Location</Th>
             <Th>Asset</Th>
             <Th>Status</Th>
-            <Th>Campaign Target</Th>
+            <Th>Listing Target</Th>
             <Th>Collected Amount</Th>
             <Th>Progress</Th>
             <Th>Participants</Th>
