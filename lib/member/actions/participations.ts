@@ -34,29 +34,6 @@ function parseAmount(value: FormDataEntryValue | null) {
   return { amount };
 }
 
-async function resolveDevelopmentDemoMemberId(tx: Prisma.TransactionClient) {
-  if (process.env.NODE_ENV === "production") {
-    throw new Error("Authenticated member session is required.");
-  }
-
-  const demoMemberRef = process.env.DEMO_MEMBER_REF;
-  if (!demoMemberRef) {
-    throw new Error("Authenticated member session is required.");
-  }
-
-  const member = await tx.member.findUnique({
-    where: { memberRef: demoMemberRef },
-    select: { id: true },
-  });
-
-  if (!member) {
-    throw new Error(`Demo member ${demoMemberRef} was not found.`);
-  }
-
-  return member.id;
-}
-
-
 async function createParticipationRecord({
   campaignId,
   campaignSlug,
@@ -89,7 +66,7 @@ async function createParticipationRecord({
       },
     });
 
-    if (!campaign) throw new Error("Campaign was not found.");
+    if (!campaign) throw new Error("Opportunity was not found.");
 
     const now = new Date();
     const target = Number(campaign.campaignTarget);
@@ -106,11 +83,11 @@ async function createParticipationRecord({
       (campaign.campaignOpenDate && campaign.campaignOpenDate > now) ||
       (campaign.campaignCloseDate && campaign.campaignCloseDate < now)
     ) {
-      throw new Error("Campaign is not currently open for participation.");
+      throw new Error("Opportunity is not currently open for participation.");
     }
 
     if (remaining <= 0) {
-      throw new Error("Campaign is fully funded or closed.");
+      throw new Error("Opportunity is fully funded or closed.");
     }
 
     if (amount < min) {
@@ -122,10 +99,10 @@ async function createParticipationRecord({
     }
 
     if (amount > remaining) {
-      throw new Error(`Participation amount must not exceed the remaining campaign amount of RM${remaining.toLocaleString()}.`);
+      throw new Error(`Participation amount must not exceed the remaining opportunity amount of RM${remaining.toLocaleString()}.`);
     }
 
-    const memberId = authenticatedMember.member.id || (await resolveDevelopmentDemoMemberId(tx));
+    const memberId = authenticatedMember.member.id;
     const reservedAt = now;
     const reservedUntil = new Date(now.getTime() + RESERVATION_MINUTES * 60 * 1000);
     const paymentRef = makeRef("PAY");
@@ -233,8 +210,8 @@ export async function createParticipationAction(
   const authenticatedMember = await requireMember();
 
   if (typeof campaignId !== "string" || !campaignId) {
-    if (directSubmit) throw new Error("Campaign is required.");
-    return { error: "Campaign is required." };
+    if (directSubmit) throw new Error("Opportunity is required.");
+    return { error: "Opportunity is required." };
   }
 
   if (parsedAmount.error || parsedAmount.amount === undefined) {

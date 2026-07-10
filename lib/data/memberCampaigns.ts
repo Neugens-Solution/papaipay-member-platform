@@ -1,3 +1,4 @@
+import { DocumentStatus, FileVisibility, Visibility } from "@prisma/client";
 import { db } from "@/lib/db";
 import {
   opportunities as demoOpportunities,
@@ -14,6 +15,42 @@ type CampaignWithRelations = Awaited<
   ReturnType<typeof getMemberCampaignsRaw>
 >[number];
 
+type MemberFileAsset = {
+  bucket?: string | null;
+  objectKey?: string | null;
+  visibility?: string | null;
+} | null | undefined;
+
+const MEMBER_ACCESSIBLE_FILE_VISIBILITIES = [FileVisibility.Public, FileVisibility.Authenticated] as const;
+const MEMBER_DOCUMENT_STATUSES = [DocumentStatus.Published, DocumentStatus.Ready] as const;
+
+function shouldUseDemoDataFallback() {
+  return process.env.NODE_ENV !== "production" && !process.env.DATABASE_URL;
+}
+
+function assertProductionDatabaseConfigured() {
+  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL must be configured for member listing data in production.");
+  }
+}
+
+function memberAccessibleDocumentWhere() {
+  return {
+    visibility: Visibility.MemberVisible,
+    documentStatus: { in: [...MEMBER_DOCUMENT_STATUSES] },
+    fileAsset: { is: { visibility: { in: [...MEMBER_ACCESSIBLE_FILE_VISIBILITIES] } } },
+  };
+}
+
+function canMemberAccessFileAsset(fileAsset: MemberFileAsset) {
+  return Boolean(
+    fileAsset?.visibility &&
+      MEMBER_ACCESSIBLE_FILE_VISIBILITIES.includes(
+        fileAsset.visibility as (typeof MEMBER_ACCESSIBLE_FILE_VISIBILITIES)[number],
+      ),
+  );
+}
+
 function statusToMemberStatus(status: string): Opportunity["status"] {
   if (status === "Distributed") return "closed";
   if (status === "Cancelled") return "closed";
@@ -29,7 +66,8 @@ function formatReturnType(returnType: string): Opportunity["returnType"] {
   return "Target";
 }
 
-function fileAssetUrl(fileAsset?: { bucket?: string | null; objectKey?: string | null } | null): string | null {
+function fileAssetUrl(fileAsset?: MemberFileAsset): string | null {
+  if (!canMemberAccessFileAsset(fileAsset)) return null;
   return fileAssetPublicUrl(fileAsset);
 }
 
@@ -126,18 +164,24 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     maximumHoldingPeriodMonths: campaign.maximumHoldingPeriodMonths,
     principalProtectionRule:
       "If the property is not successfully disposed of within the maximum holding period, members will receive their original Participation Amount back according to the listing terms.",
-    documents: (campaign.documents ?? [])
-      .filter(
-        (document) =>
-          document.visibility === "MemberVisible" &&
-          ["Published", "Ready"].includes(document.documentStatus) &&
-          document.fileAsset,
-      )
-      .map((document) => ({
+    documents: (campaign.documents ?? []).flatMap((document) => {
+      if (
+        document.visibility !== Visibility.MemberVisible ||
+        !MEMBER_DOCUMENT_STATUSES.includes(document.documentStatus as (typeof MEMBER_DOCUMENT_STATUSES)[number]) ||
+        !document.fileAsset
+      ) {
+        return [];
+      }
+
+      const url = fileAssetUrl(document.fileAsset);
+      if (!url) return [];
+
+      return [{
         title: document.title,
-        filename: document.fileAsset?.originalFilename ?? document.title,
-        url: fileAssetUrl(document.fileAsset) ?? "#",
-      })),
+        filename: document.fileAsset.originalFilename ?? document.title,
+        url,
+      }];
+    }),
     riskSummary:
       campaign.content?.riskDisclaimer ||
       "Please review all listing information before participating.",
@@ -145,7 +189,10 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
 }
 
 async function getMemberCampaignsRaw() {
-  if (!process.env.DATABASE_URL) return [];
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return [];
+  }
 
   return db.campaign.findMany({
     where: {
@@ -167,10 +214,7 @@ async function getMemberCampaignsRaw() {
       },
       content: true,
       documents: {
-        where: {
-          visibility: "MemberVisible",
-          documentStatus: { in: ["Published", "Ready"] },
-        },
+        where: memberAccessibleDocumentWhere(),
         include: {
           fileAsset: true,
         },
@@ -198,7 +242,10 @@ async function getMemberCampaignsRaw() {
 }
 
 async function getMemberCampaignSummariesRaw() {
-  if (!process.env.DATABASE_URL) return [];
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return [];
+  }
 
   return db.campaign.findMany({
     where: {
@@ -240,7 +287,7 @@ export async function getMemberCampaignSummaries() {
   try {
     const campaigns = await getMemberCampaignSummariesRaw();
 
-    if (campaigns.length === 0 && !process.env.DATABASE_URL) {
+    if (campaigns.length === 0 && shouldUseDemoDataFallback()) {
       return demoOpportunities;
     }
 
@@ -254,6 +301,7 @@ export async function getMemberCampaignSummaries() {
       riskSummary: "",
     }));
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn(
       "Falling back to demo member campaigns because database reads are unavailable.",
       error,
@@ -270,12 +318,13 @@ export async function getMemberCampaigns() {
   try {
     const campaigns = await getMemberCampaignsRaw();
 
-    if (campaigns.length === 0 && !process.env.DATABASE_URL) {
+    if (campaigns.length === 0 && shouldUseDemoDataFallback()) {
       return demoOpportunities;
     }
 
     return campaigns.map(toOpportunity);
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn(
       "Falling back to demo member campaigns because database reads are unavailable.",
       error,
@@ -285,7 +334,10 @@ export async function getMemberCampaigns() {
 }
 
 export async function getRealMemberCampaignBySlug(slug: string) {
-  if (!process.env.DATABASE_URL) return null;
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return null;
+  }
 
   try {
     const campaign = await db.campaign.findFirst({
@@ -306,6 +358,7 @@ export async function getRealMemberCampaignBySlug(slug: string) {
         },
         content: true,
         documents: {
+          where: memberAccessibleDocumentWhere(),
           include: {
             fileAsset: true,
           },
@@ -332,6 +385,7 @@ export async function getRealMemberCampaignBySlug(slug: string) {
 
     return toOpportunity(campaign);
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn(
       "Member participation is unavailable because the real campaign could not be loaded.",
       error,
@@ -341,7 +395,10 @@ export async function getRealMemberCampaignBySlug(slug: string) {
 }
 
 export async function getMemberCampaignBySlug(slug: string) {
-  if (!process.env.DATABASE_URL) return demoCampaignBySlug(slug);
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return demoCampaignBySlug(slug);
+  }
 
   try {
     const campaign = await db.campaign.findFirst({
@@ -362,6 +419,7 @@ export async function getMemberCampaignBySlug(slug: string) {
         },
         content: true,
         documents: {
+          where: memberAccessibleDocumentWhere(),
           include: {
             fileAsset: true,
           },
@@ -388,6 +446,7 @@ export async function getMemberCampaignBySlug(slug: string) {
 
     return toOpportunity(campaign);
   } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
     console.warn(
       "Falling back to demo member campaign because database reads are unavailable.",
       error,
