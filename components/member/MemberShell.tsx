@@ -114,9 +114,9 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
   );
 }
 
-function HeaderIconLink({ href, label, icon: Icon, hasUnread = false }: { href: string; label: IconComponent; icon: IconComponent; hasUnread?: boolean }) {
+function HeaderIconLink({ href, label, icon: Icon, hasUnread = false }: { href: string; label: string; icon: IconComponent; hasUnread?: boolean }) {
   return (
-    <Link href={href} aria-label={label as unknown as string} className="relative grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition hover:border-papaipay-green/30 hover:bg-slate-50 hover:text-papaipay-green">
+    <Link href={href} aria-label={label} className="relative grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition hover:border-papaipay-green/30 hover:bg-slate-50 hover:text-papaipay-green">
       <Icon className="h-5 w-5" />
       {hasUnread ? <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-papaipay-green ring-2 ring-white" /> : null}
     </Link>
