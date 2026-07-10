@@ -6,15 +6,15 @@ import type { SVGProps } from "react";
 
 const navItems = [
   ["Dashboard", "/member/dashboard"],
-  ["Member Listings", "/member/opportunities"],
+  ["Opportunities", "/member/opportunities"],
   ["Portfolio", "/member/portfolio"],
   ["Distributions", "/member/distributions"],
   ["Profile", "/member/profile"],
-];
+] as const;
 
 const bottomNavItems = [
   ["Dashboard", "/member/dashboard", HomeIcon],
-  ["Member Listings", "/member/opportunities", BuildingIcon],
+  ["Opportunities", "/member/opportunities", BuildingIcon],
   ["Portfolio", "/member/portfolio", BriefcaseIcon],
   ["Distributions", "/member/distributions", WalletIcon],
   ["Profile", "/member/profile", UserCircleIcon],
@@ -43,7 +43,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
               <p className="mt-1.5 text-sm font-semibold tracking-tight text-papaipay-ink">Member Portal</p>
             </Link>
           </div>
-          <nav className="space-y-1.5 px-3 pb-6">
+          <nav className="space-y-1.5 px-3 pb-6" aria-label="Member navigation">
             {navItems.map(([label, href]) => {
               const active = isActivePath(pathname, href);
 
@@ -51,6 +51,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 <Link
                   key={label}
                   href={href}
+                  aria-current={active ? "page" : undefined}
                   className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}
                 >
                   {label}
@@ -64,6 +65,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
             <div className="flex items-center justify-between gap-3">
               <Link href="/member/dashboard" className="rounded-md lg:hidden">
                 <p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY</p>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-papaipay-green">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
                 <HeaderIconLink href="/member/notifications" label="Notifications" icon={BellIcon} hasUnread />
@@ -89,7 +91,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           <main className="px-4 py-7 pb-24 sm:px-6 lg:px-10 lg:py-10 lg:pb-10">{children}</main>
         </div>
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Member mobile navigation">
         <div className="grid grid-cols-5 gap-1 py-2">
           {bottomNavItems.map(([label, href, Icon]) => {
             const active = isActivePath(pathname, href);

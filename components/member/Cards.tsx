@@ -51,7 +51,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
       </PendingLink>
       <div className="space-y-4 p-5">
         <div>
-          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Ref: {opportunity.campaignId} • {opportunity.campaignCode}</p>
+          <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Opportunity Ref: {opportunity.campaignId} • {opportunity.campaignCode}</p>
           <PendingLink href={detailHref} pendingLabel="Opening..." className="group">
             <h3 className="text-lg font-semibold tracking-tight text-papaipay-ink group-hover:text-papaipay-green">{opportunity.title}</h3>
           </PendingLink>
@@ -82,7 +82,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
         </dl>
 
         <PendingLink href={detailHref} pendingLabel="Opening..." className="inline-flex min-h-10 w-full items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-semibold text-white transition hover:bg-papaipay-green/90">
-          View Listing Details
+          View Opportunity Details
         </PendingLink>
       </div>
     </article>
