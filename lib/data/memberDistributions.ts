@@ -31,14 +31,24 @@ export type MemberDistributionRecord = {
 
 type DistributionWithRelations = Awaited<ReturnType<typeof getPaidMemberDistributionRows>>[number];
 
+function assertProductionDatabaseConfigured() {
+  if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+    throw new Error("DATABASE_URL must be configured for member distribution data in production.");
+  }
+}
+
 const paidCompletedWhere = (memberId: string) => ({
   memberId,
+  participation: { memberId },
   status: DistributionStatus.Paid,
   distributionBatch: { status: DistributionBatchStatus.Completed },
 });
 
 async function getPaidMemberDistributionRows(memberId: string) {
-  if (!process.env.DATABASE_URL) return [];
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return [];
+  }
 
   return db.distribution.findMany({
     where: paidCompletedWhere(memberId),
@@ -105,7 +115,10 @@ export async function getMemberDistributions() {
 
 export async function getMemberDistributionByRefOrSlug(params: { slug: string }) {
   const { member } = await requireMember();
-  if (!process.env.DATABASE_URL) return null;
+  if (!process.env.DATABASE_URL) {
+    assertProductionDatabaseConfigured();
+    return null;
+  }
 
   const row = await db.distribution.findFirst({
     where: {
