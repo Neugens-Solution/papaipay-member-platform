@@ -36,9 +36,10 @@ jobs:
           npm cache clean --force
           rm -rf ~/.npm/_cacache
           npm config set registry https://registry.npmjs.org/
+          npm config set cache "${{ runner.temp }}/npm-cache"
 
       - name: Install dependencies
-        run: npm ci --prefer-online --no-audit --no-fund --registry=https://registry.npmjs.org/
+        run: npm ci --cache "${{ runner.temp }}/npm-cache" --prefer-online --no-audit --no-fund --registry=https://registry.npmjs.org/
 
       - name: Run lint
         run: npm run lint
