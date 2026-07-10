@@ -1,3 +1,4 @@
+import { DocumentStatus, FileVisibility, Visibility } from "@prisma/client";
 import { db } from "@/lib/db";
 import {
   opportunities as demoOpportunities,
@@ -20,7 +21,8 @@ type MemberFileAsset = {
   visibility?: string | null;
 } | null | undefined;
 
-const MEMBER_ACCESSIBLE_FILE_VISIBILITIES = ["Public", "Authenticated"] as const;
+const MEMBER_ACCESSIBLE_FILE_VISIBILITIES = [FileVisibility.Public, FileVisibility.Authenticated] as const;
+const MEMBER_DOCUMENT_STATUSES = [DocumentStatus.Published, DocumentStatus.Ready] as const;
 
 function shouldUseDemoDataFallback() {
   return process.env.NODE_ENV !== "production" && !process.env.DATABASE_URL;
@@ -34,8 +36,8 @@ function assertProductionDatabaseConfigured() {
 
 function memberAccessibleDocumentWhere() {
   return {
-    visibility: "MemberVisible" as const,
-    documentStatus: { in: ["Published", "Ready"] as const },
+    visibility: Visibility.MemberVisible,
+    documentStatus: { in: [...MEMBER_DOCUMENT_STATUSES] },
     fileAsset: { is: { visibility: { in: [...MEMBER_ACCESSIBLE_FILE_VISIBILITIES] } } },
   };
 }
@@ -164,8 +166,8 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
       "If the property is not successfully disposed of within the maximum holding period, members will receive their original Participation Amount back according to the listing terms.",
     documents: (campaign.documents ?? []).flatMap((document) => {
       if (
-        document.visibility !== "MemberVisible" ||
-        !["Published", "Ready"].includes(document.documentStatus) ||
+        document.visibility !== Visibility.MemberVisible ||
+        !MEMBER_DOCUMENT_STATUSES.includes(document.documentStatus as (typeof MEMBER_DOCUMENT_STATUSES)[number]) ||
         !document.fileAsset
       ) {
         return [];
