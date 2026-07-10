@@ -15,6 +15,20 @@ const navItems = [
   ["Admin Users", "/admin/admin-users"],
 ] as const;
 
+const primaryMobileNavItems = [
+  navItems[0],
+  navItems[2],
+  navItems[1],
+  navItems[3],
+] as const;
+
+const secondaryMobileNavItems = [
+  navItems[4],
+  navItems[5],
+  navItems[6],
+  navItems[7],
+] as const;
+
 function activePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
@@ -23,6 +37,7 @@ export function AdminShell({ children, identity }: { children: React.ReactNode; 
   const pathname = usePathname();
   const displayName = identity.name || identity.email;
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "AD";
+  const moreActive = secondaryMobileNavItems.some(([, href]) => activePath(pathname, href));
 
   return (
     <div className="min-h-screen bg-[#f7f8f5] text-papaipay-ink">
@@ -34,19 +49,31 @@ export function AdminShell({ children, identity }: { children: React.ReactNode; 
               <p className="mt-1.5 text-sm font-semibold tracking-tight text-papaipay-ink">Admin Portal</p>
             </Link>
           </div>
-          <nav className="space-y-1.5 px-3 pb-6">
+          <nav className="space-y-1.5 px-3 pb-6" aria-label="Admin navigation">
             {navItems.map(([label, href]) => {
               const active = activePath(pathname, href);
-              return <Link key={label} href={href} className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}>{label}</Link>;
+              return (
+                <Link
+                  key={label}
+                  href={href}
+                  aria-current={active ? "page" : undefined}
+                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}
+                >
+                  {label}
+                </Link>
+              );
             })}
           </nav>
         </aside>
         <div className="min-w-0 flex-1 lg:h-screen lg:overflow-y-auto">
           <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
-              <Link href="/admin/dashboard" className="rounded-md lg:hidden"><p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY Admin</p></Link>
+              <Link href="/admin/dashboard" className="rounded-md lg:hidden">
+                <p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY</p>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-papaipay-green">Admin Portal</p>
+              </Link>
               <div className="ml-auto flex items-center gap-2">
-                <HeaderIconLink href="/admin/activity-log" label="Notifications" icon={BellIcon} hasUnread />
+                <HeaderIconLink href="/admin/activity-log" label="Activity log" icon={BellIcon} hasUnread />
                 <details className="group relative">
                   <summary aria-label="Admin profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-60 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
@@ -64,9 +91,39 @@ export function AdminShell({ children, identity }: { children: React.ReactNode; 
           <main className="px-4 py-7 pb-28 sm:px-6 lg:px-10 lg:py-10">{children}</main>
         </div>
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden">
-        <div className="grid grid-cols-4 gap-1 py-2 sm:grid-cols-7">
-          {navItems.map(([label, href]) => <Link key={label} href={href} className={`flex min-h-12 items-center justify-center rounded-xl px-1 text-center text-[0.62rem] font-semibold ${activePath(pathname, href) ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500"}`}>{label}</Link>)}
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Admin mobile navigation">
+        <div className="grid grid-cols-5 gap-1 py-2">
+          {primaryMobileNavItems.map(([label, href]) => {
+            const active = activePath(pathname, href);
+            return (
+              <Link
+                key={label}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={`flex min-h-12 min-w-0 items-center justify-center rounded-xl px-1 text-center text-[0.62rem] font-semibold transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}
+              >
+                <span className="truncate">{label}</span>
+              </Link>
+            );
+          })}
+          <details className={`group relative flex min-h-12 min-w-0 items-center justify-center rounded-xl px-1 text-center text-[0.62rem] font-semibold transition ${moreActive ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}>
+            <summary className="flex h-full w-full cursor-pointer list-none items-center justify-center rounded-xl">More</summary>
+            <div className="absolute bottom-[calc(100%+0.5rem)] right-0 w-56 rounded-2xl border border-slate-200 bg-white p-2 text-left shadow-soft">
+              {secondaryMobileNavItems.map(([label, href]) => {
+                const active = activePath(pathname, href);
+                return (
+                  <Link
+                    key={label}
+                    href={href}
+                    aria-current={active ? "page" : undefined}
+                    className={`block rounded-xl px-3 py-2.5 text-sm font-semibold ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-600 hover:bg-slate-50 hover:text-papaipay-green"}`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </div>
+          </details>
         </div>
       </nav>
     </div>
