@@ -1,9 +1,11 @@
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData } from "../audit";
 import { optionalDecimal, requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
 
 export async function savePropertyModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId) throw new WorkspaceValidationError("Save Overview before saving Property.");
   const tenure = requiredString(formData, "tenure") || "Freehold";

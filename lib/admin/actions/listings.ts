@@ -6,6 +6,7 @@ import {
   ListingWorkspaceEngine,
   toWorkspaceError,
 } from "@/lib/admin/listings/workspace/engine";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import type { WorkspaceReadinessResult } from "@/lib/admin/listings/workspace/types";
 
 export type ListingFormState = {
@@ -21,6 +22,7 @@ export async function saveListingWorkspaceAction(
   _prevState: ListingFormState,
   formData: FormData,
 ): Promise<ListingFormState> {
+  await requireAdminPermission("listing.manage");
   const result =
     await ListingWorkspaceEngine.dispatch(formData).catch(toWorkspaceError);
   if (!result.ok) {

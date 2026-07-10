@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { uploadListingImage, validateImageFile, type StoredMediaObject } from "@/lib/storage/mediaStorage";
 import { buildListingAuditData, makeFileRef } from "../audit";
 import { fileFromForm, filesFromForm, requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
@@ -23,6 +24,7 @@ async function createImageFileAsset(tx: Prisma.TransactionClient, file: File, st
 }
 
 export async function saveMediaModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId) throw new WorkspaceValidationError("Save Overview before saving Media.");
   const campaign = await db.campaign.findUnique({ where: { id: campaignId }, select: { slug: true } });

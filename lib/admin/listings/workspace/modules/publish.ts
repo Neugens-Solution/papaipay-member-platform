@@ -1,5 +1,6 @@
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData } from "../audit";
 import { getWorkspaceReadiness } from "../readiness";
 import {
@@ -11,6 +12,7 @@ import {
 export async function publishListingModule(
   formData: FormData,
 ): Promise<WorkspaceModuleResult> {
+  const { user } = await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId)
     throw new WorkspaceValidationError("Save Overview before publishing.");
@@ -18,6 +20,7 @@ export async function publishListingModule(
   if (!readiness.ready) {
     await db.auditLog.create({
       data: buildListingAuditData({
+        actorId: user.id,
         action: "listing.publish.blocked",
         entityId: campaignId,
         afterSnapshot: readiness,
@@ -42,6 +45,7 @@ export async function publishListingModule(
     });
     await tx.auditLog.create({
       data: buildListingAuditData({
+        actorId: user.id,
         action: "listing.published",
         entityId: campaignId,
         afterSnapshot: {
@@ -70,6 +74,7 @@ export async function publishListingModule(
 export async function unpublishListingModule(
   formData: FormData,
 ): Promise<WorkspaceModuleResult> {
+  const { user } = await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId");
   if (!campaignId)
     throw new WorkspaceValidationError("Listing shell was not found.");
@@ -85,6 +90,7 @@ export async function unpublishListingModule(
     });
     await tx.auditLog.create({
       data: buildListingAuditData({
+        actorId: user.id,
         action: "listing.unpublished",
         entityId: campaignId,
         afterSnapshot: {

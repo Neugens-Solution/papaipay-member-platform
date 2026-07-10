@@ -1,0 +1,51 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Install, lint, validate Prisma, and build
+    runs-on: ubuntu-latest
+
+    env:
+      CI: true
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Placeholder values for schema validation and build-time checks only.
+      # The workflow does not run migrations, seed data, or connect to a real database.
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
+      DIRECT_DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
+      AUTH_SESSION_SECRET: "ci-only-dummy-session-secret-change-in-production"
+      NEXTAUTH_SECRET: "ci-only-dummy-nextauth-secret-change-in-production"
+      BLOB_READ_WRITE_TOKEN: "ci-only-dummy-blob-token"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Reset npm cache
+        run: |
+          npm cache clean --force
+          rm -rf ~/.npm/_cacache
+          npm config set registry https://registry.npmjs.org/
+          npm config set cache "${{ runner.temp }}/npm-cache"
+
+      - name: Install dependencies
+        run: npm ci --cache "${{ runner.temp }}/npm-cache" --prefer-online --no-audit --no-fund --registry=https://registry.npmjs.org/
+
+      - name: Run lint
+        run: npm run lint
+
+      - name: Validate Prisma schema
+        run: npx prisma validate
+
+      - name: Build application
+        run: npm run build

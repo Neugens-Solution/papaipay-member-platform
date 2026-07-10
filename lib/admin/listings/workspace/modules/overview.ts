@@ -1,5 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
+import { requireAdminPermission } from "@/lib/auth/guards";
 import { buildListingAuditData } from "../audit";
 import { decimalOrZero, optionalDate, requiredString, WorkspaceValidationError, type WorkspaceModuleResult } from "../types";
 
@@ -27,6 +28,7 @@ function makeCampaignCode(title: string) {
 }
 
 export async function saveOverviewModule(formData: FormData): Promise<WorkspaceModuleResult> {
+  await requireAdminPermission("listing.manage");
   const campaignId = requiredString(formData, "campaignId") || undefined;
   const title = requiredString(formData, "title") || "Untitled Listing";
   const aboutCampaign = requiredString(formData, "aboutCampaign");
