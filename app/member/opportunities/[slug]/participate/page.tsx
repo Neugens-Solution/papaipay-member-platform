@@ -8,11 +8,12 @@ function parseAmount(value?: string) {
   return Number(value.replace(/,/g, ""));
 }
 
-export default async function ParticipatePage({ params, searchParams }: { params: { slug: string }; searchParams?: { amount?: string } }) {
-  const opportunity = await getRealMemberCampaignBySlug(params.slug);
+export default async function ParticipatePage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<{ amount?: string }> }) {
+  const [{ slug }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const opportunity = await getRealMemberCampaignBySlug(slug);
   if (!opportunity) return <ParticipationUnavailable />;
-  const amount = parseAmount(searchParams?.amount);
-  const hasAmount = typeof searchParams?.amount === "string";
+  const amount = parseAmount(resolvedSearchParams?.amount);
+  const hasAmount = typeof resolvedSearchParams?.amount === "string";
   const error = hasAmount && (!Number.isFinite(amount) || amount <= 0)
     ? "Amount must be greater than zero."
     : hasAmount && amount < opportunity.minimumParticipation
@@ -34,7 +35,7 @@ export default async function ParticipatePage({ params, searchParams }: { params
           <h2 className="text-lg font-bold">Participation Amount</h2>
           <form className="mt-5 space-y-4" method="get" action={`/member/opportunities/${opportunity.slug}/participate/review`}>
             <label className="block text-sm font-bold text-slate-600" htmlFor="amount">Amount is required</label>
-            <div className="flex rounded-xl border border-slate-200 bg-white shadow-inner"><span className="px-3 py-3 text-sm font-bold text-slate-500">RM</span><input id="amount" name="amount" inputMode="decimal" required min={opportunity.minimumParticipation} max={opportunity.maximumParticipation} step="1" defaultValue={searchParams?.amount ?? ""} className="min-h-12 flex-1 rounded-xl px-2 py-3 text-sm outline-none" placeholder="10,000" /></div>
+            <div className="flex rounded-xl border border-slate-200 bg-white shadow-inner"><span className="px-3 py-3 text-sm font-bold text-slate-500">RM</span><input id="amount" name="amount" inputMode="decimal" required min={opportunity.minimumParticipation} max={opportunity.maximumParticipation} step="1" defaultValue={resolvedSearchParams?.amount ?? ""} className="min-h-12 flex-1 rounded-xl px-2 py-3 text-sm outline-none" placeholder="10,000" /></div>
             {error ? <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-bold text-red-700">{error}</p> : null}
             <div className="rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
               <p><strong>Minimum:</strong> {formatRM(opportunity.minimumParticipation)}</p>

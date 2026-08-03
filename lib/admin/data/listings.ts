@@ -48,7 +48,19 @@ function demoAdminListingDetail(slug: string) {
         fullName: participation.name,
         user: { email: participation.email },
       },
-      payments: [{ amount: participation.amount, status: participation.paymentStatus, updatedAt: new Date(participation.date) }],
+      payments: [{
+        id: `${participation.participationId}-payment`,
+        paymentRef: `${participation.participationId}-PAY`,
+        amount: participation.amount,
+        status: participation.paymentStatus,
+        gateway: "Manual",
+        reconciliationReference: null,
+        submittedReference: null,
+        submittedAt: null,
+        memberNotes: null,
+        updatedAt: new Date(participation.date),
+        receiptFileAsset: null,
+      }],
       distributions: [{ id: `${participation.participationId}-dist`, status: participation.distributionStatus, finalDistributionTotal: null, distributionBatch: null, updatedAt: new Date(participation.date) }],
     }));
 
@@ -150,7 +162,11 @@ function demoAdminListingDetail(slug: string) {
 }
 
 export async function getAdminListingSummaries() {
-  if (!process.env.DATABASE_URL) return demoAdminListingSummaries();
+  const allowDemoFallback = process.env.NODE_ENV !== "production";
+  if (!process.env.DATABASE_URL) {
+    if (allowDemoFallback) return demoAdminListingSummaries();
+    throw new Error("Admin listings are unavailable because the database is not configured.");
+  }
 
   try {
     return await db.campaign.findMany({
@@ -175,6 +191,7 @@ export async function getAdminListingSummaries() {
       },
     });
   } catch (error) {
+    if (!allowDemoFallback) throw error;
     console.warn(
       "Falling back to demo admin listings because database reads are unavailable.",
       error,
@@ -184,7 +201,11 @@ export async function getAdminListingSummaries() {
 }
 
 export async function getAdminListingForEdit(slug: string) {
-  if (!process.env.DATABASE_URL) return demoAdminListingDetail(slug);
+  const allowDemoFallback = process.env.NODE_ENV !== "production";
+  if (!process.env.DATABASE_URL) {
+    if (allowDemoFallback) return demoAdminListingDetail(slug);
+    throw new Error("Listing editing is unavailable because the database is not configured.");
+  }
 
   try {
     return await db.campaign.findUnique({
@@ -204,6 +225,7 @@ export async function getAdminListingForEdit(slug: string) {
       },
     });
   } catch (error) {
+    if (!allowDemoFallback) throw error;
     console.warn(
       "Falling back to demo admin listing because database reads are unavailable.",
       error,
@@ -213,7 +235,11 @@ export async function getAdminListingForEdit(slug: string) {
 }
 
 export async function getAdminListingBySlug(slug: string) {
-  if (!process.env.DATABASE_URL) return demoAdminListingDetail(slug);
+  const allowDemoFallback = process.env.NODE_ENV !== "production";
+  if (!process.env.DATABASE_URL) {
+    if (allowDemoFallback) return demoAdminListingDetail(slug);
+    throw new Error("Listing details are unavailable because the database is not configured.");
+  }
 
   try {
     return await db.campaign.findUnique({
@@ -269,6 +295,7 @@ export async function getAdminListingBySlug(slug: string) {
       },
     });
   } catch (error) {
+    if (!allowDemoFallback) throw error;
     console.warn(
       "Falling back to demo admin listing because database reads are unavailable.",
       error,
@@ -326,10 +353,24 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
             payments: {
               orderBy: { updatedAt: "desc" },
-              select: { id: true, paymentRef: true, amount: true, status: true, gateway: true, reconciliationReference: true, updatedAt: true },
+              take: 1,
+              select: {
+                id: true,
+                paymentRef: true,
+                amount: true,
+                status: true,
+                gateway: true,
+                reconciliationReference: true,
+                submittedReference: true,
+                submittedAt: true,
+                memberNotes: true,
+                updatedAt: true,
+                receiptFileAsset: { select: { id: true, originalFilename: true } },
+              },
             },
             distributions: {
               orderBy: { updatedAt: "desc" },
+              take: 1,
               select: { id: true, status: true, finalDistributionTotal: true, distributionBatch: { select: { status: true } }, updatedAt: true },
             },
           },
@@ -362,7 +403,8 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             createdAt: true,
             createdBy: { select: { email: true } },
             distributions: {
-              orderBy: { updatedAt: "desc" },
+              orderBy: { markedPaidAt: "desc" },
+              take: 1,
               select: { paymentDate: true, paymentReference: true, adminNotes: true, markedPaidAt: true },
             },
           },

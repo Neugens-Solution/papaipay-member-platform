@@ -63,6 +63,14 @@ check("/admin/signup route does not exist", routeMissing("/admin/signup"));
 check("app/member/layout.tsx uses requireMember()", /requireMember\s*\(\s*\)/.test(read("app/member/layout.tsx")));
 check("app/admin/layout.tsx uses requireAdmin()", /requireAdmin\s*\(\s*\)/.test(read("app/admin/layout.tsx")));
 
+const guards = read("lib/auth/guards.ts");
+check(
+  "admin permission guard enforces role permissions",
+  guards.includes("db.rolePermission.findFirst") &&
+    guards.includes("permission: { key: permissionKey }") &&
+    !guards.includes("void permissionKey"),
+);
+
 const session = read("lib/auth/session.ts");
 check(
   "lib/auth/session.ts accepts AUTH_SESSION_SECRET or NEXTAUTH_SECRET",
@@ -76,7 +84,7 @@ check(
 const envExample = read(".env.example");
 check(
   ".env.example includes required production variables",
-  includesAll(envExample, ["DATABASE_URL", "DIRECT_DATABASE_URL", "BLOB_READ_WRITE_TOKEN", "AUTH_SESSION_SECRET", "NEXTAUTH_SECRET"]),
+  includesAll(envExample, ["DATABASE_URL", "DIRECT_DATABASE_URL", "BLOB_READ_WRITE_TOKEN", "PRIVATE_BLOB_READ_WRITE_TOKEN", "AUTH_SESSION_SECRET", "NEXTAUTH_SECRET"]),
 );
 
 check(".github/workflows/ci.yml exists", exists(".github/workflows/ci.yml"));
@@ -94,7 +102,16 @@ check(
   "member data access contains member ownership checks",
   memberParticipations.includes("where: { memberId }") &&
     memberParticipations.includes("where: { id, memberId: member.id }") &&
-    memberParticipations.includes("payments: { where: { memberId: member.id }"),
+    /payments:\s*\{\s*where:\s*\{\s*memberId:\s*member\.id/.test(memberParticipations),
+);
+
+const privateFileRoute = read("app/files/[id]/route.ts");
+check(
+  "private documents require authentication and ownership or active admin access",
+  privateFileRoute.includes("getCurrentUser") &&
+    privateFileRoute.includes("ownsKycFile") &&
+    privateFileRoute.includes("ownsPaymentReceipt") &&
+    privateFileRoute.includes("PRIVATE_BLOB_READ_WRITE_TOKEN"),
 );
 
 const memberCampaigns = read("lib/data/memberCampaigns.ts");

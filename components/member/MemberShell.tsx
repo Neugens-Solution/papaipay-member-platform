@@ -68,8 +68,6 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-papaipay-green">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
-                <HeaderIconLink href="/member/notifications" label="Notifications" icon={BellIcon} hasUnread />
-                <HeaderIconLink href="/member/announcements" label="Announcements" icon={NewspaperIcon} />
                 <details className="group relative hidden lg:block">
                   <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
@@ -114,17 +112,6 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
   );
 }
 
-function HeaderIconLink({ href, label, icon: Icon, hasUnread = false }: { href: string; label: string; icon: IconComponent; hasUnread?: boolean }) {
-  return (
-    <Link href={href} aria-label={label} className="relative grid min-h-10 min-w-10 place-items-center rounded-full border border-slate-200/80 bg-white text-slate-600 transition hover:border-papaipay-green/30 hover:bg-slate-50 hover:text-papaipay-green">
-      <Icon className="h-5 w-5" />
-      {hasUnread ? <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-papaipay-green ring-2 ring-white" /> : null}
-    </Link>
-  );
-}
-
-type IconComponent = (props: SVGProps<SVGSVGElement>) => JSX.Element;
-
 function IconBase({ children, ...props }: SVGProps<SVGSVGElement>) {
   return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" {...props}>{children}</svg>;
 }
@@ -147,12 +134,4 @@ function WalletIcon(props: SVGProps<SVGSVGElement>) {
 
 function UserCircleIcon(props: SVGProps<SVGSVGElement>) {
   return <IconBase {...props}><circle cx="12" cy="12" r="9" /><path d="M9 10.5a3 3 0 1 0 6 0 3 3 0 0 0-6 0" /><path d="M7.5 18a5.5 5.5 0 0 1 9 0" /></IconBase>;
-}
-
-function BellIcon(props: SVGProps<SVGSVGElement>) {
-  return <IconBase {...props}><path d="M18 9.8A6 6 0 0 0 6 9.8c0 6-2.2 6.7-2.2 6.7h16.4S18 15.8 18 9.8" /><path d="M10 19a2 2 0 0 0 4 0" /></IconBase>;
-}
-
-function NewspaperIcon(props: SVGProps<SVGSVGElement>) {
-  return <IconBase {...props}><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H18a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6.5A2.5 2.5 0 0 1 4 17.5Z" /><path d="M8 8h8" /><path d="M8 12h3" /><path d="M14 12h2" /><path d="M8 16h8" /></IconBase>;
 }

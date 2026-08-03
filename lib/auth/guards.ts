@@ -1,10 +1,11 @@
 import "server-only";
 
+import { cache } from "react";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
 
-export async function getCurrentUser() {
+export const getCurrentUser = cache(async function getCurrentUser() {
   const session = await getSession();
   if (!session) return null;
 
@@ -14,7 +15,7 @@ export async function getCurrentUser() {
   });
   if (!user) return null;
   return { ...user, sessionAccountType: session.accountType };
-}
+});
 
 export async function requireUser() {
   const user = await getCurrentUser();
@@ -48,8 +49,12 @@ export async function requireAdmin() {
 
 export async function requireAdminPermission(permissionKey: string) {
   const current = await requireAdmin();
-  // TODO: Enforce granular permissionKey checks once seeded role permissions are finalized.
-  // This PR intentionally fails closed at the active admin boundary for every admin mutation.
-  void permissionKey;
+  if (current.admin.role.name === "Super Admin") return current;
+
+  const permission = await db.rolePermission.findFirst({
+    where: { roleId: current.admin.roleId, permission: { key: permissionKey } },
+    select: { permissionId: true },
+  });
+  if (!permission) throw new Error("You do not have permission to perform this admin action.");
   return current;
 }

@@ -1,47 +1,30 @@
+import { notFound } from "next/navigation";
 import { BackLink, Badge, Card, InfoGrid, PageHeader } from "@/components/admin/AdminUI";
-import { distributions } from "@/lib/adminMockData";
+import { getAdminDistributionById } from "@/lib/admin/data/distributions";
+import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
 const steps = ["Pending", "Processing", "Paid"];
 
-export default function DistributionDetailPage() {
-  const distribution = distributions[0];
-  const currentIndex = steps.indexOf(distribution.status);
+export default async function DistributionDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const distribution = await getAdminDistributionById(id);
+  if (!distribution) notFound();
+  const currentIndex = Math.max(steps.indexOf(String(distribution.status)), 0);
+  const bank = distribution.member.bankAccounts[0];
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <BackLink href="/admin/distributions" label="Back to Distributions" />
-      <PageHeader eyebrow={distribution.id} title="Distribution Detail" description="Manual distribution payment workflow: review calculation, check bank details, transfer outside the system, enter reference, date and notes, then mark Paid." />
+      <PageHeader eyebrow={distribution.distributionRef} title="Distribution Detail" description="Read-only audit view of the manual distribution record." />
 
-      <Card>
-        <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
-          {steps.map((step, index) => {
-            const active = index <= currentIndex;
-            return (
-              <div key={step} className="flex flex-1 items-center gap-3">
-                <div className={`grid h-11 w-11 flex-none place-items-center rounded-full text-sm font-bold ring-1 ${active ? "bg-papaipay-green text-white ring-papaipay-green" : "bg-white text-slate-400 ring-slate-200"}`}>{index + 1}</div>
-                <div>
-                  <p className="text-sm font-bold text-papaipay-ink">{step}</p>
-                  <p className="text-xs text-slate-500">{active ? "Reached" : "Awaiting"}</p>
-                </div>
-                {index < steps.length - 1 ? <div className="hidden h-px flex-1 bg-slate-200 sm:block" /> : null}
-              </div>
-            );
-          })}
-        </div>
-      </Card>
+      <Card><div className="grid gap-3 sm:grid-cols-3">{steps.map((step, index) => <div key={step} className={`rounded-xl border p-4 ${index <= currentIndex ? "border-emerald-200 bg-emerald-50" : "border-slate-200 bg-slate-50"}`}><span className={`grid h-8 w-8 place-items-center rounded-full text-xs font-bold ${index <= currentIndex ? "bg-papaipay-green text-white" : "bg-slate-200 text-slate-500"}`}>{index + 1}</span><p className="mt-3 text-sm font-bold text-papaipay-ink">{step}</p></div>)}</div></Card>
 
-      <section className="grid gap-4 lg:grid-cols-2">
-        <Card><h2 className="font-bold">Campaign Information</h2><InfoGrid items={[{ label: "Campaign ID", value: distribution.campaignId }, { label: "Campaign Code", value: distribution.campaignCode }, { label: "Distribution Batch", value: distribution.distributionBatchId }, { label: "Campaign", value: distribution.campaign }, { label: "Participation ID", value: distribution.participationId }, { label: "Participation", value: distribution.participation }]} /></Card>
-        <Card><h2 className="font-bold">Member Information</h2><InfoGrid items={[{ label: "Member", value: distribution.member }, { label: "Member ID", value: distribution.memberId }]} /></Card>
-        <Card><h2 className="font-bold">Distribution Information</h2><InfoGrid items={[{ label: "Distribution ID", value: distribution.id }, { label: "Principal Return", value: distribution.principalReturn }, { label: "Holding Return", value: distribution.holdingReturn }, { label: "Profit Distribution", value: distribution.profitDistribution }, { label: "Final Distribution Total", value: distribution.amount }, { label: "Payment Date", value: distribution.paid }, { label: "Payment Reference", value: distribution.paymentReference }, { label: "Admin Notes", value: "Manual transfer pending finance confirmation" }]} /></Card>
-        <Card>
-          <h2 className="font-bold">Manual Payment Processing</h2>
-          <div className="mt-4"><Badge>{distribution.status}</Badge></div>
-          <div className="mt-4 grid gap-2 sm:grid-cols-3">{steps.map((step) => <button key={step} className="rounded-lg border border-slate-200 px-3 py-2 text-sm font-bold text-slate-600 hover:border-papaipay-green hover:text-papaipay-green">Mark {step}</button>)}</div>
-        </Card>
+      <section className="grid min-w-0 gap-4 lg:grid-cols-2">
+        <Card><h2 className="font-bold">Project & Member</h2><InfoGrid items={[{ label: "Project", value: distribution.campaign.title }, { label: "Campaign ID", value: distribution.campaign.campaignRef }, { label: "Campaign Code", value: distribution.campaign.campaignCode }, { label: "Batch", value: distribution.distributionBatch.batchRef }, { label: "Member", value: distribution.member.fullName }, { label: "Member ID", value: distribution.member.memberRef }, { label: "Bank", value: bank?.bankName || "Not provided" }, { label: "Account", value: bank?.accountNumberLast4 ? `•••• ${bank.accountNumberLast4}` : "Not provided" }]} /></Card>
+        <Card><h2 className="font-bold">Distribution Breakdown</h2><InfoGrid items={[{ label: "Participation", value: distribution.participation.participationRef }, { label: "Participation Amount", value: formatCurrency(decimalToNumber(distribution.participation.participationAmount)) }, { label: "Principal Return", value: formatCurrency(decimalToNumber(distribution.principalReturn)) }, { label: "Holding Return", value: formatCurrency(decimalToNumber(distribution.holdingReturn)) }, { label: "Profit Distribution", value: formatCurrency(decimalToNumber(distribution.profitDistribution)) }, { label: "Final Distribution", value: formatCurrency(decimalToNumber(distribution.finalDistributionTotal)) }]} /></Card>
+        <Card><h2 className="font-bold">Payment Record</h2><div className="mt-4"><Badge>{formatEnumLabel(String(distribution.status))}</Badge></div><InfoGrid items={[{ label: "Payment Date", value: distribution.paymentDate ? formatDate(distribution.paymentDate) : "Not paid" }, { label: "Payment Reference", value: distribution.paymentReference || "Not recorded" }, { label: "Paid By", value: distribution.markedPaidBy?.email || "Not recorded" }, { label: "Notes", value: distribution.adminNotes || "No notes" }]} /></Card>
+        <Card><h2 className="font-bold">Process Note</h2><p className="mt-4 text-sm leading-7 text-slate-600">The actual bank transfer is completed outside PAPAIPAY. This page records the reviewed distribution amount, payment date, reference and responsible admin for audit purposes.</p></Card>
       </section>
-
-      <Card><h2 className="font-bold">Manual Distribution Process</h2>{["Review final distribution calculation", "Check member bank account details", "Manually transfer payment outside the system", "Enter payment reference number", "Enter payment date", "Add notes if needed", "Mark distribution as Paid"].map((item, index) => <p key={item} className="mt-3 border-t border-slate-100 pt-3 text-sm text-slate-600">Step {index + 1}: {item}</p>)}</Card>
     </div>
   );
 }

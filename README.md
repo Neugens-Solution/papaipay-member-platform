@@ -1,43 +1,61 @@
-# PAPAIPAY Portal V1
+# PAPAIPAY Member Portal
 
-PAPAIPAY Portal is a property participation campaign platform. This repository contains the V1 interface implementation using local sample data for member and admin screens covering campaign listings, portfolio records, participation records, manual distribution review, announcements, reports and profiles.
+PAPAIPAY is a database-backed member portal for Kasset Ventures property participation campaigns. The public landing page is intended for `https://www.kassetventures.com`; authenticated member and admin workspaces live in the same Next.js application.
 
-## Implementation limits
+## Supported production flow
 
-- Local sample data only.
-- No backend services.
-- No database schema or migrations.
-- No real authentication.
-- No payment gateway.
-- No automated payout or production payment logic.
+1. A member creates an account and completes their profile.
+2. The member uploads IC front and back for manual identity review.
+3. An active admin reviews the private documents and approves the member or requests resubmission.
+4. An approved member joins a published opportunity and receives a pending manual-payment record.
+5. The member transfers funds outside the portal, then uploads a receipt and bank reference.
+6. An admin verifies the receipt and records the manual payment as received.
+7. The participation is confirmed and appears in the member portfolio.
+8. Distribution calculations and external transfers remain admin-controlled manual operations; the portal records their status and references.
 
-## Core terminology
+There is no payment gateway, automated payout, or third-party e-KYC integration. The portal records and verifies manual operational steps only.
 
-Members join Campaigns for Malaysian property Listings using a Participation Amount in RM. Participation is based on RM amount only. The member joined-campaign area is Portfolio and `/member/portfolio` is the canonical Portfolio route.
+## Architecture
 
-Required reference IDs are displayed in relevant screens:
+- Next.js 15 App Router and React 19
+- Prisma 6 with PostgreSQL / Supabase
+- Signed, HTTP-only custom session cookies with member/admin role guards
+- Public Vercel Blob store for listing media
+- Separate private Vercel Blob store for IC documents and payment receipts
+- Server actions for participation, manual KYC, receipt submission, and admin review
 
-- Member ID: `MEM-000001`
-- Campaign ID: `CAM-000001`
-- Campaign Code: `PP-KL-2026-001`
-- Participation ID: `PAR-000001`
-- Distribution ID: `DIS-000001`
-- Distribution Batch ID: `DBT-000001`
-- Payment Reference: `PAY-000001`
+Private file downloads are authorized through `/files/[id]`; raw private Blob URLs are never exposed to members.
 
-## Campaign model
+## Required environment variables
 
-Admin campaign setup includes Campaign Target, Minimum Participation Amount, Maximum Participation Amount, Holding Return Rate, Return Type (Fixed / Target / Up To), Maximum Holding Period, Principal Protection and Manual Distribution Process notes.
+Copy `.env.example` and configure:
 
-Holding Return accrues during the holding period and is paid once during final distribution only. If the asset is not sold after 24 months, the rule returns principal / Participation Amount only with no Holding Return or Profit Distribution.
+- `DATABASE_URL` — pooled application connection
+- `DIRECT_DATABASE_URL` — direct connection used for Prisma migrations
+- `AUTH_SESSION_SECRET` and `NEXTAUTH_SECRET` — set both to the same strong random value
+- `BLOB_READ_WRITE_TOKEN` — public listing-media Blob store
+- `PRIVATE_BLOB_READ_WRITE_TOKEN` — separate private IC/receipt Blob store
 
-## Distribution model
+## Local checks
 
-Distribution screens show Principal Return, Holding Return, Profit Distribution, Final Distribution Total, Distribution Status, Payment Date, Payment Reference, Distribution Batch and Admin Notes. Admin screens represent a manual process: review calculation, check bank details, transfer outside the system, enter reference/date/notes and mark Paid.
-
-## Development
+Use Node.js 20, matching `.nvmrc` and the production engine.
 
 ```bash
-npm install
+npm ci
+npx prisma validate
+npm run lint
+npm test
 npm run build
 ```
+
+Apply committed production migrations with the direct database connection:
+
+```bash
+npx prisma migrate deploy
+```
+
+See `docs/PRODUCTION_READINESS.md` for the release gate and `docs/uat-demo-script.md` for the final UAT sequence.
+
+## Core references
+
+The portal generates durable references for members, campaigns, participations, payments, distributions, and audit events. A member's Participation Amount is denominated in RM. Holding Return is presented as projected and is not guaranteed; manual distributions are recorded only after the external finance process is complete.

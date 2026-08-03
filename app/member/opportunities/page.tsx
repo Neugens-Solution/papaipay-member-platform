@@ -1,27 +1,27 @@
 import { PendingLink } from "@/components/common/PendingLink";
-import { OpportunityCard, StatusBadge } from "@/components/member/Cards";
-import { completedCampaigns, formatRM } from "@/lib/memberMockData";
+import { OpportunityCard } from "@/components/member/Cards";
 import { getMemberCampaignSummaries } from "@/lib/data/memberCampaigns";
 
-const inputClass = "min-h-11 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm outline-none transition focus:border-papaipay-green/50 focus:ring-4 focus:ring-papaipay-green/10";
+const inputClass = "min-h-11 min-w-0 rounded-xl border border-slate-200/80 bg-white px-4 py-3 text-sm outline-none transition focus:border-papaipay-green/50 focus:ring-4 focus:ring-papaipay-green/10";
 const tabs = ["open", "completed", "all"] as const;
-
 type Tab = (typeof tabs)[number];
 
-function FilterFields({ compact = false }: { compact?: boolean }) {
-  return (
-    <>
-      <select className={`${inputClass} ${compact ? "min-w-0 flex-1 px-3" : ""}`}><option>State</option><option>Selangor</option><option>Kuala Lumpur</option><option>Negeri Sembilan</option><option>Perak</option></select>
-      <select className={`${inputClass} ${compact ? "min-w-0 flex-1 px-3" : ""}`}><option>Asset Type</option><option>Terrace House</option></select>
-      <select className={`${inputClass} ${compact ? "min-w-0 flex-1 px-3" : ""}`}><option>Status</option><option>Open</option><option>Closing Soon</option><option>Closed</option></select>
-    </>
-  );
-}
-
-export default async function InvestmentOpportunitiesPage({ searchParams }: { searchParams?: { tab?: string } }) {
-  const activeTab: Tab = tabs.includes(searchParams?.tab as Tab) ? (searchParams?.tab as Tab) : "open";
+export default async function InvestmentOpportunitiesPage({ searchParams }: { searchParams?: Promise<{ tab?: string; q?: string; state?: string; asset?: string }> }) {
+  const filters = await searchParams;
+  const activeTab: Tab = tabs.includes(filters?.tab as Tab) ? (filters?.tab as Tab) : "open";
   const opportunities = await getMemberCampaignSummaries();
-  const openCampaigns = opportunities.filter((campaign) => campaign.status !== "closed");
+  const query = filters?.q?.trim().toLowerCase() || "";
+  const selectedState = filters?.state || "";
+  const selectedAsset = filters?.asset || "";
+  const states = Array.from(new Set(opportunities.map((campaign) => campaign.state).filter(Boolean))).sort();
+  const assets = Array.from(new Set(opportunities.map((campaign) => campaign.propertyType).filter(Boolean))).sort();
+  const filtered = opportunities.filter((campaign) =>
+    (!query || `${campaign.title} ${campaign.location} ${campaign.campaignCode}`.toLowerCase().includes(query)) &&
+    (!selectedState || campaign.state === selectedState) &&
+    (!selectedAsset || campaign.propertyType === selectedAsset),
+  );
+  const openCampaigns = filtered.filter((campaign) => campaign.status !== "closed");
+  const completedCampaigns = filtered.filter((campaign) => campaign.status === "closed");
   const showOpen = activeTab === "open" || activeTab === "all";
   const showCompleted = activeTab === "completed" || activeTab === "all";
 
@@ -33,70 +33,33 @@ export default async function InvestmentOpportunitiesPage({ searchParams }: { se
           <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-papaipay-ink sm:text-3xl">Opportunities</h1>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">Browse property participation opportunities available to members.</p>
         </div>
-        <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Opportunity tabs">
+        <nav className="flex gap-2 overflow-x-auto pb-1" aria-label="Opportunity tabs">
           {tabs.map((tab) => {
-            const label = tab.replace(/^./, (char) => char.toUpperCase());
             const active = activeTab === tab;
-            return <PendingLink key={tab} href={`/member/opportunities?tab=${tab}`} pendingLabel="Loading..." className={`rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-papaipay-green text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{label}</PendingLink>;
+            return <PendingLink key={tab} href={`/member/opportunities?tab=${tab}`} pendingLabel="Loading…" className={`rounded-full px-4 py-2 text-sm font-bold ${active ? "bg-papaipay-green text-white" : "border border-slate-200 bg-white text-slate-600"}`}>{tab.replace(/^./, (character) => character.toUpperCase())}</PendingLink>;
           })}
-        </div>
-        <div className="sticky top-[65px] z-10 -mx-4 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/90 sm:p-3 sm:shadow-[0_1px_2px_rgba(15,23,42,0.03)]">
-          <div className="flex gap-2 md:grid md:grid-cols-[1.5fr_1fr_1fr_1fr] md:gap-3">
-            <input className={`${inputClass} min-w-0 flex-1`} placeholder="Search opportunities" />
-            <div className="hidden md:contents"><FilterFields /></div>
-            <details className="group md:hidden">
-              <summary className="inline-flex min-h-11 cursor-pointer list-none items-center justify-center rounded-xl border border-slate-200/80 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:border-papaipay-green/30 hover:text-papaipay-green">Filters</summary>
-              <div className="fixed inset-x-0 bottom-0 z-40 rounded-t-3xl border border-slate-200 bg-white p-5 shadow-soft">
-                <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" />
-                <h2 className="text-base font-semibold tracking-tight text-papaipay-ink">Filter Opportunities</h2>
-                <div className="mt-4 grid gap-3"><FilterFields /></div>
-                <div className="mt-5 grid grid-cols-2 gap-3">
-                  <button type="button" className="min-h-11 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700">Reset</button>
-                  <button type="button" className="min-h-11 rounded-xl bg-papaipay-green text-sm font-semibold text-white">Apply Filters</button>
-                </div>
-              </div>
-            </details>
-          </div>
-        </div>
+        </nav>
+        <form method="get" className="sticky top-[65px] z-10 -mx-4 grid gap-2 border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border sm:bg-white/90 sm:p-3 sm:shadow-[0_1px_2px_rgba(15,23,42,0.03)] md:grid-cols-[1.5fr_1fr_1fr_auto_auto]">
+          <input type="hidden" name="tab" value={activeTab} />
+          <input name="q" defaultValue={filters?.q || ""} className={inputClass} placeholder="Search name, location or code" aria-label="Search opportunities" />
+          <select name="state" defaultValue={selectedState} className={inputClass} aria-label="Filter by state"><option value="">All states</option>{states.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+          <select name="asset" defaultValue={selectedAsset} className={inputClass} aria-label="Filter by asset type"><option value="">All asset types</option>{assets.map((item) => <option key={item} value={item}>{item}</option>)}</select>
+          <button type="submit" className="min-h-11 rounded-xl bg-papaipay-green px-5 text-sm font-bold text-white">Apply</button>
+          <PendingLink href={`/member/opportunities?tab=${activeTab}`} pendingLabel="Resetting…" className="inline-flex min-h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-sm font-bold text-slate-600">Reset</PendingLink>
+        </form>
       </header>
 
-      {showOpen ? <section className="grid gap-5 xl:grid-cols-3">{openCampaigns.map((campaign) => <OpportunityCard key={campaign.id} opportunity={campaign} />)}</section> : null}
-
-      {showCompleted ? (
-        <section className="space-y-4">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Completed</p>
-            <h2 className="mt-2 text-xl font-bold">Completed Opportunities</h2>
-            <p className="mt-1 text-sm text-slate-600">Review completed opportunities and final distribution outcomes.</p>
-          </div>
-          <div className="grid gap-4 lg:grid-cols-2">
-            {completedCampaigns.map((campaign) => (
-              <PendingLink key={campaign.slug} href={`/member/opportunities/${campaign.slug}/outcome`} pendingLabel="Opening..." className="rounded-2xl border border-slate-200 bg-white p-5 transition hover:border-papaipay-green/40">
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Opportunity Reference: {campaign.campaignId} • {campaign.campaignCode}</p>
-                    <h3 className="mt-1 text-lg font-bold">{campaign.campaignName}</h3>
-                  </div>
-                  <div className="flex flex-wrap justify-end gap-2"><StatusBadge status={campaign.status} /><StatusBadge status="Distributed" /></div>
-                </div>
-                <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
-                  <Summary label="Sale Price" value={formatRM(campaign.salePrice)} />
-                  <Summary label="Holding Period" value={campaign.holdingPeriod} />
-                  <Summary label="Holding Return" value={campaign.holdingReturn} />
-                  <Summary label="Profit Distribution" value={campaign.profitDistribution} />
-                  <Summary label="Total Distribution" value={campaign.totalDistribution} />
-                  <Summary label="Final Distribution at Project Completion" value={formatRM(campaign.finalDistributionAmount)} />
-                  <Summary label="Distribution Date" value={campaign.distributionDate} />
-                </dl>
-              </PendingLink>
-            ))}
-          </div>
-        </section>
-      ) : null}
+      {showOpen ? <CampaignGrid title="Open Opportunities" campaigns={openCampaigns} empty="No open opportunities match the current filters." /> : null}
+      {showCompleted ? <CampaignGrid title="Completed Opportunities" campaigns={completedCampaigns} empty="No completed opportunities match the current filters." /> : null}
     </div>
   );
 }
 
-function Summary({ label, value }: { label: string; value: string }) {
-  return <div><dt className="text-xs font-bold uppercase text-slate-400">{label}</dt><dd className="mt-1 font-bold text-slate-800">{value}</dd></div>;
+function CampaignGrid({ title, campaigns, empty }: { title: string; campaigns: Awaited<ReturnType<typeof getMemberCampaignSummaries>>; empty: string }) {
+  return (
+    <section className="space-y-4">
+      <h2 className="text-xl font-bold text-papaipay-ink">{title}</h2>
+      {campaigns.length ? <div className="grid gap-5 xl:grid-cols-3">{campaigns.map((campaign) => <OpportunityCard key={campaign.id} opportunity={campaign} />)}</div> : <p className="rounded-2xl border border-dashed border-slate-200 bg-white p-6 text-sm text-slate-500">{empty}</p>}
+    </section>
+  );
 }

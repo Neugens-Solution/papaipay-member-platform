@@ -3,8 +3,9 @@ import { notFound } from "next/navigation";
 import { ContentCard, Info, StatusBadge } from "@/components/member/Cards";
 import { formatDistributionAmount, getMemberDistributionByRefOrSlug } from "@/lib/data/memberDistributions";
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  const record = await getMemberDistributionByRefOrSlug({ slug: params.slug });
+export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const record = await getMemberDistributionByRefOrSlug({ slug });
   if (!record) notFound();
 
   return (
@@ -48,7 +49,7 @@ export default async function Page({ params }: { params: { slug: string } }) {
       </ContentCard>
 
       <div className="flex flex-col gap-3 sm:flex-row">
-        <button disabled className="min-h-10 cursor-not-allowed rounded-md bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400">Receipt unavailable in this UAT build</button>
+        <button disabled className="min-h-10 cursor-not-allowed rounded-md bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400">Receipt unavailable</button>
         <Link href="/member/distributions" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-papaipay-green hover:text-papaipay-green">Back to Distributions</Link>
       </div>
     </div>

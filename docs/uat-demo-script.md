@@ -8,38 +8,34 @@ Current decision status:
 
 - Internal UAT: GO
 - Controlled client demo: GO, scripted path only
-- Production: NO-GO
+- Production: GO only after migration, private Blob setup, and the final checklist pass
 
 ## What is ready
 
 The following scripted lifecycle is ready for controlled demonstration:
 
-1. Member participates in an opportunity.
-2. Participation enters Payment Pending status.
-3. Admin confirms manual payment received outside PAPAIPAY.
-4. Participation becomes confirmed.
-5. Admin reviews the financial summary.
-6. Admin approves the financial summary.
-7. Admin locks the financial summary.
-8. Admin validates the distribution preview.
-9. Admin saves a draft distribution batch.
-10. Admin approves the distribution batch.
-11. Admin records completed manual payment and marks the batch paid.
-12. Distribution batch becomes Completed.
-13. Distribution rows become Paid.
-14. Member views the paid distribution from DB-backed member distributions pages.
+1. Member uploads IC front and back for manual review.
+2. Admin approves the manual KYC submission.
+3. Member participates in an opportunity.
+4. Participation enters Payment Pending status.
+5. Member transfers outside the portal and uploads a receipt and bank reference.
+6. Payment enters Processing status for admin review.
+7. Admin opens the receipt and confirms manual payment received outside PAPAIPAY.
+8. Participation becomes confirmed.
+9. Admin reviews, approves, and locks the financial summary.
+10. Admin validates and approves the distribution batch.
+11. Admin records the externally completed distribution payment.
+12. Member views the paid distribution from DB-backed member distributions pages.
 
-## What is not production-ready yet
+## Remaining production gates
 
-The platform is not cleared for production launch. Do not position this demo as a production-ready payment or payout system.
+The application is ready for the final release gate. Complete the production deployment, migration, private storage, DNS, and HTTPS setup first, then run this full UAT sequence on `https://www.kassetventures.com` before normal member use. Do not position the portal as a payment or payout execution system.
 
-Not production-ready areas include:
+Out-of-scope areas remain:
 
-- Unscripted operational paths outside the controlled UAT flow.
 - Live bank transfer execution or payment gateway payouts.
-- Broad production user onboarding.
-- Non-demo payment operations.
-- Any workflow that has not been explicitly validated in the final UAT script.
+- Automated e-KYC or third-party identity verification.
+- Any workflow that has not been validated in the target production environment.
 
 ## Required environment variables
 
@@ -49,8 +45,9 @@ Set the application environment before running the demo. Required variables incl
 - `DIRECT_DATABASE_URL`
 - `AUTH_SESSION_SECRET` or `NEXTAUTH_SECRET`
 - `BLOB_READ_WRITE_TOKEN` if media/upload is shown
+- `PRIVATE_BLOB_READ_WRITE_TOKEN` for IC and receipt uploads
 
-Only show media or upload screens when `BLOB_READ_WRITE_TOKEN` is configured and the path has been tested in the target environment.
+Only show upload screens after both the Public listing-media store and separate Private document store have been tested in the target environment.
 
 ## Demo user setup commands
 
@@ -93,32 +90,26 @@ Recommended order for a fresh controlled demo environment:
 1. Log in as the demo admin.
 2. Open the target project workspace.
 3. Confirm that a member participation is pending manual payment.
-4. Confirm manual payment received outside PAPAIPAY.
-5. Verify the participation status moves to confirmed.
-6. Open the financial summary area.
-7. Review the financial summary.
-8. Approve the financial summary.
-9. Lock the financial summary.
-10. Open the distribution preview.
-11. Confirm the preview is valid for the scripted data.
-12. Save a draft distribution batch.
-13. Approve the distribution batch.
-14. Record completed manual payment and mark the batch paid.
-15. Verify the distribution batch status is Completed and distribution rows are Paid.
+4. Open the member receipt and reference.
+5. Confirm manual payment received outside PAPAIPAY.
+6. Verify the participation status moves to confirmed.
+7. Open the financial summary area, review, approve, and lock it.
+8. Validate and approve the distribution batch.
+9. Record the externally completed distribution payment.
+10. Verify the distribution batch status is Completed and distribution rows are Paid.
 
 ## Member demo flow
 
-1. Log in as the demo member.
-2. Open the target opportunity.
-3. Review opportunity details and the Projected Holding Return wording.
-4. Start participation.
-5. Enter the scripted participation amount.
-6. Review the participation details.
-7. Accept the required declarations.
-8. Confirm participation.
-9. Verify the participation is pending manual payment confirmation.
-10. After admin completes the scripted admin flow, open member distributions.
-11. Verify the paid distribution is visible from the DB-backed member distributions pages.
+1. Log in as the demo member and upload IC front and back from Profile.
+2. Log in as admin, review the private files, and approve the member.
+3. Return as the member and open the target opportunity.
+4. Review opportunity details and the Projected Holding Return wording.
+5. Start participation, review the declaration, and confirm.
+6. Verify the participation is pending manual payment.
+7. Complete the scripted external transfer and upload the receipt plus bank reference.
+8. Verify the payment is Processing until admin review.
+9. After admin completes the scripted admin flow, open member distributions.
+10. Verify the paid distribution is visible from the DB-backed member distributions pages.
 
 ## Important wording notes
 
@@ -152,4 +143,4 @@ Before the demo:
 - Confirm member-facing labels say “Projected Holding Return.”
 - Confirm distribution copy says manual payment is recorded only.
 - Confirm no presenter language implies PAPAIPAY executes bank transfers or payment gateway payouts.
-- Confirm production status is described as NO-GO.
+- Confirm production status is described as conditional GO only after the release checklist passes.

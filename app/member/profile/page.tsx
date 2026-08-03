@@ -1,169 +1,116 @@
-"use client";
-
 import Link from "next/link";
-import { useState, type ReactNode } from "react";
+import type { ReactNode } from "react";
+import { ManualKycForm } from "@/components/member/ManualKycForm";
+import { getMemberProfile } from "@/lib/data/memberProfile";
+import { formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
-import { memberProfileDetails } from "@/lib/memberMockData";
-
-type ModalType = "personal" | "email" | "bank" | "nominee" | "password" | null;
-
-const profile = memberProfileDetails;
-
-function InfoRow({ label, value }: { label: string; value: string }) {
+function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
-    <div className="border-b border-slate-100/80 py-3 last:border-b-0 sm:grid sm:grid-cols-[210px_1fr] sm:gap-4">
-      <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.16em] text-slate-400">{label}</dt>
-      <dd className="mt-1 text-sm font-medium leading-6 text-papaipay-ink sm:mt-0">{value}</dd>
-    </div>
-  );
-}
-
-function Section({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
-  return (
-    <section className="rounded-2xl border border-slate-200/70 bg-white/90 px-4 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:px-5 sm:py-5">
-      <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">{title}</h2>
-      <dl className="mt-3">{children}</dl>
-      {action ? <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">{action}</div> : null}
+    <section className="min-w-0 rounded-2xl border border-slate-200/70 bg-white p-5 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:p-6">
+      <h2 className="text-base font-bold text-papaipay-ink">{title}</h2>
+      {description ? <p className="mt-1 text-sm leading-6 text-slate-500">{description}</p> : null}
+      <div className="mt-4">{children}</div>
     </section>
   );
 }
 
-function ActionButton({ children, onClick }: { children: ReactNode; onClick: () => void }) {
+function InfoRow({ label, value }: { label: string; value: string }) {
   return (
-    <button type="button" onClick={onClick} className="inline-flex min-h-9 items-center justify-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-papaipay-green/30 hover:bg-emerald-50/60 hover:text-papaipay-green">
-      {children}
-    </button>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  return <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-papaipay-green ring-1 ring-inset ring-emerald-100">{status}</span>;
-}
-
-function Field({ label, value = "", type = "text" }: { label: string; value?: string; type?: string }) {
-  return (
-    <label className="block">
-      <span className="text-xs font-semibold text-slate-500">{label}</span>
-      <input type={type} className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm text-papaipay-ink outline-none transition placeholder:text-slate-400 focus:border-papaipay-green/50 focus:ring-2 focus:ring-papaipay-green/10" defaultValue={value} placeholder={label} />
-    </label>
-  );
-}
-
-function AccountAction({ href, title, body }: { href: string; title: string; body: string }) {
-  return (
-    <Link href={href} className="block rounded-xl border border-slate-200/70 bg-slate-50/60 px-4 py-3 transition hover:border-papaipay-green/30 hover:bg-emerald-50/60">
-      <p className="text-sm font-semibold text-papaipay-ink">{title}</p>
-      <p className="mt-1 text-xs leading-5 text-slate-500">{body}</p>
-    </Link>
-  );
-}
-
-function EditModal({ type, onClose }: { type: Exclude<ModalType, null>; onClose: () => void }) {
-  const config = {
-    personal: {
-      title: "Edit Personal Information",
-      action: "Save Changes",
-      fields: [<Field key="name" label="Full name" value={profile.personal.fullName} />, <Field key="phone" label="Phone number" value={profile.personal.phone} />, <Field key="address" label="Residential address" value={profile.personal.address} />],
-    },
-    email: {
-      title: "Change Email",
-      action: "Continue",
-      fields: [<Field key="current" label="Current email" value={profile.personal.email} />, <Field key="new" label="New email" />],
-    },
-    bank: {
-      title: "Update Bank Account",
-      action: "Save Changes",
-      fields: [<Field key="bank" label="Bank name" value={profile.bank.bankName} />, <Field key="holder" label="Account holder name" value={profile.bank.accountHolderName} />, <Field key="number" label="Account number" />],
-    },
-    nominee: {
-      title: "Edit Nominee",
-      action: "Save Changes",
-      fields: [<Field key="name" label="Name" value={profile.nominee.name} />, <Field key="relationship" label="Relationship" value={profile.nominee.relationship} />, <Field key="phone" label="Phone number" value={profile.nominee.phone} />],
-    },
-    password: {
-      title: "Change Password",
-      action: "Save Changes",
-      fields: [<Field key="current" label="Current password" type="password" />, <Field key="new" label="New password" type="password" />, <Field key="confirm" label="Confirm password" type="password" />],
-    },
-  }[type];
-
-  return (
-    <div className="fixed inset-0 z-50 grid place-items-end bg-slate-950/30 p-0 backdrop-blur-sm sm:place-items-center sm:p-4" role="dialog" aria-modal="true" aria-labelledby="profile-modal-title">
-      <div className="w-full rounded-t-3xl bg-white p-5 shadow-soft sm:max-w-lg sm:rounded-3xl sm:p-6">
-        <div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200 sm:hidden" />
-        <h2 id="profile-modal-title" className="text-lg font-semibold tracking-tight text-papaipay-ink">{config.title}</h2>
-        <div className="mt-5 grid gap-4">{config.fields}</div>
-        {type === "email" ? <p className="mt-3 text-xs leading-5 text-slate-500">A confirmation code will be required before the email is changed.</p> : null}
-        <div className="mt-6 grid grid-cols-2 gap-3">
-          <button type="button" onClick={onClose} className="min-h-11 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:bg-slate-50">Cancel</button>
-          <button type="button" onClick={onClose} className="min-h-11 rounded-xl bg-papaipay-green text-sm font-semibold text-white transition hover:bg-papaipay-green/90">{config.action}</button>
-        </div>
-      </div>
+    <div className="min-w-0 border-b border-slate-100 py-3 last:border-0 sm:grid sm:grid-cols-[190px_minmax(0,1fr)] sm:gap-4">
+      <dt className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</dt>
+      <dd className="mt-1 min-w-0 break-words text-sm font-semibold leading-6 text-papaipay-ink sm:mt-0">{value}</dd>
     </div>
   );
 }
 
-export default function MemberProfilePage() {
-  const [modal, setModal] = useState<ModalType>(null);
+function statusTone(status: string) {
+  if (status === "Approved") return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+  if (["Submitted", "UnderReview", "Pending"].includes(status)) return "border-amber-200 bg-amber-50 text-amber-800";
+  if (["Rejected", "ResubmissionRequired"].includes(status)) return "border-rose-200 bg-rose-50 text-rose-700";
+  return "border-slate-200 bg-slate-50 text-slate-700";
+}
+
+export default async function MemberProfilePage() {
+  const { user, profile } = await getMemberProfile();
+  const contact = profile.contacts[0];
+  const address = profile.addresses[0];
+  const bank = profile.bankAccounts[0];
+  const nominee = profile.nominees[0];
+  const submission = profile.manualKycSubmissions[0];
+  const verificationStatus = submission?.status === "Approved" || profile.verificationStatus === "Approved"
+    ? "Approved"
+    : submission?.status || profile.verificationStatus;
+  const underReview = ["Submitted", "UnderReview"].includes(String(verificationStatus));
+  const canSubmit = verificationStatus !== "Approved" && !underReview;
+  const formattedAddress = address
+    ? [address.addressLine1, address.addressLine2, address.postcode, address.city, address.state, address.country].filter(Boolean).join(", ")
+    : "Not provided";
 
   return (
-    <div className="mx-auto max-w-4xl space-y-6">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-[-0.03em] text-papaipay-ink sm:text-3xl">My Profile</h1>
-          <p className="mt-2 text-sm leading-6 text-slate-500">Manage account details, security, distributions, and member documents.</p>
-        </div>
+    <div className="mx-auto max-w-5xl space-y-6">
+      <header>
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Account</p>
+        <h1 className="mt-2 text-2xl font-semibold tracking-[-0.03em] text-papaipay-ink sm:text-3xl">My Profile</h1>
+        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Review your member information and complete the required manual identity verification.</p>
       </header>
 
-      <div className="grid gap-5">
-        <Section title="Personal Information" action={<ActionButton onClick={() => setModal("personal")}>Edit Information</ActionButton>}>
-          <InfoRow label="Member ID" value={profile.memberId} />
-          <InfoRow label="Full Name" value={profile.personal.fullName} />
-          <InfoRow label="IC Number" value={profile.personal.icNumberMasked} />
-          <InfoRow label="Phone Number" value={profile.personal.phone} />
-          <InfoRow label="Residential Address" value={profile.personal.address} />
-        </Section>
-
-        <Section title="Email" action={<ActionButton onClick={() => setModal("email")}>Change Email</ActionButton>}>
-          <InfoRow label="Current Email" value={profile.personal.email} />
-        </Section>
-
-        <section className="rounded-2xl border border-slate-200/70 bg-white/90 px-4 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.03)] sm:px-5 sm:py-5">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Verification Status</h2>
-            <StatusBadge status={profile.verification.status} />
+      <Section title="Identity Verification" description="PAPAIPAY currently verifies members manually. No third-party e-KYC service is used.">
+        <div className={`rounded-xl border p-4 ${statusTone(String(verificationStatus))}`}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-bold">Status: {formatEnumLabel(String(verificationStatus))}</p>
+            {submission?.submittedAt ? <p className="text-xs font-semibold">Submitted {formatDate(submission.submittedAt)}</p> : null}
           </div>
-          <p className="mt-3 text-sm leading-6 text-slate-600">Verified on {profile.verification.verifiedDate}. Identity verification is handled by PAPAIPAY&apos;s third-party e-KYC provider.</p>
-        </section>
+          {submission?.rejectionReason ? <p className="mt-2 text-sm leading-6">Reason: {submission.rejectionReason}</p> : null}
+        </div>
 
-        <Section title="Bank Account" action={<ActionButton onClick={() => setModal("bank")}>Update Bank Account</ActionButton>}>
-          <InfoRow label="Bank Name" value={profile.bank.bankName} />
-          <InfoRow label="Account Holder Name" value={profile.bank.accountHolderName} />
-          <InfoRow label="Account Number" value={profile.bank.accountNumber} />
-          <p className="mt-3 rounded-xl bg-slate-50 px-3 py-2 text-sm leading-6 text-slate-600">Distribution payments will be sent to this bank account.</p>
-        </Section>
-
-        <Section title="Nominee / Beneficiary" action={<ActionButton onClick={() => setModal("nominee")}>Edit Nominee</ActionButton>}>
-          <InfoRow label="Nominee Name" value={profile.nominee.name} />
-          <InfoRow label="Relationship" value={profile.nominee.relationship} />
-          <InfoRow label="Phone Number" value={profile.nominee.phone} />
-          <InfoRow label="IC Number" value={profile.nominee.icNumberMasked} />
-        </Section>
-
-        <Section title="Password" action={<ActionButton onClick={() => setModal("password")}>Change Password</ActionButton>}>
-          <InfoRow label="Password Status" value={profile.security.passwordStatus} />
-          <InfoRow label="Last Login" value={profile.security.lastLogin} />
-          <InfoRow label="Two-Factor Authentication" value="Coming Soon" />
-        </Section>
-
-        <Section title="Statements & Reports">
-          <div className="grid gap-3 sm:grid-cols-2">
-            <AccountAction href="/member/reports" title="Reports" body="View member participation and distribution statements." />
+        {submission?.documents.length ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {submission.documents.map((document) => (
+              <Link key={document.id} href={`/files/${document.fileAsset.id}`} target="_blank" className="min-w-0 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-papaipay-green hover:border-papaipay-green/40">
+                <span className="block text-xs uppercase tracking-wide text-slate-400">{formatEnumLabel(String(document.documentType))}</span>
+                <span className="mt-1 block truncate">{document.fileAsset.originalFilename}</span>
+              </Link>
+            ))}
           </div>
+        ) : null}
+
+        {canSubmit ? <ManualKycForm /> : null}
+        {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your IC documents have been received. You can continue using the portal while the admin team reviews them, but participation confirmation requires approved verification.</p> : null}
+      </Section>
+
+      <div className="grid min-w-0 gap-5 lg:grid-cols-2">
+        <Section title="Personal Information">
+          <dl>
+            <InfoRow label="Member ID" value={profile.memberRef} />
+            <InfoRow label="Full Name" value={profile.fullName} />
+            <InfoRow label="Email" value={user.email} />
+            <InfoRow label="Phone" value={contact?.phone || user.phone || "Not provided"} />
+            <InfoRow label="Nationality" value={profile.nationality || "Not provided"} />
+            <InfoRow label="Date of Birth" value={profile.dateOfBirth ? formatDate(profile.dateOfBirth) : "Not provided"} />
+          </dl>
+        </Section>
+
+        <Section title="Contact Address">
+          <dl><InfoRow label="Primary Address" value={formattedAddress} /></dl>
+        </Section>
+
+        <Section title="Bank Account" description="Approved distributions are recorded against this account.">
+          <dl>
+            <InfoRow label="Bank" value={bank?.bankName || "Not provided"} />
+            <InfoRow label="Account Holder" value={bank?.accountHolderName || "Not provided"} />
+            <InfoRow label="Account Number" value={bank?.accountNumberLast4 ? `•••• ${bank.accountNumberLast4}` : "Not provided"} />
+            <InfoRow label="Verification" value={bank ? formatEnumLabel(String(bank.verificationStatus)) : "Not started"} />
+          </dl>
+        </Section>
+
+        <Section title="Nominee / Beneficiary">
+          <dl>
+            <InfoRow label="Name" value={nominee?.fullName || "Not provided"} />
+            <InfoRow label="Relationship" value={nominee?.relationship || "Not provided"} />
+            <InfoRow label="Phone" value={nominee?.phone || "Not provided"} />
+          </dl>
         </Section>
       </div>
-
-      {modal ? <EditModal type={modal} onClose={() => setModal(null)} /> : null}
     </div>
   );
 }

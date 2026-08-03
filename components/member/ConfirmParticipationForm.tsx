@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState as useFormState } from "react";
+import { useFormStatus } from "react-dom";
 import { createParticipationAction } from "@/lib/member/actions/participations";
 import type { ParticipationFormState } from "@/lib/member/actions/participations";
 

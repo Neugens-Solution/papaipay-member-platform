@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState as useFormState } from "react";
+import { useFormStatus } from "react-dom";
 import { memberSignupAction, type SignupState } from "./actions";
 
 function SubmitButton() { const { pending } = useFormStatus(); return <button disabled={pending} className="mt-6 min-h-12 w-full rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-600 disabled:opacity-70">{pending ? "Creating account..." : "Create member account"}</button>; }

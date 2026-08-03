@@ -193,6 +193,7 @@ enum FilePurpose {
   CampaignDocument
   MemberDocument
   ManualKycDocument
+  PaymentReceipt
   ExternalEkycDocument
   ReportExport
 }
@@ -465,27 +466,27 @@ model Campaign {
 }
 
 model PropertyDetail {
-  id           String      @id @default(uuid())
-  campaignId   String      @unique
-  propertyType String
-  assetCategory String?
+  id              String      @id @default(uuid())
+  campaignId      String      @unique
+  propertyType    String
+  assetCategory   String?
   occupancyStatus String?
-  tenure       Tenure
-  tenureAlias  TenureAlias
-  isLaca       Boolean     @default(false)
-  bumiStatus   BumiStatus
-  builtUpArea  String?
-  landArea     String?
-  bedrooms     Int?
-  bathrooms    Int?
-  auctionDate  DateTime?
-  reservePrice Decimal?    @db.Decimal(14, 2)
-  state        String
-  location     String
-  fullAddress  String
-  yearBuilt    String?
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
+  tenure          Tenure
+  tenureAlias     TenureAlias
+  isLaca          Boolean     @default(false)
+  bumiStatus      BumiStatus
+  builtUpArea     String?
+  landArea        String?
+  bedrooms        Int?
+  bathrooms       Int?
+  auctionDate     DateTime?
+  reservePrice    Decimal?    @db.Decimal(14, 2)
+  state           String
+  location        String
+  fullAddress     String
+  yearBuilt       String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
@@ -513,6 +514,7 @@ model FileAsset {
   campaignMedia      CampaignMedia[]
   documents          CampaignDocument[]
   manualKycDocuments ManualKycDocument[]
+  paymentReceipts    Payment[]
   reports            Report[]
 
   @@index([visibility])
@@ -669,17 +671,24 @@ model Payment {
   providerResponseEncrypted String?
   failureReason             String?
   reconciliationReference   String?
+  receiptFileAssetId        String?
+  submittedReference        String?
+  memberNotes               String?
+  submittedAt               DateTime?
   createdAt                 DateTime      @default(now())
   updatedAt                 DateTime      @updatedAt
 
-  member        Member                @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  campaign      Campaign              @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  participation Participation?        @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  webhookEvents PaymentWebhookEvent[]
+  member           Member                @relation(fields: [memberId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  campaign         Campaign              @relation(fields: [campaignId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  participation    Participation?        @relation(fields: [participationId], references: [id], onDelete: Restrict, onUpdate: Cascade)
+  receiptFileAsset FileAsset?            @relation(fields: [receiptFileAssetId], references: [id], onDelete: SetNull, onUpdate: Cascade)
+  webhookEvents    PaymentWebhookEvent[]
 
   @@index([memberId])
   @@index([campaignId])
   @@index([participationId])
+  @@index([receiptFileAssetId])
+  @@index([submittedAt])
   @@index([gatewayTransactionId])
   @@index([status])
   @@index([createdAt])

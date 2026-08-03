@@ -91,7 +91,12 @@ export async function getMemberParticipationById(id: string) {
     include: {
       member: true,
       campaign: { include: { propertyDetail: true } },
-      payments: { where: { memberId: member.id }, orderBy: { createdAt: "desc" }, take: 1 },
+      payments: {
+        where: { memberId: member.id },
+        orderBy: { createdAt: "desc" },
+        take: 1,
+        include: { receiptFileAsset: true },
+      },
     },
   });
 }
