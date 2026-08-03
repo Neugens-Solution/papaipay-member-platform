@@ -17,6 +17,8 @@ async function main() {
   const permissions = [
     { key: 'campaign.read', description: 'View campaign records' },
     { key: 'campaign.manage', description: 'Manage campaign setup records' },
+    { key: 'listing.manage', description: 'Manage listing workspace records' },
+    { key: 'members.review-kyc', description: 'Review manual member identity submissions' },
     { key: 'settlement.manage', description: 'Manage settlement calculation records' },
     { key: 'distribution.manage', description: 'Manage distribution processing records' },
     { key: 'report.read', description: 'View reports' },

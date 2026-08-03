@@ -6,16 +6,17 @@ import { getAdminListingForEdit } from "@/lib/admin/data/listings";
 export default async function EditListingPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
-  const campaign = await getAdminListingForEdit(params.slug);
+  const { slug } = await params;
+  const campaign = await getAdminListingForEdit(slug);
 
   if (!campaign) notFound();
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
       <BackLink
-        href={`/admin/listings/${params.slug}`}
+        href={`/admin/listings/${slug}`}
         label="Back to Listing Detail"
       />
       <PageHeader
@@ -24,7 +25,7 @@ export default async function EditListingPage({
       />
       <ListingForm
         mode="edit"
-        slug={params.slug}
+        slug={slug}
         initialValues={{
           id: campaign.id,
           campaignRef: campaign.campaignRef,

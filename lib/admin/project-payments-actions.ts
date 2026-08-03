@@ -40,12 +40,13 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
   await db.$transaction(async (tx) => {
     const participation = await tx.participation.findFirst({
       where: { id: participationId, campaignId },
-      include: { payments: { where: { gateway: "manual" }, orderBy: { updatedAt: "desc" }, take: 1 } },
+      include: { payments: { where: { gateway: "manual" }, orderBy: { updatedAt: "desc" }, take: 1, include: { receiptFileAsset: { select: { id: true } } } } },
     });
 
     if (!participation) throw new Error("Participation was not found for this project.");
     const payment = participation.payments[0];
     if (!payment) throw new Error("Pending manual payment was not found for this participation.");
+    if (!payment.receiptFileAssetId || !payment.receiptFileAsset) throw new Error("The member must submit a payment receipt before admin confirmation.");
 
     if (participation.participationStatus === ParticipationStatus.Confirmed && payment.status === PaymentStatus.Succeeded) return;
     if (
@@ -53,10 +54,7 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
       participation.participationStatus === ParticipationStatus.Refunded
     ) throw new Error("Cancelled or refunded participations cannot be confirmed.");
     if (participation.participationStatus !== ParticipationStatus.PendingPayment) throw new Error("Only pending payment participations can be manually confirmed.");
-    if (
-      payment.status !== PaymentStatus.Pending &&
-      payment.status !== PaymentStatus.Processing
-    ) throw new Error(`Manual confirmation is not allowed for ${payment.status} payments.`);
+    if (payment.status !== PaymentStatus.Processing) throw new Error(`Manual confirmation is not allowed for ${payment.status} payments.`);
 
     const participationAmount = Number(participation.participationAmount);
     if (submittedAmount !== participationAmount) throw new Error("Manual confirmation amount must exactly equal the participation amount for Phase 1.");
@@ -67,8 +65,8 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
     });
     if (duplicate) throw new Error("A manual payment with this reference already exists.");
 
-    await tx.payment.update({
-      where: { id: payment.id },
+    const claimedPayment = await tx.payment.updateMany({
+      where: { id: payment.id, status: PaymentStatus.Processing, receiptFileAssetId: { not: null } },
       data: {
         status: PaymentStatus.Succeeded,
         amount: new Prisma.Decimal(submittedAmount),
@@ -83,6 +81,7 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
         },
       },
     });
+    if (claimedPayment.count !== 1) throw new Error("This payment was already reviewed or changed. Refresh the project workspace.");
 
     const confirmedAt = new Date();
     const campaignSnapshot = await tx.campaign.findUniqueOrThrow({
@@ -91,7 +90,11 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
     });
     const nextReservedSnapshot = Math.max(Number(campaignSnapshot.reservedAmountSnapshot) - participationAmount, 0);
 
-    await tx.participation.update({ where: { id: participation.id }, data: { participationStatus: ParticipationStatus.Confirmed, confirmedAt } });
+    const claimedParticipation = await tx.participation.updateMany({
+      where: { id: participation.id, participationStatus: ParticipationStatus.PendingPayment },
+      data: { participationStatus: ParticipationStatus.Confirmed, confirmedAt },
+    });
+    if (claimedParticipation.count !== 1) throw new Error("This participation was already reviewed or changed. Refresh the project workspace.");
     await tx.campaign.update({
       where: { id: participation.campaignId },
       data: {

@@ -150,7 +150,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
 
   if (activeBatch) {
     return (
-      <Card>
+      <Card id="distributions">
         <SectionHeading title="Distributions">Distribution batch has been saved for this settlement.</SectionHeading>
         <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
           A distribution batch has already been saved. New preview generation is disabled to prevent duplicate distributions.
@@ -229,7 +229,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
   const canSaveDraftBatch = isSettlementLocked && preview.summary.isPreviewValid && blockers.length === 0 && preview.rows.length > 0 && isReconciled && !activeBatch;
 
   return (
-    <Card>
+    <Card id="distributions">
       <SectionHeading title="Distributions">Admin-only distribution preview and draft batch persistence powered by the existing preview engine.</SectionHeading>
       <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
         Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers.
@@ -311,11 +311,12 @@ function ProjectWorkspaceUnavailable() {
   );
 }
 
-export default async function ProjectWorkspacePage({ params }: { params: { slug: string } }) {
+export default async function ProjectWorkspacePage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
   let project: ProjectWorkspace | null = null;
 
   try {
-    project = await getAdminProjectWorkspaceBySlug(params.slug);
+    project = await getAdminProjectWorkspaceBySlug(slug);
   } catch (error) {
     console.error("Project workspace unavailable", error);
     return <ProjectWorkspaceUnavailable />;
@@ -385,13 +386,13 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         </Card>
       </section>
 
-      <div className="flex gap-2 overflow-x-auto pb-1">
-        {["Overview", "Project Progress", "Participants", "Financials", "Distributions", "Activity Log"].map((tab) => (
-          <span key={tab} className="rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200">{tab}</span>
+      <nav className="sticky top-[65px] z-10 -mx-4 flex gap-2 overflow-x-auto border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border" aria-label="Project workspace sections">
+        {[["Overview", "overview"], ["Progress", "progress"], ["Participants", "participants"], ["Financials", "financials"], ["Distributions", "distributions"], ["Updates", "updates"]].map(([label, id]) => (
+          <a key={id} href={`#${id}`} className="whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:text-papaipay-green hover:ring-emerald-200">{label}</a>
         ))}
-      </div>
+      </nav>
 
-      <Card>
+      <Card id="overview">
         <SectionHeading title="Overview" />
         <InfoGrid items={[
           { label: "Campaign ID", value: project.campaignRef },
@@ -412,7 +413,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         ]} />
       </Card>
 
-      <Card>
+      <Card id="progress">
         <SectionHeading title="Project Progress">Manage admin-only operational project progress. This is separate from funding progress and does not change listing lifecycle status.</SectionHeading>
         <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
@@ -437,7 +438,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
           </form>
         </div>
 
-        <div className="mt-5 grid gap-3 md:grid-cols-7">
+        <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
           {PROJECT_PROGRESS_STATUSES.map((status) => (
             <div key={status} className={`rounded-xl border p-3 ${status === projectStatus ? "border-emerald-200 bg-emerald-50/70" : "border-slate-100 bg-white"}`}>
               <p className="text-xs font-bold text-papaipay-ink">{status}</p>
@@ -454,7 +455,7 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         </div>
       </Card>
 
-      <Card>
+      <Card id="participants">
         <SectionHeading title="Participants">Admin-only participant operations. Manual confirmation records received payment only; it does not create a payment transfer or distribution.</SectionHeading>
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
@@ -476,47 +477,43 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
         </div>
         {project.participations.length > 0 ? (
           <TableWrap>
-            <thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Amount</Th><Th>Date</Th><Th>Participation Status</Th><Th>Payment Status</Th><Th>Distribution Status</Th><Th>Manual Confirmation</Th><Th>Last Updated</Th></tr></thead>
+            <thead><tr><Th>Participation</Th><Th>Member</Th><Th>Amount</Th><Th>Status</Th><Th>Payment Receipt</Th><Th>Admin Review</Th></tr></thead>
             <tbody>{project.participations.map((p) => {
               const latestPayment = p.payments[0];
               const latestDistribution = p.distributions[0];
 
               return (
                 <tr key={p.id} className="border-t border-slate-100">
-                  <Td>{p.participationRef || p.id.slice(0, 8)}</Td>
-                  <Td><span className="font-bold text-papaipay-ink">{p.member.fullName || p.member.memberRef}</span><span className="block text-xs font-semibold text-slate-400">{p.member.memberRef}</span></Td>
-                  <Td>{p.member.user.email}</Td>
+                  <Td><span className="font-bold text-papaipay-ink">{p.participationRef || p.id.slice(0, 8)}</span><span className="mt-1 block text-xs text-slate-400">{formatDate(p.createdAt)}</span></Td>
+                  <Td><span className="font-bold text-papaipay-ink">{p.member.fullName || p.member.memberRef}</span><span className="block break-all text-xs font-semibold text-slate-400">{p.member.user.email}</span></Td>
                   <Td>{formatCurrency(decimalToNumber(p.participationAmount))}</Td>
-                  <Td>{formatDate(p.createdAt)}</Td>
-                  <Td><StatusBadge status={String(p.participationStatus)} /></Td>
-                  <Td><StatusBadge status={latestPayment ? String(latestPayment.status) : null} /></Td>
-                  <Td><StatusBadge status={latestDistribution ? String(latestDistribution.status) : null} /></Td>
-                  <Td>{String(p.participationStatus) === "PendingPayment" && latestPayment ? (
+                  <Td><div className="space-y-1.5"><StatusBadge status={String(p.participationStatus)} /><span className="block"><StatusBadge status={latestPayment ? String(latestPayment.status) : null} /></span>{latestDistribution ? <span className="block"><StatusBadge status={String(latestDistribution.status)} /></span> : null}</div></Td>
+                  <Td>{latestPayment?.receiptFileAsset ? <div className="min-w-44"><PendingLink href={`/files/${latestPayment.receiptFileAsset.id}`} className="font-bold text-papaipay-green" pendingLabel="Opening…">View receipt ↗</PendingLink><span className="mt-1 block text-xs text-slate-500">Ref: {latestPayment.submittedReference || "Not provided"}</span><span className="mt-1 block text-xs text-slate-400">{latestPayment.submittedAt ? formatDate(latestPayment.submittedAt) : "Submission date not recorded"}</span></div> : <span className="text-xs font-semibold text-slate-400">Awaiting member upload</span>}</Td>
+                  <Td>{String(p.participationStatus) === "PendingPayment" && latestPayment?.receiptFileAsset ? (
                     <details className="min-w-64 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
-                      <summary className="cursor-pointer text-sm font-bold text-amber-700">Confirm Payment</summary>
+                      <summary className="cursor-pointer text-sm font-bold text-amber-700">Review & Confirm</summary>
                       <form action={confirmManualPaymentAction} className="mt-3 space-y-3">
                         <input type="hidden" name="campaignId" value={project.id} />
                         <input type="hidden" name="projectSlug" value={project.slug} />
                         <input type="hidden" name="participationId" value={p.id} />
-                        <p className="text-xs leading-5 text-slate-600">Manual confirmation records that payment has been received. This does not create a payment transfer or distribution.</p>
+                        <p className="text-xs leading-5 text-slate-600">Open and verify the member receipt first. Confirmation only records payment received; it does not execute a transfer.</p>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment amount<input name="paymentAmount" defaultValue={decimalInputValue(p.participationAmount)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
-                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required defaultValue={latestPayment.submittedReference || ""} placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment date<input name="paymentDate" required type="date" defaultValue={dateInputValue(new Date())} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
                         <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Notes<textarea name="notes" rows={2} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-papaipay-green" /></label>
                         <button className="w-full rounded-lg bg-papaipay-green px-3 py-2 text-sm font-bold text-white hover:bg-papaipay-ink" type="submit">Confirm manual payment</button>
                       </form>
                     </details>
-                  ) : <span className="text-xs font-semibold text-slate-400">No action</span>}</Td>
-                  <Td>{formatDate(p.updatedAt)}</Td>
+                  ) : <span className="text-xs font-semibold text-slate-400">{String(p.participationStatus) === "PendingPayment" ? "Receipt required" : "No action"}</span>}</Td>
                 </tr>
               );
             })}</tbody>
           </TableWrap>
         ) : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-500">No participants have joined this project yet.</p>}
-        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm leading-6 text-slate-600">Participant detail, filtering, export, and distribution review will be added in later phases.</p>
+        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/60 p-4 text-sm leading-6 text-slate-600">For identity documents and a member-wide history, open the member record from the Members section.</p>
       </Card>
 
-      <Card>
+      <Card id="financials">
         <SectionHeading title="Financials">Admin-only summary editing for project financial inputs. This does not calculate member distribution payments or execute distributions.</SectionHeading>
         <InfoGrid items={[
           { label: "Campaign Target", value: formatCurrency(target) },
@@ -569,8 +566,8 @@ export default async function ProjectWorkspacePage({ params }: { params: { slug:
 
       <DistributionPreviewSection project={project} latestSettlement={latestSettlement} />
 
-      <Card>
-        <SectionHeading title="Project Updates">Create admin-side operational communications. These are stored now but are not displayed in the member portal in this sprint.</SectionHeading>
+      <Card id="updates">
+        <SectionHeading title="Project Updates">Create operational updates and choose whether they are visible to members, participants only, or internal admins.</SectionHeading>
         <form action={createProjectUpdateFormAction} className="mb-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
           <input type="hidden" name="campaignId" value={project.id} />
           <div className="grid gap-4 md:grid-cols-2">

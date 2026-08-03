@@ -6,9 +6,10 @@ import { getRealMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
 
 function validAmount(raw: string | undefined, min: number, max: number) { const amount = Number((raw ?? "").replace(/,/g, "")); return Number.isFinite(amount) && amount > 0 && amount >= min && amount <= max ? amount : null; }
 
-export default async function ReviewPage({ params, searchParams }: { params: { slug: string }; searchParams?: { amount?: string } }) {
-  const opportunity = await getRealMemberCampaignBySlug(params.slug); if (!opportunity) return <ParticipationUnavailable />;
-  const amount = validAmount(searchParams?.amount, opportunity.minimumParticipation, opportunity.maximumParticipation); if (!amount) redirect(`/member/opportunities/${opportunity.slug}/participate`);
+export default async function ReviewPage({ params, searchParams }: { params: Promise<{ slug: string }>; searchParams?: Promise<{ amount?: string }> }) {
+  const [{ slug }, resolvedSearchParams] = await Promise.all([params, searchParams]);
+  const opportunity = await getRealMemberCampaignBySlug(slug); if (!opportunity) return <ParticipationUnavailable />;
+  const amount = validAmount(resolvedSearchParams?.amount, opportunity.minimumParticipation, opportunity.maximumParticipation); if (!amount) redirect(`/member/opportunities/${opportunity.slug}/participate`);
   const next = `/member/opportunities/${opportunity.slug}/participate/declaration?amount=${amount}`;
   return <Step title="Review Participation" kicker="Review" backHref={`/member/opportunities/${opportunity.slug}/participate?amount=${amount}`} backLabel="Back to Participate"><ContentCard><dl className="divide-y divide-slate-100 text-sm"><Row label="Opportunity title" value={opportunity.title} /><Row label="Participation amount" value={formatRM(amount)} /><Row label="Projected Holding Return" value={opportunity.estimatedYield} /><Row label="Asset category" value={opportunity.assetCategory} /><Row label="Occupancy status" value={opportunity.occupancyStatus} /><Row label="Total amount" value={formatRM(amount)} strong /></dl><Link href={next} className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white">Continue to Declaration</Link></ContentCard></Step>;
 }

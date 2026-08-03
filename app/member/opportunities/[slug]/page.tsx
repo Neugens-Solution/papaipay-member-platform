@@ -4,13 +4,7 @@ import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
 import { ImageCarousel } from "@/components/member/ImageCarousel";
 import { formatRM } from "@/lib/memberMockData";
-import { getMemberCampaignBySlug, getMemberCampaigns } from "@/lib/data/memberCampaigns";
-
-export async function generateStaticParams() {
-  const opportunities = await getMemberCampaigns();
-
-  return opportunities.map((opportunity) => ({ slug: opportunity.slug }));
-}
+import { getMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
 
 type IconName = "arrow" | "map" | "calendar" | "dollar" | "file" | "shield" | "trend" | "wallet" | "check" | "chevronRight" | "chevronDown" | "image" | "building" | "home" | "clock";
 
@@ -63,8 +57,9 @@ function MobileAccordion({ title, children }: { title: string; children: React.R
   );
 }
 
-export default async function CampaignDetailPage({ params }: { params: { slug: string } }) {
-  const campaign = await getMemberCampaignBySlug(params.slug);
+export default async function CampaignDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const campaign = await getMemberCampaignBySlug(slug);
   if (!campaign) notFound();
 
   const progress = Math.round((campaign.collectedAmount / campaign.targetAmount) * 100);

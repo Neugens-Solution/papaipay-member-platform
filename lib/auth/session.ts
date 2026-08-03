@@ -59,11 +59,13 @@ export function readSessionValue(value?: string): SessionPayload | null {
 }
 
 export async function getSession() {
-  return readSessionValue(cookies().get(SESSION_COOKIE_NAME)?.value);
+  const cookieStore = await cookies();
+  return readSessionValue(cookieStore.get(SESSION_COOKIE_NAME)?.value);
 }
 
 export async function setSession(input: { userId: string; accountType: "admin" | "member" }) {
-  cookies().set(SESSION_COOKIE_NAME, createSessionValue(input), {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, createSessionValue(input), {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
@@ -73,7 +75,8 @@ export async function setSession(input: { userId: string; accountType: "admin" |
 }
 
 export async function clearSession() {
-  cookies().set(SESSION_COOKIE_NAME, "", {
+  const cookieStore = await cookies();
+  cookieStore.set(SESSION_COOKIE_NAME, "", {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",

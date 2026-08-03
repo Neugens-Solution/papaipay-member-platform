@@ -1,7 +1,9 @@
 import { PendingLink } from "@/components/common/PendingLink";
-import { Badge, PageHeader, ProgressBar, SearchFilter, TableWrap, Td, Th } from "@/components/admin/AdminUI";
+import { Badge, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminListingSummaries } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatEnumLabel } from "@/lib/utils/formatters";
+
+export const dynamic = "force-dynamic";
 
 function formatTenureBadge(tenure: string | null, tenureAlias: string | null) {
   if (tenure === "Freehold" || tenureAlias === "FH") return "FH";
@@ -48,7 +50,6 @@ export default async function ListingsPage() {
           </PendingLink>
         }
       />
-      <SearchFilter placeholder="Search listings" />
       <TableWrap>
         <thead>
           <tr>

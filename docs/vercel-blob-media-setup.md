@@ -44,3 +44,16 @@ Vercel automatically injects `BLOB_READ_WRITE_TOKEN` for selected environments w
 7. Publish the listing with and without media to confirm media does not block publishing.
 8. Open Admin Listing Detail and confirm saved images render, or `No media uploaded yet` appears if none exist.
 9. Open Member Opportunities card/detail pages and confirm the Hero/Gallery images render, or the neutral `Image pending` placeholder appears if no media exists.
+
+## Separate private document store
+
+IC documents and payment receipts must not use the public listing-media store above.
+
+1. Create a second Vercel Blob store with **Private** access.
+2. Connect it to the same Vercel project and required environments.
+3. Add its read-write token as `PRIVATE_BLOB_READ_WRITE_TOKEN`.
+4. Keep `BLOB_READ_WRITE_TOKEN` mapped to the Public listing-media store.
+5. Upload a UAT IC image and receipt, then confirm the stored file opens only through the authenticated `/files/[id]` route.
+6. Confirm a signed-out request receives `401` and a different member receives `403`.
+
+Both tokens are server-only and must never use a `NEXT_PUBLIC_` prefix.

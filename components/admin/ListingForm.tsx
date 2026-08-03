@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState as useFormState } from "react";
+import { useFormStatus } from "react-dom";
 import type { ListingFormState } from "@/lib/admin/actions/listings";
 import { Card } from "@/components/admin/AdminUI";
 import { PublishReadinessChecklist } from "@/components/admin/listing-workspace/PublishReadinessChecklist";
@@ -922,10 +923,8 @@ export function ListingForm({
         submittedStepRef.current = intentStepIndex[intent] ?? null;
       }}
       onChange={(event) => {
-        const target = event.target as
-          | HTMLInputElement
-          | HTMLTextAreaElement
-          | HTMLSelectElement;
+        const target = event.target;
+        if (!(target instanceof HTMLInputElement) && !(target instanceof HTMLTextAreaElement) && !(target instanceof HTMLSelectElement)) return;
         const name = target.name;
         setDirtySteps((prev) => new Set(prev).add(activeStep));
         setSavedSteps((prev) => {

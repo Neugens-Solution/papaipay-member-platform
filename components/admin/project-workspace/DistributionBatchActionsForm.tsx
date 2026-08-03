@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState as useFormState } from "react";
+import { useFormStatus } from "react-dom";
 import { approveDistributionBatchAction, markDistributionBatchPaidAction, saveDraftDistributionBatchAction, type DistributionBatchActionState } from "@/lib/admin/project-distributions-actions";
 
 const initialState: DistributionBatchActionState = { status: "idle", message: null, errors: [] };

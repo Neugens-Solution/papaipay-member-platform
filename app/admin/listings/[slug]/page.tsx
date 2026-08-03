@@ -17,8 +17,9 @@ function formatTenure(value: string | null | undefined) {
   return "To be confirmed";
 }
 
-export default async function ListingDetailPage({ params }: { params: { slug: string } }) {
-  const listing = await getAdminListingBySlug(params.slug);
+export default async function ListingDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const { slug } = await params;
+  const listing = await getAdminListingBySlug(slug);
 
   if (!listing) notFound();
 

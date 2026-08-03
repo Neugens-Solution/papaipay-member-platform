@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { MetricCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
-import { memberProfile } from "@/lib/memberMockData";
+import { requireMember } from "@/lib/auth/guards";
 import { getMemberParticipations } from "@/lib/data/memberParticipations";
 import { formatRMCompact, getAssetCategory, getPortfolioAllocation, getPortfolioSummary, getRecentActivities } from "@/lib/data/memberPortfolio";
 
@@ -13,7 +13,8 @@ const quickActions = [
 ];
 
 export default async function MemberDashboardPage() {
-  const portfolioRecords = await getMemberParticipations();
+  const [portfolioRecords, { member }] = await Promise.all([getMemberParticipations(), requireMember()]);
+  const firstName = member.fullName.trim().split(/\s+/)[0] || "Member";
   const summary = getPortfolioSummary(portfolioRecords);
   const allocation = getPortfolioAllocation(portfolioRecords);
   const activities = getRecentActivities(portfolioRecords);
@@ -29,7 +30,7 @@ export default async function MemberDashboardPage() {
     <div className="mx-auto w-full max-w-7xl space-y-8 sm:space-y-10">
       <section className="overflow-hidden rounded-[2rem] border border-slate-200/70 bg-white p-6 shadow-[0_20px_70px_rgba(15,23,42,0.06)] sm:p-8 lg:p-10">
         <div className="max-w-3xl">
-          <p className="text-sm font-semibold text-papaipay-green">Good Morning, {memberProfile.firstName}</p>
+          <p className="text-sm font-semibold text-papaipay-green">Welcome, {firstName}</p>
           <h1 className="mt-3 text-3xl font-semibold tracking-[-0.045em] text-papaipay-ink sm:text-5xl">Welcome back.</h1>
           <p className="mt-4 text-base leading-7 text-slate-500 sm:text-lg">Here&apos;s your participation overview.</p>
         </div>

@@ -10,7 +10,7 @@ export type ParticipationFormState = { error?: string };
 
 type AuthenticatedMember = Awaited<ReturnType<typeof requireMember>>;
 
-const RESERVATION_MINUTES = 60;
+const RESERVATION_MINUTES = 24 * 60;
 
 function makeRef(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -208,6 +208,12 @@ export async function createParticipationAction(
   const campaignSlug = formData.get("campaignSlug");
   const parsedAmount = parseAmount(formData.get("amount"));
   const authenticatedMember = await requireMember();
+
+  if (authenticatedMember.member.verificationStatus !== "Approved") {
+    const message = "Complete and obtain approval for identity verification before participating.";
+    if (directSubmit) throw new Error(message);
+    return { error: message };
+  }
 
   if (typeof campaignId !== "string" || !campaignId) {
     if (directSubmit) throw new Error("Opportunity is required.");
