@@ -1,4 +1,4 @@
-# PAPAIPAY Portal V1 Enum Catalogue
+# K Asset Ventures Portal V1 Enum Catalogue
 
 This catalogue defines approved backend enum values for the production data contract. It is documentation only and introduces no runtime behavior.
 

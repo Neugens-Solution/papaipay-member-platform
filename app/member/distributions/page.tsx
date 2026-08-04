@@ -51,7 +51,7 @@ function DistributionRow({ record }: { record: MemberDistributionRecord }) {
     <div className="grid gap-3 px-4 py-4 sm:px-5 lg:grid-cols-[1.4fr_1fr_1fr_1fr_0.9fr_auto] lg:items-center">
       <div>
         <p className="text-xs font-bold text-slate-400">{record.distributionRef} • Batch {record.batchRef}</p>
-        <p className="text-sm font-bold text-papaipay-ink">{record.projectTitle}</p>
+        <p className="text-sm font-bold text-kasset-ink">{record.projectTitle}</p>
         <p className="mt-1 text-xs text-slate-500">{record.campaignCode} • {record.propertySummary}</p>
       </div>
       <ListField label="Final Distribution Total" value={formatDistributionAmount(record.finalDistributionTotal)} />
@@ -64,7 +64,7 @@ function DistributionRow({ record }: { record: MemberDistributionRecord }) {
       </div>
       <ListField label="Paid Date" value={record.paidDate} />
       <ListField label="Payment Reference" value={record.paymentReference} />
-      <Link href={`/member/distributions/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-papaipay-green px-4 py-2 text-sm font-bold text-papaipay-green transition hover:bg-papaipay-green hover:text-white">
+      <Link href={`/member/distributions/${record.slug}`} className="inline-flex min-h-10 items-center justify-center rounded-md border border-kasset-green px-4 py-2 text-sm font-bold text-kasset-green transition hover:bg-kasset-green hover:text-white">
         View Details
       </Link>
     </div>

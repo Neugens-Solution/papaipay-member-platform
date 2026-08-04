@@ -7,7 +7,7 @@ const scryptAsync = promisify(scrypt)
 
 const ADMIN_EMAIL = 'admin@example.local'
 const MEMBER_EMAIL = 'member@example.local'
-const DEFAULT_PASSWORD = 'PapaipayDemo123!'
+const DEFAULT_PASSWORD = 'K Asset VenturesDemo123!'
 const ADMIN_REF = 'ADM-000001'
 const MEMBER_REF = 'MEM-000001'
 

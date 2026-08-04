@@ -1,4 +1,4 @@
-# PAPAIPAY Portal V1 Database Schema Proposal
+# K Asset Ventures Portal V1 Database Schema Proposal
 
 This document proposes the production database schema for the backend transition. It is documentation only. No migrations are introduced by this document.
 

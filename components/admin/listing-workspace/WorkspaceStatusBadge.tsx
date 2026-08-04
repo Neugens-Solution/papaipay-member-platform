@@ -10,7 +10,7 @@ export type WorkspaceStepStatus =
 export function workspaceStatusClasses(status: WorkspaceStepStatus) {
   if (status === "Error") return "border-red-200 bg-red-50 text-red-700";
   if (status === "Saved")
-    return "border-emerald-100 bg-emerald-50 text-papaipay-green";
+    return "border-emerald-100 bg-emerald-50 text-kasset-green";
   if (status === "Unsaved")
     return "border-amber-200 bg-amber-50 text-amber-800";
   if (status === "Saving")

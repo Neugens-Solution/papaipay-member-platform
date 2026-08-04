@@ -42,7 +42,7 @@ export default async function ListingsPage() {
         description="Manage listing records, publishing readiness, and collection progress. Campaign references remain internal identifiers."
         action={
           <PendingLink
-            className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+            className="rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white"
             href="/admin/listings/create"
             pendingLabel="Opening..."
           >
@@ -77,7 +77,7 @@ export default async function ListingsPage() {
                 <Td>{listing.campaignRef}</Td>
                 <Td>{listing.campaignCode}</Td>
                 <Td>
-                  <b className="text-papaipay-ink">{listing.title}</b>
+                  <b className="text-kasset-ink">{listing.title}</b>
                 </Td>
                 <Td>
                   {listing.propertyDetail?.location ||
@@ -97,21 +97,21 @@ export default async function ListingsPage() {
                 <Td>
                   <div className="flex gap-3">
                     <PendingLink
-                      className="font-bold text-papaipay-green"
+                      className="font-bold text-kasset-green"
                       href={`/admin/listings/${listing.slug}`}
                       pendingLabel="Opening..."
                     >
                       View
                     </PendingLink>
                     <PendingLink
-                      className="font-bold text-papaipay-green"
+                      className="font-bold text-kasset-green"
                       href={`/admin/listings/${listing.slug}/edit`}
                       pendingLabel="Loading Workspace..."
                     >
                       Edit
                     </PendingLink>
                     <PendingLink
-                      className="font-bold text-papaipay-green"
+                      className="font-bold text-kasset-green"
                       href={`/admin/projects/${listing.slug}`}
                       pendingLabel="Opening Project..."
                     >

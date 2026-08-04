@@ -8,7 +8,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        papaipay: {
+        kasset: {
           ink: "#10201a",
           green: "#0f7a4f",
           mint: "#dff7ec",

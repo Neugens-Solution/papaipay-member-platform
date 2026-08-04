@@ -25,7 +25,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function iconClass(active: boolean) {
-  return active ? "text-papaipay-green" : "text-slate-500";
+  return active ? "text-kasset-green" : "text-slate-500";
 }
 
 export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
@@ -34,13 +34,13 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ME";
 
   return (
-    <div className="min-h-screen bg-[#f7f8f5] text-papaipay-ink">
+    <div className="min-h-screen bg-[#f7f8f5] text-kasset-ink">
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
         <aside className="hidden border-r border-slate-200/70 bg-white/90 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-52 lg:flex-none">
           <div className="px-5 py-7">
-            <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-papaipay-green/30">
-              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-papaipay-green">PAPAIPAY</p>
-              <p className="mt-1.5 text-sm font-semibold tracking-tight text-papaipay-ink">Member Portal</p>
+            <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-kasset-green/30">
+              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-kasset-green">K Asset Ventures</p>
+              <p className="mt-1.5 text-sm font-semibold tracking-tight text-kasset-ink">Member Portal</p>
             </Link>
           </div>
           <nav className="space-y-1.5 px-3 pb-6" aria-label="Member navigation">
@@ -52,7 +52,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                   key={label}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}
+                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-kasset-green" : "text-slate-500 hover:bg-slate-50 hover:text-kasset-green"}`}
                 >
                   {label}
                 </Link>
@@ -64,21 +64,21 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
               <Link href="/member/dashboard" className="rounded-md lg:hidden">
-                <p className="text-sm font-extrabold tracking-tight text-papaipay-ink">PAPAIPAY</p>
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-papaipay-green">Member Portal</p>
+                <p className="text-sm font-extrabold tracking-tight text-kasset-ink">K Asset Ventures</p>
+                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-kasset-green">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
                 <details className="group relative hidden lg:block">
-                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-papaipay-ink text-xs font-semibold text-white transition hover:bg-papaipay-green">{initials}</summary>
+                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-kasset-ink text-xs font-semibold text-white transition hover:bg-kasset-green">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
                     <div className="px-3 py-2">
-                      <p className="text-sm font-bold text-papaipay-ink">{displayName}</p>
+                      <p className="text-sm font-bold text-kasset-ink">{displayName}</p>
                       <p className="mt-1 text-xs text-slate-500">{identity.email}</p>
                     </div>
-                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
+                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-kasset-green">
                       My Profile
                     </Link>
-                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-papaipay-green">
+                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-kasset-green">
                       Logout
                     </Link>
                   </div>
@@ -99,7 +99,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 key={label}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-emerald-50/80 text-papaipay-green" : "text-slate-500 hover:bg-slate-50 hover:text-papaipay-green"}`}
+                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-emerald-50/80 text-kasset-green" : "text-slate-500 hover:bg-slate-50 hover:text-kasset-green"}`}
               >
                 <Icon className={`h-5 w-5 ${iconClass(active)}`} />
                 <span className="mt-1 truncate leading-none">{label}</span>

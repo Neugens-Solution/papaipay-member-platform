@@ -15,7 +15,7 @@ function AnnouncementForm() {
           <label><span className="text-sm font-bold">Publish Date</span><input type="date" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 px-3" /></label>
           <label><span className="text-sm font-bold">Status</span><select className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 px-3"><option>Draft</option><option>Scheduled</option><option>Published</option></select></label>
         </div>
-        <button className="w-fit rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Save Announcement</button>
+        <button className="w-fit rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white">Save Announcement</button>
       </div>
     </Card>
   );

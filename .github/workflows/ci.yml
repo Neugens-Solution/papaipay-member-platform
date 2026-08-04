@@ -17,11 +17,11 @@ jobs:
         env:
           POSTGRES_USER: ci
           POSTGRES_PASSWORD: ci
-          POSTGRES_DB: papaipay_ci
+          POSTGRES_DB: kasset_ci
         ports:
           - 5432:5432
         options: >-
-          --health-cmd "pg_isready -U ci -d papaipay_ci"
+          --health-cmd "pg_isready -U ci -d kasset_ci"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -31,8 +31,8 @@ jobs:
       NEXT_TELEMETRY_DISABLED: "1"
       # CI-only local Postgres connection for schema validation and build-time page collection.
       # The workflow does not run migrations, seed data, or connect to any real/staging/production database.
-      DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
-      DIRECT_DATABASE_URL: "postgresql://ci:ci@localhost:5432/papaipay_ci?schema=public"
+      DATABASE_URL: "postgresql://ci:ci@localhost:5432/kasset_ci?schema=public"
+      DIRECT_DATABASE_URL: "postgresql://ci:ci@localhost:5432/kasset_ci?schema=public"
       AUTH_SESSION_SECRET: "ci-only-dummy-session-secret-change-in-production"
       NEXTAUTH_SECRET: "ci-only-dummy-nextauth-secret-change-in-production"
       BLOB_READ_WRITE_TOKEN: "ci-only-dummy-blob-token"

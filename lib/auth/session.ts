@@ -3,7 +3,7 @@ import "server-only";
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
-export const SESSION_COOKIE_NAME = "papaipay_session";
+export const SESSION_COOKIE_NAME = "kasset_session";
 const SESSION_TTL_SECONDS = 60 * 60 * 8;
 
 type SessionPayload = {
@@ -18,7 +18,7 @@ function secret() {
   if (process.env.NODE_ENV === "production") {
     throw new Error("AUTH_SESSION_SECRET or NEXTAUTH_SECRET must be configured in production.");
   }
-  return "papaipay-local-dev-session-secret-change-me";
+  return "kasset-local-dev-session-secret-change-me";
 }
 
 function encodeBase64Url(value: string) {

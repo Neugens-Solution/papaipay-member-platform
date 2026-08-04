@@ -34,13 +34,13 @@ function CompactRow({ label, value, icon, helper, wideValue = false }: { label: 
   return (
     <div className={`${wideValue ? "sm:grid sm:grid-cols-[minmax(0,1fr)_minmax(20rem,32rem)]" : "flex justify-between"} items-start gap-4 border-b border-slate-100 py-3 last:border-b-0`}>
       <dt className="flex min-w-0 items-start gap-2 text-sm text-slate-500">
-        {icon ? <Icon name={icon} className="mt-0.5 h-4 w-4 flex-none text-papaipay-green" /> : null}
+        {icon ? <Icon name={icon} className="mt-0.5 h-4 w-4 flex-none text-kasset-green" /> : null}
         <span className="min-w-0">
           <span className="block">{label}</span>
           {helper ? <span className="mt-1 block text-xs leading-5 text-slate-400">{helper}</span> : null}
         </span>
       </dt>
-      <dd className={`${wideValue ? "sm:max-w-none" : "max-w-[13rem]"} text-right text-sm font-bold leading-6 text-papaipay-ink`}>{value}</dd>
+      <dd className={`${wideValue ? "sm:max-w-none" : "max-w-[13rem]"} text-right text-sm font-bold leading-6 text-kasset-ink`}>{value}</dd>
     </div>
   );
 }
@@ -48,7 +48,7 @@ function CompactRow({ label, value, icon, helper, wideValue = false }: { label: 
 function MobileAccordion({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <details className="rounded-xl border border-slate-200 bg-white p-4 md:hidden">
-      <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-bold text-papaipay-ink">
+      <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-bold text-kasset-ink">
         {title}
         <Icon name="chevronRight" className="h-4 w-4 text-slate-400" />
       </summary>
@@ -71,7 +71,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
 
   return (
     <div className="space-y-5 pb-44 md:pb-0">
-      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink"><Icon name="arrow" className="h-4 w-4" />Back to Member Listings</Link>
+      <Link href="/member/opportunities" className="inline-flex items-center gap-2 rounded-md text-sm font-bold text-kasset-green hover:text-kasset-ink"><Icon name="arrow" className="h-4 w-4" />Back to Member Listings</Link>
 
       <section className="grid gap-5 xl:grid-cols-[1.45fr_.55fr]">
         <div className="space-y-5">
@@ -80,8 +80,8 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <p className="text-[0.68rem] font-semibold uppercase tracking-[0.18em] text-slate-400">Listing Reference: {campaign.campaignId} • {campaign.campaignCode}</p>
-                  <h1 className="mt-2 text-2xl font-bold tracking-tight text-papaipay-ink sm:text-4xl">{campaign.title}</h1>
-                  <p className="mt-2 flex items-center gap-2 text-sm leading-6 text-slate-600"><Icon name="map" className="h-4 w-4 text-papaipay-green" />{campaign.location}</p>
+                  <h1 className="mt-2 text-2xl font-bold tracking-tight text-kasset-ink sm:text-4xl">{campaign.title}</h1>
+                  <p className="mt-2 flex items-center gap-2 text-sm leading-6 text-slate-600"><Icon name="map" className="h-4 w-4 text-kasset-green" />{campaign.location}</p>
                 </div>
                 <StatusBadge status={campaign.status} />
               </div>
@@ -97,7 +97,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             </div>
             {campaign.gallery.length > 0 ? <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
               <details className="relative">
-                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold text-papaipay-green"><Icon name="image" className="h-4 w-4" />View All Photos</summary>
+                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold text-kasset-green"><Icon name="image" className="h-4 w-4" />View All Photos</summary>
                 <div className="absolute left-1/2 z-20 mt-3 grid w-[min(86vw,640px)] -translate-x-1/2 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-soft sm:grid-cols-2">
                   {campaign.gallery.map((item) => <div key={item} className="h-32 rounded-lg bg-cover bg-center" style={{ backgroundImage: `url(${item})` }} />)}
                 </div>
@@ -109,7 +109,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
             <h2 className="text-lg font-bold">Listing Summary</h2>
             <div className="mt-4 grid gap-4 sm:grid-cols-[1fr_auto] sm:items-center">
               <div><ProgressBar value={progress} /></div>
-              <p className="text-sm font-bold text-papaipay-green">{progress}%</p>
+              <p className="text-sm font-bold text-kasset-green">{progress}%</p>
             </div>
             <dl className="mt-3 grid gap-x-6 sm:grid-cols-2">
               <CompactRow label="Listing Target" value={formatRM(campaign.targetAmount)} icon="dollar" />
@@ -152,7 +152,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <CompactRow wideValue label="Final Distribution at Project Completion" value={finalDistributionText} icon="wallet" />
             </dl>
             <details className="mt-4 rounded-xl bg-slate-50 p-4 text-sm leading-6 text-slate-600">
-              <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-papaipay-green">Learn More <Icon name="chevronDown" className="h-4 w-4" /></summary>
+              <summary className="flex cursor-pointer list-none items-center justify-between font-bold text-kasset-green">Learn More <Icon name="chevronDown" className="h-4 w-4" /></summary>
               <p className="mt-3">Holding Return is a projected return that accumulates during the project holding period. It is not paid monthly and will be distributed together with the Final Distribution after the project is completed.</p><p className="mt-3">If the property is not successfully disposed of within the maximum holding period, members will receive their original Participation Amount back according to the listing terms.</p><p className="mt-3">Actual returns may vary depending on project outcome and approved costs.</p>
             </details>
           </ContentCard>
@@ -160,7 +160,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <div className="hidden space-y-5 md:block">
             <ContentCard><h2 className="text-lg font-bold">About This Opportunity</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Documents</h2><div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></ContentCard>
-            <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
+            <ContentCard><h2 className="text-lg font-bold">Updates</h2><div className="mt-4 space-y-3">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-4"><p className="text-xs font-bold text-kasset-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">FAQ</h2>{campaign.faqs.map((faq) => <details key={faq.question} className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-3 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<details className="mt-3 rounded-md border border-slate-100 bg-slate-50/80 p-4"><summary className="cursor-pointer text-sm font-bold">What happens after 24 months?</summary><p className="mt-3 text-sm leading-6 text-slate-600">If the property is not successfully disposed of within the maximum holding period, members receive their original Participation Amount back according to the listing terms.</p></details></ContentCard>
             <ContentCard><h2 className="text-lg font-bold">Risk Disclaimer</h2><p className="mt-3 text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></ContentCard>
           </div>
@@ -168,7 +168,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
           <div className="space-y-3 md:hidden">
             <MobileAccordion title="Documents"><div className="space-y-2">{campaign.documents.map((doc) => <DocumentLink key={typeof doc === "string" ? doc : doc.url} document={doc} />)}</div></MobileAccordion>
             <MobileAccordion title="About This Opportunity"><p className="text-sm leading-6 text-slate-600">{campaign.aboutCampaign}</p><div className="mt-3 rounded-lg bg-emerald-50 p-3 text-sm leading-6 text-slate-700">{campaign.importantInformation}</div></MobileAccordion>
-            <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-papaipay-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
+            <MobileAccordion title="Updates"><div className="space-y-2">{campaign.updates.map((update) => <article key={update.title} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><p className="text-xs font-bold text-kasset-green">{update.date}</p><h3 className="mt-1 text-sm font-bold">{update.title}</h3><p className="mt-2 text-sm leading-6 text-slate-600">{update.body}</p></article>)}</div></MobileAccordion>
             <MobileAccordion title="FAQ"><div className="space-y-2">{campaign.faqs.map((faq) => <details key={faq.question} className="rounded-lg border border-slate-100 bg-slate-50/70 p-3"><summary className="cursor-pointer text-sm font-bold">{faq.question}</summary><p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p></details>)}<p className="rounded-lg bg-slate-50 p-3 text-sm leading-6 text-slate-600">If the property is not successfully disposed of within the maximum holding period, members receive their original Participation Amount back according to the listing terms.</p></div></MobileAccordion>
             <MobileAccordion title="Risk Disclaimer"><p className="text-sm leading-6 text-slate-600">{campaign.riskSummary}</p></MobileAccordion>
           </div>
@@ -178,10 +178,10 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
       </section>
 
       <details className="group fixed inset-x-3 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-40 md:hidden">
-        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-papaipay-green/40 bg-white p-4 shadow-soft group-open:hidden">
-          <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span>
-          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-papaipay-ink">Participate in this Opportunity</span><span className="block text-xs font-bold text-papaipay-green">From {formatRM(campaign.minimumParticipation)}</span></span>
-          <span className="rounded-xl bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Participate Now</span>
+        <summary className="flex min-h-16 cursor-pointer list-none items-center justify-between gap-3 rounded-2xl border border-kasset-green/40 bg-white p-4 shadow-soft group-open:hidden">
+          <span className="grid h-9 w-9 place-items-center rounded-full bg-emerald-50 text-kasset-green"><Icon name="dollar" className="h-5 w-5" /></span>
+          <span className="min-w-0 flex-1"><span className="block text-sm font-bold text-kasset-ink">Participate in this Opportunity</span><span className="block text-xs font-bold text-kasset-green">From {formatRM(campaign.minimumParticipation)}</span></span>
+          <span className="rounded-xl bg-kasset-green px-4 py-2 text-sm font-bold text-white">Participate Now</span>
         </summary>
         <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-soft"><div className="mx-auto mb-4 h-1 w-10 rounded-full bg-slate-200" /><ParticipationPanel campaign={campaign} compact /></div>
       </details>
@@ -202,10 +202,10 @@ function DocumentLink({
     <a
       href={url}
       download={filename}
-      className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold transition hover:border-papaipay-green/30 hover:bg-emerald-50/60"
+      className="flex items-center justify-between rounded-md border border-slate-100 bg-slate-50/70 p-3 text-sm font-bold transition hover:border-kasset-green/30 hover:bg-emerald-50/60"
     >
       <span className="flex min-w-0 items-center gap-2">
-        <Icon name="file" className="h-4 w-4 flex-none text-papaipay-green" />
+        <Icon name="file" className="h-4 w-4 flex-none text-kasset-green" />
         <span className="min-w-0">
           <span className="block truncate">{title}</span>
           <span className="block truncate text-xs font-semibold text-slate-500">
@@ -226,14 +226,14 @@ function ParticipationPanel({
   compact?: boolean;
 }) {
   return (
-    <ContentCard className={`${compact ? "border-0 p-0 shadow-none" : "border-papaipay-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"}`}>
-      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-papaipay-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participate</h2><p className="text-xs font-semibold text-slate-500">Start the review and declaration flow.</p></div></div>
+    <ContentCard className={`${compact ? "border-0 p-0 shadow-none" : "border-kasset-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]"}`}>
+      <div className="flex items-center gap-3"><span className="grid h-10 w-10 place-items-center rounded-full bg-emerald-50 text-kasset-green"><Icon name="dollar" className="h-5 w-5" /></span><div><h2 className="text-lg font-bold">Participate</h2><p className="text-xs font-semibold text-slate-500">Start the review and declaration flow.</p></div></div>
       <div className="mt-4 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-3">
         <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} />
         <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} />
         <CompactRow label="Available to Participate" value={formatRM(Math.max(campaign.targetAmount - campaign.collectedAmount - campaign.reservedAmount, 0))} />
       </div>
-      <Link href={`/member/opportunities/${campaign.slug}/participate`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.24)] transition hover:bg-papaipay-green/90">Participate</Link>
+      <Link href={`/member/opportunities/${campaign.slug}/participate`} className="mt-5 inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-kasset-green px-5 py-3 text-sm font-bold text-white shadow-[0_10px_24px_rgba(34,139,76,0.24)] transition hover:bg-kasset-green/90">Participate</Link>
       <p className="mt-3 text-center text-xs font-semibold leading-5 text-slate-500">No payment gateway is connected yet. Participation is submitted for review.</p>
     </ContentCard>
   );

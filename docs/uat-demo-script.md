@@ -1,4 +1,4 @@
-# PAPAIPAY UAT / Controlled Client Demo Script
+# K Asset Ventures UAT / Controlled Client Demo Script
 
 ## Demo positioning
 
@@ -20,7 +20,7 @@ The following scripted lifecycle is ready for controlled demonstration:
 4. Participation enters Payment Pending status.
 5. Member transfers outside the portal and uploads a receipt and bank reference.
 6. Payment enters Processing status for admin review.
-7. Admin opens the receipt and confirms manual payment received outside PAPAIPAY.
+7. Admin opens the receipt and confirms manual payment received outside K Asset Ventures.
 8. Participation becomes confirmed.
 9. Admin reviews, approves, and locks the financial summary.
 10. Admin validates and approves the distribution batch.
@@ -91,7 +91,7 @@ Recommended order for a fresh controlled demo environment:
 2. Open the target project workspace.
 3. Confirm that a member participation is pending manual payment.
 4. Open the member receipt and reference.
-5. Confirm manual payment received outside PAPAIPAY.
+5. Confirm manual payment received outside K Asset Ventures.
 6. Verify the participation status moves to confirmed.
 7. Open the financial summary area, review, approve, and lock it.
 8. Validate and approve the distribution batch.
@@ -129,7 +129,7 @@ For controlled client demos, stay on the scripted path. Do not show or improvise
 - Unseeded projects, unvalidated member accounts, or ad hoc data.
 - Media/upload areas unless explicitly configured and tested.
 - Admin actions outside the approved UAT lifecycle.
-- Any section that could imply PAPAIPAY executes transfers directly.
+- Any section that could imply K Asset Ventures executes transfers directly.
 
 ## Final demo checklist
 
@@ -142,5 +142,5 @@ Before the demo:
 - Confirm the scripted opportunity is visible to member.
 - Confirm member-facing labels say “Projected Holding Return.”
 - Confirm distribution copy says manual payment is recorded only.
-- Confirm no presenter language implies PAPAIPAY executes bank transfers or payment gateway payouts.
+- Confirm no presenter language implies K Asset Ventures executes bank transfers or payment gateway payouts.
 - Confirm production status is described as conditional GO only after the release checklist passes.

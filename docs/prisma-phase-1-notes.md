@@ -1,4 +1,4 @@
-# PAPAIPAY Portal V1 Prisma Phase 1 Notes
+# K Asset Ventures Portal V1 Prisma Phase 1 Notes
 
 This Phase 1 pass adds the database and ORM foundation only.
 

@@ -6,7 +6,7 @@ import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/
 import { fileAssetPublicUrl } from "@/lib/storage/fileAssetUrl";
 
 function DocumentIcon() {
-  return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-papaipay-green ring-1 ring-emerald-100">PDF</span>;
+  return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-kasset-green ring-1 ring-emerald-100">PDF</span>;
 }
 
 
@@ -58,7 +58,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
         action={
           <div className="flex flex-wrap gap-2">
             <PendingLink
-              className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white"
+              className="rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white"
               href={`/admin/projects/${listing.slug}`}
               pendingLabel="Opening Project..."
             >
@@ -185,7 +185,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                     aria-label={media.altText || media.fileAsset?.originalFilename || "Listing image"}
                   />
                   <div className="p-3">
-                    <p className="truncate text-sm font-bold text-papaipay-ink">{media.fileAsset?.originalFilename || "Listing image"}</p>
+                    <p className="truncate text-sm font-bold text-kasset-ink">{media.fileAsset?.originalFilename || "Listing image"}</p>
                     <p className="mt-1 text-xs text-slate-500">{media.mediaType === "PrimaryImage" ? "Main / Hero Image" : "Gallery Image"} • {media.altText || "Alt text not set"}</p>
                   </div>
                 </div>
@@ -203,7 +203,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
                 <div key={document.id} className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/60 p-3">
                   <DocumentIcon />
                   <div>
-                    <p className="text-sm font-bold text-papaipay-ink">{document.fileAsset?.originalFilename || document.category}</p>
+                    <p className="text-sm font-bold text-kasset-ink">{document.fileAsset?.originalFilename || document.category}</p>
                     <p className="text-xs text-slate-500">Listing document</p>
                   </div>
                 </div>
@@ -248,7 +248,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
           <div className="mt-4 grid gap-3 lg:grid-cols-2">
             {listing.faqs.map((faq) => (
               <div key={faq.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4">
-                <p className="text-sm font-bold text-papaipay-ink">{faq.question}</p>
+                <p className="text-sm font-bold text-kasset-ink">{faq.question}</p>
                 <p className="mt-2 text-sm leading-6 text-slate-600">{faq.answer}</p>
               </div>
             ))}

@@ -13,7 +13,7 @@ async function hashPassword(password) {
 const prisma = new PrismaClient()
 
 async function main() {
-  const demoPasswordHash = await hashPassword(process.env.SEED_DEMO_PASSWORD || 'PapaipayDemo123!')
+  const demoPasswordHash = await hashPassword(process.env.SEED_DEMO_PASSWORD || 'K Asset VenturesDemo123!')
   const permissions = [
     { key: 'campaign.read', description: 'View campaign records' },
     { key: 'campaign.manage', description: 'Manage campaign setup records' },

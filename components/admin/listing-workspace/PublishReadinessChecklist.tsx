@@ -32,10 +32,10 @@ export function PublishReadinessChecklist({
   return (
     <section id="publish" className="space-y-5">
       <div>
-        <p className="text-xs font-black uppercase tracking-[0.18em] text-papaipay-green">
+        <p className="text-xs font-black uppercase tracking-[0.18em] text-kasset-green">
           Publish Review
         </p>
-        <h2 className="mt-1 text-xl font-black text-papaipay-ink">
+        <h2 className="mt-1 text-xl font-black text-kasset-ink">
           Launch Checklist
         </h2>
         <p className="mt-2 text-sm text-slate-500">
@@ -46,10 +46,10 @@ export function PublishReadinessChecklist({
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <p className="text-xs font-black uppercase tracking-wide text-papaipay-green">
+            <p className="text-xs font-black uppercase tracking-wide text-kasset-green">
               Readiness Progress
             </p>
-            <p className="mt-1 text-lg font-black text-papaipay-ink">
+            <p className="mt-1 text-lg font-black text-kasset-ink">
               {readiness
                 ? `${readiness.completionPercentage}% ready`
                 : "Save a step to refresh readiness"}
@@ -61,7 +61,7 @@ export function PublishReadinessChecklist({
         </div>
         <div className="mt-4 h-2 overflow-hidden rounded-full bg-white">
           <div
-            className="h-full rounded-full bg-papaipay-green transition-all"
+            className="h-full rounded-full bg-kasset-green transition-all"
             style={{ width: `${readiness?.completionPercentage ?? 0}%` }}
           />
         </div>
@@ -75,9 +75,9 @@ export function PublishReadinessChecklist({
             >
               <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <p className="font-black text-papaipay-ink">{module.label}</p>
+                  <p className="font-black text-kasset-ink">{module.label}</p>
                   <p
-                    className={`mt-1 text-xs font-black ${module.ready ? "text-papaipay-green" : module.optional ? "text-slate-500" : "text-amber-800"}`}
+                    className={`mt-1 text-xs font-black ${module.ready ? "text-kasset-green" : module.optional ? "text-slate-500" : "text-amber-800"}`}
                   >
                     {module.ready
                       ? "Saved"
@@ -89,7 +89,7 @@ export function PublishReadinessChecklist({
                 <button
                   type="button"
                   onClick={() => onGoToStep(moduleStepIndex[module.key])}
-                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-papaipay-green"
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-black text-kasset-green"
                 >
                   Go to Step
                 </button>

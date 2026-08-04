@@ -26,7 +26,7 @@ export function WorkspaceSummaryBar({
         <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-400">
           Listing Status
         </p>
-        <p className="mt-1 text-sm font-black text-papaipay-ink">
+        <p className="mt-1 text-sm font-black text-kasset-ink">
           {listingStatus}
         </p>
       </div>
@@ -34,7 +34,7 @@ export function WorkspaceSummaryBar({
         <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-400">
           Workspace Readiness
         </p>
-        <p className="mt-1 text-sm font-black text-papaipay-green">
+        <p className="mt-1 text-sm font-black text-kasset-green">
           {typeof readinessPercentage === "number"
             ? `${readinessPercentage}% ready`
             : "Available after save"}
@@ -44,7 +44,7 @@ export function WorkspaceSummaryBar({
         <p className="text-[0.65rem] font-black uppercase tracking-[0.18em] text-slate-400">
           Last Saved / Updated
         </p>
-        <p className="mt-1 text-sm font-black text-papaipay-ink">
+        <p className="mt-1 text-sm font-black text-kasset-ink">
           {formatDateTime(lastUpdated)}
         </p>
       </div>

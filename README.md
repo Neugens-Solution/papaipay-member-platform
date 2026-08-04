@@ -1,6 +1,6 @@
-# PAPAIPAY Member Portal
+# K Asset Ventures Member Portal
 
-PAPAIPAY is a database-backed member portal for Kasset Ventures property participation campaigns. The public landing page is intended for `https://www.kassetventures.com`; authenticated member and admin workspaces live in the same Next.js application.
+K Asset Ventures is a property participation platform brand owned and operated by PICM Sdn Bhd. The public landing page is intended for `https://www.kassetventures.com`; authenticated member and admin workspaces live in the same Next.js application.
 
 ## Supported production flow
 

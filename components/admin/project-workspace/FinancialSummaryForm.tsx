@@ -35,7 +35,7 @@ function SubmitButton({ mode }: { mode: "create" | "update" }) {
 
   return (
     <button
-      className="mt-4 rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink disabled:cursor-not-allowed disabled:bg-slate-300"
+      className="mt-4 rounded-lg bg-kasset-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-kasset-ink disabled:cursor-not-allowed disabled:bg-slate-300"
       type="submit"
       disabled={pending}
     >
@@ -58,7 +58,7 @@ function MoneyInput({
   return (
     <div>
       <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
-      <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="Enter amount" />
+      <input id={id} name={name} type="number" min="0" step="0.01" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" placeholder="Enter amount" />
     </div>
   );
 }
@@ -67,7 +67,7 @@ function PercentInput({ id, name, label, defaultValue }: { id: string; name: key
   return (
     <div>
       <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor={id}>{label}</label>
-      <input id={id} name={name} type="number" min="0" max="100" step="0.0001" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" placeholder="0" />
+      <input id={id} name={name} type="number" min="0" max="100" step="0.0001" defaultValue={defaultValue} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" placeholder="0" />
     </div>
   );
 }
@@ -96,11 +96,11 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
       <input type="hidden" name="campaignId" value={campaignId} />
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="font-bold text-papaipay-ink">{mode === "update" ? "Update Financial Summary" : "Create Financial Summary"}</p>
+          <p className="font-bold text-kasset-ink">{mode === "update" ? "Update Financial Summary" : "Create Financial Summary"}</p>
           <p className="mt-1 text-sm text-slate-500">Enter admin-approved summary values only. Values are saved exactly as entered.</p>
           <p className="mt-1 text-xs font-semibold text-slate-400">Enter 0 where the approved amount is RM0. Leave fields blank only when the value is not available.</p>
         </div>
-        <span className="inline-flex whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-papaipay-green">
+        <span className="inline-flex whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-kasset-green">
           {mode === "update" ? "Existing summary" : "New summary"}
         </span>
       </div>
@@ -112,7 +112,7 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
       ) : null}
 
       {state.status === "success" ? (
-        <p className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-papaipay-green" role="status">
+        <p className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-kasset-green" role="status">
           {state.message || "Financial summary updated."}
         </p>
       ) : null}
@@ -138,15 +138,15 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
         <MoneyInput id="finalDistributionPool" name="finalDistributionPool" label="Final Distribution Pool" defaultValue={initialValues.finalDistributionPool} />
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="saleCompletedAt">Sale Completed Date</label>
-          <input id="saleCompletedAt" name="saleCompletedAt" type="date" defaultValue={initialValues.saleCompletedAt} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" />
+          <input id="saleCompletedAt" name="saleCompletedAt" type="date" defaultValue={initialValues.saleCompletedAt} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" />
         </div>
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="distributionCalculationDate">Distribution Calculation Date</label>
-          <input id="distributionCalculationDate" name="distributionCalculationDate" type="date" defaultValue={initialValues.distributionCalculationDate} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green" />
+          <input id="distributionCalculationDate" name="distributionCalculationDate" type="date" defaultValue={initialValues.distributionCalculationDate} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" />
         </div>
       </div>
       <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="calculationRemarks">Calculation Remarks</label>
-      <textarea id="calculationRemarks" name="calculationRemarks" rows={4} defaultValue={initialValues.calculationRemarks} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" placeholder="Add summary assumptions, approval notes, or calculation context." />
+      <textarea id="calculationRemarks" name="calculationRemarks" rows={4} defaultValue={initialValues.calculationRemarks} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-kasset-green" placeholder="Add summary assumptions, approval notes, or calculation context." />
       <SubmitButton mode={mode} />
     </form>
   );
