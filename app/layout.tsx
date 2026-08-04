@@ -4,16 +4,17 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.kassetventures.com"),
-  title: { default: "PAPAIPAY | Kasset Ventures Member Portal", template: "%s | PAPAIPAY" },
-  description: "Access PAPAIPAY property participation opportunities, manual verification, payment receipt submission, portfolio updates and distribution records.",
+  applicationName: "K Asset Ventures",
+  title: { default: "K Asset Ventures | Auction Property Participation", template: "%s | K Asset Ventures" },
+  description: "Review selected residential auction-property opportunities owned and managed by PICM Sdn Bhd through the K Asset Ventures member portal.",
   openGraph: {
-    title: "PAPAIPAY | Kasset Ventures Member Portal",
-    description: "A clear and secure portal for your property participation journey.",
+    title: "K Asset Ventures | Selected Auction Property Opportunities",
+    description: "A structured property participation platform owned and operated by PICM Sdn Bhd.",
     url: "https://www.kassetventures.com",
-    siteName: "PAPAIPAY",
+    siteName: "K Asset Ventures",
     type: "website",
   },
-  twitter: { card: "summary_large_image", title: "PAPAIPAY Member Portal", description: "A clear and secure portal for your property participation journey." },
+  twitter: { card: "summary_large_image", title: "K Asset Ventures", description: "Selected auction property opportunities, managed from acquisition to exit." },
 };
 
 export default function RootLayout({

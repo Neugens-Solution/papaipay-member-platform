@@ -26,7 +26,7 @@ Use two Blob stores: a Public store for listing media and a separate Private sto
 ## Database release
 
 - Review the committed Prisma migration before release.
-- Manual receipt migration `20260803000000_add_manual_payment_receipts` was applied and verified on 2026-08-03 against Supabase project `papaipay-portal` (`wljglgkulhibsxvtdvkf`).
+- Manual receipt migration `20260803000000_add_manual_payment_receipts` was applied and verified on 2026-08-03 against Supabase project ref `wljglgkulhibsxvtdvkf`.
 - Confirm the `PaymentReceipt` file purpose and manual receipt columns still exist after restoring or cloning the database.
 - Run `npx prisma migrate deploy` against `DIRECT_DATABASE_URL` for any future committed migrations before sending live traffic to a new build.
 - Do not use `prisma db push` against Production.

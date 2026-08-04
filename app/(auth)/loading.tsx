@@ -13,9 +13,9 @@ function SkeletonField() {
 
 export default function AuthLoading() {
   return (
-    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dff7ec,transparent_32rem),linear-gradient(135deg,#f8faf7_0%,#f6f1e8_100%)] px-6 py-10 text-papaipay-ink sm:px-10" aria-label="Loading portal access page">
+    <main className="min-h-screen bg-[radial-gradient(circle_at_top_left,#dff7ec,transparent_32rem),linear-gradient(135deg,#f8faf7_0%,#f6f1e8_100%)] px-6 py-10 text-kasset-ink sm:px-10" aria-label="Loading portal access page">
       <section className="mx-auto flex min-h-[calc(100vh-5rem)] max-w-md flex-col justify-center">
-        <div className="rounded-[2rem] border border-papaipay-green/10 bg-white/90 p-8 shadow-soft">
+        <div className="rounded-[2rem] border border-kasset-green/10 bg-white/90 p-8 shadow-soft">
           <SkeletonLine className="h-3 w-36" />
           <SkeletonLine className="mt-5 h-8 w-56" />
           <SkeletonLine className="mt-4 h-4 w-full" />

@@ -124,7 +124,7 @@ export const opportunities: Opportunity[] = [
   auctionDate: closeDate as string,
   reservePrice: (targetAmount as number) - 50000,
   yearBuilt: `${2010 + index}`,
-  fullAddress: `${12 + index}, Jalan PAPAIPAY ${index + 1}, ${location}`,
+  fullAddress: `${12 + index}, Jalan Harmoni ${index + 1}, ${location}`,
   minimumParticipation: 500,
   maximumParticipation: index % 2 === 0 ? 60000 : 75000,
   targetAmount: targetAmount as number,
@@ -141,7 +141,7 @@ export const opportunities: Opportunity[] = [
   galleryCount: terraceImages.length,
   daysRemaining: Math.max(0, Math.ceil((new Date(closeDate as string).getTime() - new Date("2026-06-17").getTime()) / 86400000)),
   principalProtectionEnabled: true,
-  aboutCampaign: `This listing gives members exposure to ${title}, with proceeds managed through Papaipay's property listing operating process.`,
+  aboutCampaign: `This listing gives members exposure to ${title}, with the project managed through K Asset Ventures by PICM Sdn Bhd.`,
   importantInformation: "All participation is subject to listing documents and terms. Please review the documents carefully before participating.",
   updates: [
     { title: "Listing progress updated", date: "2026-06-14", body: "Collected amount and current participants were refreshed for this property." },

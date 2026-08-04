@@ -44,9 +44,9 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
           <div className="mt-5">
             <div className="grid gap-3 sm:grid-cols-2">
               {latestKyc.documents.map((document) => (
-                <Link key={document.id} href={`/files/${document.fileAsset.id}`} target="_blank" className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-4 hover:border-papaipay-green/40">
+                <Link key={document.id} href={`/files/${document.fileAsset.id}`} target="_blank" className="min-w-0 rounded-xl border border-slate-200 bg-slate-50/70 p-4 hover:border-kasset-green/40">
                   <span className="block text-xs font-bold uppercase tracking-wide text-slate-400">{formatEnumLabel(String(document.documentType))}</span>
-                  <span className="mt-2 block truncate text-sm font-bold text-papaipay-green">{document.fileAsset.originalFilename} ↗</span>
+                  <span className="mt-2 block truncate text-sm font-bold text-kasset-green">{document.fileAsset.originalFilename} ↗</span>
                   <span className="mt-1 block text-xs text-slate-500">{formatEnumLabel(String(document.documentStatus))}</span>
                 </Link>
               ))}
@@ -56,9 +56,9 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
               <form action={reviewManualKycAction} className="mt-5 grid gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
                 <input type="hidden" name="memberId" value={member.id} />
                 <input type="hidden" name="submissionId" value={latestKyc.id} />
-                <label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Reason if resubmission is required</span><input name="reason" className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-papaipay-green" placeholder="Explain what needs to be clearer" /></label>
+                <label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Reason if resubmission is required</span><input name="reason" className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-kasset-green" placeholder="Explain what needs to be clearer" /></label>
                 <button name="decision" value="ResubmissionRequired" className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700">Request Resubmission</button>
-                <button name="decision" value="Approved" className="min-h-11 rounded-xl bg-papaipay-green px-4 text-sm font-bold text-white">Approve Verification</button>
+                <button name="decision" value="Approved" className="min-h-11 rounded-xl bg-kasset-green px-4 text-sm font-bold text-white">Approve Verification</button>
               </form>
             ) : null}
           </div>
@@ -71,7 +71,7 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
           <thead><tr><Th>Opportunity</Th><Th>Amount</Th><Th>Status</Th><Th>Payment</Th><Th>Receipt</Th><Th>Date</Th></tr></thead>
           <tbody>{member.participations.map((record) => {
             const payment = record.payments[0];
-            return <tr key={record.id} className="border-t border-slate-100 align-top"><Td><Link href={`/admin/projects/${record.campaign.slug}`} className="font-bold text-papaipay-green">{record.campaign.title}</Link><span className="block text-xs text-slate-400">{record.participationRef}</span></Td><Td>{formatCurrency(decimalToNumber(record.participationAmount))}</Td><Td><Badge>{formatEnumLabel(String(record.participationStatus))}</Badge></Td><Td><Badge>{formatEnumLabel(String(payment?.status || "Not available"))}</Badge>{payment?.submittedReference ? <span className="mt-1 block text-xs text-slate-500">Ref: {payment.submittedReference}</span> : null}</Td><Td>{payment?.receiptFileAsset ? <Link href={`/files/${payment.receiptFileAsset.id}`} target="_blank" className="font-bold text-papaipay-green">View receipt ↗</Link> : <span className="text-slate-400">Not submitted</span>}</Td><Td>{formatDate(record.createdAt)}</Td></tr>;
+            return <tr key={record.id} className="border-t border-slate-100 align-top"><Td><Link href={`/admin/projects/${record.campaign.slug}`} className="font-bold text-kasset-green">{record.campaign.title}</Link><span className="block text-xs text-slate-400">{record.participationRef}</span></Td><Td>{formatCurrency(decimalToNumber(record.participationAmount))}</Td><Td><Badge>{formatEnumLabel(String(record.participationStatus))}</Badge></Td><Td><Badge>{formatEnumLabel(String(payment?.status || "Not available"))}</Badge>{payment?.submittedReference ? <span className="mt-1 block text-xs text-slate-500">Ref: {payment.submittedReference}</span> : null}</Td><Td>{payment?.receiptFileAsset ? <Link href={`/files/${payment.receiptFileAsset.id}`} target="_blank" className="font-bold text-kasset-green">View receipt ↗</Link> : <span className="text-slate-400">Not submitted</span>}</Td><Td>{formatDate(record.createdAt)}</Td></tr>;
           })}</tbody>
         </TableWrap>
       </Card>
@@ -80,5 +80,5 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
 }
 
 function Summary({ label, value }: { label: string; value: string }) {
-  return <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-2 min-w-0 break-words text-xl font-semibold tracking-tight text-papaipay-ink">{value}</p></article>;
+  return <article className="min-w-0 rounded-2xl border border-slate-200 bg-white p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-400">{label}</p><p className="mt-2 min-w-0 break-words text-xl font-semibold tracking-tight text-kasset-ink">{value}</p></article>;
 }

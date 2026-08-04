@@ -89,7 +89,7 @@ function mapDistribution(row: DistributionWithRelations): MemberDistributionReco
     paidDate: formatDate(row.paymentDate || row.createdAt),
     paymentDate: row.paymentDate,
     paymentReference: row.paymentReference || "Not provided",
-    adminNotes: row.adminNotes || "Manual payment has been recorded by PAPAIPAY.",
+    adminNotes: row.adminNotes || "Manual payment has been recorded by PICM Sdn Bhd.",
     createdAt: row.createdAt,
   };
 }

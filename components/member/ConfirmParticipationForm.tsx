@@ -9,7 +9,7 @@ function ConfirmButton() {
   const { pending } = useFormStatus();
 
   return (
-    <button disabled={pending} className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-70" type="submit">
+    <button disabled={pending} className="inline-flex min-h-12 w-full items-center justify-center rounded-xl bg-kasset-green px-5 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:opacity-70" type="submit">
       {pending ? "Creating participation..." : "Confirm Participation"}
     </button>
   );

@@ -10,7 +10,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
 
   return (
     <div className="space-y-6">
-      <Link href="/member/distributions" className="inline-flex items-center rounded-md text-sm font-bold text-papaipay-green hover:text-papaipay-ink">← Back to Distributions</Link>
+      <Link href="/member/distributions" className="inline-flex items-center rounded-md text-sm font-bold text-kasset-green hover:text-kasset-ink">← Back to Distributions</Link>
       <header className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-xs font-bold uppercase tracking-wide text-slate-400">Paid Distribution</p>
@@ -44,13 +44,13 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
           <p className="mt-1 text-sm leading-6 text-slate-700">{record.adminNotes}</p>
         </div>
         <div className="mt-4 rounded-md border border-amber-100 bg-amber-50/70 p-3">
-          <p className="text-sm leading-6 text-amber-900">This record confirms that manual payment has been recorded by PAPAIPAY. It does not represent an automated transfer executed by the platform.</p>
+          <p className="text-sm leading-6 text-amber-900">This record confirms that manual payment has been recorded by PICM Sdn Bhd. It does not represent an automated transfer executed by the platform.</p>
         </div>
       </ContentCard>
 
       <div className="flex flex-col gap-3 sm:flex-row">
         <button disabled className="min-h-10 cursor-not-allowed rounded-md bg-slate-100 px-4 py-2 text-sm font-bold text-slate-400">Receipt unavailable</button>
-        <Link href="/member/distributions" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-papaipay-green hover:text-papaipay-green">Back to Distributions</Link>
+        <Link href="/member/distributions" className="inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-kasset-green hover:text-kasset-green">Back to Distributions</Link>
       </div>
     </div>
   );

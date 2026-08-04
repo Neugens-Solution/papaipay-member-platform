@@ -373,9 +373,9 @@ export const announcements = [
 ];
 
 export const adminUsers = [
-  { name: "Sarah Lim", email: "sarah.lim@papaipay.test", role: "Super Admin", status: "Active", lastLogin: "18 Jun 2026, 09:12" },
-  { name: "Hafiz Omar", email: "hafiz.omar@papaipay.test", role: "Admin", status: "Active", lastLogin: "17 Jun 2026, 18:04" },
-  { name: "Mei Wong", email: "mei.wong@papaipay.test", role: "Manager", status: "Invited", lastLogin: "—" },
+  { name: "Sarah Lim", email: "sarah.lim@kassetventures.test", role: "Super Admin", status: "Active", lastLogin: "18 Jun 2026, 09:12" },
+  { name: "Hafiz Omar", email: "hafiz.omar@kassetventures.test", role: "Admin", status: "Active", lastLogin: "17 Jun 2026, 18:04" },
+  { name: "Mei Wong", email: "mei.wong@kassetventures.test", role: "Manager", status: "Invited", lastLogin: "—" },
 ];
 
 export const reportGroups = ["Member Reports", "Participation Reports", "Campaign Reports", "Distribution Reports", "Settlement Reports", "Campaign Outcome Reports"];

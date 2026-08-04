@@ -11,7 +11,7 @@ No client-side Blob token is required because uploads are performed by the exist
 
 ## Create and attach a Blob Store
 
-1. Open the Vercel Dashboard and select the PAPAIPAY project.
+1. Open the Vercel Dashboard and select the K Asset Ventures project.
 2. Go to **Storage** in the project sidebar.
 3. Choose **Create Database** / **Create Store**, then select **Blob**.
 4. Select **Public** access for listing media, because member and admin pages render image URLs directly.

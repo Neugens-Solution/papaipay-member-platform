@@ -1,4 +1,4 @@
-# PAPAIPAY Portal V1 Field Classification Matrix
+# K Asset Ventures Portal V1 Field Classification Matrix
 
 This matrix classifies major fields before backend implementation. Classifications guide schema design, encryption, calculated values, snapshots, file storage, provider callbacks, and display-only data.
 

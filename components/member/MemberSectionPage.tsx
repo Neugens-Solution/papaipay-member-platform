@@ -21,7 +21,7 @@ export function MemberSectionPage({
   return (
     <div className="space-y-6">
       <header className="max-w-3xl">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-kasset-green">
           {eyebrow}
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-[1.7rem]">{title}</h1>
@@ -32,7 +32,7 @@ export function MemberSectionPage({
           <ContentCard key={item.title}>
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
               <div>
-                <p className="text-sm font-semibold text-papaipay-green">{item.meta}</p>
+                <p className="text-sm font-semibold text-kasset-green">{item.meta}</p>
                 <h3 className="mt-2 text-lg font-bold">{item.title}</h3>
               </div>
               <StatusBadge status={item.status} />

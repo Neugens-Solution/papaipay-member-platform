@@ -1,4 +1,4 @@
-# PAPAIPAY Portal V1 Backend Data Contract
+# K Asset Ventures Portal V1 Backend Data Contract
 
 This is the Phase 0 backend data contract. It freezes core entity boundaries, field ownership, ID formats, enums, and migration principles before any database, auth, payment gateway, or e-KYC implementation begins.
 

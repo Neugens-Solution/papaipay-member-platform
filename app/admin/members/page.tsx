@@ -13,11 +13,11 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
     <div className="mx-auto max-w-7xl space-y-6">
       <PageHeader title="Members" description="Review member accounts, manual identity verification, participation and distributions." />
       <form method="get" className="grid min-w-0 gap-3 rounded-2xl border border-slate-200 bg-white p-4 sm:grid-cols-[minmax(0,1fr)_220px_auto]">
-        <input name="q" defaultValue={filters.q || ""} className="min-h-11 min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-papaipay-green" placeholder="Search name, email or member ID" />
-        <select name="status" defaultValue={filters.status || ""} className="min-h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none focus:border-papaipay-green">
+        <input name="q" defaultValue={filters.q || ""} className="min-h-11 min-w-0 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-kasset-green" placeholder="Search name, email or member ID" />
+        <select name="status" defaultValue={filters.status || ""} className="min-h-11 min-w-0 rounded-xl border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none focus:border-kasset-green">
           {statusOptions.map((status) => <option key={status || "all"} value={status}>{status ? formatEnumLabel(status) : "All verification statuses"}</option>)}
         </select>
-        <button className="min-h-11 rounded-xl bg-papaipay-green px-5 text-sm font-bold text-white" type="submit">Filter</button>
+        <button className="min-h-11 rounded-xl bg-kasset-green px-5 text-sm font-bold text-white" type="submit">Filter</button>
       </form>
 
       <div className="rounded-xl border border-emerald-100 bg-emerald-50/60 px-4 py-3 text-sm text-slate-600">
@@ -29,13 +29,13 @@ export default async function MembersPage({ searchParams }: { searchParams: Prom
         <tbody>
           {members.map((member) => (
             <tr key={member.id} className="border-t border-slate-100 align-top">
-              <Td><span className="block font-bold text-papaipay-ink">{member.fullName}</span><span className="mt-1 block text-xs font-semibold text-slate-400">{member.memberRef}</span></Td>
+              <Td><span className="block font-bold text-kasset-ink">{member.fullName}</span><span className="mt-1 block text-xs font-semibold text-slate-400">{member.memberRef}</span></Td>
               <Td><span className="block break-all">{member.user.email}</span><span className="mt-1 block text-xs text-slate-400">{member.user.phone || "No phone"}</span></Td>
               <Td><Badge>{formatEnumLabel(String(member.displayVerificationStatus))}</Badge></Td>
-              <Td><span className="block font-bold text-papaipay-ink">{formatCurrency(member.totalParticipation)}</span><span className="mt-1 block text-xs text-slate-400">{member.activeCampaigns} active • {member._count.participations} records</span></Td>
+              <Td><span className="block font-bold text-kasset-ink">{formatCurrency(member.totalParticipation)}</span><span className="mt-1 block text-xs text-slate-400">{member.activeCampaigns} active • {member._count.participations} records</span></Td>
               <Td>{formatCurrency(member.totalDistribution)}</Td>
               <Td>{formatDate(member.createdAt)}</Td>
-              <Td><Link className="font-bold text-papaipay-green" href={`/admin/members/${member.id}`}>Review member →</Link></Td>
+              <Td><Link className="font-bold text-kasset-green" href={`/admin/members/${member.id}`}>Review member →</Link></Td>
             </tr>
           ))}
           {members.length === 0 ? <tr><Td><span className="text-slate-500">No members match these filters.</span></Td></tr> : null}

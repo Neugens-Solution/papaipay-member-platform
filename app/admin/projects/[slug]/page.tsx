@@ -52,7 +52,7 @@ function statusBadgeClass(status: string) {
   const normalized = status.toLowerCase();
 
   if (["confirmed", "approved", "succeeded", "paid", "completed"].some((value) => normalized.includes(value))) {
-    return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+    return "border-emerald-200 bg-emerald-50 text-kasset-green";
   }
 
   if (["pending", "processing", "review"].some((value) => normalized.includes(value))) {
@@ -107,7 +107,7 @@ function previewStatus(preview: DistributionPreviewResult) {
 }
 
 function previewStatusClass(status: string) {
-  if (status === "Valid") return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+  if (status === "Valid") return "border-emerald-200 bg-emerald-50 text-kasset-green";
   if (status === "Warning") return "border-amber-200 bg-amber-50 text-amber-700";
   return "border-rose-200 bg-rose-50 text-rose-700";
 }
@@ -133,7 +133,7 @@ const activeDistributionBatchStatuses = new Set(["Draft", "Approved", "Processin
 function CompletedBatchPaymentSummary({ batch }: { batch: ProjectWorkspace["distributionBatches"][number] }) {
   const paidRow = batch.distributions.find((row) => row.paymentDate || row.paymentReference || row.adminNotes);
   return (
-    <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">
+    <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-kasset-green">
       <p>Distribution batch completed. Manual payment has been recorded.</p>
       <div className="mt-2 grid gap-2 text-slate-700 md:grid-cols-3">
         <span>Paid count: {batch.paidCount ?? 0}</span>
@@ -152,7 +152,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
     return (
       <Card id="distributions">
         <SectionHeading title="Distributions">Distribution batch has been saved for this settlement.</SectionHeading>
-        <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
+        <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-kasset-ink">
           A distribution batch has already been saved. New preview generation is disabled to prevent duplicate distributions.
         </div>
         <div className="rounded-2xl border border-emerald-100 bg-emerald-50/70 p-5">
@@ -176,7 +176,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
         <div className="mt-6 rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
           <DistributionBatchActionsForm campaignId={project.id} settlementId={latestSettlement?.id} batchId={activeBatch.id} saveDisabled draftSaved approveDisabled={String(activeBatch.status) !== "Draft"} approved={String(activeBatch.status) === "Approved"} completed={String(activeBatch.status) === "Completed"} />
           {String(activeBatch.status) === "Draft" ? <p className="mt-3 text-sm leading-6 text-slate-600">Approve Distribution confirms these amounts for future processing. It does not execute payment transfers.</p> : null}
-          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-papaipay-green">Approved for manual payment recording. No payment transfer has been executed.</p> : null}
+          {String(activeBatch.status) === "Approved" ? <p className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50 p-3 text-sm font-semibold leading-6 text-kasset-green">Approved for manual payment recording. No payment transfer has been executed.</p> : null}
           {String(activeBatch.status) === "Completed" ? <CompletedBatchPaymentSummary batch={activeBatch} /> : null}
         </div>
       </Card>
@@ -231,14 +231,14 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
   return (
     <Card id="distributions">
       <SectionHeading title="Distributions">Admin-only distribution preview and draft batch persistence powered by the existing preview engine.</SectionHeading>
-      <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-papaipay-ink">
+      <div className="mb-5 rounded-2xl border border-emerald-100 bg-emerald-50/70 p-4 text-sm font-semibold leading-6 text-kasset-ink">
         Save Draft Batch creates internal draft distribution records only. It does not approve payments or execute transfers.
       </div>
 
       <div className="grid gap-4 xl:grid-cols-[1fr_.8fr]">
         <div className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
           <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="font-bold text-papaipay-ink">Settlement Readiness</p>
+            <p className="font-bold text-kasset-ink">Settlement Readiness</p>
             <span className={`inline-flex rounded-md border px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide ${previewStatusClass(status)}`}>Preview status: {status}</span>
           </div>
           <InfoGrid items={[
@@ -259,7 +259,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
             ["Excluded Participants", String(preview.summary.excludedParticipantCount)],
             ["Total Eligible Participation Amount", moneyFromPreview(preview.summary.totalEligibleParticipationAmount)],
             ["Succeeded Payment Coverage Total", formatCurrency(succeededCoverageTotal)],
-          ].map(([label, value]) => <div key={label} className="rounded-2xl border border-emerald-100 bg-white p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{value}</p></div>)}
+          ].map(([label, value]) => <div key={label} className="rounded-2xl border border-emerald-100 bg-white p-4"><p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">{label}</p><p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-kasset-ink">{value}</p></div>)}
         </div>
       </div>
 
@@ -268,9 +268,9 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
         {warnings.map((finding) => <p key={finding.code} className="rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm font-semibold text-amber-700">Warning: {distributionFindingCopy(finding.code, finding.message)}</p>)}
       </div>
 
-      {preview.rows.length > 0 ? <div className="mt-6"><SectionHeading title="Distribution Preview Table" /><TableWrap><thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Share %</Th><Th>Principal Return</Th><Th>Holding Return</Th><Th>Profit Distribution</Th><Th>Final Distribution Total</Th></tr></thead><tbody>{preview.rows.map((row) => { const participation = project.participations.find((item) => item.id === row.participationId); return <tr key={row.participationId} className="border-t border-slate-100"><Td>{participation?.participationRef || row.participationId.slice(0, 8)}</Td><Td><span className="font-bold text-papaipay-ink">{row.name || row.memberRef || row.memberId}</span><span className="block text-xs font-semibold text-slate-400">{row.memberRef}</span></Td><Td>{row.email || "Not available"}</Td><Td>{moneyFromPreview(row.participationAmount)}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.memberSharePercent}</Td><Td>{moneyFromPreview(row.principalReturn)}</Td><Td>{moneyFromPreview(row.holdingReturn)}</Td><Td>{moneyFromPreview(row.profitDistribution)}</Td><Td>{moneyFromPreview(row.finalDistributionTotal)}</Td></tr>; })}</tbody></TableWrap></div> : null}
+      {preview.rows.length > 0 ? <div className="mt-6"><SectionHeading title="Distribution Preview Table" /><TableWrap><thead><tr><Th>Participation Ref</Th><Th>Member</Th><Th>Email</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Share %</Th><Th>Principal Return</Th><Th>Holding Return</Th><Th>Profit Distribution</Th><Th>Final Distribution Total</Th></tr></thead><tbody>{preview.rows.map((row) => { const participation = project.participations.find((item) => item.id === row.participationId); return <tr key={row.participationId} className="border-t border-slate-100"><Td>{participation?.participationRef || row.participationId.slice(0, 8)}</Td><Td><span className="font-bold text-kasset-ink">{row.name || row.memberRef || row.memberId}</span><span className="block text-xs font-semibold text-slate-400">{row.memberRef}</span></Td><Td>{row.email || "Not available"}</Td><Td>{moneyFromPreview(row.participationAmount)}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.memberSharePercent}</Td><Td>{moneyFromPreview(row.principalReturn)}</Td><Td>{moneyFromPreview(row.holdingReturn)}</Td><Td>{moneyFromPreview(row.profitDistribution)}</Td><Td>{moneyFromPreview(row.finalDistributionTotal)}</Td></tr>; })}</tbody></TableWrap></div> : null}
 
-      {preview.excludedRows.length > 0 ? <div className="mt-6"><SectionHeading title="Excluded Participants" /><TableWrap><thead><tr><Th>Member</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Reason</Th></tr></thead><tbody>{project.participations.filter((p) => excludedById.has(p.id)).map((participation) => { const row = excludedById.get(participation.id)!; return <tr key={participation.id} className="border-t border-slate-100"><Td><span className="font-bold text-papaipay-ink">{participation.member.fullName || participation.member.memberRef}</span><span className="block text-xs font-semibold text-slate-400">{participation.member.user.email}</span></Td><Td>{row.participationAmount ? moneyFromPreview(row.participationAmount) : "Invalid amount"}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.reasonMessage}</Td></tr>; })}</tbody></TableWrap></div> : null}
+      {preview.excludedRows.length > 0 ? <div className="mt-6"><SectionHeading title="Excluded Participants" /><TableWrap><thead><tr><Th>Member</Th><Th>Participation Amount</Th><Th>Succeeded Payment Amount</Th><Th>Reason</Th></tr></thead><tbody>{project.participations.filter((p) => excludedById.has(p.id)).map((participation) => { const row = excludedById.get(participation.id)!; return <tr key={participation.id} className="border-t border-slate-100"><Td><span className="font-bold text-kasset-ink">{participation.member.fullName || participation.member.memberRef}</span><span className="block text-xs font-semibold text-slate-400">{participation.member.user.email}</span></Td><Td>{row.participationAmount ? moneyFromPreview(row.participationAmount) : "Invalid amount"}</Td><Td>{moneyFromPreview(row.succeededPaymentAmount)}</Td><Td>{row.reasonMessage}</Td></tr>; })}</tbody></TableWrap></div> : null}
 
       <div className="mt-6">
         <SectionHeading title="Reconciliation Summary" />
@@ -290,7 +290,7 @@ function DistributionPreviewSection({ project, latestSettlement }: { project: Pr
 function SectionHeading({ title, children }: { title: string; children?: React.ReactNode }) {
   return (
     <div className="mb-4">
-      <h2 className="font-bold text-papaipay-ink">{title}</h2>
+      <h2 className="font-bold text-kasset-ink">{title}</h2>
       {children ? <p className="mt-1 text-sm leading-6 text-slate-500">{children}</p> : null}
     </div>
   );
@@ -376,19 +376,19 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
         </Card>
         <Card>
           <SectionHeading title="Funding Progress">{formatCurrency(collected)} collected of {formatCurrency(target)}</SectionHeading>
-          <p className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-papaipay-ink">{Math.round(fundingProgress)}%</p>
+          <p className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-kasset-ink">{Math.round(fundingProgress)}%</p>
           <ProgressBar value={fundingProgress} />
         </Card>
         <Card>
           <SectionHeading title="Project Progress">Operational progress derived from the latest recognized project timeline status.</SectionHeading>
-          <p className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-papaipay-ink">{projectProgress}%</p>
+          <p className="mb-3 text-3xl font-semibold tracking-[-0.04em] text-kasset-ink">{projectProgress}%</p>
           <ProgressBar value={projectProgress} />
         </Card>
       </section>
 
       <nav className="sticky top-[65px] z-10 -mx-4 flex gap-2 overflow-x-auto border-y border-slate-200/70 bg-[#f7f8f5]/95 px-4 py-3 backdrop-blur sm:top-[73px] sm:mx-0 sm:rounded-2xl sm:border" aria-label="Project workspace sections">
         {[["Overview", "overview"], ["Progress", "progress"], ["Participants", "participants"], ["Financials", "financials"], ["Distributions", "distributions"], ["Updates", "updates"]].map(([label, id]) => (
-          <a key={id} href={`#${id}`} className="whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:text-papaipay-green hover:ring-emerald-200">{label}</a>
+          <a key={id} href={`#${id}`} className="whitespace-nowrap rounded-full bg-white px-3 py-1.5 text-xs font-bold text-slate-600 ring-1 ring-slate-200 transition hover:text-kasset-green hover:ring-emerald-200">{label}</a>
         ))}
       </nav>
 
@@ -417,9 +417,9 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
         <SectionHeading title="Project Progress">Manage admin-only operational project progress. This is separate from funding progress and does not change listing lifecycle status.</SectionHeading>
         <div className="grid gap-4 lg:grid-cols-[1fr_1.2fr]">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-5">
-            <p className="text-xs font-bold uppercase tracking-[0.18em] text-papaipay-green">Current Project Status</p>
-            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{projectStatus}</p>
-            <p className="mt-2 text-sm text-slate-600">Project progress: <span className="font-bold text-papaipay-green">{projectProgress}%</span></p>
+            <p className="text-xs font-bold uppercase tracking-[0.18em] text-kasset-green">Current Project Status</p>
+            <p className="mt-3 text-2xl font-semibold tracking-[-0.04em] text-kasset-ink">{projectStatus}</p>
+            <p className="mt-2 text-sm text-slate-600">Project progress: <span className="font-bold text-kasset-green">{projectProgress}%</span></p>
             <div className="mt-4"><ProgressBar value={projectProgress} /></div>
             <p className="mt-3 text-sm leading-6 text-slate-600">Last status update: {currentProjectStatus.event?.eventDate ? formatDate(currentProjectStatus.event.eventDate) : currentProjectStatus.event ? formatDate(currentProjectStatus.event.createdAt) : "No timeline status recorded"}</p>
             <p className="mt-2 text-xs font-semibold text-slate-500">Source: {currentProjectStatus.source}. Operational progress is not funding progress.</p>
@@ -427,22 +427,22 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
 
           <form action={updateProjectStatusFormAction} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
             <input type="hidden" name="campaignId" value={project.id} />
-            <p className="font-bold text-papaipay-ink">Change Project Status</p>
+            <p className="font-bold text-kasset-ink">Change Project Status</p>
             <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="status">Status</label>
-            <select id="status" name="status" defaultValue={projectStatus} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green">
+            <select id="status" name="status" defaultValue={projectStatus} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green">
               {PROJECT_PROGRESS_STATUSES.map((status) => <option key={status} value={status}>{status}</option>)}
             </select>
             <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="note">Optional note</label>
-            <textarea id="note" name="note" rows={4} placeholder="Add operational context for the internal project timeline." className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" />
-            <button className="mt-4 rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink" type="submit">Update Project Status</button>
+            <textarea id="note" name="note" rows={4} placeholder="Add operational context for the internal project timeline." className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-kasset-green" />
+            <button className="mt-4 rounded-lg bg-kasset-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-kasset-ink" type="submit">Update Project Status</button>
           </form>
         </div>
 
         <div className="mt-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4 2xl:grid-cols-7">
           {PROJECT_PROGRESS_STATUSES.map((status) => (
             <div key={status} className={`rounded-xl border p-3 ${status === projectStatus ? "border-emerald-200 bg-emerald-50/70" : "border-slate-100 bg-white"}`}>
-              <p className="text-xs font-bold text-papaipay-ink">{status}</p>
-              <p className="mt-2 text-sm font-semibold text-papaipay-green">{PROJECT_PROGRESS_BY_STATUS[status]}%</p>
+              <p className="text-xs font-bold text-kasset-ink">{status}</p>
+              <p className="mt-2 text-sm font-semibold text-kasset-green">{PROJECT_PROGRESS_BY_STATUS[status]}%</p>
             </div>
           ))}
         </div>
@@ -450,7 +450,7 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
         <div className="mt-6">
           <SectionHeading title="Project Timeline">Status events are shown newest first. Status changes created here are Internal visibility for now.</SectionHeading>
           {project.timelineEvents.length > 0 ? (
-            <div className="space-y-3">{project.timelineEvents.map((event) => <div key={event.id} className="rounded-xl border border-slate-100 bg-white p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-papaipay-ink">{event.title}</p><Badge>{visibilityLabel(String(event.visibility))}</Badge></div>{event.description ? <p className="mt-2 text-sm leading-6 text-slate-600">{event.description}</p> : null}<p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(event.eventDate || event.createdAt)}</p></div>)}</div>
+            <div className="space-y-3">{project.timelineEvents.map((event) => <div key={event.id} className="rounded-xl border border-slate-100 bg-white p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-kasset-ink">{event.title}</p><Badge>{visibilityLabel(String(event.visibility))}</Badge></div>{event.description ? <p className="mt-2 text-sm leading-6 text-slate-600">{event.description}</p> : null}<p className="mt-2 text-xs font-semibold text-slate-400">{formatDate(event.eventDate || event.createdAt)}</p></div>)}</div>
           ) : <p className="rounded-xl border border-dashed border-slate-200 bg-slate-50/70 p-4 text-sm text-slate-500">No timeline events have been recorded yet.</p>}
         </div>
       </Card>
@@ -460,15 +460,15 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participants</p>
-            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{participantCount}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-kasset-ink">{participantCount}</p>
           </div>
           <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participation Amount</p>
-            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-ink">{formatCurrency(totalParticipationAmount)}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-kasset-ink">{formatCurrency(totalParticipationAmount)}</p>
           </div>
           <div className="rounded-2xl border border-emerald-100 bg-white p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Confirmed / Approved</p>
-            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-papaipay-green">{confirmedParticipationCount}</p>
+            <p className="mt-2 text-2xl font-semibold tracking-[-0.04em] text-kasset-green">{confirmedParticipationCount}</p>
           </div>
           <div className="rounded-2xl border border-amber-100 bg-amber-50/60 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Pending / Processing</p>
@@ -484,11 +484,11 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
 
               return (
                 <tr key={p.id} className="border-t border-slate-100">
-                  <Td><span className="font-bold text-papaipay-ink">{p.participationRef || p.id.slice(0, 8)}</span><span className="mt-1 block text-xs text-slate-400">{formatDate(p.createdAt)}</span></Td>
-                  <Td><span className="font-bold text-papaipay-ink">{p.member.fullName || p.member.memberRef}</span><span className="block break-all text-xs font-semibold text-slate-400">{p.member.user.email}</span></Td>
+                  <Td><span className="font-bold text-kasset-ink">{p.participationRef || p.id.slice(0, 8)}</span><span className="mt-1 block text-xs text-slate-400">{formatDate(p.createdAt)}</span></Td>
+                  <Td><span className="font-bold text-kasset-ink">{p.member.fullName || p.member.memberRef}</span><span className="block break-all text-xs font-semibold text-slate-400">{p.member.user.email}</span></Td>
                   <Td>{formatCurrency(decimalToNumber(p.participationAmount))}</Td>
                   <Td><div className="space-y-1.5"><StatusBadge status={String(p.participationStatus)} /><span className="block"><StatusBadge status={latestPayment ? String(latestPayment.status) : null} /></span>{latestDistribution ? <span className="block"><StatusBadge status={String(latestDistribution.status)} /></span> : null}</div></Td>
-                  <Td>{latestPayment?.receiptFileAsset ? <div className="min-w-44"><PendingLink href={`/files/${latestPayment.receiptFileAsset.id}`} className="font-bold text-papaipay-green" pendingLabel="Opening…">View receipt ↗</PendingLink><span className="mt-1 block text-xs text-slate-500">Ref: {latestPayment.submittedReference || "Not provided"}</span><span className="mt-1 block text-xs text-slate-400">{latestPayment.submittedAt ? formatDate(latestPayment.submittedAt) : "Submission date not recorded"}</span></div> : <span className="text-xs font-semibold text-slate-400">Awaiting member upload</span>}</Td>
+                  <Td>{latestPayment?.receiptFileAsset ? <div className="min-w-44"><PendingLink href={`/files/${latestPayment.receiptFileAsset.id}`} className="font-bold text-kasset-green" pendingLabel="Opening…">View receipt ↗</PendingLink><span className="mt-1 block text-xs text-slate-500">Ref: {latestPayment.submittedReference || "Not provided"}</span><span className="mt-1 block text-xs text-slate-400">{latestPayment.submittedAt ? formatDate(latestPayment.submittedAt) : "Submission date not recorded"}</span></div> : <span className="text-xs font-semibold text-slate-400">Awaiting member upload</span>}</Td>
                   <Td>{String(p.participationStatus) === "PendingPayment" && latestPayment?.receiptFileAsset ? (
                     <details className="min-w-64 rounded-xl border border-amber-100 bg-amber-50/50 p-3">
                       <summary className="cursor-pointer text-sm font-bold text-amber-700">Review & Confirm</summary>
@@ -497,11 +497,11 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
                         <input type="hidden" name="projectSlug" value={project.slug} />
                         <input type="hidden" name="participationId" value={p.id} />
                         <p className="text-xs leading-5 text-slate-600">Open and verify the member receipt first. Confirmation only records payment received; it does not execute a transfer.</p>
-                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment amount<input name="paymentAmount" defaultValue={decimalInputValue(p.participationAmount)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
-                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required defaultValue={latestPayment.submittedReference || ""} placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
-                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment date<input name="paymentDate" required type="date" defaultValue={dateInputValue(new Date())} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-papaipay-green" /></label>
-                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Notes<textarea name="notes" rows={2} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-papaipay-green" /></label>
-                        <button className="w-full rounded-lg bg-papaipay-green px-3 py-2 text-sm font-bold text-white hover:bg-papaipay-ink" type="submit">Confirm manual payment</button>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment amount<input name="paymentAmount" defaultValue={decimalInputValue(p.participationAmount)} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-kasset-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment reference<input name="paymentReference" required defaultValue={latestPayment.submittedReference || ""} placeholder="Bank/reference number" className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-kasset-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Payment date<input name="paymentDate" required type="date" defaultValue={dateInputValue(new Date())} className="mt-1 min-h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold outline-none focus:border-kasset-green" /></label>
+                        <label className="block text-xs font-bold uppercase tracking-wide text-slate-500">Notes<textarea name="notes" rows={2} className="mt-1 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm outline-none focus:border-kasset-green" /></label>
+                        <button className="w-full rounded-lg bg-kasset-green px-3 py-2 text-sm font-bold text-white hover:bg-kasset-ink" type="submit">Confirm manual payment</button>
                       </form>
                     </details>
                   ) : <span className="text-xs font-semibold text-slate-400">{String(p.participationStatus) === "PendingPayment" ? "Receipt required" : "No action"}</span>}</Td>
@@ -573,11 +573,11 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
           <div className="grid gap-4 md:grid-cols-2">
             <div>
               <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="updateTitle">Title</label>
-              <input id="updateTitle" name="title" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-papaipay-green" placeholder="e.g. Buyer due diligence update" />
+              <input id="updateTitle" name="title" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none focus:border-kasset-green" placeholder="e.g. Buyer due diligence update" />
             </div>
             <div>
               <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="visibility">Visibility</label>
-              <select id="visibility" name="visibility" defaultValue="InternalOnly" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-papaipay-green">
+              <select id="visibility" name="visibility" defaultValue="InternalOnly" className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green">
                 <option value="MemberVisible">Public</option>
                 <option value="ParticipantsOnly">Participants Only</option>
                 <option value="InternalOnly">Internal</option>
@@ -585,14 +585,14 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
             </div>
           </div>
           <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="body">Body</label>
-          <textarea id="body" name="body" rows={5} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-papaipay-green" placeholder="Write a concise project update." />
+          <textarea id="body" name="body" rows={5} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-kasset-green" placeholder="Write a concise project update." />
           <div className="mt-4 flex flex-wrap gap-3">
-            <button className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-papaipay-green" type="submit" name="publishMode" value="draft">Save Draft</button>
-            <button className="rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink" type="submit" name="publishMode" value="publish">Publish</button>
+            <button className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold text-slate-700 hover:border-kasset-green" type="submit" name="publishMode" value="draft">Save Draft</button>
+            <button className="rounded-lg bg-kasset-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-kasset-ink" type="submit" name="publishMode" value="publish">Publish</button>
           </div>
         </form>
         {project.updates.length > 0 ? (
-          <div className="space-y-3">{project.updates.map((update) => <div key={update.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-papaipay-ink">{update.title}</p><div className="flex gap-2"><Badge>{visibilityLabel(String(update.visibility))}</Badge><Badge>{update.publishedAt ? "Published" : "Draft"}</Badge></div></div><p className="mt-2 text-sm leading-6 text-slate-600">{bodyPreview(update.body)}</p><p className="mt-2 text-xs font-semibold text-slate-400">{update.publishedAt ? `Published ${formatDate(update.publishedAt)}` : `Created ${formatDate(update.createdAt)}`}</p></div>)}</div>
+          <div className="space-y-3">{project.updates.map((update) => <div key={update.id} className="rounded-xl border border-slate-100 bg-slate-50/70 p-4"><div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"><p className="font-bold text-kasset-ink">{update.title}</p><div className="flex gap-2"><Badge>{visibilityLabel(String(update.visibility))}</Badge><Badge>{update.publishedAt ? "Published" : "Draft"}</Badge></div></div><p className="mt-2 text-sm leading-6 text-slate-600">{bodyPreview(update.body)}</p><p className="mt-2 text-xs font-semibold text-slate-400">{update.publishedAt ? `Published ${formatDate(update.publishedAt)}` : `Created ${formatDate(update.createdAt)}`}</p></div>)}</div>
         ) : <p className="text-sm text-slate-500">No project updates have been recorded yet.</p>}
       </Card>
     </div>

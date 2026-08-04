@@ -476,7 +476,7 @@ export async function markDistributionBatchPaidAction(_previousState: Distributi
             adminNotes,
             markedPaidById: user.id,
             markedPaidAt: markedPaidAt.toISOString(),
-            systemTransferStatement: "PAPAIPAY did not execute a transfer; finance completed the manual payment outside the system.",
+            systemTransferStatement: "The platform did not execute a transfer; finance completed the manual payment outside the system.",
             rowCount,
             totalFinalDistribution: rowTotal,
           }) as Prisma.InputJsonValue,
@@ -487,7 +487,7 @@ export async function markDistributionBatchPaidAction(_previousState: Distributi
     }, { timeout: 10_000 });
 
     revalidatePath(`/admin/projects/${slug}`);
-    return { status: "success", message: "Distribution batch completed. Manual payment has been recorded. No transfer was executed by PAPAIPAY.", errors: [] };
+    return { status: "success", message: "Distribution batch completed. Manual payment has been recorded. No transfer was executed by the platform.", errors: [] };
   } catch (error) {
     const message = error instanceof Error ? error.message : "Distribution batch could not be marked paid.";
     return { status: "error", message, errors: [message] };

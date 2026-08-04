@@ -243,7 +243,7 @@ function Field({
         step={step}
         readOnly={readOnly}
         aria-invalid={Boolean(error)}
-        className={`mt-2 min-h-11 w-full rounded-lg border px-3 text-sm outline-none transition focus:ring-4 ${readOnly ? "bg-slate-100 font-semibold text-slate-500" : "bg-white"} ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
+        className={`mt-2 min-h-11 w-full rounded-lg border px-3 text-sm outline-none transition focus:ring-4 ${readOnly ? "bg-slate-100 font-semibold text-slate-500" : "bg-white"} ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-kasset-green focus:ring-kasset-green/10"}`}
       />
       {error && name ? (
         <p className="mt-1 text-xs font-bold text-red-600">{error}</p>
@@ -278,7 +278,7 @@ function SelectField({
         name={name}
         defaultValue={defaultValue}
         aria-invalid={Boolean(error)}
-        className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
+        className={`mt-2 min-h-11 w-full rounded-lg border bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-kasset-green focus:ring-kasset-green/10"}`}
       >
         {options.map((option) => (
           <option key={option} value={option}>
@@ -318,7 +318,7 @@ function TextAreaField({
         rows={rows}
         defaultValue={defaultValue ?? undefined}
         aria-invalid={Boolean(error)}
-        className={`mt-2 w-full rounded-lg border bg-white p-3 text-sm outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-papaipay-green focus:ring-papaipay-green/10"}`}
+        className={`mt-2 w-full rounded-lg border bg-white p-3 text-sm outline-none transition focus:ring-4 ${error ? "border-red-300 focus:border-red-400 focus:ring-red-100" : "border-slate-200 focus:border-kasset-green focus:ring-kasset-green/10"}`}
       />
       {error && name ? (
         <p className="mt-1 text-xs font-bold text-red-600">{error}</p>
@@ -356,7 +356,7 @@ function SubsectionCard({
 }) {
   return (
     <div className="rounded-2xl border border-slate-100 bg-slate-50/60 p-4">
-      <h3 className="text-sm font-black text-papaipay-ink">{title}</h3>
+      <h3 className="text-sm font-black text-kasset-ink">{title}</h3>
       <p className="mt-1 text-xs leading-5 text-slate-500">{description}</p>
       <div className="mt-4">{children}</div>
     </div>
@@ -396,7 +396,7 @@ function Toast({
   return (
     <div
       role={tone === "error" ? "alert" : "status"}
-      className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border bg-white px-5 py-4 text-sm font-bold shadow-[0_18px_45px_rgba(15,23,42,0.18)] ${tone === "error" ? "border-red-200 text-red-700" : "border-emerald-100 text-papaipay-green"}`}
+      className={`fixed bottom-6 right-6 z-50 max-w-sm rounded-2xl border bg-white px-5 py-4 text-sm font-bold shadow-[0_18px_45px_rgba(15,23,42,0.18)] ${tone === "error" ? "border-red-200 text-red-700" : "border-emerald-100 text-kasset-green"}`}
     >
       {tone === "error" ? "!" : "✓"} {message}
     </div>
@@ -461,9 +461,9 @@ function UploadZone({
       data-field={name}
       className={`min-w-0 rounded-2xl border border-dashed bg-slate-50 p-4 ${error ? "border-red-300" : "border-slate-300"}`}
     >
-      <p className="text-sm font-black text-papaipay-ink">{title}</p>
+      <p className="text-sm font-black text-kasset-ink">{title}</p>
       <p className="mt-1 text-xs text-slate-500">{helper}</p>
-      <label className="mt-3 inline-flex cursor-pointer rounded-full bg-white px-3 py-2 text-xs font-black text-papaipay-green ring-1 ring-emerald-100">
+      <label className="mt-3 inline-flex cursor-pointer rounded-full bg-white px-3 py-2 text-xs font-black text-kasset-green ring-1 ring-emerald-100">
         <input
           ref={inputRef}
           type="file"
@@ -506,7 +506,7 @@ function UploadZone({
               key={file.id}
               className="flex min-w-0 items-center gap-3 rounded-lg border border-slate-100 bg-white p-2"
             >
-              <div className="grid h-14 w-14 flex-none place-items-center overflow-hidden rounded-md bg-emerald-50 text-xs font-black text-papaipay-green">
+              <div className="grid h-14 w-14 flex-none place-items-center overflow-hidden rounded-md bg-emerald-50 text-xs font-black text-kasset-green">
                 {file.url ? (
                   <span
                     className="block h-full w-full bg-cover bg-center"
@@ -524,7 +524,7 @@ function UploadZone({
                   {file.name}
                 </p>
                 {index === 0 && name === "heroImage" ? (
-                  <p className="text-[11px] font-black uppercase text-papaipay-green">
+                  <p className="text-[11px] font-black uppercase text-kasset-green">
                     Main / Hero
                   </p>
                 ) : null}
@@ -1206,7 +1206,7 @@ export function ListingForm({
                   defaultValue={
                     initialValues?.propertyDetail?.isLaca ? "true" : "false"
                   }
-                  className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-papaipay-green focus:ring-4 focus:ring-papaipay-green/10"
+                  className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-600 outline-none transition focus:border-kasset-green focus:ring-4 focus:ring-kasset-green/10"
                 >
                   <option value="false">No</option>
                   <option value="true">Yes</option>
@@ -1462,7 +1462,7 @@ export function ListingForm({
                         name="galleryMediaId"
                         value={media.id}
                       />
-                      <p className="truncate text-sm font-black text-papaipay-ink">
+                      <p className="truncate text-sm font-black text-kasset-ink">
                         Gallery image {index + 1}
                       </p>
                       <p className="truncate text-xs text-slate-500">
@@ -1538,7 +1538,7 @@ export function ListingForm({
                       />
                       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-black text-papaipay-ink">
+                          <p className="truncate text-sm font-black text-kasset-ink">
                             {document.fileAsset?.originalFilename ??
                               document.title}
                           </p>
@@ -1687,7 +1687,7 @@ export function ListingForm({
                   <SubmitButton
                     intent="publish"
                     pendingLabel="Publishing..."
-                    className="rounded-xl bg-papaipay-green px-5 py-3 text-sm font-black text-white shadow-sm"
+                    className="rounded-xl bg-kasset-green px-5 py-3 text-sm font-black text-white shadow-sm"
                   >
                     Publish Listing
                   </SubmitButton>
@@ -1711,7 +1711,7 @@ export function ListingForm({
             type="button"
             onClick={goNext}
             disabled={activeStep === wizardSteps.length - 1}
-            className="rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
+            className="rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white disabled:opacity-50"
           >
             Next
           </button>

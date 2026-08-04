@@ -95,7 +95,7 @@ check("CI runs npm test", ci.includes("npm test"));
 check("CI validates Prisma schema", ci.includes("npx prisma validate"));
 check("CI pushes schema to local CI Postgres", ci.includes("npx prisma db push --skip-generate"));
 check("CI builds application", ci.includes("npm run build"));
-check("CI defines local Postgres service", ci.includes("postgres:") && ci.includes("POSTGRES_DB: papaipay_ci"));
+check("CI defines local Postgres service", ci.includes("postgres:") && ci.includes("POSTGRES_DB: kasset_ci"));
 
 const memberParticipations = read("lib/data/memberParticipations.ts");
 check(

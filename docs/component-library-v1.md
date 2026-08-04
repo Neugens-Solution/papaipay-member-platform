@@ -1,6 +1,6 @@
-# PAPAIPAY Portal V1 Documentation
+# K Asset Ventures Portal V1 Documentation
 
-This document is aligned to the latest PAPAIPAY Portal model: a property participation campaign platform V1 interface using local sample data.
+This document is aligned to the latest K Asset Ventures Portal model: a property participation campaign platform V1 interface using local sample data.
 
 ## Scope limits
 

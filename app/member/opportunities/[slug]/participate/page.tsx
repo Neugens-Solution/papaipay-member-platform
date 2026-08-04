@@ -24,10 +24,10 @@ export default async function ParticipatePage({ params, searchParams }: { params
 
   return (
     <div className="mx-auto max-w-5xl space-y-5">
-      <Link href={`/member/opportunities/${opportunity.slug}`} className="text-sm font-bold text-papaipay-green">← Back to Opportunity Detail</Link>
+      <Link href={`/member/opportunities/${opportunity.slug}`} className="text-sm font-bold text-kasset-green">← Back to Opportunity Detail</Link>
       <header className="space-y-2">
-        <p className="text-xs font-bold uppercase tracking-[0.22em] text-papaipay-green">Participate</p>
-        <h1 className="text-2xl font-bold tracking-tight text-papaipay-ink sm:text-3xl">Start Participation</h1>
+        <p className="text-xs font-bold uppercase tracking-[0.22em] text-kasset-green">Participate</p>
+        <h1 className="text-2xl font-bold tracking-tight text-kasset-ink sm:text-3xl">Start Participation</h1>
         <p className="text-sm leading-6 text-slate-600">Enter the participation amount for this opportunity before reviewing your declaration and final confirmation.</p>
       </header>
       <div className="grid gap-5 lg:grid-cols-[1fr_.8fr]">
@@ -42,7 +42,7 @@ export default async function ParticipatePage({ params, searchParams }: { params
               <p><strong>Maximum:</strong> {formatRM(opportunity.maximumParticipation)}</p>
               <p><strong>Calculated participation summary:</strong> total amount equals the participation amount entered. No payment gateway is connected yet.</p>
             </div>
-            <button className="min-h-12 w-full rounded-xl bg-papaipay-green px-5 py-3 text-sm font-bold text-white" type="submit">Continue to Review</button>
+            <button className="min-h-12 w-full rounded-xl bg-kasset-green px-5 py-3 text-sm font-bold text-white" type="submit">Continue to Review</button>
           </form>
         </ContentCard>
         <Summary opportunity={opportunity} />
@@ -54,6 +54,6 @@ export default async function ParticipatePage({ params, searchParams }: { params
 function Summary({ opportunity }: { opportunity: NonNullable<Awaited<ReturnType<typeof getRealMemberCampaignBySlug>>> }) {
   return <ContentCard><h2 className="text-lg font-bold">Opportunity Summary</h2><dl className="mt-4 divide-y divide-slate-100 text-sm"><Row label="Opportunity" value={opportunity.title} /><Row label="Location" value={opportunity.location} /><Row label="Market Value" value={formatRM(opportunity.marketValue)} /><Row label="Projected Holding Return" value={opportunity.estimatedYield} /><Row label="Asset Category" value={opportunity.assetCategory} /><Row label="Occupancy Status" value={opportunity.occupancyStatus} /></dl></ContentCard>;
 }
-function Row({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-4 py-3"><dt className="text-slate-500">{label}</dt><dd className="text-right font-bold text-papaipay-ink">{value}</dd></div>; }
+function Row({ label, value }: { label: string; value: string }) { return <div className="flex justify-between gap-4 py-3"><dt className="text-slate-500">{label}</dt><dd className="text-right font-bold text-kasset-ink">{value}</dd></div>; }
 
-function ParticipationUnavailable() { return <div className="mx-auto max-w-3xl space-y-5"><ContentCard><h1 className="text-2xl font-bold text-papaipay-ink">Participation unavailable</h1><p className="mt-3 text-sm leading-6 text-slate-600">This opportunity could not be loaded from the live database, so participation is unavailable right now. Please try again later or choose another opportunity.</p><Link href="/member/opportunities" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-papaipay-green px-4 py-2 text-sm font-bold text-white">Back to Opportunities</Link></ContentCard></div>; }
+function ParticipationUnavailable() { return <div className="mx-auto max-w-3xl space-y-5"><ContentCard><h1 className="text-2xl font-bold text-kasset-ink">Participation unavailable</h1><p className="mt-3 text-sm leading-6 text-slate-600">This opportunity could not be loaded from the live database, so participation is unavailable right now. Please try again later or choose another opportunity.</p><Link href="/member/opportunities" className="mt-5 inline-flex min-h-11 items-center justify-center rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white">Back to Opportunities</Link></ContentCard></div>; }

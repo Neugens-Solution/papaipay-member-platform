@@ -29,7 +29,7 @@ function statusBadgeClass(status: string) {
   const normalized = status.toLowerCase();
 
   if (["approved", "locked", "completed"].some((value) => normalized.includes(value))) {
-    return "border-emerald-200 bg-emerald-50 text-papaipay-green";
+    return "border-emerald-200 bg-emerald-50 text-kasset-green";
   }
 
   if (["draft", "review"].some((value) => normalized.includes(value))) {
@@ -80,7 +80,7 @@ function ApprovalButton({ label }: { label: string }) {
     <button
       type="submit"
       disabled={pending}
-      className="rounded-lg bg-papaipay-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-papaipay-ink disabled:cursor-not-allowed disabled:bg-slate-300"
+      className="rounded-lg bg-kasset-green px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-kasset-ink disabled:cursor-not-allowed disabled:bg-slate-300"
     >
       {pending ? "Saving..." : label}
     </button>
@@ -99,9 +99,9 @@ export function FinancialApprovalStatusCard({ campaignId, settlement }: Financia
     <div className="mt-6 rounded-2xl border border-emerald-100 bg-white p-5 shadow-sm">
       <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.18em] text-papaipay-green">Financial Approval / Status</p>
+          <p className="text-xs font-bold uppercase tracking-[0.18em] text-kasset-green">Financial Approval / Status</p>
           <div className="mt-2 flex items-center gap-3">
-            <h3 className="text-lg font-black text-papaipay-ink">{status ? formatEnumLabel(status) : "No settlement"}</h3>
+            <h3 className="text-lg font-black text-kasset-ink">{status ? formatEnumLabel(status) : "No settlement"}</h3>
             <StatusBadge status={status} />
           </div>
           <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">{financialStatusExplanation(status)}</p>
@@ -112,12 +112,12 @@ export function FinancialApprovalStatusCard({ campaignId, settlement }: Financia
             <ApprovalButton label={actionLabel} />
           </form>
         ) : status === "Locked" ? (
-          <span className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-papaipay-green">Locked — no action available</span>
+          <span className="rounded-lg border border-emerald-100 bg-emerald-50 px-4 py-2.5 text-sm font-bold text-kasset-green">Locked — no action available</span>
         ) : null}
       </div>
 
       {state.status === "success" ? (
-        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-papaipay-green" role="status">
+        <p className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-kasset-green" role="status">
           {state.message || "Financial approval status updated."}
         </p>
       ) : null}
