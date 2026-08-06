@@ -1,19 +1,28 @@
 import { ImageResponse } from "next/og";
 
-export const alt = "K Asset Ventures — selected auction property opportunities";
+export const alt = "K Asset Ventures — auction property income opportunities";
 export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default function OpenGraphImage() {
   return new ImageResponse(
-    <div style={{ width: "100%", height: "100%", display: "flex", background: "#11362a", color: "white", padding: 72, position: "relative", overflow: "hidden", fontFamily: "Arial, sans-serif" }}>
-      <div style={{ position: "absolute", width: 520, height: 520, borderRadius: 999, background: "rgba(216,197,143,.13)", right: -100, top: -140 }} />
-      <div style={{ display: "flex", flexDirection: "column", justifyContent: "space-between", width: "100%", position: "relative" }}>
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <div style={{ width: 64, height: 64, display: "flex", alignItems: "center", justifyContent: "center", borderRadius: 18, background: "#dec98f", color: "#17362c", fontSize: 20, fontWeight: 900 }}>KV</div>
-          <div style={{ marginLeft: 20, display: "flex", flexDirection: "column" }}><div style={{ fontSize: 32, fontWeight: 800, letterSpacing: 1 }}>K ASSET VENTURES</div><div style={{ marginTop: 6, fontSize: 16, letterSpacing: 3, color: "#d8c58f", textTransform: "uppercase" }}>By PICM Sdn Bhd</div></div>
+    <div style={{ width: "100%", height: "100%", display: "flex", background: "#f4f0e7", color: "#143c2e", fontFamily: "Arial, sans-serif" }}>
+      <div style={{ width: "64%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: "62px 68px" }}>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ fontSize: 24, fontWeight: 800, letterSpacing: 3 }}>K ASSET VENTURES</div>
+          <div style={{ marginTop: 10, fontSize: 14, fontWeight: 600, letterSpacing: 3, color: "#8b7040", textTransform: "uppercase" }}>by PICM Sdn Bhd</div>
         </div>
-        <div style={{ display: "flex", flexDirection: "column", maxWidth: 960 }}><div style={{ fontSize: 62, lineHeight: 1.05, fontWeight: 700, letterSpacing: -3 }}>Selected auction properties. Managed from acquisition to exit.</div><div style={{ marginTop: 24, fontSize: 22, color: "#cbd5d0" }}>A private, structured property participation experience.</div></div>
+        <div style={{ display: "flex", flexDirection: "column" }}>
+          <div style={{ width: 72, height: 2, background: "#a68649", marginBottom: 28 }} />
+          <div style={{ fontSize: 58, lineHeight: 1.04, fontWeight: 600, letterSpacing: -2.5 }}>Build income through selected auction property opportunities.</div>
+        </div>
+      </div>
+      <div style={{ width: "36%", display: "flex", flexDirection: "column", justifyContent: "flex-end", background: "#143c2e", color: "white", padding: "62px 54px" }}>
+        <div style={{ fontSize: 64, lineHeight: 1, fontWeight: 700, color: "#d8c18a" }}>1.5%</div>
+        <div style={{ marginTop: 12, fontSize: 19, lineHeight: 1.35 }}>Monthly holding return</div>
+        <div style={{ width: "100%", height: 1, background: "rgba(255,255,255,.25)", marginTop: 34, marginBottom: 30 }} />
+        <div style={{ fontSize: 50, lineHeight: 1, fontWeight: 700, color: "#d8c18a" }}>24</div>
+        <div style={{ marginTop: 12, fontSize: 19, lineHeight: 1.35 }}>Maximum holding months</div>
       </div>
     </div>,
     size,
