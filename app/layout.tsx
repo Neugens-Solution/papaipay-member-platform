@@ -26,8 +26,21 @@ export const metadata: Metadata = {
     url: "https://www.kassetventures.com",
     siteName: "K Asset Ventures",
     type: "website",
+    images: [
+      {
+        url: "/landing/og-image.png",
+        width: 1536,
+        height: 805,
+        alt: "K Asset Ventures residential property opportunities",
+      },
+    ],
   },
-  twitter: { card: "summary_large_image", title: "K Asset Ventures", description: "Build income through selected auction property opportunities." },
+  twitter: {
+    card: "summary_large_image",
+    title: "K Asset Ventures",
+    description: "Build income through selected auction property opportunities.",
+    images: ["/landing/og-image.png"],
+  },
 };
 
 export default function RootLayout({
