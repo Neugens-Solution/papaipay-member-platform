@@ -5,93 +5,26 @@ export type LandingCopy = {
   login: string;
   requestAccess: string;
   languageLabel: string;
-  hero: {
-    kicker: string;
-    title: string;
-    body: string;
-    primary: string;
-    secondary: string;
-    note: string;
-    imageAlt: string;
-    imageCaption: string;
-  };
+  hero: { kicker: string; title: string; body: string; primary: string; secondary: string; note: string; imageAlt: string; imageCaption: string };
   facts: Array<{ value: string; label: string; detail: string }>;
-  model: {
-    kicker: string;
-    title: string;
-    intro: string;
-    steps: Array<{ title: string; body: string }>;
-  };
-  risk: {
-    kicker: string;
-    title: string;
-    body: string;
-    points: Array<{ title: string; body: string }>;
-    disclosureTitle: string;
-    disclosure: string;
-  };
-  returns: {
-    kicker: string;
-    title: string;
-    body: string;
-    holdingLabel: string;
-    holdingValue: string;
-    holdingTitle: string;
-    holdingBody: string;
-    profitLabel: string;
-    profitValue: string;
-    profitTitle: string;
-    profitBody: string;
-    terms: string;
-  };
-  protection: {
-    label: string;
-    value: string;
-    unit: string;
-    title: string;
-    body: string;
-    note: string;
-  };
-  opportunities: {
-    kicker: string;
-    title: string;
-    body: string;
-    types: Array<{ title: string; body: string }>;
-    detail: string;
-    cta: string;
-  };
-  journey: {
-    kicker: string;
-    title: string;
-    steps: Array<{ title: string; body: string }>;
-  };
-  faq: {
-    kicker: string;
-    title: string;
-    items: Array<{ question: string; answer: string }>;
-  };
-  finalCta: {
-    kicker: string;
-    title: string;
-    body: string;
-    primary: string;
-    secondary: string;
-  };
-  footer: {
-    description: string;
-    disclosure: string;
-    rights: string;
-    admin: string;
-  };
+  model: { kicker: string; title: string; intro: string; steps: Array<{ title: string; body: string }> };
+  risk: { kicker: string; title: string; body: string; points: Array<{ title: string; body: string }>; disclosureTitle: string; disclosure: string };
+  returns: { kicker: string; title: string; body: string; holdingLabel: string; holdingValue: string; holdingTitle: string; holdingBody: string; profitLabel: string; profitValue: string; profitTitle: string; profitBody: string; terms: string };
+  protection: { label: string; value: string; unit: string; title: string; body: string; note: string };
+  opportunities: { kicker: string; title: string; body: string; types: Array<{ title: string; body: string }>; detail: string; cta: string };
+  journey: { kicker: string; title: string; steps: Array<{ title: string; body: string }> };
+  faq: { kicker: string; title: string; items: Array<{ question: string; answer: string }> };
+  finalCta: { kicker: string; title: string; body: string; primary: string; secondary: string };
+  footer: { description: string; disclosure: string; rights: string; admin: string };
 };
 
 const en: LandingCopy = {
   locale: "en",
   navigationLabel: "Public navigation",
   nav: [
-    { label: "Why auction property", href: "#model" },
-    { label: "Returns", href: "#returns" },
-    { label: "Protection", href: "#protection" },
+    { label: "What we do", href: "#model" },
+    { label: "Property market", href: "#returns" },
+    { label: "Our approach", href: "#protection" },
     { label: "Opportunities", href: "#opportunities" },
     { label: "FAQ", href: "#faq" },
   ],
@@ -99,112 +32,111 @@ const en: LandingCopy = {
   requestAccess: "Request access",
   languageLabel: "Language",
   hero: {
-    kicker: "Private access to selected residential projects",
-    title: "Build income through selected auction property opportunities.",
-    body: "Participate in carefully selected residential property projects and earn a monthly holding return while each asset is prepared and positioned for sale.",
-    primary: "Explore opportunities",
+    kicker: "K Asset Ventures by PICM Sdn Bhd",
+    title: "Turning selected property opportunities into managed projects.",
+    body: "K Asset Ventures identifies selected residential properties, assesses their market potential, coordinates improvement where appropriate and manages each project towards its intended exit strategy.",
+    primary: "Explore K Asset Ventures",
     secondary: "Member login",
-    note: "Opportunity details are available to registered and approved members.",
-    imageAlt: "Illustrative Malaysian residential property exterior",
-    imageCaption: "Selected residential property · Managed from acquisition to sale",
+    note: "Specific participation terms and financial information are available only to registered and approved members.",
+    imageAlt: "Malaysian residential property exterior",
+    imageCaption: "Property selection · Assessment · Improvement · Project management",
   },
   facts: [
-    { value: "1.5%", label: "Monthly holding return", detail: "Calculated on the participation amount" },
-    { value: "24", label: "Maximum holding months", detail: "A clearly defined participation term" },
-    { value: "2", label: "Potential return components", detail: "Holding return and separate sale profit" },
+    { value: "KAV", label: "Property-focused platform", detail: "Built around selected Malaysian residential property projects" },
+    { value: "01", label: "Disciplined assessment", detail: "Location, condition, market context, costs and exit planning are considered" },
+    { value: "02", label: "Member access", detail: "Specific opportunity and participation details remain inside the member portal" },
   ],
   model: {
-    kicker: "Why auction property",
-    title: "Acquired for value. Improved for greater potential.",
-    intro: "The opportunity begins before the auction. Each property is considered for its entry value, condition, location, improvement needs and realistic path to sale.",
+    kicker: "What K Asset Ventures does",
+    title: "From property identification to project execution.",
+    intro: "K Asset Ventures focuses on residential property opportunities where acquisition, improvement and market positioning can be managed through a structured project process.",
     steps: [
-      { title: "Select", body: "Identify residential auction properties with a credible value proposition and buyer demand." },
-      { title: "Assess", body: "Review the property, location, indicative market value, legal position, costs and project timeline." },
-      { title: "Improve", body: "Carry out the repairs or improvements needed to make the property more attractive to the market." },
-      { title: "Sell", body: "Position the completed property for sale and distribute the applicable project outcome." },
+      { title: "Identify", body: "Source selected residential properties, including auction opportunities, for further assessment." },
+      { title: "Assess", body: "Review location, property condition, indicative market context, legal considerations, estimated costs and the intended project path." },
+      { title: "Improve", body: "Coordinate practical repairs or improvements where these support the property’s condition and marketability." },
+      { title: "Manage", body: "Monitor the property project through its planned holding and exit process, subject to the circumstances of each property." },
     ],
   },
   risk: {
     kicker: "A more controlled approach",
-    title: "Property-backed, selected carefully and managed with a plan.",
-    body: "Property projects are not risk-free. K Asset Ventures is structured to manage those risks through disciplined selection, a physical underlying asset and more than one route to exit.",
+    title: "Property projects managed with structure, due diligence and clear project information.",
+    body: "Property projects involve risk and outcomes can vary. K Asset Ventures focuses on disciplined assessment and ongoing project management rather than presenting property outcomes as guaranteed.",
     points: [
-      { title: "A real underlying asset", body: "Each opportunity is connected to a residential property rather than an abstract product." },
-      { title: "Potential value at entry", body: "Auction acquisition can create room between the purchase cost and indicative market value when a property is selected well." },
-      { title: "Value through improvement", body: "Repairs and thoughtful improvements are used to strengthen the property’s market appeal and sale potential." },
-      { title: "Alternative holding strategy", body: "If a suitable sale takes longer, the asset can be held and managed, including rental where appropriate." },
+      { title: "A physical underlying property", body: "Each project is connected to an identifiable residential property and its specific circumstances." },
+      { title: "Assessment before execution", body: "Location, condition, indicative market context, costs and project considerations are reviewed before a property progresses." },
+      { title: "Planned improvement", body: "Repairs and improvements may be carried out where they support the property’s condition and intended market positioning." },
+      { title: "Project monitoring", body: "Progress, documents and relevant project updates can be communicated through the member experience." },
     ],
-    disclosureTitle: "Managed risk, not zero risk",
-    disclosure: "Property values, legal timelines, repair costs and buyer demand can change. Every participant should review the specific opportunity and Participant Agreement before joining.",
+    disclosureTitle: "Property projects carry risk",
+    disclosure: "Property values, legal timelines, repair costs, market conditions and buyer demand may change. Members should review the information and documents for each specific opportunity before making any decision.",
   },
   returns: {
-    kicker: "How returns work",
-    title: "Earn during the holding period—and from the project outcome.",
-    body: "The holding return and sale-profit distribution are two separate components. This makes it easier to understand where each part of a participant’s potential return comes from.",
-    holdingLabel: "During the holding period",
-    holdingValue: "1.5%",
-    holdingTitle: "Monthly holding return",
-    holdingBody: "A 1.5% holding return is calculated each month on the participation amount, beginning when the campaign closes and continuing until the month the property is sold, up to 24 months.",
-    profitLabel: "When the property is sold",
-    profitValue: "+",
-    profitTitle: "Separate sale-profit distribution",
-    profitBody: "When the property is successfully sold, any applicable profit from the sale is calculated and distributed separately according to the project terms.",
-    terms: "Calculation and payment treatment are governed by the specific opportunity terms and Participant Agreement.",
+    kicker: "Malaysia property market",
+    title: "Property decisions start with market context.",
+    body: "K Asset Ventures considers the wider Malaysian residential property environment together with property-specific information. Public market content is intended to provide context; specific opportunity terms remain within the member portal.",
+    holdingLabel: "Market perspective",
+    holdingValue: "MY",
+    holdingTitle: "Residential property context",
+    holdingBody: "Location, comparable properties, accessibility, neighbourhood characteristics and buyer demand can all influence how an individual property is assessed.",
+    profitLabel: "Opportunity perspective",
+    profitValue: "KAV",
+    profitTitle: "Auction and project context",
+    profitBody: "Auction terms, property condition, estimated improvement needs and the intended exit path are considered at project level rather than relying on headline market movements alone.",
+    terms: "Market information is general and does not represent a promise of property value, project outcome, return or repayment.",
   },
   protection: {
-    label: "Defined principal protection term",
-    value: "24",
-    unit: "months",
-    title: "Your original principal is protected within a defined term.",
-    body: "If the property remains unsold 24 months after the campaign closes, the participant’s original principal will be repaid in accordance with the Participant Agreement.",
-    note: "Principal protection is separate from the holding return and sale-profit distribution. The applicable terms must be reviewed before participation.",
+    label: "Project approach",
+    value: "4",
+    unit: "stages",
+    title: "Selection, assessment, improvement and management—not a guarantee of outcome.",
+    body: "K Asset Ventures applies a structured property-project process while recognising that market conditions, costs, timelines and sale outcomes can change.",
+    note: "Detailed participation terms, project documents, financial information and relevant risk disclosures are provided to approved members for the specific opportunity.",
   },
   opportunities: {
     kicker: "Property opportunities",
-    title: "A growing selection of homes to consider.",
-    body: "New opportunities are introduced as suitable residential properties complete the assessment process. Approved members can compare the property, project plan, holding period and participation terms in one place.",
+    title: "Selected residential projects for approved members to review.",
+    body: "Suitable residential properties may be introduced after completing the relevant assessment process. Approved members can review the information made available for each specific opportunity inside the member portal.",
     types: [
-      { title: "Terrace and landed homes", body: "Residential properties with broad owner-occupier appeal and clear improvement potential." },
-      { title: "Apartments and urban residences", body: "Selected homes in locations where practical access and buyer demand support the exit plan." },
-      { title: "Established and growth locations", body: "Opportunities considered in the context of the neighbourhood, comparable values and likely marketability." },
+      { title: "Terrace and landed homes", body: "Residential properties considered in the context of condition, location, marketability and improvement requirements." },
+      { title: "Apartments and urban residences", body: "Selected residential units assessed according to the circumstances of the property and surrounding market." },
+      { title: "Established and growth locations", body: "Projects may be considered across different locations based on property-specific assessment and market context." },
     ],
-    detail: "Every live listing includes its own property information, campaign status, holding return, maximum term, documents and key risks.",
+    detail: "Financial terms, participation conditions, project documents and specific risk information are restricted to registered and approved members.",
     cta: "View member opportunities",
   },
   journey: {
-    kicker: "How to participate",
-    title: "A clear path from selection to distribution.",
+    kicker: "Member journey",
+    title: "A clear path to reviewing a property opportunity.",
     steps: [
-      { title: "Explore", body: "Browse selected opportunities in the member portal." },
-      { title: "Review", body: "Read the project information, terms, documents and risks." },
-      { title: "Participate", body: "Choose an amount and complete the required confirmation." },
-      { title: "Track", body: "Follow the project and holding period through the portal." },
-      { title: "Receive", body: "Review confirmed holding-return and sale-profit distributions." },
+      { title: "Register", body: "Create an account and complete the required member information." },
+      { title: "Review", body: "Access the available property information, documents, terms and risk disclosures." },
+      { title: "Decide", body: "Consider the specific opportunity information before choosing whether to participate." },
+      { title: "Track", body: "Follow relevant project information and updates through the portal." },
+      { title: "Review updates", body: "See confirmed project and distribution records when applicable." },
     ],
   },
   faq: {
     kicker: "Frequently asked questions",
-    title: "What members usually want to know.",
+    title: "Understanding K Asset Ventures.",
     items: [
-      { question: "What is an auction property opportunity?", answer: "It is an opportunity to participate in a selected residential property project acquired through the auction market, managed through improvement and holding, and intended for a later sale." },
-      { question: "How are properties selected?", answer: "Each opportunity is assessed based on factors such as location, property condition, indicative market value, auction terms, estimated project costs and the intended exit strategy." },
-      { question: "How does the 1.5% monthly holding return work?", answer: "The holding return is calculated monthly on the participant’s amount from the campaign close until the month the property is sold, subject to the 24-month maximum and the applicable project terms." },
-      { question: "Is the holding return separate from the sale profit?", answer: "Yes. The 1.5% monthly holding return and any applicable profit distribution from the eventual property sale are calculated as separate components." },
-      { question: "What happens if the property is sold early?", answer: "The holding period ends in the month of sale. The applicable holding return and sale-profit outcome are then handled according to that opportunity’s terms." },
-      { question: "What happens if the property remains unsold after 24 months?", answer: "The participant’s original principal will be repaid in accordance with the Participant Agreement. This is the defined maximum holding term for the opportunity." },
-      { question: "Who can participate?", answer: "Initial access is intended for registered and approved members. Account verification and acceptance of the applicable project documents are required before participation." },
+      { question: "What is K Asset Ventures?", answer: "K Asset Ventures by PICM Sdn Bhd is a property-focused platform for selected residential property projects. It supports the process from property identification and assessment through project management and the intended exit strategy." },
+      { question: "What types of properties does K Asset Ventures consider?", answer: "The focus is on selected residential properties, including suitable auction opportunities, subject to the assessment carried out for each property." },
+      { question: "How are properties assessed?", answer: "Assessment may consider location, property condition, indicative market context, legal considerations, estimated project costs, improvement needs and the intended project path." },
+      { question: "Where can I see participation and financial terms?", answer: "Specific participation terms, financial information, project documents and relevant risk disclosures are available only to registered and approved members inside the member portal." },
+      { question: "Are property outcomes guaranteed?", answer: "No. Property values, costs, timelines, market conditions, buyer demand and project outcomes can change. Members should review the information and documents for each opportunity before making a decision." },
+      { question: "Who can access member opportunities?", answer: "Opportunity details are intended for registered and approved members who have completed the required account and verification steps." },
     ],
   },
   finalCta: {
-    kicker: "Your next property opportunity",
-    title: "See what is available inside K Asset Ventures.",
-    body: "Review selected auction property projects through a clear, structured member experience.",
+    kicker: "K Asset Ventures member access",
+    title: "Explore selected property opportunities inside the member portal.",
+    body: "Approved members can review specific project information, documents, terms and relevant disclosures in a structured member experience.",
     primary: "Request access",
     secondary: "Member login",
   },
   footer: {
     description: "K Asset Ventures by PICM Sdn Bhd",
-    disclosure: "Information on this public page is general. Returns, sale profits and principal protection are subject to the specific opportunity and Participant Agreement. Property projects carry risks and timelines may change.",
+    disclosure: "Information on this public page is general and for informational purposes. Property projects involve risk and outcomes are not guaranteed. Specific opportunity information, terms and risk disclosures should be reviewed before any participation decision.",
     rights: "All rights reserved.",
     admin: "Admin access",
   },
@@ -214,9 +146,9 @@ const ms: LandingCopy = {
   locale: "ms",
   navigationLabel: "Navigasi awam",
   nav: [
-    { label: "Mengapa hartanah lelong", href: "#model" },
-    { label: "Pulangan", href: "#returns" },
-    { label: "Perlindungan", href: "#protection" },
+    { label: "Apa yang kami lakukan", href: "#model" },
+    { label: "Pasaran hartanah", href: "#returns" },
+    { label: "Pendekatan kami", href: "#protection" },
     { label: "Peluang", href: "#opportunities" },
     { label: "Soalan lazim", href: "#faq" },
   ],
@@ -224,112 +156,111 @@ const ms: LandingCopy = {
   requestAccess: "Mohon akses",
   languageLabel: "Bahasa",
   hero: {
-    kicker: "Akses persendirian kepada projek kediaman terpilih",
-    title: "Jana pendapatan melalui peluang hartanah lelong terpilih.",
-    body: "Sertai projek hartanah kediaman yang dipilih dengan teliti dan nikmati pulangan pegangan bulanan sementara setiap aset disiapkan dan diposisikan untuk jualan.",
-    primary: "Terokai peluang",
+    kicker: "K Asset Ventures by PICM Sdn Bhd",
+    title: "Mengurus peluang hartanah terpilih sebagai projek yang tersusun.",
+    body: "K Asset Ventures mengenal pasti hartanah kediaman terpilih, menilai potensi pasarannya, menyelaras penambahbaikan apabila bersesuaian dan mengurus setiap projek ke arah strategi keluar yang dirancang.",
+    primary: "Kenali K Asset Ventures",
     secondary: "Log masuk ahli",
-    note: "Maklumat penuh peluang tersedia kepada ahli yang berdaftar dan diluluskan.",
-    imageAlt: "Gambaran ilustrasi kediaman di Malaysia",
-    imageCaption: "Hartanah kediaman terpilih · Diurus dari pemerolehan hingga jualan",
+    note: "Terma penyertaan khusus dan maklumat kewangan hanya tersedia kepada ahli yang berdaftar dan diluluskan.",
+    imageAlt: "Hartanah kediaman di Malaysia",
+    imageCaption: "Pemilihan hartanah · Penilaian · Penambahbaikan · Pengurusan projek",
   },
   facts: [
-    { value: "1.5%", label: "Pulangan pegangan bulanan", detail: "Dikira atas jumlah penyertaan" },
-    { value: "24", label: "Bulan pegangan maksimum", detail: "Tempoh penyertaan yang ditetapkan" },
-    { value: "2", label: "Komponen pulangan berpotensi", detail: "Pulangan pegangan dan untung jualan berasingan" },
+    { value: "KAV", label: "Platform berfokus hartanah", detail: "Berteraskan projek hartanah kediaman terpilih di Malaysia" },
+    { value: "01", label: "Penilaian berdisiplin", detail: "Lokasi, keadaan, konteks pasaran, kos dan pelan keluar dipertimbangkan" },
+    { value: "02", label: "Akses ahli", detail: "Maklumat khusus peluang dan penyertaan kekal dalam portal ahli" },
   ],
   model: {
-    kicker: "Mengapa hartanah lelong",
-    title: "Diperoleh pada nilai berpotensi. Ditambah baik untuk peluang lebih besar.",
-    intro: "Peluang bermula sebelum proses lelong. Setiap hartanah dipertimbangkan berdasarkan nilai pemerolehan, keadaan, lokasi, keperluan penambahbaikan dan laluan jualan yang realistik.",
+    kicker: "Apa yang K Asset Ventures lakukan",
+    title: "Daripada mengenal pasti hartanah hingga pelaksanaan projek.",
+    intro: "K Asset Ventures memberi tumpuan kepada peluang hartanah kediaman yang boleh diurus melalui proses projek yang tersusun meliputi pemerolehan, penambahbaikan dan kedudukan pasaran.",
     steps: [
-      { title: "Pilih", body: "Kenal pasti hartanah kediaman lelong dengan potensi nilai dan permintaan pembeli yang munasabah." },
-      { title: "Nilai", body: "Semak hartanah, lokasi, anggaran nilai pasaran, kedudukan undang-undang, kos dan tempoh projek." },
-      { title: "Tambah baik", body: "Laksanakan pembaikan atau penambahbaikan yang diperlukan untuk meningkatkan tarikan pasaran hartanah." },
-      { title: "Jual", body: "Pasarkan hartanah yang telah siap dan agihkan hasil projek yang berkenaan." },
+      { title: "Kenal pasti", body: "Mencari hartanah kediaman terpilih, termasuk peluang lelong, untuk penilaian lanjut." },
+      { title: "Nilai", body: "Meneliti lokasi, keadaan hartanah, konteks pasaran indikatif, pertimbangan undang-undang, anggaran kos dan laluan projek." },
+      { title: "Tambah baik", body: "Menyelaras pembaikan atau penambahbaikan praktikal apabila ia menyokong keadaan dan kebolehpasaran hartanah." },
+      { title: "Urus", body: "Memantau projek hartanah sepanjang proses pegangan dan strategi keluar yang dirancang, tertakluk kepada keadaan setiap hartanah." },
     ],
   },
   risk: {
     kicker: "Pendekatan yang lebih terkawal",
-    title: "Disokong hartanah, dipilih dengan teliti dan diurus dengan pelan.",
-    body: "Projek hartanah bukan tanpa risiko. K Asset Ventures distruktur untuk mengurus risiko melalui pemilihan berdisiplin, aset fizikal sebenar dan lebih daripada satu pilihan untuk keluar daripada projek.",
+    title: "Projek hartanah diurus dengan struktur, penelitian dan maklumat projek yang jelas.",
+    body: "Projek hartanah mempunyai risiko dan hasilnya boleh berbeza. K Asset Ventures memberi tumpuan kepada penilaian berdisiplin dan pengurusan projek berterusan, bukan menggambarkan hasil hartanah sebagai sesuatu yang dijamin.",
     points: [
-      { title: "Aset asas yang nyata", body: "Setiap peluang berkait dengan hartanah kediaman sebenar, bukan produk yang bersifat abstrak." },
-      { title: "Potensi nilai ketika pemerolehan", body: "Pembelian lelong boleh mewujudkan ruang antara kos pemerolehan dan anggaran nilai pasaran apabila hartanah dipilih dengan baik." },
-      { title: "Nilai melalui penambahbaikan", body: "Pembaikan dan penambahbaikan terancang digunakan untuk mengukuhkan tarikan pasaran serta potensi jualan hartanah." },
-      { title: "Strategi pegangan alternatif", body: "Jika jualan yang sesuai mengambil masa, aset boleh terus dipegang dan diurus, termasuk disewakan apabila bersesuaian." },
+      { title: "Hartanah fizikal yang dikenal pasti", body: "Setiap projek berkait dengan hartanah kediaman tertentu serta keadaan khusus hartanah tersebut." },
+      { title: "Penilaian sebelum pelaksanaan", body: "Lokasi, keadaan, konteks pasaran indikatif, kos dan pertimbangan projek diteliti sebelum sesuatu hartanah diteruskan." },
+      { title: "Penambahbaikan terancang", body: "Pembaikan dan penambahbaikan boleh dilaksanakan apabila ia menyokong keadaan hartanah serta kedudukan pasaran yang dirancang." },
+      { title: "Pemantauan projek", body: "Kemajuan, dokumen dan maklumat projek yang berkaitan boleh disampaikan melalui pengalaman ahli." },
     ],
-    disclosureTitle: "Risiko diurus, bukan dihapuskan",
-    disclosure: "Nilai hartanah, tempoh undang-undang, kos pembaikan dan permintaan pembeli boleh berubah. Setiap peserta perlu meneliti peluang khusus serta Perjanjian Peserta sebelum menyertai.",
+    disclosureTitle: "Projek hartanah mempunyai risiko",
+    disclosure: "Nilai hartanah, tempoh undang-undang, kos pembaikan, keadaan pasaran dan permintaan pembeli boleh berubah. Ahli perlu meneliti maklumat serta dokumen bagi setiap peluang khusus sebelum membuat keputusan.",
   },
   returns: {
-    kicker: "Bagaimana pulangan dijana",
-    title: "Terima pulangan sepanjang tempoh pegangan—dan daripada hasil projek.",
-    body: "Pulangan pegangan dan agihan keuntungan jualan ialah dua komponen berasingan. Ini memudahkan peserta memahami dari mana datangnya setiap bahagian pulangan berpotensi mereka.",
-    holdingLabel: "Sepanjang tempoh pegangan",
-    holdingValue: "1.5%",
-    holdingTitle: "Pulangan pegangan bulanan",
-    holdingBody: "Pulangan pegangan sebanyak 1.5% dikira setiap bulan atas jumlah penyertaan, bermula apabila kempen ditutup sehingga bulan hartanah terjual, tertakluk kepada maksimum 24 bulan.",
-    profitLabel: "Apabila hartanah terjual",
-    profitValue: "+",
-    profitTitle: "Agihan keuntungan jualan berasingan",
-    profitBody: "Apabila hartanah berjaya dijual, sebarang keuntungan jualan yang berkenaan dikira dan diagihkan secara berasingan mengikut terma projek.",
-    terms: "Kaedah pengiraan dan pembayaran ditentukan oleh terma peluang khusus serta Perjanjian Peserta.",
+    kicker: "Pasaran hartanah Malaysia",
+    title: "Keputusan hartanah bermula dengan memahami konteks pasaran.",
+    body: "K Asset Ventures mempertimbangkan persekitaran hartanah kediaman Malaysia bersama maklumat khusus setiap hartanah. Kandungan pasaran awam bertujuan memberi konteks; terma peluang khusus kekal dalam portal ahli.",
+    holdingLabel: "Perspektif pasaran",
+    holdingValue: "MY",
+    holdingTitle: "Konteks hartanah kediaman",
+    holdingBody: "Lokasi, hartanah perbandingan, akses, ciri kejiranan dan permintaan pembeli boleh mempengaruhi bagaimana sesuatu hartanah dinilai.",
+    profitLabel: "Perspektif peluang",
+    profitValue: "KAV",
+    profitTitle: "Konteks lelong dan projek",
+    profitBody: "Terma lelong, keadaan hartanah, anggaran keperluan penambahbaikan dan laluan keluar yang dirancang dipertimbangkan pada peringkat projek, bukan berdasarkan pergerakan pasaran umum semata-mata.",
+    terms: "Maklumat pasaran adalah bersifat umum dan bukan janji terhadap nilai hartanah, hasil projek, pulangan atau pembayaran balik.",
   },
   protection: {
-    label: "Tempoh perlindungan modal yang ditetapkan",
-    value: "24",
-    unit: "bulan",
-    title: "Modal pokok anda dilindungi dalam tempoh yang jelas.",
-    body: "Jika hartanah masih belum terjual selepas 24 bulan daripada tarikh kempen ditutup, modal pokok asal peserta akan dipulangkan mengikut Perjanjian Peserta.",
-    note: "Perlindungan modal pokok adalah berasingan daripada pulangan pegangan dan agihan keuntungan jualan. Terma berkaitan perlu diteliti sebelum penyertaan.",
+    label: "Pendekatan projek",
+    value: "4",
+    unit: "peringkat",
+    title: "Pemilihan, penilaian, penambahbaikan dan pengurusan—bukan jaminan hasil.",
+    body: "K Asset Ventures menggunakan proses projek hartanah yang tersusun sambil mengambil kira bahawa keadaan pasaran, kos, tempoh dan hasil jualan boleh berubah.",
+    note: "Terma penyertaan terperinci, dokumen projek, maklumat kewangan dan pendedahan risiko berkaitan disediakan kepada ahli yang diluluskan bagi peluang khusus tersebut.",
   },
   opportunities: {
     kicker: "Peluang hartanah",
-    title: "Lebih banyak pilihan kediaman untuk dipertimbangkan.",
-    body: "Peluang baharu diperkenalkan apabila hartanah kediaman yang bersesuaian selesai melalui proses penilaian. Ahli yang diluluskan boleh membandingkan hartanah, pelan projek, tempoh pegangan dan terma penyertaan di satu tempat.",
+    title: "Projek kediaman terpilih untuk penelitian ahli yang diluluskan.",
+    body: "Hartanah kediaman yang bersesuaian boleh diperkenalkan selepas melalui proses penilaian berkaitan. Ahli yang diluluskan boleh meneliti maklumat yang disediakan bagi setiap peluang khusus dalam portal ahli.",
     types: [
-      { title: "Rumah teres dan kediaman bertanah", body: "Hartanah kediaman dengan tarikan luas kepada pembeli serta potensi penambahbaikan yang jelas." },
-      { title: "Apartmen dan kediaman bandar", body: "Kediaman terpilih di lokasi yang mempunyai akses praktikal dan permintaan pembeli bagi menyokong pelan jualan." },
-      { title: "Lokasi matang dan sedang berkembang", body: "Peluang dinilai berdasarkan kejiranan, perbandingan nilai dan kebolehpasaran hartanah tersebut." },
+      { title: "Rumah teres dan kediaman bertanah", body: "Hartanah kediaman dipertimbangkan berdasarkan keadaan, lokasi, kebolehpasaran dan keperluan penambahbaikan." },
+      { title: "Apartmen dan kediaman bandar", body: "Unit kediaman terpilih dinilai mengikut keadaan hartanah serta pasaran di sekitarnya." },
+      { title: "Lokasi matang dan sedang berkembang", body: "Projek boleh dipertimbangkan di lokasi berbeza berdasarkan penilaian khusus hartanah dan konteks pasaran." },
     ],
-    detail: "Setiap penyenaraian aktif memaparkan maklumat hartanah, status kempen, pulangan pegangan, tempoh maksimum, dokumen dan risiko utamanya.",
+    detail: "Terma kewangan, syarat penyertaan, dokumen projek dan maklumat risiko khusus dihadkan kepada ahli yang berdaftar dan diluluskan.",
     cta: "Lihat peluang untuk ahli",
   },
   journey: {
-    kicker: "Cara menyertai",
-    title: "Laluan yang jelas daripada pemilihan hingga agihan.",
+    kicker: "Perjalanan ahli",
+    title: "Laluan yang jelas untuk meneliti sesuatu peluang hartanah.",
     steps: [
-      { title: "Terokai", body: "Lihat peluang terpilih dalam portal ahli." },
-      { title: "Teliti", body: "Baca maklumat projek, terma, dokumen dan risiko." },
-      { title: "Sertai", body: "Pilih jumlah dan lengkapkan pengesahan yang diperlukan." },
-      { title: "Pantau", body: "Ikuti projek dan tempoh pegangan melalui portal." },
-      { title: "Terima", body: "Semak agihan pulangan pegangan dan keuntungan jualan yang disahkan." },
+      { title: "Daftar", body: "Cipta akaun dan lengkapkan maklumat ahli yang diperlukan." },
+      { title: "Teliti", body: "Akses maklumat hartanah, dokumen, terma dan pendedahan risiko yang tersedia." },
+      { title: "Buat keputusan", body: "Pertimbangkan maklumat khusus peluang sebelum memilih sama ada mahu menyertai." },
+      { title: "Pantau", body: "Ikuti maklumat dan perkembangan projek yang berkaitan melalui portal." },
+      { title: "Semak kemas kini", body: "Lihat rekod projek dan agihan yang telah disahkan apabila berkenaan." },
     ],
   },
   faq: {
     kicker: "Soalan lazim",
-    title: "Perkara yang sering ingin diketahui oleh ahli.",
+    title: "Memahami K Asset Ventures.",
     items: [
-      { question: "Apakah peluang hartanah lelong?", answer: "Ia ialah peluang untuk menyertai projek hartanah kediaman terpilih yang diperoleh melalui pasaran lelong, diurus melalui penambahbaikan dan pegangan, serta disasarkan untuk jualan kemudian." },
-      { question: "Bagaimanakah hartanah dipilih?", answer: "Setiap peluang dinilai berdasarkan faktor seperti lokasi, keadaan hartanah, anggaran nilai pasaran, terma lelong, anggaran kos projek dan strategi jualan yang dirancang." },
-      { question: "Bagaimanakah pulangan pegangan 1.5% sebulan dikira?", answer: "Pulangan pegangan dikira setiap bulan atas jumlah penyertaan bermula daripada tarikh kempen ditutup sehingga bulan hartanah terjual, tertakluk kepada maksimum 24 bulan dan terma projek berkenaan." },
-      { question: "Adakah pulangan pegangan berasingan daripada untung jualan?", answer: "Ya. Pulangan pegangan bulanan 1.5% dan sebarang agihan keuntungan daripada jualan hartanah dikira sebagai dua komponen yang berasingan." },
-      { question: "Apa berlaku jika hartanah terjual lebih awal?", answer: "Tempoh pegangan tamat pada bulan jualan. Pulangan pegangan yang berkenaan dan hasil keuntungan jualan kemudiannya diurus mengikut terma peluang tersebut." },
-      { question: "Apa berlaku jika hartanah belum terjual selepas 24 bulan?", answer: "Modal pokok asal peserta akan dipulangkan mengikut Perjanjian Peserta. Ini ialah tempoh pegangan maksimum yang ditetapkan untuk peluang tersebut." },
-      { question: "Siapa yang boleh menyertai?", answer: "Akses awal disediakan kepada ahli yang berdaftar dan diluluskan. Pengesahan akaun serta penerimaan dokumen projek berkaitan diperlukan sebelum penyertaan." },
+      { question: "Apakah K Asset Ventures?", answer: "K Asset Ventures by PICM Sdn Bhd ialah platform berfokus hartanah untuk projek hartanah kediaman terpilih. Ia menyokong proses daripada pengenalpastian dan penilaian hartanah hingga pengurusan projek serta strategi keluar yang dirancang." },
+      { question: "Apakah jenis hartanah yang dipertimbangkan?", answer: "Fokus adalah pada hartanah kediaman terpilih, termasuk peluang lelong yang bersesuaian, tertakluk kepada penilaian bagi setiap hartanah." },
+      { question: "Bagaimanakah hartanah dinilai?", answer: "Penilaian boleh mengambil kira lokasi, keadaan hartanah, konteks pasaran indikatif, pertimbangan undang-undang, anggaran kos projek, keperluan penambahbaikan dan laluan projek yang dirancang." },
+      { question: "Di manakah saya boleh melihat terma penyertaan dan maklumat kewangan?", answer: "Terma penyertaan khusus, maklumat kewangan, dokumen projek dan pendedahan risiko berkaitan hanya tersedia kepada ahli yang berdaftar dan diluluskan dalam portal ahli." },
+      { question: "Adakah hasil projek hartanah dijamin?", answer: "Tidak. Nilai hartanah, kos, tempoh, keadaan pasaran, permintaan pembeli dan hasil projek boleh berubah. Ahli perlu meneliti maklumat dan dokumen setiap peluang sebelum membuat keputusan." },
+      { question: "Siapa yang boleh mengakses peluang ahli?", answer: "Maklumat peluang disediakan untuk ahli yang berdaftar dan diluluskan serta telah melengkapkan langkah akaun dan pengesahan yang diperlukan." },
     ],
   },
   finalCta: {
-    kicker: "Peluang hartanah anda seterusnya",
-    title: "Lihat peluang yang tersedia dalam K Asset Ventures.",
-    body: "Terokai projek hartanah lelong terpilih melalui pengalaman ahli yang jelas dan tersusun.",
+    kicker: "Akses ahli K Asset Ventures",
+    title: "Terokai peluang hartanah terpilih dalam portal ahli.",
+    body: "Ahli yang diluluskan boleh meneliti maklumat projek khusus, dokumen, terma dan pendedahan berkaitan melalui pengalaman ahli yang tersusun.",
     primary: "Mohon akses",
     secondary: "Log masuk ahli",
   },
   footer: {
     description: "K Asset Ventures by PICM Sdn Bhd",
-    disclosure: "Maklumat pada halaman awam ini adalah bersifat umum. Pulangan, keuntungan jualan dan perlindungan modal tertakluk kepada peluang khusus serta Perjanjian Peserta. Projek hartanah mempunyai risiko dan tempohnya boleh berubah.",
+    disclosure: "Maklumat pada halaman awam ini bersifat umum dan untuk tujuan maklumat. Projek hartanah mempunyai risiko dan hasilnya tidak dijamin. Maklumat, terma dan pendedahan risiko bagi peluang khusus perlu diteliti sebelum sebarang keputusan penyertaan.",
     rights: "Hak cipta terpelihara.",
     admin: "Akses pentadbir",
   },
