@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Menu, X } from "lucide-react";
 import { useState } from "react";
@@ -100,12 +101,14 @@ export function LandingHeader({
 function HeaderWordmark({ homeHref }: { homeHref: string }) {
   return (
     <Link href={homeHref} aria-label="K Asset Ventures home" className="block flex-none leading-none">
-      <span className="block text-[0.7rem] font-bold tracking-[0.12em] text-[#172235] min-[360px]:text-[0.73rem] sm:text-[0.86rem] sm:tracking-[0.14em]">
-        K ASSET VENTURES
-      </span>
-      <span className="mt-1.5 block text-[0.49rem] font-medium uppercase tracking-[0.12em] text-[#7a6a55] min-[360px]:text-[0.51rem] sm:text-[0.58rem] sm:tracking-[0.15em]">
-        by PICM Sdn Bhd
-      </span>
+      <Image
+        src="/logo-kav-02.svg"
+        alt="K Asset Ventures by PICM Sdn Bhd"
+        width={168}
+        height={55}
+        priority
+        className="h-9 w-auto sm:h-11"
+      />
     </Link>
   );
 }
