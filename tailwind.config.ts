@@ -9,14 +9,14 @@ const config: Config = {
     extend: {
       colors: {
         kasset: {
-          ink: "#10201a",
-          green: "#0f7a4f",
-          mint: "#dff7ec",
-          sand: "#f6f1e8",
+          ink: "#0e1726",
+          green: "#a47c48",
+          mint: "#f4eadc",
+          sand: "#f6f3ed",
         },
       },
       boxShadow: {
-        soft: "0 24px 80px rgba(16, 32, 26, 0.12)",
+        soft: "0 24px 80px rgba(14, 23, 38, 0.14)",
       },
     },
   },
