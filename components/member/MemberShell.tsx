@@ -26,7 +26,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function iconClass(active: boolean) {
-  return active ? "text-[#a47c48]" : "text-slate-500";
+  return active ? "text-[#c6a574]" : "text-slate-500";
 }
 
 export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
@@ -37,7 +37,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
   return (
     <div className="min-h-screen bg-[#f6f3ed] text-[#25282d]">
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
-        <aside className="hidden border-r border-[#172235]/15 bg-[#fffdf9]/95 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-56 lg:flex-none">
+        <aside className="hidden border-r border-[#c6a574]/25 bg-[#0e1726] lg:sticky lg:top-0 lg:block lg:h-screen lg:w-56 lg:flex-none">
           <div className="px-5 py-6">
             <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-[#a47c48]">
               <Image
@@ -46,9 +46,9 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 width={168}
                 height={55}
                 priority
-                className="h-10 w-auto"
+                className="h-11 w-auto"
               />
-              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#a47c48]">Member Portal</p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#c6a574]">Member Portal</p>
             </Link>
           </div>
           <nav className="space-y-1.5 px-3 pb-6" aria-label="Member navigation">
@@ -60,7 +60,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                   key={label}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-[#f4eadc] text-[#172235]" : "text-slate-500 hover:bg-[#f7efe3] hover:text-[#a47c48]"}`}
+                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-[#c6a574] text-[#0e1726]" : "text-[#cbd1dc] hover:bg-white/10 hover:text-[#f6e8cb]"}`}
                 >
                   {label}
                 </Link>
@@ -69,7 +69,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           </nav>
         </aside>
         <div className="min-w-0 flex-1 lg:h-screen lg:overflow-y-auto">
-          <header className="sticky top-0 z-20 border-b border-[#172235]/15 bg-[#fffdf9]/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-20 border-b border-[#c6a574]/25 bg-[#0e1726] px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
               <Link href="/member/dashboard" className="rounded-md focus:outline-none focus:ring-2 focus:ring-[#a47c48] lg:hidden">
                 <Image
@@ -78,9 +78,9 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                   width={150}
                   height={49}
                   priority
-                  className="h-8 w-auto"
+                  className="h-9 w-auto"
                 />
-                <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#a47c48]">Member Portal</p>
+                <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#c6a574]">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
                 <details className="group relative hidden lg:block">
@@ -90,10 +90,10 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                       <p className="text-sm font-bold text-[#172235]">{displayName}</p>
                       <p className="mt-1 text-xs text-slate-500">{identity.email}</p>
                     </div>
-                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#a47c48]">
+                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">
                       My Profile
                     </Link>
-                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#a47c48]">
+                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">
                       Logout
                     </Link>
                   </div>
@@ -104,7 +104,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           <main className="px-4 py-7 pb-24 sm:px-6 lg:px-10 lg:py-10 lg:pb-10">{children}</main>
         </div>
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#172235]/15 bg-[#fffdf9]/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Member mobile navigation">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#c6a574]/25 bg-[#0e1726] px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Member mobile navigation">
         <div className="grid grid-cols-5 gap-1 py-2">
           {bottomNavItems.map(([label, href, Icon]) => {
             const active = isActivePath(pathname, href);
@@ -114,7 +114,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 key={label}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-[#f4eadc] text-[#172235]" : "text-slate-500 hover:bg-[#f7efe3] hover:text-[#a47c48]"}`}
+                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-[#c6a574] text-[#0e1726]" : "text-[#cbd1dc] hover:bg-white/10 hover:text-[#f6e8cb]"}`}
               >
                 <Icon className={`h-5 w-5 ${iconClass(active)}`} />
                 <span className="mt-1 truncate leading-none">{label}</span>
