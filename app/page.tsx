@@ -3,9 +3,9 @@ import { LandingPage } from "@/components/landing/LandingPage";
 import { landingCopy } from "@/lib/landing-copy";
 
 export const metadata: Metadata = {
-  title: { absolute: "Auction Property Income Opportunities | K Asset Ventures" },
+  title: { absolute: "Selected Malaysian Property Projects | K Asset Ventures" },
   description:
-    "Explore selected residential auction property opportunities with a 1.5% monthly holding return, separate sale-profit distribution and a defined 24-month principal protection term.",
+    "Learn how K Asset Ventures by PICM Sdn Bhd identifies, assesses, improves and manages selected Malaysian residential property projects for approved members.",
   alternates: {
     canonical: "https://www.kassetventures.com",
     languages: {
@@ -14,18 +14,19 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Auction Property Income Opportunities | K Asset Ventures",
-    description: "Build income through selected residential auction property opportunities with a structured holding period and defined principal protection term.",
+    title: "Selected Malaysian Property Projects | K Asset Ventures",
+    description:
+      "K Asset Ventures presents selected Malaysian residential property projects with project context, member documents and risk information for approved members.",
     url: "https://www.kassetventures.com",
     locale: "en_MY",
     siteName: "K Asset Ventures",
     type: "website",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "K Asset Ventures auction property opportunities" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "K Asset Ventures selected Malaysian residential property projects" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Auction Property Income Opportunities | K Asset Ventures",
-    description: "Build income through selected residential auction property opportunities.",
+    title: "Selected Malaysian Property Projects | K Asset Ventures",
+    description: "Selected Malaysian residential property projects for approved K Asset Ventures members.",
     images: ["/opengraph-image"],
   },
 };
