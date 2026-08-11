@@ -3,9 +3,9 @@ import { LandingPage } from "@/components/landing/LandingPage";
 import { landingCopy } from "@/lib/landing-copy";
 
 export const metadata: Metadata = {
-  title: { absolute: "Peluang Pendapatan Hartanah Lelong | K Asset Ventures" },
+  title: { absolute: "Projek Hartanah Kediaman Terpilih | K Asset Ventures" },
   description:
-    "Terokai peluang hartanah kediaman lelong terpilih dengan pulangan pegangan 1.5% sebulan, agihan keuntungan jualan berasingan dan perlindungan modal pokok selama 24 bulan.",
+    "Ketahui bagaimana K Asset Ventures by PICM Sdn Bhd mengenal pasti, menilai, menambah baik dan mengurus projek hartanah kediaman terpilih untuk ahli yang diluluskan.",
   alternates: {
     canonical: "https://www.kassetventures.com/ms",
     languages: {
@@ -14,18 +14,19 @@ export const metadata: Metadata = {
     },
   },
   openGraph: {
-    title: "Peluang Pendapatan Hartanah Lelong | K Asset Ventures",
-    description: "Jana pendapatan melalui peluang hartanah kediaman lelong terpilih dengan tempoh pegangan yang tersusun dan perlindungan modal yang ditetapkan.",
+    title: "Projek Hartanah Kediaman Terpilih | K Asset Ventures",
+    description:
+      "K Asset Ventures memperkenalkan projek hartanah kediaman terpilih dengan konteks projek, dokumen ahli dan maklumat risiko untuk ahli yang diluluskan.",
     url: "https://www.kassetventures.com/ms",
     locale: "ms_MY",
     siteName: "K Asset Ventures",
     type: "website",
-    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Peluang hartanah lelong K Asset Ventures" }],
+    images: [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Projek hartanah kediaman terpilih K Asset Ventures" }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "Peluang Pendapatan Hartanah Lelong | K Asset Ventures",
-    description: "Jana pendapatan melalui peluang hartanah kediaman lelong terpilih.",
+    title: "Projek Hartanah Kediaman Terpilih | K Asset Ventures",
+    description: "Projek hartanah kediaman terpilih untuk ahli K Asset Ventures yang diluluskan.",
     images: ["/opengraph-image"],
   },
 };
