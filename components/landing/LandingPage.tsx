@@ -1,8 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowRight, Plus } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import type { LandingCopy } from "@/lib/landing-copy";
 import { LandingHeader } from "@/components/landing/LandingHeader";
+import { FaqList } from "@/components/landing/FaqList";
 
 export function LandingPage({ copy }: { copy: LandingCopy }) {
   return (
@@ -28,7 +29,7 @@ export function LandingPage({ copy }: { copy: LandingCopy }) {
                 {copy.hero.body}
               </p>
               <div className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-4">
-                <Link href="/member/opportunities" className="inline-flex min-h-12 items-center justify-center rounded-[3px] bg-[#172235] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#263653] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#172235]">
+                <Link href="#model" className="inline-flex min-h-12 items-center justify-center rounded-[3px] bg-[#172235] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#263653] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#172235]">
                   {copy.hero.primary}
                 </Link>
                 <Link href="/member/login" className="group inline-flex min-h-12 items-center gap-2 text-sm font-semibold text-[#172235] underline decoration-[#a47c48]/60 underline-offset-8 transition-colors hover:text-[#8f693b]">
@@ -176,7 +177,7 @@ export function LandingPage({ copy }: { copy: LandingCopy }) {
               </article>
             ))}
           </div>
-          <Link href="/member/opportunities" className="mt-9 inline-flex min-h-12 items-center gap-3 rounded-[3px] border border-[#172235] px-6 text-sm font-semibold text-[#172235] transition-colors hover:bg-[#172235] hover:text-white">
+          <Link href="/member/signup" className="mt-9 inline-flex min-h-12 items-center gap-3 rounded-[3px] border border-[#172235] px-6 text-sm font-semibold text-[#172235] transition-colors hover:bg-[#172235] hover:text-white">
             {copy.opportunities.cta}<ArrowRight aria-hidden="true" size={17} strokeWidth={1.7} />
           </Link>
         </div>
@@ -200,17 +201,7 @@ export function LandingPage({ copy }: { copy: LandingCopy }) {
       <section id="faq" className="scroll-mt-24 px-5 py-20 sm:px-8 sm:py-28 lg:px-12">
         <div className="mx-auto grid max-w-[86rem] gap-12 lg:grid-cols-[0.42fr_0.58fr] lg:gap-24">
           <SectionIntro kicker={copy.faq.kicker} title={copy.faq.title} />
-          <div className="border-t border-[#172235]/25">
-            {copy.faq.items.map((item, index) => (
-              <details key={item.question} className="group border-b border-[#172235]/20 py-5 sm:py-6" open={index === 0}>
-                <summary className="flex cursor-pointer list-none items-start justify-between gap-6 text-base font-semibold leading-7 text-[#172235] marker:content-none sm:text-lg">
-                  {item.question}
-                  <Plus aria-hidden="true" size={20} strokeWidth={1.5} className="mt-1 flex-none text-[#a47c48] transition-transform group-open:rotate-45" />
-                </summary>
-                <p className="max-w-3xl pt-4 text-sm leading-7 text-[#626a75] sm:text-base sm:leading-8">{item.answer}</p>
-              </details>
-            ))}
-          </div>
+          <FaqList items={copy.faq.items} />
         </div>
       </section>
 
@@ -235,9 +226,8 @@ export function LandingPage({ copy }: { copy: LandingCopy }) {
 
 function Wordmark({ homeHref = "/" }: { homeHref?: string }) {
   return (
-    <Link href={homeHref} aria-label="K Asset Ventures home" className="block flex-none leading-none">
-      <span className="block text-[0.73rem] font-bold tracking-[0.14em] text-[#172235] sm:text-[0.86rem]">K ASSET VENTURES</span>
-      <span className="mt-1.5 block text-[0.51rem] font-medium uppercase tracking-[0.15em] text-[#7a6a55] sm:text-[0.58rem]">by PICM Sdn Bhd</span>
+    <Link href={homeHref} aria-label="K Asset Ventures home" className="inline-flex flex-none items-center leading-none">
+      <Image src="/logo-kav-01.svg" alt="K Asset Ventures" width={64} height={64} className="h-16 w-auto" />
     </Link>
   );
 }
