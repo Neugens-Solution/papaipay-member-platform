@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { SVGProps } from "react";
@@ -25,7 +26,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function iconClass(active: boolean) {
-  return active ? "text-kasset-green" : "text-slate-500";
+  return active ? "text-[#a47c48]" : "text-slate-500";
 }
 
 export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
@@ -34,13 +35,20 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ME";
 
   return (
-    <div className="min-h-screen bg-[#f7f8f5] text-kasset-ink">
+    <div className="min-h-screen bg-[#f6f3ed] text-[#25282d]">
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
-        <aside className="hidden border-r border-slate-200/70 bg-white/90 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-52 lg:flex-none">
-          <div className="px-5 py-7">
-            <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-kasset-green/30">
-              <p className="text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-kasset-green">K Asset Ventures</p>
-              <p className="mt-1.5 text-sm font-semibold tracking-tight text-kasset-ink">Member Portal</p>
+        <aside className="hidden border-r border-[#172235]/15 bg-[#fffdf9]/95 lg:sticky lg:top-0 lg:block lg:h-screen lg:w-56 lg:flex-none">
+          <div className="px-5 py-6">
+            <Link href="/member/dashboard" className="block rounded-md focus:outline-none focus:ring-2 focus:ring-[#a47c48]">
+              <Image
+                src="/logo-kav-02.svg"
+                alt="K Asset Ventures by PICM Sdn Bhd"
+                width={168}
+                height={55}
+                priority
+                className="h-10 w-auto"
+              />
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.18em] text-[#a47c48]">Member Portal</p>
             </Link>
           </div>
           <nav className="space-y-1.5 px-3 pb-6" aria-label="Member navigation">
@@ -52,7 +60,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                   key={label}
                   href={href}
                   aria-current={active ? "page" : undefined}
-                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-emerald-50/80 text-kasset-green" : "text-slate-500 hover:bg-slate-50 hover:text-kasset-green"}`}
+                  className={`block rounded-lg px-3 py-2.5 text-[0.86rem] font-medium transition ${active ? "bg-[#f4eadc] text-[#172235]" : "text-slate-500 hover:bg-[#f7efe3] hover:text-[#a47c48]"}`}
                 >
                   {label}
                 </Link>
@@ -61,24 +69,31 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           </nav>
         </aside>
         <div className="min-w-0 flex-1 lg:h-screen lg:overflow-y-auto">
-          <header className="sticky top-0 z-20 border-b border-slate-200/70 bg-white/90 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
+          <header className="sticky top-0 z-20 border-b border-[#172235]/15 bg-[#fffdf9]/95 px-4 py-3 backdrop-blur sm:px-6 lg:px-8">
             <div className="flex items-center justify-between gap-3">
-              <Link href="/member/dashboard" className="rounded-md lg:hidden">
-                <p className="text-sm font-extrabold tracking-tight text-kasset-ink">K Asset Ventures</p>
-                <p className="text-[0.65rem] font-bold uppercase tracking-[0.18em] text-kasset-green">Member Portal</p>
+              <Link href="/member/dashboard" className="rounded-md focus:outline-none focus:ring-2 focus:ring-[#a47c48] lg:hidden">
+                <Image
+                  src="/logo-kav-02.svg"
+                  alt="K Asset Ventures by PICM Sdn Bhd"
+                  width={150}
+                  height={49}
+                  priority
+                  className="h-8 w-auto"
+                />
+                <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#a47c48]">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
                 <details className="group relative hidden lg:block">
-                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-kasset-ink text-xs font-semibold text-white transition hover:bg-kasset-green">{initials}</summary>
-                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-slate-200 bg-white p-2 shadow-sm">
+                  <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-[#172235] text-xs font-semibold text-white transition hover:bg-[#a47c48]">{initials}</summary>
+                  <div className="absolute right-0 mt-2 w-56 rounded-lg border border-[#172235]/15 bg-white p-2 shadow-sm">
                     <div className="px-3 py-2">
-                      <p className="text-sm font-bold text-kasset-ink">{displayName}</p>
+                      <p className="text-sm font-bold text-[#172235]">{displayName}</p>
                       <p className="mt-1 text-xs text-slate-500">{identity.email}</p>
                     </div>
-                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-kasset-green">
+                    <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#a47c48]">
                       My Profile
                     </Link>
-                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-slate-50 hover:text-kasset-green">
+                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#a47c48]">
                       Logout
                     </Link>
                   </div>
@@ -89,7 +104,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
           <main className="px-4 py-7 pb-24 sm:px-6 lg:px-10 lg:py-10 lg:pb-10">{children}</main>
         </div>
       </div>
-      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-slate-200/70 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Member mobile navigation">
+      <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-[#172235]/15 bg-[#fffdf9]/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-sm backdrop-blur lg:hidden" aria-label="Member mobile navigation">
         <div className="grid grid-cols-5 gap-1 py-2">
           {bottomNavItems.map(([label, href, Icon]) => {
             const active = isActivePath(pathname, href);
@@ -99,7 +114,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 key={label}
                 href={href}
                 aria-current={active ? "page" : undefined}
-                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-emerald-50/80 text-kasset-green" : "text-slate-500 hover:bg-slate-50 hover:text-kasset-green"}`}
+                className={`flex min-h-14 min-w-0 flex-col items-center justify-center rounded-xl px-1 text-[0.64rem] font-semibold transition ${active ? "bg-[#f4eadc] text-[#172235]" : "text-slate-500 hover:bg-[#f7efe3] hover:text-[#a47c48]"}`}
               >
                 <Icon className={`h-5 w-5 ${iconClass(active)}`} />
                 <span className="mt-1 truncate leading-none">{label}</span>
