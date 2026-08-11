@@ -18,19 +18,19 @@ const editorialFont = Source_Serif_4({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.kassetventures.com"),
   applicationName: "K Asset Ventures",
-  title: { default: "K Asset Ventures | Auction Property Participation", template: "%s | K Asset Ventures" },
-  description: "Explore selected residential auction property opportunities through K Asset Ventures by PICM Sdn Bhd.",
+  title: { default: "K Asset Ventures | Selected Property Projects", template: "%s | K Asset Ventures" },
+  description: "Explore how K Asset Ventures by PICM Sdn Bhd manages selected Malaysian residential property projects for approved members.",
   openGraph: {
-    title: "K Asset Ventures | Auction Property Income Opportunities",
-    description: "Selected residential auction property opportunities with a structured holding period and defined principal protection term.",
+    title: "K Asset Ventures | Selected Malaysian Property Projects",
+    description: "Selected Malaysian residential property projects with project context, member documents and risk information for approved members.",
     url: "https://www.kassetventures.com",
     siteName: "K Asset Ventures",
     type: "website",
     images: [
       {
-        url: "/landing/og-image.png",
-        width: 1536,
-        height: 805,
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
         alt: "K Asset Ventures residential property opportunities",
       },
     ],
@@ -38,8 +38,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "K Asset Ventures",
-    description: "Build income through selected auction property opportunities.",
-    images: ["/landing/og-image.png"],
+    description: "Selected Malaysian residential property projects for approved K Asset Ventures members.",
+    images: ["/opengraph-image"],
   },
 };
 
