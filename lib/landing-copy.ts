@@ -102,7 +102,7 @@ const en: LandingCopy = {
       { title: "Established and growth locations", body: "Projects may be considered across different locations based on property-specific assessment and market context." },
     ],
     detail: "Financial terms, participation conditions, project documents and specific risk information are restricted to registered and approved members.",
-    cta: "View member opportunities",
+    cta: "Request member access",
   },
   journey: {
     kicker: "Member journey",
@@ -226,7 +226,7 @@ const ms: LandingCopy = {
       { title: "Lokasi matang dan sedang berkembang", body: "Projek boleh dipertimbangkan di lokasi berbeza berdasarkan penilaian khusus hartanah dan konteks pasaran." },
     ],
     detail: "Terma kewangan, syarat penyertaan, dokumen projek dan maklumat risiko khusus dihadkan kepada ahli yang berdaftar dan diluluskan.",
-    cta: "Lihat peluang untuk ahli",
+    cta: "Mohon akses ahli",
   },
   journey: {
     kicker: "Perjalanan ahli",
