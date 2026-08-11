@@ -267,18 +267,18 @@ function ReturnColumn({ label, value, title, body, second = false }: { label: st
 
 function SiteFooter({ copy }: { copy: LandingCopy }) {
   return (
-    <footer className="border-t border-[#172235]/15 bg-[#f6f3ed] px-5 py-10 sm:px-8 lg:px-12">
+    <footer className="border-t border-[#c6a574]/25 bg-[#0e1726] px-5 py-10 text-white sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[86rem]">
         <div className="grid gap-7 sm:grid-cols-[0.34fr_0.66fr] sm:gap-12">
           <div>
             <Wordmark homeHref={copy.locale === "ms" ? "/ms" : "/"} />
-            <p className="mt-4 text-xs font-medium text-[#666d77]">{copy.footer.description}</p>
+            <p className="mt-4 text-xs font-medium text-[#cbd1dc]">{copy.footer.description}</p>
           </div>
-          <p className="max-w-3xl text-xs leading-6 text-[#6d747e] sm:justify-self-end">{copy.footer.disclosure}</p>
+          <p className="max-w-3xl text-xs leading-6 text-[#aeb8c6] sm:justify-self-end">{copy.footer.disclosure}</p>
         </div>
-        <div className="mt-8 flex items-center justify-between gap-5 border-t border-[#172235]/15 pt-6 text-xs text-[#747b85]">
+        <div className="mt-8 flex items-center justify-between gap-5 border-t border-[#c6a574]/20 pt-6 text-xs text-[#aeb8c6]">
           <p>© {new Date().getFullYear()} K Asset Ventures. {copy.footer.rights}</p>
-          <Link href="/admin/login" className="transition-colors hover:text-[#172235]">{copy.footer.admin}</Link>
+          <Link href="/admin/login" className="transition-colors hover:text-[#c6a574]">{copy.footer.admin}</Link>
         </div>
       </div>
     </footer>
