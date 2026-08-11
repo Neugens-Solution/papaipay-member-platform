@@ -20,6 +20,14 @@ export const metadata: Metadata = {
   applicationName: "K Asset Ventures",
   title: { default: "K Asset Ventures | Selected Property Projects", template: "%s | K Asset Ventures" },
   description: "Explore how K Asset Ventures by PICM Sdn Bhd manages selected Malaysian residential property projects for approved members.",
+  icons: {
+    icon: [
+      { url: "/kav-favicon.svg", type: "image/svg+xml" },
+      { url: "/kav-favicon.png", sizes: "500x500", type: "image/png" },
+    ],
+    shortcut: "/kav-favicon.png",
+    apple: [{ url: "/kav-favicon.png", sizes: "500x500", type: "image/png" }],
+  },
   openGraph: {
     title: "K Asset Ventures | Selected Malaysian Property Projects",
     description: "Selected Malaysian residential property projects with project context, member documents and risk information for approved members.",
