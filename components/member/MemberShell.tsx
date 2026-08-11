@@ -26,7 +26,7 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function iconClass(active: boolean) {
-  return active ? "text-[#c6a574]" : "text-slate-500";
+  return active ? "text-[#0e1726]" : "text-[#cbd1dc]";
 }
 
 export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
