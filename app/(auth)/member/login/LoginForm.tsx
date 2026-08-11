@@ -31,7 +31,7 @@ export function MemberLoginForm() {
           type="email"
           autoComplete="email"
           required
-          className="mt-2 min-h-12 w-full rounded-[3px] border border-[#172235]/15 bg-white px-4 outline-none transition focus:border-[#a47c48] focus:ring-4 focus:ring-[#c6a574]/18"
+          className="mt-2 min-h-12 w-full rounded-[3px] border border-[#172235]/15 bg-white px-4 outline-none transition focus:border-[#a47c48] focus:ring-4 focus:ring-[#eadbbf]"
         />
       </label>
       <label className="block text-sm font-semibold text-[#374151]">
@@ -41,7 +41,7 @@ export function MemberLoginForm() {
           type="password"
           autoComplete="current-password"
           required
-          className="mt-2 min-h-12 w-full rounded-[3px] border border-[#172235]/15 bg-white px-4 outline-none transition focus:border-[#a47c48] focus:ring-4 focus:ring-[#c6a574]/18"
+          className="mt-2 min-h-12 w-full rounded-[3px] border border-[#172235]/15 bg-white px-4 outline-none transition focus:border-[#a47c48] focus:ring-4 focus:ring-[#eadbbf]"
         />
       </label>
       {state.error ? (
