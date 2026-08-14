@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ManualKycForm } from "@/components/member/ManualKycForm";
+import { MemberProfileForm } from "@/components/member/MemberProfileForm";
 import { getMemberProfile } from "@/lib/data/memberProfile";
 import { formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
@@ -76,6 +77,28 @@ export default async function MemberProfilePage() {
 
         {canSubmit ? <ManualKycForm /> : null}
         {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your IC documents have been received. You can continue using the portal while the admin team reviews them, but participation confirmation requires approved verification.</p> : null}
+      </Section>
+
+      <Section title="Update Profile" description="Keep your personal, contact, bank and nominee information current.">
+        <MemberProfileForm values={{
+          fullName: profile.fullName,
+          phone: contact?.phone || user.phone || "",
+          nationality: profile.nationality || "",
+          dateOfBirth: profile.dateOfBirth ? profile.dateOfBirth.toISOString().slice(0, 10) : "",
+          addressLine1: address?.addressLine1 || "",
+          addressLine2: address?.addressLine2 || "",
+          city: address?.city || "",
+          state: address?.state || "",
+          postcode: address?.postcode || "",
+          country: address?.country || "Malaysia",
+          bankName: bank?.bankName || "",
+          accountHolderName: bank?.accountHolderName || "",
+          accountNumberLast4: bank?.accountNumberLast4 || "",
+          nomineeName: nominee?.fullName || "",
+          nomineeRelationship: nominee?.relationship || "",
+          nomineePhone: nominee?.phone || "",
+          nomineeEmail: nominee?.email || "",
+        }} />
       </Section>
 
       <div className="grid min-w-0 gap-5 lg:grid-cols-2">
