@@ -481,6 +481,7 @@ model PropertyDetail {
   bathrooms       Int?
   auctionDate     DateTime?
   reservePrice    Decimal?    @db.Decimal(14, 2)
+  resalePrice     Decimal?    @db.Decimal(14, 2)
   state           String
   location        String
   fullAddress     String

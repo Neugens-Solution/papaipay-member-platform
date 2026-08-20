@@ -88,6 +88,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
   const property = campaign.propertyDetail;
   const imageUrl = getPrimaryImageUrl(campaign);
   const reservePrice = decimalToNumber(property?.reservePrice);
+  const resalePrice = decimalToNumber(property?.resalePrice);
   const campaignTarget = decimalToNumber(campaign.campaignTarget);
   const closeDate = campaign.campaignCloseDate;
 
@@ -139,7 +140,7 @@ function toOpportunity(campaign: CampaignWithRelations): Opportunity {
     participants: campaign._count?.participations ?? 0,
     closeDate: formatDate(closeDate),
     auctionPrice: 0,
-    marketValue: reservePrice || campaignTarget,
+    resalePrice,
     valuationDate: "To be confirmed",
     valuationReport: "To be uploaded",
     daysRemaining: calculateDaysRemaining(closeDate),

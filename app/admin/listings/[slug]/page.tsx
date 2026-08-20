@@ -27,7 +27,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
   const target = decimalToNumber(listing.campaignTarget);
   const collected = decimalToNumber(listing.collectedAmountSnapshot);
   const reservePrice = decimalToNumber(property?.reservePrice);
-  const marketValue = target || reservePrice;
+  const resalePrice = decimalToNumber(property?.resalePrice);
   const estimatedAnnualYield = decimalToNumber(listing.holdingReturnRateMonthly) * 12;
   const progress = target > 0 ? (collected / target) * 100 : 0;
 
@@ -91,7 +91,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               { label: "Campaign Code", value: listing.campaignCode },
               { label: "City", value: property?.location || property?.state || "To be confirmed" },
               { label: "Asset Category", value: property?.assetCategory || property?.propertyType || "Residential Asset" },
-              { label: "Market Value", value: marketValue ? formatCurrency(marketValue) : "To be confirmed" },
+              { label: "Resale Price", value: resalePrice ? formatCurrency(resalePrice) : "To be confirmed" },
               { label: "Holding Return", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
               { label: "Occupancy Status", value: property?.occupancyStatus || "To be confirmed" },
               { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },

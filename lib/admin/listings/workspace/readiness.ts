@@ -54,7 +54,8 @@ export async function getWorkspaceReadiness(campaignId: string): Promise<Workspa
     !has(property?.location) ? "City" : null,
     !has(property?.state) ? "State" : null,
     !has(property?.fullAddress) ? "Full address" : null,
-    !moneyPositive(property?.reservePrice) ? "Market value" : null,
+    !moneyPositive(property?.reservePrice) ? "Auction reserve price" : null,
+    !moneyPositive(property?.resalePrice) ? "Resale price" : null,
   ].filter(Boolean) as string[];
 
   const participationMissing = [

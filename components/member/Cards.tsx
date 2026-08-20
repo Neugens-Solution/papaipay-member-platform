@@ -76,7 +76,7 @@ export function OpportunityCard({ opportunity }: { opportunity: Opportunity }) {
           <DetailRow label="Occupancy Status" value={opportunity.occupancyStatus} />
           <DetailRow label="Built-up" value={opportunity.builtUpArea} />
           <DetailRow label="Bedrooms / Bathrooms" value={`${opportunity.bedrooms} / ${opportunity.bathrooms}`} />
-          <DetailRow label="Market Value" value={`RM${opportunity.marketValue.toLocaleString()}`} />
+          <DetailRow label="Resale Price" value={opportunity.resalePrice > 0 ? `RM${opportunity.resalePrice.toLocaleString()}` : "To be confirmed"} />
           <DetailRow label="Projected Holding Return" value={opportunity.estimatedYield} />
           <DetailRow label="Min / Max Participation Amount" value={`RM${opportunity.minimumParticipation.toLocaleString()} - RM${opportunity.maximumParticipation.toLocaleString()}`} />
         </dl>

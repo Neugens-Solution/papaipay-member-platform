@@ -47,7 +47,8 @@ const requiredFieldsByStep: Record<number, { name: string; label: string }[]> =
       { name: "landArea", label: "Land Area" },
       { name: "bedrooms", label: "Bedrooms" },
       { name: "bathrooms", label: "Bathrooms" },
-      { name: "reservePrice", label: "Market Value" },
+      { name: "reservePrice", label: "Auction Reserve Price" },
+      { name: "resalePrice", label: "Resale Price" },
       { name: "yearBuilt", label: "Year Built / Completion Year" },
     ],
     2: [
@@ -678,6 +679,7 @@ export function ListingForm({
       bedrooms: 1,
       bathrooms: 1,
       reservePrice: 1,
+      resalePrice: 1,
       state: 1,
       location: 1,
       fullAddress: 1,
@@ -1179,11 +1181,18 @@ export function ListingForm({
                   defaultValue={initialValues?.propertyDetail?.bathrooms}
                 />
                 <Field
-                  label="Market Value"
+                  label="Auction Reserve Price"
                   name="reservePrice"
                   error={fieldErrors.reservePrice}
                   type="number"
                   defaultValue={initialValues?.propertyDetail?.reservePrice}
+                />
+                <Field
+                  label="Resale Price"
+                  name="resalePrice"
+                  error={fieldErrors.resalePrice}
+                  type="number"
+                  defaultValue={initialValues?.propertyDetail?.resalePrice}
                 />
                 <ReadOnlyField
                   label="Developer"

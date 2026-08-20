@@ -49,6 +49,7 @@ export const listingDraftSchema = z.object({
     bedrooms: z.coerce.number().int().nonnegative().optional(),
     bathrooms: z.coerce.number().int().nonnegative().optional(),
     reservePrice: moneyAmount.optional(),
+    resalePrice: moneyAmount.optional(),
     state: z.string().trim().min(2).max(80),
     location: z.string().trim().min(2).max(160),
     fullAddress: z.string().trim().min(5).max(500),

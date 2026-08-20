@@ -116,7 +116,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               <CompactRow label="Collected Amount" value={formatRM(campaign.collectedAmount)} icon="wallet" />
               <CompactRow label="Reserved Amount" value={formatRM(campaign.reservedAmount)} icon="wallet" />
               <CompactRow label="Remaining Amount" value={formatRM(remainingAmount)} icon="trend" />
-              <CompactRow label="Market Value" value={formatRM(campaign.marketValue)} icon="dollar" />
+              <CompactRow label="Resale Price" value={campaign.resalePrice > 0 ? formatRM(campaign.resalePrice) : "To be confirmed"} icon="dollar" />
               <CompactRow label="Projected Holding Return" value={campaign.estimatedYield} icon="trend" />
               <CompactRow label="Minimum Participation" value={formatRM(campaign.minimumParticipation)} icon="check" />
               <CompactRow label="Maximum Participation" value={formatRM(campaign.maximumParticipation)} icon="check" />

@@ -22,6 +22,7 @@ export async function savePropertyModule(formData: FormData): Promise<WorkspaceM
     bedrooms: requiredString(formData, "bedrooms") ? Number(requiredString(formData, "bedrooms")) : null,
     bathrooms: requiredString(formData, "bathrooms") ? Number(requiredString(formData, "bathrooms")) : null,
     reservePrice: optionalDecimal(requiredString(formData, "reservePrice")),
+    resalePrice: optionalDecimal(requiredString(formData, "resalePrice")),
     state: requiredString(formData, "state"),
     location: requiredString(formData, "location"),
     fullAddress: requiredString(formData, "fullAddress"),

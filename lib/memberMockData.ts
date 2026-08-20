@@ -33,7 +33,7 @@ export type Opportunity = {
   participants: number;
   closeDate: string;
   auctionPrice: number;
-  marketValue: number;
+  resalePrice: number;
   valuationDate: string;
   valuationReport: string;
   imageUrl: string | null;
@@ -133,7 +133,7 @@ export const opportunities: Opportunity[] = [
   participants: participants as number,
   closeDate: closeDate as string,
   auctionPrice: (targetAmount as number) - 50000,
-  marketValue: (targetAmount as number) + 90000,
+  resalePrice: (targetAmount as number) + 90000,
   valuationDate: "2026-05-31",
   valuationReport: "Independent desktop valuation summary available for member review",
   imageUrl: terraceImages[index % terraceImages.length],

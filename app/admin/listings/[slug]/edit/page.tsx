@@ -58,6 +58,7 @@ export default async function EditListingPage({
             ? {
                 ...campaign.propertyDetail,
                 reservePrice: campaign.propertyDetail.reservePrice?.toString(),
+                resalePrice: campaign.propertyDetail.resalePrice?.toString(),
               }
             : undefined,
           content: campaign.content,

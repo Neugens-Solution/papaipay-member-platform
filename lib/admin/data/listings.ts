@@ -103,6 +103,7 @@ function demoAdminListingDetail(slug: string) {
       bedrooms: listing.bedrooms,
       bathrooms: listing.bathrooms,
       reservePrice: listing.reservePrice,
+      resalePrice: listing.reservePrice,
       state: listing.state,
       location: listing.location,
       fullAddress: listing.fullAddress,
