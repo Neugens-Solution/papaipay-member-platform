@@ -8,7 +8,7 @@ import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
 import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
 import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
-import { calculateDistributionPreview, type DistributionPreviewResult } from "@/lib/distributions/preview";
+import { calculateDistributionPreview, evaluateParticipationEligibility, type DistributionPreviewResult } from "@/lib/distributions/preview";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 
 type ProjectWorkspace = NonNullable<Awaited<ReturnType<typeof getAdminProjectWorkspaceBySlug>>>;
@@ -81,6 +81,15 @@ function dateInputValue(value?: Date | string | null) {
   const date = value instanceof Date ? value : new Date(value);
   if (Number.isNaN(date.getTime())) return "";
   return date.toISOString().slice(0, 10);
+}
+
+/** Participation amounts that count as paid-in principal (confirmed + fully paid). */
+function paidPrincipal(project: ProjectWorkspace) {
+  return project.participations.reduce((sum, participation) => {
+    const result = evaluateParticipationEligibility({ ...participation, member: null });
+    const counts = !("reasonCode" in result) || result.reasonCode === "EXISTING_DISTRIBUTION_FOUND";
+    return counts ? sum + decimalToNumber(participation.participationAmount) : sum;
+  }, 0);
 }
 
 function decimalInputValue(value: unknown) {
@@ -544,13 +553,20 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
           campaignId={project.id}
           mode={latestSettlement ? "update" : "create"}
           calculationStatus={latestSettlement ? String(latestSettlement.calculationStatus) : null}
+          projectDefaults={{
+            paidPrincipal: paidPrincipal(project).toFixed(2),
+            holdingReturnRateMonthly: decimalInputValue(project.holdingReturnRateMonthly),
+            maximumHoldingPeriodMonths: project.maximumHoldingPeriodMonths ?? 24,
+            holdingStartDate: dateInputValue(latestSettlement?.holdingStartDate ?? project.campaignCloseDate),
+            memberProfitDistributionPercentage: decimalInputValue(project.memberProfitDistributionPercentagePlanned),
+          }}
           initialValues={{
             purchasePrice: decimalInputValue(latestSettlement?.purchasePrice),
             salePrice: decimalInputValue(latestSettlement?.salePrice),
             totalCostsSnapshot: decimalInputValue(latestSettlement?.totalCostsSnapshot),
             grossProfitSnapshot: decimalInputValue(latestSettlement?.grossProfitSnapshot),
             netProfitSnapshot: decimalInputValue(latestSettlement?.netProfitSnapshot),
-            memberProfitDistributionPercentage: decimalInputValue(latestSettlement?.memberProfitDistributionPercentage),
+            memberProfitDistributionPercentage: decimalInputValue(latestSettlement?.memberProfitDistributionPercentage) || decimalInputValue(project.memberProfitDistributionPercentagePlanned),
             platformProfitSharePercentage: decimalInputValue(latestSettlement?.platformProfitSharePercentage),
             platformShare: decimalInputValue(latestSettlement?.platformShare),
             principalReturnPool: decimalInputValue(latestSettlement?.principalReturnPool),

@@ -22,8 +22,20 @@ type FinancialSummaryFormValues = {
   calculationRemarks: string;
 };
 
+type ProjectDefaults = {
+  /** Sum of confirmed, fully paid participation amounts. */
+  paidPrincipal: string;
+  /** Listing holding return rate, % per month. */
+  holdingReturnRateMonthly: string;
+  maximumHoldingPeriodMonths: number;
+  /** yyyy-mm-dd; holding return accrues from this date. */
+  holdingStartDate: string;
+  memberProfitDistributionPercentage: string;
+};
+
 type FinancialSummaryFormProps = {
   campaignId: string;
+  projectDefaults: ProjectDefaults;
   mode: "create" | "update";
   initialValues: FinancialSummaryFormValues;
   calculationStatus?: string | null;
@@ -109,6 +121,16 @@ function toCents(value: string) {
 function fromCents(cents: number | null) {
   return cents === null ? "" : (cents / 100).toFixed(2);
 }
+/** Whole months from start to end, e.g. 15 Jan → 14 Apr = 2, 15 Jan → 15 Apr = 3. */
+function completedMonths(start: string, end: string) {
+  if (!start || !end) return null;
+  const [sy, sm, sd] = start.split("-").map(Number);
+  const [ey, em, ed] = end.split("-").map(Number);
+  if ([sy, sm, sd, ey, em, ed].some((n) => !Number.isFinite(n))) return null;
+  const months = (ey - sy) * 12 + (em - sm) - (ed < sd ? 1 : 0);
+  return Math.max(months, 0);
+}
+
 function toPercent(value: string) {
   if (value.trim() === "") return null;
   const numeric = Number(value);
@@ -117,13 +139,16 @@ function toPercent(value: string) {
 
 const initialState: ProjectFinancialSummaryState = { status: "idle", message: null, errors: [] };
 
-export function FinancialSummaryForm({ campaignId, mode, initialValues, calculationStatus }: FinancialSummaryFormProps) {
+export function FinancialSummaryForm({ campaignId, mode, initialValues, calculationStatus, projectDefaults }: FinancialSummaryFormProps) {
   const [state, formAction] = useFormState(saveProjectFinancialSummaryAction, initialState);
   const isApproved = calculationStatus === "Approved";
   const isLocked = calculationStatus === "Locked";
   const isReviewed = calculationStatus === "Reviewed";
   const isEditable = !isApproved && !isLocked;
-  const [values, setValues] = useState(initialValues);
+  const [values, setValues] = useState(() => ({
+    ...initialValues,
+    memberProfitDistributionPercentage: initialValues.memberProfitDistributionPercentage || projectDefaults.memberProfitDistributionPercentage,
+  }));
   const set = (key: keyof FinancialSummaryFormValues) => (value: string) => setValues((prev) => ({ ...prev, [key]: value }));
 
   const derived = useMemo(() => {
@@ -131,12 +156,17 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
     const sale = toCents(values.salePrice);
     const costs = toCents(values.totalCostsSnapshot);
     const memberPercent = toPercent(values.memberProfitDistributionPercentage);
-    const principal = toCents(values.principalReturnPool);
-    const holding = toCents(values.holdingReturnPool);
+    const principal = toCents(projectDefaults.paidPrincipal);
+    const rate = toPercent(projectDefaults.holdingReturnRateMonthly);
+    const elapsed = completedMonths(projectDefaults.holdingStartDate, values.saleCompletedAt);
+    const holdingMonths = elapsed === null ? null : Math.min(elapsed, projectDefaults.maximumHoldingPeriodMonths);
+    const holding = principal !== null && rate !== null && holdingMonths !== null ? Math.round((principal * rate * holdingMonths) / 100) : null;
 
     const gross = purchase !== null && sale !== null ? sale - purchase : null;
     const net = gross !== null ? gross - (costs ?? 0) : null;
-    const distributable = net !== null ? Math.max(net, 0) : null;
+    // Holding return is paid out of net return first; the rest is split member/platform.
+    const distributable = net !== null ? Math.max(net - (holding ?? 0), 0) : null;
+    const holdingExceedsNet = net !== null && holding !== null && holding > net;
     const platformPercent = memberPercent !== null && memberPercent >= 0 && memberPercent <= 100 ? Math.round((100 - memberPercent) * 10000) / 10000 : null;
     const memberProfit = distributable !== null && memberPercent !== null && platformPercent !== null ? Math.round((distributable * memberPercent) / 100) : null;
     // Platform takes the remainder so member + platform always equals net return exactly.
@@ -144,6 +174,10 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
     const finalPool = principal !== null || holding !== null || memberProfit !== null ? (principal ?? 0) + (holding ?? 0) + (memberProfit ?? 0) : null;
 
     return {
+      holdingMonths,
+      holdingExceedsNet,
+      principalReturnPool: fromCents(principal),
+      holdingReturnPool: fromCents(holding),
       grossProfitSnapshot: fromCents(gross),
       netProfitSnapshot: fromCents(net),
       platformProfitSharePercentage: platformPercent === null ? "" : String(platformPercent),
@@ -151,7 +185,7 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
       profitDistributionPool: fromCents(memberProfit),
       finalDistributionPool: fromCents(finalPool),
     };
-  }, [values]);
+  }, [values, projectDefaults]);
 
   if (!isEditable) {
     return (
@@ -169,7 +203,7 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
       <div className="mb-5 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <p className="font-bold text-kasset-ink">{mode === "update" ? "Update Financial Summary" : "Create Financial Summary"}</p>
-          <p className="mt-1 text-sm text-slate-500">Enter the approved inputs; fields marked Auto are calculated for you. A net loss gives RM0 profit to share.</p>
+          <p className="mt-1 text-sm text-slate-500">Enter acquisition price, sale price, total costs and sale date; fields marked Auto are calculated for you. A net loss gives RM0 profit to share.</p>
           <p className="mt-1 text-xs font-semibold text-slate-400">Enter 0 where the approved amount is RM0. Leave fields blank only when the value is not available.</p>
         </div>
         <span className="inline-flex whitespace-nowrap rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[0.68rem] font-bold uppercase tracking-wide text-kasset-green">
@@ -203,20 +237,34 @@ export function FinancialSummaryForm({ campaignId, mode, initialValues, calculat
         <AutoInput name="netProfitSnapshot" label="Net Return" value={derived.netProfitSnapshot} hint="Gross Return − Total Approved Costs" />
         <NumberInput name="memberProfitDistributionPercentage" label="Member Return Share %" value={values.memberProfitDistributionPercentage} onChange={set("memberProfitDistributionPercentage")} percent />
         <AutoInput name="platformProfitSharePercentage" label="Platform Return Share %" value={derived.platformProfitSharePercentage} hint="100% − Member Return Share %" />
-        <AutoInput name="platformShare" label="Platform Share Amount" value={derived.platformShare} hint="Net Return × Platform %" />
-        <NumberInput name="principalReturnPool" label="Principal Return Pool" value={values.principalReturnPool} onChange={set("principalReturnPool")} />
-        <NumberInput name="holdingReturnPool" label="Holding Return Pool" value={values.holdingReturnPool} onChange={set("holdingReturnPool")} />
-        <AutoInput name="profitDistributionPool" label="Member Profit Distribution Pool" value={derived.profitDistributionPool} hint="Net Return × Member %" />
+        <AutoInput name="platformShare" label="Platform Share Amount" value={derived.platformShare} hint="(Net Return − Holding Return) × Platform %" />
+        <AutoInput name="principalReturnPool" label="Principal Return Pool" value={derived.principalReturnPool} hint="Total confirmed & paid participations" />
+        <AutoInput
+          name="holdingReturnPool"
+          label="Holding Return Pool"
+          value={derived.holdingReturnPool}
+          hint={
+            derived.holdingMonths === null
+              ? "Set Sale Completed Date to calculate"
+              : `Principal × ${projectDefaults.holdingReturnRateMonthly || 0}%/month × ${derived.holdingMonths} month(s) from ${projectDefaults.holdingStartDate || "holding start"}`
+          }
+        />
+        <AutoInput name="profitDistributionPool" label="Member Profit Distribution Pool" value={derived.profitDistributionPool} hint="(Net Return − Holding Return) × Member %" />
         <AutoInput name="finalDistributionPool" label="Final Distribution Pool" value={derived.finalDistributionPool} hint="Principal + Holding + Member Profit" />
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="saleCompletedAt">Sale Completed Date</label>
-          <input id="saleCompletedAt" name="saleCompletedAt" type="date" defaultValue={initialValues.saleCompletedAt} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" />
+          <input id="saleCompletedAt" name="saleCompletedAt" type="date" value={values.saleCompletedAt} onChange={(event) => set("saleCompletedAt")(event.target.value)} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" />
         </div>
         <div>
           <label className="block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="distributionCalculationDate">Distribution Calculation Date</label>
           <input id="distributionCalculationDate" name="distributionCalculationDate" type="date" defaultValue={initialValues.distributionCalculationDate} className="mt-2 min-h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm font-semibold text-slate-700 outline-none focus:border-kasset-green" />
         </div>
       </div>
+      {derived.holdingExceedsNet ? (
+        <p className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-4 text-sm font-semibold text-amber-700">
+          Holding Return Pool is larger than Net Return, so the sale does not cover the full holding return. Review before approving.
+        </p>
+      ) : null}
       <label className="mt-4 block text-xs font-bold uppercase tracking-wide text-slate-400" htmlFor="calculationRemarks">Calculation Remarks</label>
       <textarea id="calculationRemarks" name="calculationRemarks" rows={4} defaultValue={initialValues.calculationRemarks} className="mt-2 w-full rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm leading-6 outline-none focus:border-kasset-green" placeholder="Add summary assumptions, approval notes, or calculation context." />
       <SubmitButton mode={mode} />
