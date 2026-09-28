@@ -102,7 +102,7 @@ export async function saveMediaModule(formData: FormData): Promise<WorkspaceModu
       }
       await tx.auditLog.create({ data: buildListingAuditData({ action: "listing.media.saved", entityId: campaignId, afterSnapshot: auditSnapshots }) });
       return tx.campaign.findUniqueOrThrow({ where: { id: campaignId }, select: { updatedAt: true } });
-    });
+    }, { maxWait: 10_000, timeout: 30_000 }); // one FileAsset + CampaignMedia per image; default 5s is too short for a full gallery
     return { ok: true, status: "saved", message: "Media saved.", updatedAt: saved.updatedAt.toISOString() };
   } catch (error) {
     if (uploadedHero || uploadedGallery.length) console.error("Listing media upload succeeded but database write failed; storage cleanup is required.", { campaignId, uploadedHero, uploadedGallery: uploadedGallery.map((item) => item.stored.objectKey), error });
