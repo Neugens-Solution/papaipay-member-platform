@@ -6,6 +6,13 @@ import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/auth/guards";
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+const MYT_OFFSET_MS = 8 * 60 * 60 * 1000;
+
+function formatMalaysiaDate(date: Date) {
+  return date.toLocaleDateString("en-MY", { day: "numeric", month: "short", year: "numeric", timeZone: "UTC" });
+}
+
 export type ParticipationFormState = { error?: string };
 
 type AuthenticatedMember = Awaited<ReturnType<typeof requireMember>>;
@@ -79,11 +86,19 @@ async function createParticipationRecord({
     if (
       campaign.publishStatus !== "Published" ||
       campaign.visibility !== "MemberVisible" ||
-      campaign.lifecycleStatus !== "Open" ||
-      (campaign.campaignOpenDate && campaign.campaignOpenDate > now) ||
-      (campaign.campaignCloseDate && campaign.campaignCloseDate < now)
+      campaign.lifecycleStatus !== "Open"
     ) {
       throw new Error("Opportunity is not currently open for participation.");
+    }
+    // Admin dates are calendar days (stored as UTC midnight). Treat them as
+    // Malaysia-time days: open from 00:00 MYT, close after 23:59 MYT.
+    const openAt = campaign.campaignOpenDate ? new Date(campaign.campaignOpenDate.getTime() - MYT_OFFSET_MS) : null;
+    const closeAt = campaign.campaignCloseDate ? new Date(campaign.campaignCloseDate.getTime() - MYT_OFFSET_MS + DAY_MS) : null;
+    if (openAt && openAt > now) {
+      throw new Error(`Opportunity opens for participation on ${formatMalaysiaDate(campaign.campaignOpenDate!)}.`);
+    }
+    if (closeAt && closeAt <= now) {
+      throw new Error(`Opportunity closed for participation on ${formatMalaysiaDate(campaign.campaignCloseDate!)}.`);
     }
 
     if (remaining <= 0) {
