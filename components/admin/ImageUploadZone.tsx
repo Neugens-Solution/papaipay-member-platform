@@ -8,6 +8,11 @@ import {
   type UploadedListingImage,
 } from "@/lib/storage/listingImagePath";
 
+// Each upload asks the token route (which queries the database) for a token.
+// Keep concurrency low so a large selection doesn't exhaust the DB pool.
+const maxConcurrentUploads = 2;
+const maxAttempts = 3;
+
 type Item = {
   id: string;
   name: string;
@@ -72,13 +77,21 @@ export function ImageUploadZone({
     try {
       validateImageFile(file);
       const { pathname } = createListingImagePathname(listingSlug!, file);
-      const blob = await upload(pathname, file, {
-        access: "public",
-        handleUploadUrl: "/api/admin/listings/media-upload",
-        clientPayload: campaignId,
-        contentType: file.type,
-        onUploadProgress: ({ percentage }) => patch(item.id, { progress: percentage }),
-      });
+      let blob: Awaited<ReturnType<typeof upload>> | null = null;
+      for (let attempt = 1; !blob; attempt++) {
+        try {
+          blob = await upload(pathname, file, {
+            access: "public",
+            handleUploadUrl: "/api/admin/listings/media-upload",
+            clientPayload: campaignId,
+            contentType: file.type,
+            onUploadProgress: ({ percentage }) => patch(item.id, { progress: percentage }),
+          });
+        } catch (attemptError) {
+          if (attempt >= maxAttempts) throw attemptError;
+          await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
+        }
+      }
       patch(item.id, {
         status: "done",
         progress: 100,
@@ -107,7 +120,14 @@ export function ImageUploadZone({
       if (!multiple) prev.forEach((item) => URL.revokeObjectURL(item.previewUrl));
       return [...kept, ...next];
     });
-    next.forEach((item, index) => void uploadOne(item, files[index]));
+    let cursor = 0;
+    const worker = async () => {
+      while (cursor < next.length) {
+        const index = cursor++;
+        await uploadOne(next[index], files[index]);
+      }
+    };
+    for (let i = 0; i < Math.min(maxConcurrentUploads, next.length); i++) void worker();
   }
 
   function remove(id: string) {
