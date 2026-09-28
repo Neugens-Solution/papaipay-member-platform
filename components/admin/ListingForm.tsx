@@ -5,6 +5,7 @@ import { useActionState as useFormState } from "react";
 import { useFormStatus } from "react-dom";
 import type { ListingFormState } from "@/lib/admin/actions/listings";
 import { Card } from "@/components/admin/AdminUI";
+import { ImageUploadZone } from "@/components/admin/ImageUploadZone";
 import { PublishReadinessChecklist } from "@/components/admin/listing-workspace/PublishReadinessChecklist";
 import { WorkspaceStepNav } from "@/components/admin/listing-workspace/WorkspaceStepNav";
 import { WorkspaceSummaryBar } from "@/components/admin/listing-workspace/WorkspaceSummaryBar";
@@ -1408,15 +1409,16 @@ export function ListingForm({
             <section id="media" className="space-y-4">
               <h2 className="text-base font-bold">Media</h2>
               <p className="text-sm text-slate-500">
-                Upload JPG, JPEG, PNG, or WEBP images up to 5MB. Save Step
-                persists uploaded media to object storage.
+                Upload JPG, JPEG, PNG, or WEBP images up to 5MB. Images
+                upload one by one as soon as you pick them.
               </p>
               <div className="grid gap-4 md:grid-cols-2">
-                <UploadZone
+                <ImageUploadZone
                   title="Main / Hero Image"
-                  name="heroImage"
-                  supported="JPG, PNG, WEBP"
-                  helper="Uploads to object storage when you save this step."
+                  name="heroImageUpload"
+                  campaignId={initialValues?.id}
+                  listingSlug={slug}
+                  helper="Uploads immediately; save this step to attach it to the listing."
                   error={fieldErrors.heroImage}
                   currentFiles={
                     heroImage?.fileAsset?.originalFilename
@@ -1430,12 +1432,13 @@ export function ListingForm({
                       : []
                   }
                 />
-                <UploadZone
+                <ImageUploadZone
                   title="Gallery Images"
-                  name="galleryImages"
+                  name="galleryImageUpload"
                   multiple
-                  supported="JPG, PNG, WEBP"
-                  helper="Uploads to object storage when you save this step."
+                  campaignId={initialValues?.id}
+                  listingSlug={slug}
+                  helper="Uploads immediately; save this step to attach them to the listing."
                   currentFiles={galleryImages.map((media) => ({
                     id: media.id,
                     name: media.fileAsset?.originalFilename ?? "Gallery image",
