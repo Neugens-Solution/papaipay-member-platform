@@ -37,6 +37,7 @@ export async function POST(request: Request) {
     });
     return NextResponse.json(json);
   } catch (error) {
+    console.error("Listing media upload token request failed:", error);
     const message = error instanceof Error ? error.message : "Image upload failed.";
     return NextResponse.json({ error: message }, { status: 400 });
   }
