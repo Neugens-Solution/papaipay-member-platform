@@ -329,6 +329,9 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
         campaignOpenDate: true,
         campaignCloseDate: true,
         publishedAt: true,
+        holdingReturnRateMonthly: true,
+        maximumHoldingPeriodMonths: true,
+        memberProfitDistributionPercentagePlanned: true,
         propertyDetail: true,
         updates: {
           orderBy: { createdAt: "desc" },
