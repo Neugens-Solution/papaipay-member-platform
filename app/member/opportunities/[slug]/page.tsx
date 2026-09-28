@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import type { SVGProps } from "react";
 import { ContentCard, ProgressBar, StatusBadge } from "@/components/member/Cards";
 import { ImageCarousel } from "@/components/member/ImageCarousel";
+import { PhotoGallery } from "@/components/member/PhotoGallery";
 import { formatRM } from "@/lib/memberMockData";
 import { getMemberCampaignBySlug } from "@/lib/data/memberCampaigns";
 
@@ -96,12 +97,7 @@ export default async function CampaignDetailPage({ params }: { params: Promise<{
               )}
             </div>
             {campaign.gallery.length > 0 ? <div className="flex items-center justify-center border-t border-slate-100 px-5 py-3">
-              <details className="relative">
-                <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-bold text-kasset-green"><Icon name="image" className="h-4 w-4" />View All Photos</summary>
-                <div className="absolute left-1/2 z-20 mt-3 grid w-[min(86vw,640px)] -translate-x-1/2 gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-soft sm:grid-cols-2">
-                  {campaign.gallery.map((item) => <div key={item} className="h-32 rounded-lg bg-cover bg-center" style={{ backgroundImage: `url(${item})` }} />)}
-                </div>
-              </details>
+              <PhotoGallery images={campaign.gallery} title={campaign.title} />
             </div> : null}
           </article>
 
