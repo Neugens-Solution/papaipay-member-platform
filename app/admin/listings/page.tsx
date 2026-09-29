@@ -41,13 +41,22 @@ export default async function ListingsPage() {
         title="Listing Management"
         description="Manage listing records, publishing readiness, and collection progress. Campaign references remain internal identifiers."
         action={
-          <PendingLink
-            className="rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white"
-            href="/admin/listings/create"
-            pendingLabel="Opening..."
-          >
-            Create Listing
-          </PendingLink>
+          <div className="flex flex-wrap gap-2">
+            <PendingLink
+              className="rounded-md border border-slate-200 bg-white px-4 py-2 text-sm font-bold text-kasset-green"
+              href="/admin/listings/import"
+              pendingLabel="Opening..."
+            >
+              Import from Google Sheet
+            </PendingLink>
+            <PendingLink
+              className="rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white"
+              href="/admin/listings/create"
+              pendingLabel="Opening..."
+            >
+              Create Listing
+            </PendingLink>
+          </div>
         }
       />
       <TableWrap>
