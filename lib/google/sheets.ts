@@ -6,10 +6,34 @@ const SHEETS_SCOPE = "https://www.googleapis.com/auth/spreadsheets.readonly";
 
 export class GoogleSheetsError extends Error {}
 
+/**
+ * Accepts the key however it was pasted into Vercel: the bare PEM, the JSON
+ * string value (with quotes, trailing comma and literal "\n"), or the whole
+ * service-account JSON file.
+ */
+export function normalizePrivateKey(raw: string | undefined) {
+  let value = raw?.trim();
+  if (!value) return undefined;
+  if (value.startsWith("{")) {
+    try {
+      const parsed = JSON.parse(value) as { private_key?: string };
+      if (parsed.private_key) value = parsed.private_key;
+    } catch {
+      // not valid JSON; fall through and try to clean it up as a PEM string
+    }
+  }
+  value = value.replace(/,\s*$/, "").replace(/^"private_key"\s*:\s*/, "").replace(/^"|"$/g, "");
+  value = value.replace(/\\n/g, "\n").replace(/\r/g, "");
+  const match = value.match(/-----BEGIN PRIVATE KEY-----[\s\S]*?-----END PRIVATE KEY-----/);
+  if (!match) return value;
+  // Rebuild a clean PEM (handles keys pasted on one line with spaces instead of newlines).
+  const body = match[0].replace(/-----(BEGIN|END) PRIVATE KEY-----/g, "").replace(/\s+/g, "");
+  return `-----BEGIN PRIVATE KEY-----\n${body.match(/.{1,64}/g)?.join("\n")}\n-----END PRIVATE KEY-----\n`;
+}
+
 function serviceAccount() {
-  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim();
-  // Vercel env vars often store the PEM with literal "\n" sequences.
-  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY?.replace(/\\n/g, "\n").trim();
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL?.trim().replace(/^"|",?$/g, "");
+  const privateKey = normalizePrivateKey(process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY);
   if (!email || !privateKey) {
     throw new GoogleSheetsError(
       "Google Sheets import is not configured. Set GOOGLE_SERVICE_ACCOUNT_EMAIL and GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY.",
@@ -35,7 +59,12 @@ async function accessToken() {
   try {
     signature = createSign("RSA-SHA256").update(`${header}.${claims}`).sign(privateKey, "base64url");
   } catch {
-    throw new GoogleSheetsError("GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY is not a valid private key.");
+    const looksLikePem = privateKey.includes("BEGIN PRIVATE KEY");
+    throw new GoogleSheetsError(
+      looksLikePem
+        ? "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY looks incomplete. Copy the whole private_key value from the JSON file again."
+        : "GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY does not contain a private key. Paste the private_key value (starting with -----BEGIN PRIVATE KEY-----) from the JSON file.",
+    );
   }
 
   const response = await fetch(TOKEN_URL, {
