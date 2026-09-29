@@ -194,7 +194,11 @@ export async function importListingsAction(_previous: ListingImportState, formDa
       status: "imported",
       message: `${created} of ${results.length} listing(s) created as Draft.`,
       notices,
-      rows: await loadRows(sheetUrl).then((fresh) => fresh.rows).catch(() => rows),
+      // Mark newly created rows as existing locally instead of re-reading the sheet and database.
+      rows: rows.map((row) => {
+        const created = results.find((result) => result.ok && result.rowNumber === row.rowNumber);
+        return created ? { ...row, existingSlug: created.slug ?? null, errors: [...row.errors, "Imported in this session."] } : row;
+      }),
       results,
     };
   } catch (error) {
