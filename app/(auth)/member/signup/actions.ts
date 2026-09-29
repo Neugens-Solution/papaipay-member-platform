@@ -1,5 +1,6 @@
 "use server";
 
+import { notifyAdmins } from "@/lib/notifications";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { hashPassword } from "@/lib/auth/password";
@@ -44,6 +45,7 @@ export async function memberSignupAction(_state: SignupState, formData: FormData
     select: { id: true },
   });
 
+  await notifyAdmins({ title: "New member registered", body: `${fullName} (${email}) created a member account.` });
   await setSession({ userId: user.id, accountType: "member" });
   redirect("/member/dashboard");
 }

@@ -1,5 +1,6 @@
 "use server";
 
+import { formatRinggit, notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/auth/guards";
@@ -42,7 +43,7 @@ export async function submitPaymentReceiptAction(
         participation: { memberId: member.id, participationStatus: "PendingPayment" },
         status: { in: ["Pending", "Processing"] },
       },
-      include: { receiptFileAsset: { select: { objectKey: true } } },
+      include: { receiptFileAsset: { select: { objectKey: true } }, campaign: { select: { title: true } } },
     });
     if (!payment) throw new Error("This pending payment record is no longer available for receipt upload.");
 
@@ -102,6 +103,11 @@ export async function submitPaymentReceiptAction(
       await deletePrivateDocuments([payment.receiptFileAsset.objectKey]).catch(() => undefined);
     }
 
+    await notifyAdmins({
+      campaignId: payment.campaignId,
+      title: "Payment receipt uploaded",
+      body: `${member.fullName} uploaded a receipt of ${formatRinggit(payment.amount)} for ${payment.campaign?.title ?? "a listing"} (ref ${bankReference}). Confirm it under Projects → Participants.`,
+    });
     revalidatePath(`/member/participations/${participationId}`);
     revalidatePath("/member/portfolio");
     return { success: "Payment receipt submitted. The admin team can now review it." };
