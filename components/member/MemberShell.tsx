@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { SVGProps } from "react";
+import { NotificationBell } from "@/components/common/NotificationBell";
 
 const navItems = [
   ["Dashboard", "/member/dashboard"],
@@ -29,7 +30,7 @@ function iconClass(active: boolean) {
   return active ? "text-[#0e1726]" : "text-[#cbd1dc]";
 }
 
-export function MemberShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string } }) {
+export function MemberShell({ children, identity, unreadNotifications = 0 }: { children: React.ReactNode; identity: { name?: string | null; email: string }; unreadNotifications?: number }) {
   const pathname = usePathname();
   const displayName = identity.name || identity.email;
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "ME";
@@ -83,6 +84,7 @@ export function MemberShell({ children, identity }: { children: React.ReactNode;
                 <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#c6a574]">Member Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
+                <NotificationBell href="/member/notifications" unreadCount={unreadNotifications} />
                 <details className="group relative hidden lg:block">
                   <summary aria-label="Profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-[#172235] text-xs font-semibold text-white transition hover:bg-[#a47c48]">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-56 rounded-lg border border-[#172235]/15 bg-white p-2 shadow-sm">

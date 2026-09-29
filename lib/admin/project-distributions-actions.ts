@@ -1,5 +1,6 @@
 "use server";
 
+import { formatRinggit, notifyMember } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { DistributionBatchStatus, DistributionStatus, SettlementCalculationStatus, type Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
@@ -405,8 +406,8 @@ export async function markDistributionBatchPaidAction(_previousState: Distributi
     if (!adminNotes) throw new Error("Admin notes are required.");
     if (!confirmed) throw new Error("Confirmation is required before marking the batch paid.");
 
-    const slug = await db.$transaction(async (tx) => {
-      const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { id: true, slug: true } });
+    const { slug, title, paidRows } = await db.$transaction(async (tx) => {
+      const campaign = await tx.campaign.findUnique({ where: { id: campaignId }, select: { id: true, slug: true, title: true } });
       if (!campaign) throw new Error("Project could not be found.");
 
       const latestSettlement = await tx.campaignSettlement.findFirst({
@@ -483,9 +484,20 @@ export async function markDistributionBatchPaidAction(_previousState: Distributi
         },
       });
 
-      return campaign.slug;
+      return {
+        slug: campaign.slug,
+        title: campaign.title,
+        paidRows: batch.distributions.map((row) => ({ memberId: row.memberId, total: row.finalDistributionTotal })),
+      };
     }, { timeout: 10_000 });
 
+    for (const row of paidRows) {
+      await notifyMember(row.memberId, {
+        campaignId,
+        title: "Distribution paid",
+        body: `Your final distribution of ${formatRinggit(row.total)} for ${title} has been paid (ref ${paymentReference}).`,
+      });
+    }
     revalidatePath(`/admin/projects/${slug}`);
     return { status: "success", message: "Distribution batch completed. Manual payment has been recorded. No transfer was executed by the platform.", errors: [] };
   } catch (error) {

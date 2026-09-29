@@ -1,5 +1,6 @@
 "use server";
 
+import { formatRinggit, notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
@@ -198,6 +199,8 @@ async function createParticipationRecord({
       participationRef: participation.participationRef,
       paymentRef: payment.paymentRef,
       campaignSlug: campaign.slug,
+      campaignId: campaign.id,
+      campaignTitle: campaign.title,
     };
   });
 }
@@ -254,6 +257,11 @@ export async function createParticipationAction(
     return { error: error instanceof Error ? error.message : "Unable to create participation." };
   }
 
+  await notifyAdmins({
+    campaignId: result.campaignId,
+    title: "New participation",
+    body: `${authenticatedMember.member.fullName} joined ${result.campaignTitle} with ${formatRinggit(parsedAmount.amount)} (${result.participationRef}). Awaiting payment receipt.`,
+  });
   revalidatePath("/member/portfolio");
   revalidatePath(`/member/opportunities/${result.campaignSlug}`);
   revalidatePath(`/admin/projects/${result.campaignSlug}`);

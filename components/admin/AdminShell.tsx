@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { NotificationBell } from "@/components/common/NotificationBell";
 
 const navItems = [
   ["Dashboard", "/admin/dashboard"],
@@ -18,7 +19,7 @@ function activePath(pathname: string, href: string) {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AdminShell({ children, identity }: { children: React.ReactNode; identity: { name?: string | null; email: string; role?: string | null } }) {
+export function AdminShell({ children, identity, unreadNotifications = 0 }: { children: React.ReactNode; identity: { name?: string | null; email: string; role?: string | null }; unreadNotifications?: number }) {
   const pathname = usePathname();
   const displayName = identity.name || identity.email;
   const initials = displayName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase() || "AD";
@@ -71,6 +72,7 @@ export function AdminShell({ children, identity }: { children: React.ReactNode; 
                 <p className="mt-1 text-[0.62rem] font-bold uppercase tracking-[0.18em] text-[#c6a574]">Admin Portal</p>
               </Link>
               <div className="ml-auto flex items-center gap-2">
+                <NotificationBell href="/admin/notifications" unreadCount={unreadNotifications} />
                 <details className="group relative">
                   <summary aria-label="Admin profile menu" className="grid min-h-10 min-w-10 cursor-pointer list-none place-items-center rounded-full bg-[#172235] text-xs font-semibold text-white transition hover:bg-[#a47c48]">{initials}</summary>
                   <div className="absolute right-0 mt-2 w-60 rounded-lg border border-[#172235]/15 bg-white p-2 shadow-sm">

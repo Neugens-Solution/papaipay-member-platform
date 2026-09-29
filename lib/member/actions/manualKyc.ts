@@ -1,5 +1,6 @@
 "use server";
 
+import { notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/auth/guards";
@@ -111,6 +112,7 @@ export async function submitManualKycAction(
       throw error;
     }
 
+    await notifyAdmins({ title: "KYC submitted for review", body: `${member.fullName} (${member.memberRef}) uploaded IC documents for identity verification.` });
     revalidatePath("/member/profile");
     revalidatePath("/admin/members");
     return { success: "IC front and back were submitted securely for review." };

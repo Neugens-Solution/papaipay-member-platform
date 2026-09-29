@@ -1,5 +1,6 @@
 "use server";
 
+import { notifyMember } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdminPermission } from "@/lib/auth/guards";
@@ -64,6 +65,12 @@ export async function reviewManualKycAction(formData: FormData) {
     });
   });
 
+  await notifyMember(
+    memberId,
+    decision === "Approved"
+      ? { title: "Identity verified", body: "Your identity verification has been approved. You can now participate in listings." }
+      : { title: "Identity documents need resubmission", body: `Please resubmit your IC documents. Reason: ${reason}` },
+  );
   revalidatePath("/admin/members");
   revalidatePath(`/admin/members/${memberId}`);
   revalidatePath("/member/profile");

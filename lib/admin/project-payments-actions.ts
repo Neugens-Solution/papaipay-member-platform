@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { Prisma, PaymentStatus, ParticipationStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
+import { formatRinggit, notifyMember } from "@/lib/notifications";
 
 function makeRef(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -57,7 +58,7 @@ async function confirmManualPayment(formData: FormData, { user, admin }: Awaited
   const submittedPaymentDate = new Date(`${paymentDate}T00:00:00.000Z`);
   if (Number.isNaN(submittedPaymentDate.getTime())) throw new Error("Payment date is invalid.");
 
-  await db.$transaction(async (tx) => {
+  const confirmed = await db.$transaction(async (tx) => {
     const participation = await tx.participation.findFirst({
       where: { id: participationId, campaignId },
       include: { payments: { where: { gateway: "manual" }, orderBy: { updatedAt: "desc" }, take: 1, include: { receiptFileAsset: { select: { id: true } } } } },
@@ -130,7 +131,16 @@ async function confirmManualPayment(formData: FormData, { user, admin }: Awaited
         { auditRef: makeRef("AUD"), actorId: user.id, action: "CampaignSnapshotsUpdated", entityType: "Campaign", entityId: participation.campaignId, beforeSnapshot: { reservedAmountSnapshot: Number(campaignSnapshot.reservedAmountSnapshot) }, afterSnapshot: { reservedAmountSnapshot: nextReservedSnapshot, collectedAmountIncrement: participationAmount, source: "manual-payment-confirmation" } },
       ],
     });
+    return { memberId: participation.memberId, campaignId: participation.campaignId, amount: participationAmount };
   });
 
+  if (confirmed) {
+    const campaign = await db.campaign.findUnique({ where: { id: confirmed.campaignId }, select: { title: true } });
+    await notifyMember(confirmed.memberId, {
+      campaignId: confirmed.campaignId,
+      title: "Payment confirmed",
+      body: `Your payment of ${formatRinggit(confirmed.amount)} for ${campaign?.title ?? "your listing"} has been confirmed. Your participation is now active.`,
+    });
+  }
   revalidatePath(`/admin/projects/${projectSlug}`);
 }
