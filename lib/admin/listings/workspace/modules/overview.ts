@@ -8,7 +8,7 @@ function slugify(value: string) {
   return value.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 140);
 }
 
-async function makeUniqueSlug(title: string, currentCampaignId?: string) {
+export async function makeUniqueSlug(title: string, currentCampaignId?: string) {
   const base = slugify(title) || `listing-${Date.now()}`;
   let candidate = base;
   let suffix = 2;
@@ -19,10 +19,10 @@ async function makeUniqueSlug(title: string, currentCampaignId?: string) {
   }
 }
 
-function makeCampaignRef() {
+export function makeCampaignRef() {
   return `CMP-${new Date().getFullYear()}-${Date.now().toString().slice(-6)}`;
 }
-function makeCampaignCode(title: string) {
+export function makeCampaignCode(title: string) {
   const prefix = title.toUpperCase().replace(/[^A-Z0-9]+/g, "").slice(0, 4).padEnd(4, "X");
   return `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 }

@@ -11,7 +11,8 @@ export type ListingWorkspaceAuditAction =
   | "listing.member_info.saved"
   | "listing.publish.blocked"
   | "listing.published"
-  | "listing.unpublished";
+  | "listing.unpublished"
+  | "listing.imported";
 
 export function makeAuditRef() {
   return `AUD-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
