@@ -141,7 +141,7 @@ export function ListingImportPanel({ serviceAccountEmail }: { serviceAccountEmai
                       </p>
                       <p className="mt-1 text-xs font-semibold text-slate-500">
                         {row.sourcePdf ? `${row.sourcePdf} · ` : ""}
-                        Target {money(row.campaign.campaignTarget)} · Reserve {money(row.property?.reservePrice)} · {row.property ? `${row.property.propertyType}, ${row.property.location}` : "Property incomplete"} · {row.faqs.length} FAQ · {row.timeline.length} timeline
+                        Target {money(row.campaign.campaignTarget)} · Reserve {money(row.property?.reservePrice)} · Resale {money(row.property?.resalePrice)} · {row.property ? `${row.property.propertyType}, ${row.property.location}` : "Property incomplete"} · {row.faqs.length} FAQ · {row.timeline.length} timeline
                       </p>
                       {row.errors.map((error) => <p key={error} className="mt-1 text-xs font-bold text-rose-700">✕ {error}</p>)}
                       {row.warnings.map((warning) => <p key={warning} className="mt-1 text-xs font-semibold text-amber-700">! {warning}</p>)}
