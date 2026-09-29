@@ -124,6 +124,7 @@ async function createListing(row: ImportedListing, actorId: string) {
           ...row.property,
           auctionDate: row.property.auctionDate ? new Date(row.property.auctionDate) : null,
           reservePrice: row.property.reservePrice === null ? null : new Prisma.Decimal(row.property.reservePrice),
+          resalePrice: row.property.resalePrice === null ? null : new Prisma.Decimal(row.property.resalePrice),
         },
       });
     }

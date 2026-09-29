@@ -49,6 +49,7 @@ export type ImportedListing = {
     bathrooms: number | null;
     auctionDate: string | null; // ISO
     reservePrice: number | null;
+    resalePrice: number | null;
     state: string;
     location: string;
     fullAddress: string;
@@ -72,8 +73,15 @@ export type ImportedListing = {
 // Placeholders and spreadsheet errors are treated as "not provided".
 const EMPTY_MARKERS = /^(belum disediakan|auto[- ]?generate|auto|tbc|tba|n\/a|na|-|—|#value!|#ref!|#n\/a|#name\?|#div\/0!|#error!|#num!|#null!)$/i;
 
+// "PERLU PENGESAHAN: 1.5%" → value 1.5%, flagged as unconfirmed.
+const UNCONFIRMED_PREFIX = /^\s*(perlu pengesahan|belum disahkan|untuk disahkan|to confirm|to be confirmed)\s*[:：-]\s*/i;
+
+function isUnconfirmed(value: string | undefined) {
+  return UNCONFIRMED_PREFIX.test(value ?? "");
+}
+
 function clean(value: string | undefined) {
-  const text = (value ?? "").trim();
+  const text = (value ?? "").replace(UNCONFIRMED_PREFIX, "").trim();
   return EMPTY_MARKERS.test(text) ? "" : text;
 }
 
@@ -248,13 +256,19 @@ export function parseListingImport(tabs: Record<string, string[][] | null>): { l
     }
 
     for (const [column, value] of Object.entries(record)) {
+      if (isUnconfirmed(value) && clean(value)) warnings.push(`${column} is not yet confirmed ("${value.trim()}") — imported as ${clean(value)}.`);
       if (isSpreadsheetError(value)) warnings.push(`${column} shows a spreadsheet error (${value.trim()}); treated as empty.`);
     }
 
     const money = (column: string, label: string, required: boolean) => {
       const value = parseMoney(record[column]);
       if (Number.isNaN(value)) {
-        errors.push(`${label} (${column}) is not a valid amount: "${record[column]}".`);
+        const looksLikeDate = /^\d{4}-\d{2}-\d{2}|^\d{1,2}\/\d{1,2}\/\d{4}/.test(clean(record[column]));
+        errors.push(
+          looksLikeDate
+            ? `${label} (${column}) shows a date ("${record[column]}"): the cell is formatted as a date. Select the column and choose Format → Number → Number.`
+            : `${label} (${column}) is not a valid amount: "${record[column]}".`,
+        );
         return 0;
       }
       if (value === null) {
@@ -315,7 +329,11 @@ export function parseListingImport(tabs: Record<string, string[][] | null>): { l
     // Property
     const tenure = parseTenure(record.tenure) ?? parseTenure(record.tenure_alias);
     if (tenure === undefined) errors.push(`tenure must be Freehold or Leasehold (got "${record.tenure}").`);
-    const bumiStatus = parseBumi(record.bumi_status);
+    let bumiStatus = parseBumi(record.bumi_status);
+    if (bumiStatus === undefined && isUnconfirmed(record.bumi_status)) {
+      warnings.push("bumi_status is unconfirmed and not Bumi / Non Bumi / Open Market — left empty.");
+      bumiStatus = null;
+    }
     if (bumiStatus === undefined) errors.push(`bumi_status must be Bumi, Non Bumi or Open Market (got "${record.bumi_status}").`);
     const isLaca = parseBoolean(record.is_laca);
     if (isLaca === undefined) errors.push("is_laca must be Yes or No.");
@@ -326,6 +344,7 @@ export function parseListingImport(tabs: Record<string, string[][] | null>): { l
     const auctionDate = parseDateTime(record.auction_date_time);
     if (auctionDate === "invalid") errors.push(`auction_date_time is not a valid date: "${record.auction_date_time}".`);
     const reservePrice = money("reserve_price_rm", "Reserve price", false);
+    const resalePrice = money("resale_price_rm", "Resale price", false);
     const builtUp = clean(record.built_up_sq_ft);
 
     const propertyType = clean(record.property_type);
@@ -355,6 +374,7 @@ export function parseListingImport(tabs: Record<string, string[][] | null>): { l
         bathrooms: Number.isNaN(bathrooms) ? null : bathrooms,
         auctionDate: auctionDate === "invalid" ? null : auctionDate,
         reservePrice: typeof reservePrice === "number" ? reservePrice : null,
+        resalePrice: typeof resalePrice === "number" ? resalePrice : null,
         state,
         location,
         fullAddress,
