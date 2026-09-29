@@ -320,8 +320,15 @@ function ProjectWorkspaceUnavailable() {
   );
 }
 
-export default async function ProjectWorkspacePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ProjectWorkspacePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string }>;
+  searchParams?: Promise<{ paymentError?: string; paymentConfirmed?: string }>;
+}) {
   const { slug } = await params;
+  const notice = (await searchParams) ?? {};
   let project: ProjectWorkspace | null = null;
 
   try {
@@ -466,6 +473,11 @@ export default async function ProjectWorkspacePage({ params }: { params: Promise
 
       <Card id="participants">
         <SectionHeading title="Participants">Admin-only participant operations. Manual confirmation records received payment only; it does not create a payment transfer or distribution.</SectionHeading>
+        {notice.paymentError ? (
+          <p role="alert" className="mb-4 rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-700">{notice.paymentError}</p>
+        ) : notice.paymentConfirmed ? (
+          <p role="status" className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-kasset-green">Manual payment confirmed.</p>
+        ) : null}
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
             <p className="text-[0.68rem] font-bold uppercase tracking-wide text-slate-500">Total Participants</p>

@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { Prisma, PaymentStatus, ParticipationStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
@@ -23,8 +24,27 @@ function requiredString(value: FormDataEntryValue | null, message: string) {
   return value.trim();
 }
 
+/**
+ * Validation failures are shown on the project page instead of crashing it
+ * (a thrown error in a form action renders the global "Application error").
+ */
 export async function confirmManualPaymentAction(formData: FormData): Promise<void> {
-  const { user, admin } = await requireAdmin();
+  const current = await requireAdmin();
+  const slug = typeof formData.get("projectSlug") === "string" ? String(formData.get("projectSlug")) : "";
+  let outcome: string;
+  try {
+    await confirmManualPayment(formData, current);
+    outcome = "paymentConfirmed=1";
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Payment could not be confirmed.";
+    console.error("Manual payment confirmation failed", { slug, message });
+    outcome = `paymentError=${encodeURIComponent(message)}`;
+  }
+  if (!slug) return;
+  redirect(`/admin/projects/${encodeURIComponent(slug)}?${outcome}#participants`);
+}
+
+async function confirmManualPayment(formData: FormData, { user, admin }: Awaited<ReturnType<typeof requireAdmin>>) {
   const campaignId = requiredString(formData.get("campaignId"), "Campaign is required.");
   const participationId = requiredString(formData.get("participationId"), "Participation is required.");
   const projectSlug = requiredString(formData.get("projectSlug"), "Project workspace is required.");
@@ -63,7 +83,7 @@ export async function confirmManualPaymentAction(formData: FormData): Promise<vo
       where: { gateway: "manual", reconciliationReference: reference, NOT: { id: payment.id } },
       select: { id: true },
     });
-    if (duplicate) throw new Error("A manual payment with this reference already exists.");
+    if (duplicate) throw new Error(`Payment reference "${reference}" is already used by another confirmed payment. Check the bank reference on the receipt — each transfer can only be confirmed once.`);
 
     const claimedPayment = await tx.payment.updateMany({
       where: { id: payment.id, status: PaymentStatus.Processing, receiptFileAssetId: { not: null } },
