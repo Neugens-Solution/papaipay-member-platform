@@ -70,7 +70,7 @@ export type ImportedListing = {
 };
 
 // Placeholders and spreadsheet errors are treated as "not provided".
-const EMPTY_MARKERS = /^(belum disediakan|tbc|tba|n\/a|na|-|—|#value!|#ref!|#n\/a|#name\?|#div\/0!|#error!|#num!|#null!)$/i;
+const EMPTY_MARKERS = /^(belum disediakan|auto[- ]?generate|auto|tbc|tba|n\/a|na|-|—|#value!|#ref!|#n\/a|#name\?|#div\/0!|#error!|#num!|#null!)$/i;
 
 function clean(value: string | undefined) {
   const text = (value ?? "").trim();
