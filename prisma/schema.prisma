@@ -236,6 +236,7 @@ model User {
 
   member       Member?
   adminProfile AdminProfile?
+  passwordReset PasswordReset?
 
   createdCampaigns             Campaign[]            @relation("CampaignCreatedBy")
   updatedCampaigns             Campaign[]            @relation("CampaignUpdatedBy")
@@ -252,6 +253,14 @@ model User {
   auditLogs                    AuditLog[]            @relation("AuditActor")
   reports                      Report[]              @relation("ReportGeneratedBy")
   createdAnnouncements         Announcement[]        @relation("AnnouncementCreatedBy")
+}
+
+model PasswordReset {
+  userId      String   @id
+  tokenHash   String   @unique
+  expiresAt   DateTime
+  requestedAt DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Member {

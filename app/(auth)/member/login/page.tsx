@@ -41,6 +41,7 @@ export default function MemberLoginPage() {
             Sign in to browse opportunities, monitor your portfolio and review distribution updates.
           </p>
           <MemberLoginForm />
+          <Link href="/member/forgot-password" className="mt-4 inline-block text-sm font-semibold text-[#172235] underline decoration-[#a47c48]/60 underline-offset-4">Forgot password?</Link>
           <div className="mt-6 flex flex-col gap-3 text-sm font-semibold sm:flex-row sm:items-center sm:justify-between">
             <Link href="/member/signup" className="text-[#172235] underline decoration-[#a47c48]/60 underline-offset-8 hover:text-[#a47c48]">Request member access</Link>
             <Link href="/login" className="text-[#68707c] hover:text-[#172235]">Choose another portal</Link>
