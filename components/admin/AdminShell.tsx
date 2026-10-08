@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NotificationBell } from "@/components/common/NotificationBell";
+import { logoutAction } from "@/app/login/actions";
 
 const navItems = [
   ["Dashboard", "/admin/dashboard"],
@@ -81,7 +82,7 @@ export function AdminShell({ children, identity, unreadNotifications = 0 }: { ch
                       <p className="mt-1 text-xs text-slate-500">{identity.role || identity.email}</p>
                     </div>
                     <Link href="/admin/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">Admin Profile</Link>
-                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">Logout</Link>
+                    <form action={logoutAction}><button type="submit" className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">Logout</button></form>
                   </div>
                 </details>
               </div>
