@@ -4,6 +4,7 @@ import { ManualKycForm } from "@/components/member/ManualKycForm";
 import { MemberProfileForm } from "@/components/member/MemberProfileForm";
 import { getMemberProfile } from "@/lib/data/memberProfile";
 import { formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import { correctionReasonText } from "@/lib/member/correctionReasons";
 
 function Section({ title, description, children }: { title: string; description?: string; children: ReactNode }) {
   return (
@@ -61,7 +62,7 @@ export default async function MemberProfilePage() {
             <p className="text-sm font-bold">Status: {formatEnumLabel(String(verificationStatus))}</p>
             {submission?.submittedAt ? <p className="text-xs font-semibold">Submitted {formatDate(submission.submittedAt)}</p> : null}
           </div>
-          {submission?.rejectionReason ? <p className="mt-2 text-sm leading-6">Reason: {submission.rejectionReason}</p> : null}
+          {submission?.rejectionReason ? <p className="mt-2 text-sm leading-6">Reason: {correctionReasonText(submission.rejectionReason, submission.adminNotes)}</p> : null}
         </div>
 
         {submission?.documents.length ? (
@@ -75,12 +76,12 @@ export default async function MemberProfilePage() {
           </div>
         ) : null}
 
-        {canSubmit ? <ManualKycForm /> : null}
-        {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your IC documents have been received. You can continue using the portal while the admin team reviews them, but participation confirmation requires approved verification.</p> : null}
+        {canSubmit ? <ManualKycForm correction={submission?.status === "ResubmissionRequired"} /> : null}
+        {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your documents have been received. Dashboard access will be available after your application is approved.</p> : null}
       </Section>
 
-      <Section title="Update Profile" description="Keep your personal, contact, bank and nominee information current.">
-        <MemberProfileForm values={{
+      <Section title="Update Profile" description="Complete your contact and address details before submitting your application.">
+        {underReview ? <p className="text-sm text-slate-600">Your submitted application is read-only while it is under review.</p> : <MemberProfileForm values={{
           fullName: profile.fullName,
           phone: contact?.phone || user.phone || "",
           nationality: profile.nationality || "",
@@ -98,7 +99,7 @@ export default async function MemberProfilePage() {
           nomineeRelationship: nominee?.relationship || "",
           nomineePhone: nominee?.phone || "",
           nomineeEmail: nominee?.email || "",
-        }} />
+        }} />}
       </Section>
 
       <div className="grid min-w-0 gap-5 lg:grid-cols-2">

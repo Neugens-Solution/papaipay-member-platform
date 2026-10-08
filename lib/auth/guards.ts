@@ -4,6 +4,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/db";
 import { getSession } from "@/lib/auth/session";
+import { getApplicationStatus } from "@/lib/member/applicationStatus";
 
 export const getCurrentUser = cache(async function getCurrentUser() {
   const session = await getSession();
@@ -32,6 +33,12 @@ export async function getCurrentMember() {
 export async function requireMember() {
   const current = await getCurrentMember();
   if (!current) redirect("/member/login");
+  return current;
+}
+
+export async function requireApprovedMember() {
+  const current = await requireMember();
+  if (await getApplicationStatus(current.member.id, current.member.verificationStatus) !== "Approved") redirect("/application");
   return current;
 }
 

@@ -3,7 +3,7 @@
 import { formatRinggit, notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
-import { requireMember } from "@/lib/auth/guards";
+import { requireApprovedMember } from "@/lib/auth/guards";
 import {
   deletePrivateDocuments,
   uploadPrivateDocument,
@@ -25,7 +25,7 @@ export async function submitPaymentReceiptAction(
   _state: PaymentReceiptFormState,
   formData: FormData,
 ): Promise<PaymentReceiptFormState> {
-  const { user, member } = await requireMember();
+  const { user, member } = await requireApprovedMember();
 
   try {
     const participationId = requiredString(formData.get("participationId"), "Participation is required.");

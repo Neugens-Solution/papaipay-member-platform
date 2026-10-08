@@ -4,6 +4,7 @@ import { BackLink, Badge, Card, InfoGrid, PageHeader, TableWrap, Td, Th } from "
 import { reviewManualKycAction } from "@/lib/admin/actions/manualKyc";
 import { getAdminMemberById } from "@/lib/admin/data/members";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import { correctionReasons, correctionReasonText } from "@/lib/member/correctionReasons";
 
 export default async function MemberDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -51,14 +52,14 @@ export default async function MemberDetailPage({ params }: { params: Promise<{ i
                 </Link>
               ))}
             </div>
-            {latestKyc.rejectionReason ? <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">Previous review note: {latestKyc.rejectionReason}</p> : null}
+            {latestKyc.rejectionReason ? <p className="mt-4 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">Previous review note: {correctionReasonText(latestKyc.rejectionReason, latestKyc.adminNotes)}</p> : null}
             {kycPending ? (
               <form action={reviewManualKycAction} className="mt-5 grid gap-3 rounded-2xl border border-amber-200 bg-amber-50/60 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end">
                 <input type="hidden" name="memberId" value={member.id} />
                 <input type="hidden" name="submissionId" value={latestKyc.id} />
-                <label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Reason if resubmission is required</span><input name="reason" className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm outline-none focus:border-kasset-green" placeholder="Explain what needs to be clearer" /></label>
-                <button name="decision" value="ResubmissionRequired" className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700">Request Resubmission</button>
-                <button name="decision" value="Approved" className="min-h-11 rounded-xl bg-kasset-green px-4 text-sm font-bold text-white">Approve Verification</button>
+                <div className="space-y-2"><label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Correction reason</span><select name="reason" className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm"><option value="">Select a reason</option>{Object.entries(correctionReasons).map(([code, [label]]) => <option value={code} key={code}>{label}</option>)}</select></label><label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Additional note (required for Other)</span><input name="note" maxLength={500} className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm" /></label><p className="text-xs text-slate-500">This note will be shown to the member and sent by email. Do not include identity numbers or private account details.</p></div>
+                <button name="decision" value="ResubmissionRequired" className="min-h-11 rounded-xl border border-rose-200 bg-white px-4 text-sm font-bold text-rose-700">Request Correction</button>
+                <button name="decision" value="Approved" className="min-h-11 rounded-xl bg-kasset-green px-4 text-sm font-bold text-white">Approve Application</button>
               </form>
             ) : null}
           </div>

@@ -8,28 +8,28 @@ function SubmitButton() {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className="inline-flex min-h-11 w-full items-center justify-center rounded-xl bg-kasset-green px-4 py-2.5 text-sm font-bold text-white transition hover:bg-kasset-ink disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto">
-      {pending ? "Uploading securely…" : "Submit IC for Verification"}
+      {pending ? "Submitting securely…" : "Submit Membership Application"}
     </button>
   );
 }
 
-function FileField({ name, label, helper }: { name: string; label: string; helper: string }) {
+function FileField({ name, label, helper, required }: { name: string; label: string; helper: string; required: boolean }) {
   return (
     <label className="block rounded-xl border border-slate-200 bg-slate-50/70 p-4">
       <span className="block text-sm font-bold text-kasset-ink">{label}</span>
       <span className="mt-1 block text-xs leading-5 text-slate-500">{helper}</span>
-      <input name={name} type="file" accept="image/jpeg,image/png,application/pdf" required className="mt-3 block w-full min-w-0 text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-bold file:text-kasset-green" />
+      <input name={name} type="file" accept="image/jpeg,image/png,application/pdf" required={required} className="mt-3 block w-full min-w-0 text-sm text-slate-600 file:mr-3 file:rounded-lg file:border-0 file:bg-white file:px-3 file:py-2 file:text-xs file:font-bold file:text-kasset-green" />
     </label>
   );
 }
 
-export function ManualKycForm() {
+export function ManualKycForm({ correction = false }: { correction?: boolean }) {
   const [state, formAction] = useFormState(submitManualKycAction, {} as ManualKycFormState);
   return (
     <form action={formAction} className="mt-5 space-y-4">
       <div className="grid gap-3 sm:grid-cols-2">
-        <FileField name="icFront" label="IC Front" helper="Clear colour image showing all details." />
-        <FileField name="icBack" label="IC Back" helper="Clear colour image showing the full reverse side." />
+        <FileField name="icFront" label="IC Front" helper={correction ? "Upload a replacement only if this side needs correction." : "Clear colour image showing all details."} required={!correction} />
+        <FileField name="icBack" label="IC Back" helper={correction ? "Upload a replacement only if this side needs correction." : "Clear colour image showing the full reverse side."} required={!correction} />
       </div>
       <p className="text-xs leading-5 text-slate-500">Accepted: JPG, PNG or PDF, up to 5MB per file. Your documents are stored privately and can only be viewed by you and authorised K Asset Ventures admins.</p>
       {state.error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{state.error}</p> : null}

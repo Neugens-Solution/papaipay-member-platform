@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
-import { requireMember } from "@/lib/auth/guards";
+import { requireApprovedMember } from "@/lib/auth/guards";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MYT_OFFSET_MS = 8 * 60 * 60 * 1000;
@@ -16,7 +16,7 @@ function formatMalaysiaDate(date: Date) {
 
 export type ParticipationFormState = { error?: string };
 
-type AuthenticatedMember = Awaited<ReturnType<typeof requireMember>>;
+type AuthenticatedMember = Awaited<ReturnType<typeof requireApprovedMember>>;
 
 const RESERVATION_MINUTES = 24 * 60;
 
@@ -225,7 +225,7 @@ export async function createParticipationAction(
   const campaignId = formData.get("campaignId");
   const campaignSlug = formData.get("campaignSlug");
   const parsedAmount = parseAmount(formData.get("amount"));
-  const authenticatedMember = await requireMember();
+  const authenticatedMember = await requireApprovedMember();
 
   if (authenticatedMember.member.verificationStatus !== "Approved") {
     const message = "Complete and obtain approval for identity verification before participating.";
