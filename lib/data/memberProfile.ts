@@ -12,6 +12,7 @@ export async function getMemberProfile() {
       dateOfBirth: true,
       nationality: true,
       verificationStatus: true,
+      profileCompletedAt: true,
       createdAt: true,
       contacts: { orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }], take: 1 },
       addresses: { orderBy: [{ isPrimary: "desc" }, { createdAt: "asc" }], take: 1 },

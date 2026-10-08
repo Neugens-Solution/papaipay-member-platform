@@ -139,6 +139,7 @@ export async function updateMemberProfileAction(
     });
 
     revalidatePath("/member/profile");
+    revalidatePath("/application");
     revalidatePath("/admin/members");
     revalidatePath(`/admin/members/${member.id}`);
     return { success: "Profile updated successfully." };

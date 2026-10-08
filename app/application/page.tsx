@@ -19,7 +19,7 @@ export default async function ApplicationPage() {
           ? "Your membership application has been received and is under review. Dashboard access will be available after approval."
           : status === "CorrectionRequired"
             ? "Your application needs correction. Review the reason below, update your details or documents, and resubmit for review."
-            : "Complete your profile and upload both sides of your identification document to submit your membership application."}
+            : "Step 1: Complete and save your profile. Step 2: Upload both sides of your IC and submit the application for review."}
       </div>
       <MemberProfilePage />
     </main>
