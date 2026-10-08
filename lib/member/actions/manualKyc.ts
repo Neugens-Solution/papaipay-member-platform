@@ -127,6 +127,7 @@ export async function submitManualKycAction(
     await notifyAdmins({ title: "KYC submitted for review", body: `${member.fullName} (${member.memberRef}) uploaded IC documents for identity verification.` }).catch(() => undefined);
     revalidatePath("/member/profile");
     revalidatePath("/application");
+    revalidatePath("/application/documents");
     revalidatePath("/admin/members");
     return { success: "Your membership application was submitted for review. Dashboard access will be available after approval." };
   } catch (error) {
