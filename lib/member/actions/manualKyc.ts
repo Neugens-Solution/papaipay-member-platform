@@ -35,6 +35,9 @@ export async function submitManualKycAction(
     if (!completeProfile?.profileCompletedAt) return { error: "Save your full name, phone, nationality, date of birth and complete address before submitting your application." };
     const icFront = optionalFile(formData.get("icFront"));
     const icBack = optionalFile(formData.get("icBack"));
+    if ((icFront?.size || 0) + (icBack?.size || 0) > 4 * 1024 * 1024) {
+      return { error: "The two files must total 4MB or less. Choose smaller images or PDFs and try again." };
+    }
     const current = await db.manualKycSubmission.findFirst({
       where: { memberId: member.id },
       orderBy: { createdAt: "desc" },
@@ -110,14 +113,18 @@ export async function submitManualKycAction(
         });
         return submission.id;
       });
-      await notifyMember(member.id, { title: "Application received", body: "Your membership application is under review." });
+      // The database transaction owns the submitted state. Notification failures
+      // must not remove documents that are already referenced by that state.
+      await notifyMember(member.id, { title: "Application received", body: "Your membership application is under review." }).catch(() => undefined);
       await sendApplicationEmail({ kind: "received", to: user.email, name: member.fullName, eventId: submissionId });
     } catch (error) {
-      await deletePrivateDocuments(storedDocuments.map((document) => document.objectKey)).catch(() => undefined);
+      // Only clean up uploaded blobs if no submission references them.
+      const persisted = await db.manualKycSubmission.findFirst({ where: { memberId: member.id, status: "Submitted" }, orderBy: { createdAt: "desc" }, select: { id: true } }).catch(() => null);
+      if (!persisted) await deletePrivateDocuments(storedDocuments.map((document) => document.objectKey)).catch(() => undefined);
       throw error;
     }
 
-    await notifyAdmins({ title: "KYC submitted for review", body: `${member.fullName} (${member.memberRef}) uploaded IC documents for identity verification.` });
+    await notifyAdmins({ title: "KYC submitted for review", body: `${member.fullName} (${member.memberRef}) uploaded IC documents for identity verification.` }).catch(() => undefined);
     revalidatePath("/member/profile");
     revalidatePath("/application");
     revalidatePath("/admin/members");

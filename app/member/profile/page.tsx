@@ -56,31 +56,7 @@ export default async function MemberProfilePage() {
         <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">Review your member information and complete the required manual identity verification.</p>
       </header>
 
-      <Section title="Identity Verification" description="K Asset Ventures currently verifies members manually. No third-party e-KYC service is used.">
-        <div className={`rounded-xl border p-4 ${statusTone(String(verificationStatus))}`}>
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm font-bold">Status: {formatEnumLabel(String(verificationStatus))}</p>
-            {submission?.submittedAt ? <p className="text-xs font-semibold">Submitted {formatDate(submission.submittedAt)}</p> : null}
-          </div>
-          {submission?.rejectionReason ? <p className="mt-2 text-sm leading-6">Reason: {correctionReasonText(submission.rejectionReason, submission.adminNotes)}</p> : null}
-        </div>
-
-        {submission?.documents.length ? (
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
-            {submission.documents.map((document) => (
-              <Link key={document.id} href={`/files/${document.fileAsset.id}`} target="_blank" className="min-w-0 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-kasset-green hover:border-kasset-green/40">
-                <span className="block text-xs uppercase tracking-wide text-slate-400">{formatEnumLabel(String(document.documentType))}</span>
-                <span className="mt-1 block truncate">{document.fileAsset.originalFilename}</span>
-              </Link>
-            ))}
-          </div>
-        ) : null}
-
-        {canSubmit ? <ManualKycForm correction={submission?.status === "ResubmissionRequired"} /> : null}
-        {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your documents have been received. Dashboard access will be available after your application is approved.</p> : null}
-      </Section>
-
-      <Section title="Update Profile" description="Complete your contact and address details before submitting your application.">
+      <Section title="Step 1 · Complete Your Profile" description="Save your full name, phone, nationality, date of birth and address before uploading your IC.">
         {underReview ? <p className="text-sm text-slate-600">Your submitted application is read-only while it is under review.</p> : <MemberProfileForm values={{
           fullName: profile.fullName,
           phone: contact?.phone || user.phone || "",
@@ -100,6 +76,31 @@ export default async function MemberProfilePage() {
           nomineePhone: nominee?.phone || "",
           nomineeEmail: nominee?.email || "",
         }} />}
+      </Section>
+
+      <Section title="Step 2 · Identity Verification" description="Upload both sides of your IC and submit your application for manual review.">
+        <div className={`rounded-xl border p-4 ${statusTone(String(verificationStatus))}`}>
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm font-bold">Status: {formatEnumLabel(String(verificationStatus))}</p>
+            {submission?.submittedAt ? <p className="text-xs font-semibold">Submitted {formatDate(submission.submittedAt)}</p> : null}
+          </div>
+          {submission?.rejectionReason ? <p className="mt-2 text-sm leading-6">Reason: {correctionReasonText(submission.rejectionReason, submission.adminNotes)}</p> : null}
+        </div>
+
+        {submission?.documents.length ? (
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+            {submission.documents.map((document) => (
+              <Link key={document.id} href={`/files/${document.fileAsset.id}`} target="_blank" className="min-w-0 rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold text-kasset-green hover:border-kasset-green/40">
+                <span className="block text-xs uppercase tracking-wide text-slate-400">{formatEnumLabel(String(document.documentType))}</span>
+                <span className="mt-1 block truncate">{document.fileAsset.originalFilename}</span>
+              </Link>
+            ))}
+          </div>
+        ) : null}
+
+        {canSubmit && profile.profileCompletedAt ? <ManualKycForm correction={submission?.status === "ResubmissionRequired"} /> : null}
+        {canSubmit && !profile.profileCompletedAt ? <p className="mt-5 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">Complete and save Step 1 first. The IC upload and submission button will appear here afterward.</p> : null}
+        {underReview ? <p className="mt-4 text-sm leading-6 text-slate-600">Your documents have been received. Dashboard access will be available after your application is approved.</p> : null}
       </Section>
 
       <div className="grid min-w-0 gap-5 lg:grid-cols-2">

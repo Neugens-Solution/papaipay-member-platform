@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState as useFormState } from "react";
+import { useState } from "react";
 import { useFormStatus } from "react-dom";
 import { submitManualKycAction, type ManualKycFormState } from "@/lib/member/actions/manualKyc";
 
@@ -25,13 +26,22 @@ function FileField({ name, label, helper, required }: { name: string; label: str
 
 export function ManualKycForm({ correction = false }: { correction?: boolean }) {
   const [state, formAction] = useFormState(submitManualKycAction, {} as ManualKycFormState);
+  const [fileError, setFileError] = useState("");
   return (
-    <form action={formAction} className="mt-5 space-y-4">
+    <form action={formAction} className="mt-5 space-y-4" onSubmit={(event) => {
+      const data = new FormData(event.currentTarget);
+      const files = [data.get("icFront"), data.get("icBack")].filter((value): value is File => value instanceof File);
+      if (files.some((file) => file.size > 5 * 1024 * 1024) || files.reduce((total, file) => total + file.size, 0) > 4 * 1024 * 1024) {
+        event.preventDefault();
+        setFileError("The two files must total 4MB or less. Choose smaller images or PDFs and try again.");
+      } else setFileError("");
+    }}>
       <div className="grid gap-3 sm:grid-cols-2">
         <FileField name="icFront" label="IC Front" helper={correction ? "Upload a replacement only if this side needs correction." : "Clear colour image showing all details."} required={!correction} />
         <FileField name="icBack" label="IC Back" helper={correction ? "Upload a replacement only if this side needs correction." : "Clear colour image showing the full reverse side."} required={!correction} />
       </div>
-      <p className="text-xs leading-5 text-slate-500">Accepted: JPG, PNG or PDF, up to 5MB per file. Your documents are stored privately and can only be viewed by you and authorised K Asset Ventures admins.</p>
+      <p className="text-xs leading-5 text-slate-500">Accepted: JPG, PNG or PDF, maximum 4MB combined. Your documents are stored privately and can only be viewed by you and authorised K Asset Ventures admins.</p>
+      {fileError ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{fileError}</p> : null}
       {state.error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{state.error}</p> : null}
       {state.success ? <p className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-kasset-green">{state.success}</p> : null}
       <SubmitButton />
