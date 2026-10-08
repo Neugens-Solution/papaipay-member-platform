@@ -15,13 +15,13 @@ function Field({ label, name, defaultValue, type = "text", placeholder, autoComp
   return <label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">{label}</span><input name={name} type={type} inputMode={inputMode} defaultValue={defaultValue} placeholder={placeholder} autoComplete={autoComplete} className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-kasset-ink outline-none transition focus:border-kasset-green focus:ring-2 focus:ring-kasset-green/10" /></label>;
 }
 
-function SaveButton() {
+function SaveButton({ label }: { label: string }) {
   const { pending } = useFormStatus();
-  return <button type="submit" disabled={pending} className="min-h-11 rounded-xl bg-kasset-green px-5 text-sm font-bold text-white transition hover:bg-kasset-ink disabled:cursor-not-allowed disabled:opacity-60">{pending ? "Saving…" : "Save Profile"}</button>;
+  return <button type="submit" disabled={pending} className="min-h-11 rounded-xl bg-kasset-green px-5 text-sm font-bold text-white transition hover:bg-kasset-ink disabled:cursor-not-allowed disabled:opacity-60">{pending ? "Saving…" : label}</button>;
 }
 
-export function MemberProfileForm({ values }: { values: ProfileValues }) {
-  const [state, action] = useActionState(updateMemberProfileAction, {} as MemberProfileFormState);
+export function MemberProfileForm({ values, saveAction = updateMemberProfileAction, onboarding = false }: { values: ProfileValues; saveAction?: typeof updateMemberProfileAction; onboarding?: boolean }) {
+  const [state, action] = useActionState(saveAction, {} as MemberProfileFormState);
   return (
     <form action={action} className="space-y-6">
       <fieldset><legend className="text-base font-bold text-kasset-ink">Personal Information</legend><div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Full Name *" name="fullName" defaultValue={values.fullName} autoComplete="name" /><Field label="Phone" name="phone" defaultValue={values.phone} autoComplete="tel" /><label className="block"><span className="text-xs font-bold uppercase tracking-wide text-slate-500">Nationality *</span><select name="nationality" required defaultValue={values.nationality === "Malaysia" || values.nationality === "Malaysian" ? "Malaysia" : values.nationality ? "Others" : ""} className="mt-1 min-h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-kasset-ink outline-none transition focus:border-kasset-green focus:ring-2 focus:ring-kasset-green/10"><option value="" disabled>Select nationality</option><option value="Malaysia">Malaysia</option><option value="Others">Others</option></select></label><Field label="Date of Birth" name="dateOfBirth" defaultValue={values.dateOfBirth} type="date" /></div></fieldset>
@@ -30,7 +30,7 @@ export function MemberProfileForm({ values }: { values: ProfileValues }) {
       <fieldset className="border-t border-slate-100 pt-6"><legend className="text-base font-bold text-kasset-ink">Nominee / Beneficiary</legend><div className="mt-4 grid gap-4 sm:grid-cols-2"><Field label="Full Name" name="nomineeName" defaultValue={values.nomineeName} /><Field label="Relationship" name="nomineeRelationship" defaultValue={values.nomineeRelationship} /><Field label="Phone" name="nomineePhone" defaultValue={values.nomineePhone} /><Field label="Email" name="nomineeEmail" defaultValue={values.nomineeEmail} type="email" /></div></fieldset>
       {state.error ? <p role="alert" className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700">{state.error}</p> : null}
       {state.success ? <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-kasset-green">{state.success}</p> : null}
-      <div className="flex justify-end"><SaveButton /></div>
+      <div className="flex justify-end"><SaveButton label={onboarding ? "Save & Continue to IC Upload" : "Save Profile"} /></div>
     </form>
   );
 }
