@@ -1,8 +1,8 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 import MemberProfilePage from "@/app/member/profile/page";
 import { requireMember } from "@/lib/auth/guards";
 import { getApplicationStatus } from "@/lib/member/applicationStatus";
+import { logoutAction } from "@/app/login/actions";
 
 export default async function ApplicationPage() {
   const { member } = await requireMember();
@@ -12,7 +12,7 @@ export default async function ApplicationPage() {
     <main className="min-h-screen bg-slate-50 px-4 py-8 sm:px-6">
       <div className="mx-auto mb-6 flex max-w-5xl items-center justify-between gap-4">
         <strong className="text-lg text-kasset-green">K Asset Ventures</strong>
-        <Link href="/logout" className="text-sm font-semibold text-slate-600 underline">Sign out</Link>
+        <form action={logoutAction}><button type="submit" className="text-sm font-semibold text-slate-600 underline">Sign out</button></form>
       </div>
       <div className="mx-auto mb-6 max-w-5xl rounded-2xl border border-amber-200 bg-amber-50 p-5 text-sm leading-6 text-amber-900">
         {status === "Pending"

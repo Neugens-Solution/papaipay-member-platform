@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { SVGProps } from "react";
 import { NotificationBell } from "@/components/common/NotificationBell";
+import { logoutAction } from "@/app/login/actions";
 
 const navItems = [
   ["Dashboard", "/member/dashboard"],
@@ -95,9 +96,7 @@ export function MemberShell({ children, identity, unreadNotifications = 0 }: { c
                     <Link href="/member/profile" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">
                       My Profile
                     </Link>
-                    <Link href="/logout" className="block rounded-md px-3 py-2.5 text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">
-                      Logout
-                    </Link>
+                    <form action={logoutAction}><button type="submit" className="block w-full rounded-md px-3 py-2.5 text-left text-sm font-semibold text-slate-600 hover:bg-[#f7efe3] hover:text-[#c6a574]">Logout</button></form>
                   </div>
                 </details>
               </div>

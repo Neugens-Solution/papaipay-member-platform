@@ -35,6 +35,7 @@ export async function updateMemberProfileAction(
     const fullName = text(formData, "fullName");
     const phone = text(formData, "phone");
     const nationality = text(formData, "nationality");
+    if (nationality !== "Malaysia" && nationality !== "Others") throw new Error("Select Malaysia or Others for nationality.");
     const dateOfBirthValue = text(formData, "dateOfBirth");
     const addressLine1 = text(formData, "addressLine1");
     const addressLine2 = text(formData, "addressLine2");
@@ -60,6 +61,7 @@ export async function updateMemberProfileAction(
     }
 
     const hasAddress = Boolean(addressLine1 || city || state || postcode);
+    const profileComplete = Boolean(phone && nationality && dateOfBirth && hasAddress);
     if (hasAddress && (!addressLine1 || !city || !state || !postcode)) throw new Error("Complete address line 1, city, state and postcode.");
 
     const hasBank = Boolean(bankName || accountHolderName || accountNumber);
@@ -89,7 +91,7 @@ export async function updateMemberProfileAction(
           fullName,
           nationality: nationality || null,
           dateOfBirth,
-          profileCompletedAt: phone && nationality && dateOfBirth && hasAddress ? new Date() : null,
+          profileCompletedAt: profileComplete ? new Date() : null,
         },
       });
 
@@ -142,7 +144,7 @@ export async function updateMemberProfileAction(
     revalidatePath("/application");
     revalidatePath("/admin/members");
     revalidatePath(`/admin/members/${member.id}`);
-    return { success: "Profile updated successfully." };
+    return { success: profileComplete ? "Profile saved. Continue to Step 2 to upload both sides of your IC." : "Draft saved. Complete your phone, nationality, date of birth and address to unlock Step 2." };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unable to update your profile." };
   }
