@@ -4,6 +4,8 @@ import { notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/auth/guards";
+import { notifyMember } from "@/lib/notifications";
+import { sendApplicationEmail } from "@/lib/email/application";
 import {
   deletePrivateDocuments,
   uploadPrivateDocument,
@@ -16,8 +18,8 @@ function makeRef(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 }
 
-function requiredFile(value: FormDataEntryValue | null, label: string) {
-  if (!(value instanceof File) || value.size === 0) throw new Error(`${label} is required.`);
+function optionalFile(value: FormDataEntryValue | null) {
+  if (!(value instanceof File) || value.size === 0) return null;
   validatePrivateDocument(value);
   return value;
 }
@@ -29,12 +31,14 @@ export async function submitManualKycAction(
   const { user, member } = await requireMember();
 
   try {
-    const icFront = requiredFile(formData.get("icFront"), "IC front image");
-    const icBack = requiredFile(formData.get("icBack"), "IC back image");
+    const completeProfile = await db.member.findUnique({ where: { id: member.id }, select: { profileCompletedAt: true } });
+    if (!completeProfile?.profileCompletedAt) return { error: "Save your full name, phone, nationality, date of birth and complete address before submitting your application." };
+    const icFront = optionalFile(formData.get("icFront"));
+    const icBack = optionalFile(formData.get("icBack"));
     const current = await db.manualKycSubmission.findFirst({
       where: { memberId: member.id },
       orderBy: { createdAt: "desc" },
-      select: { status: true },
+      include: { documents: true },
     });
 
     if (current?.status === "Approved" || member.verificationStatus === "Approved") {
@@ -44,40 +48,38 @@ export async function submitManualKycAction(
     if (current && ["Submitted", "UnderReview"].includes(String(current.status))) {
       return { error: "Your identity documents are already under review." };
     }
+    const previousFront = current?.status === "ResubmissionRequired" ? current.documents.find((document) => document.documentType === "IcFront") : null;
+    const previousBack = current?.status === "ResubmissionRequired" ? current.documents.find((document) => document.documentType === "IcBack") : null;
+    if (!icFront && !previousFront || !icBack && !previousBack) {
+      return { error: "Both front and back identification documents are required." };
+    }
 
     const storedDocuments: Awaited<ReturnType<typeof uploadPrivateDocument>>[] = [];
     try {
-      storedDocuments.push(await uploadPrivateDocument(icFront, "kyc", member.memberRef));
-      storedDocuments.push(await uploadPrivateDocument(icBack, "kyc", member.memberRef));
+      if (icFront) storedDocuments.push(await uploadPrivateDocument(icFront, "kyc", member.memberRef));
+      if (icBack) storedDocuments.push(await uploadPrivateDocument(icBack, "kyc", member.memberRef));
 
-      await db.$transaction(async (tx) => {
+      const submissionId = await db.$transaction(async (tx) => {
         const submission = await tx.manualKycSubmission.create({
           data: { memberId: member.id, status: "Submitted", submittedAt: new Date() },
         });
 
-        for (let index = 0; index < storedDocuments.length; index += 1) {
-          const stored = storedDocuments[index];
-          const file = index === 0 ? icFront : icBack;
-          const fileAsset = await tx.fileAsset.create({
-            data: {
-              fileRef: makeRef("FIL"),
-              bucket: stored.bucket,
-              objectKey: stored.objectKey,
-              originalFilename: file.name,
-              contentType: stored.contentType,
-              sizeBytes: stored.sizeBytes,
-              visibility: "Authenticated",
-              purpose: "ManualKycDocument",
-            },
-          });
-
-          await tx.manualKycDocument.create({
-            data: {
-              submissionId: submission.id,
-              fileAssetId: fileAsset.id,
-              documentType: index === 0 ? "IcFront" : "IcBack",
-            },
-          });
+        let uploadedIndex = 0;
+        for (const [documentType, file, previous] of [["IcFront", icFront, previousFront], ["IcBack", icBack, previousBack]] as const) {
+          let fileAssetId = previous?.fileAssetId;
+          if (file) {
+            const stored = storedDocuments[uploadedIndex++];
+            const fileAsset = await tx.fileAsset.create({
+              data: {
+                fileRef: makeRef("FIL"), bucket: stored.bucket, objectKey: stored.objectKey,
+                originalFilename: file.name, contentType: stored.contentType, sizeBytes: stored.sizeBytes,
+                visibility: "Authenticated", purpose: "ManualKycDocument",
+              },
+            });
+            fileAssetId = fileAsset.id;
+          }
+          if (!fileAssetId) throw new Error("Both sides of the identification document are required.");
+          await tx.manualKycDocument.create({ data: { submissionId: submission.id, fileAssetId, documentType } });
         }
 
         const claimedMember = await tx.member.updateMany({
@@ -106,7 +108,10 @@ export async function submitManualKycAction(
             },
           },
         });
+        return submission.id;
       });
+      await notifyMember(member.id, { title: "Application received", body: "Your membership application is under review." });
+      await sendApplicationEmail({ kind: "received", to: user.email, name: member.fullName, eventId: submissionId });
     } catch (error) {
       await deletePrivateDocuments(storedDocuments.map((document) => document.objectKey)).catch(() => undefined);
       throw error;
@@ -114,8 +119,9 @@ export async function submitManualKycAction(
 
     await notifyAdmins({ title: "KYC submitted for review", body: `${member.fullName} (${member.memberRef}) uploaded IC documents for identity verification.` });
     revalidatePath("/member/profile");
+    revalidatePath("/application");
     revalidatePath("/admin/members");
-    return { success: "IC front and back were submitted securely for review." };
+    return { success: "Your membership application was submitted for review. Dashboard access will be available after approval." };
   } catch (error) {
     return { error: error instanceof Error ? error.message : "Unable to submit identity documents." };
   }

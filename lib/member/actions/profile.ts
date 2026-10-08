@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireMember } from "@/lib/auth/guards";
 import { encryptSensitiveValue } from "@/lib/security/encryption";
+import { getApplicationStatus } from "@/lib/member/applicationStatus";
 
 export type MemberProfileFormState = { error?: string; success?: string };
 
@@ -28,6 +29,9 @@ export async function updateMemberProfileAction(
   const { user, member } = await requireMember();
 
   try {
+    if (await getApplicationStatus(member.id, member.verificationStatus) === "Pending") {
+      throw new Error("Your application is under review and cannot be edited right now.");
+    }
     const fullName = text(formData, "fullName");
     const phone = text(formData, "phone");
     const nationality = text(formData, "nationality");

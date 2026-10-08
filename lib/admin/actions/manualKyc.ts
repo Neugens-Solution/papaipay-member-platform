@@ -4,6 +4,8 @@ import { notifyMember } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
 import { requireAdminPermission } from "@/lib/auth/guards";
+import { correctionReasons, correctionReasonText } from "@/lib/member/correctionReasons";
+import { sendApplicationEmail } from "@/lib/email/application";
 
 function makeRef(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -20,10 +22,13 @@ export async function reviewManualKycAction(formData: FormData) {
   const submissionId = requiredString(formData.get("submissionId"), "KYC submission is required.");
   const decision = requiredString(formData.get("decision"), "Review decision is required.");
   const reason = typeof formData.get("reason") === "string" ? String(formData.get("reason")).trim() : "";
+  const note = typeof formData.get("note") === "string" ? String(formData.get("note")).trim() : "";
   if (!["Approved", "ResubmissionRequired"].includes(decision)) throw new Error("Invalid KYC review decision.");
-  if (decision === "ResubmissionRequired" && !reason) throw new Error("Provide a reason for resubmission.");
+  if (decision === "ResubmissionRequired" && !(reason in correctionReasons)) throw new Error("Select a correction reason.");
+  if (reason === "OTHER" && !note) throw new Error("Provide an additional note for Other.");
+  if (note.length > 500) throw new Error("Additional note is too long.");
 
-  await db.$transaction(async (tx) => {
+  const recipient = await db.$transaction(async (tx) => {
     const submission = await tx.manualKycSubmission.findFirst({
       where: { id: submissionId, memberId, status: { in: ["Submitted", "UnderReview"] } },
       include: { documents: true },
@@ -41,6 +46,7 @@ export async function reviewManualKycAction(formData: FormData) {
         reviewedById: user.id,
         reviewedAt: new Date(),
         rejectionReason: approved ? null : reason,
+        adminNotes: approved ? null : note || null,
       },
     });
     if (updatedSubmission.count !== 1) throw new Error("This KYC submission was already reviewed. Refresh to see its latest status.");
@@ -63,14 +69,23 @@ export async function reviewManualKycAction(formData: FormData) {
         afterSnapshot: { status: decision, memberId, reason: approved ? null : reason },
       },
     });
+    return tx.member.findUniqueOrThrow({ where: { id: memberId }, select: { fullName: true, user: { select: { email: true } } } });
   });
 
   await notifyMember(
     memberId,
     decision === "Approved"
-      ? { title: "Identity verified", body: "Your identity verification has been approved. You can now participate in listings." }
-      : { title: "Identity documents need resubmission", body: `Please resubmit your IC documents. Reason: ${reason}` },
+      ? { title: "Membership application approved", body: "Your application has been approved. You can now access your dashboard." }
+      : { title: "Application correction required", body: correctionReasonText(reason, note) },
   );
+  await sendApplicationEmail({
+    kind: decision === "Approved" ? "approved" : "correction",
+    to: recipient.user.email,
+    name: recipient.fullName,
+    eventId: submissionId,
+    reason: decision === "Approved" ? undefined : correctionReasonText(reason),
+    note: decision === "Approved" ? undefined : note,
+  });
   revalidatePath("/admin/members");
   revalidatePath(`/admin/members/${memberId}`);
   revalidatePath("/member/profile");

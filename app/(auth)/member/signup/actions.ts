@@ -47,5 +47,5 @@ export async function memberSignupAction(_state: SignupState, formData: FormData
 
   await notifyAdmins({ title: "New member registered", body: `${fullName} (${email}) created a member account.` });
   await setSession({ userId: user.id, accountType: "member" });
-  redirect("/member/dashboard");
+  redirect("/application");
 }
