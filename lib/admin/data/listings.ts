@@ -181,6 +181,8 @@ export async function getAdminListingSummaries() {
         title: true,
         slug: true,
         lifecycleStatus: true,
+        publishStatus: true,
+        visibility: true,
         campaignTarget: true,
         collectedAmountSnapshot: true,
         propertyDetail: true,

@@ -11,7 +11,9 @@ export type WorkspaceIntent =
   | "save-documents"
   | "save-member-info"
   | "publish"
-  | "unpublish";
+  | "unpublish"
+  | "pause"
+  | "resume";
 
 export type WorkspaceReadinessModuleKey =
   | "overview"

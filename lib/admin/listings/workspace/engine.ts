@@ -6,14 +6,14 @@ import { saveMediaModule } from "./modules/media";
 import { saveMemberInfoModule } from "./modules/memberInfo";
 import { saveOverviewModule } from "./modules/overview";
 import { saveParticipationModule } from "./modules/participation";
-import { publishListingModule, unpublishListingModule } from "./modules/publish";
+import { pauseListingModule, publishListingModule, resumeListingModule, unpublishListingModule } from "./modules/publish";
 import { savePropertyModule } from "./modules/property";
 import { saveSettlementModule } from "./modules/settlement";
 
 function normalizeIntent(intent: string): WorkspaceIntent {
   if (intent === "draft") return "save-overview";
   if (intent === "save-step") return "save-overview";
-  const allowed = new Set<WorkspaceIntent>(["save-overview", "save-property", "save-participation", "save-settlement", "save-media", "save-documents", "save-member-info", "publish", "unpublish"]);
+  const allowed = new Set<WorkspaceIntent>(["save-overview", "save-property", "save-participation", "save-settlement", "save-media", "save-documents", "save-member-info", "publish", "unpublish", "pause", "resume"]);
   if (allowed.has(intent as WorkspaceIntent)) return intent as WorkspaceIntent;
   return "save-overview";
 }
@@ -48,6 +48,10 @@ export class ListingWorkspaceEngine {
         return publishListingModule(formData);
       case "unpublish":
         return unpublishListingModule(formData);
+      case "pause":
+        return pauseListingModule(formData);
+      case "resume":
+        return resumeListingModule(formData);
     }
 
     const campaignId = requiredString(formData, "campaignId");

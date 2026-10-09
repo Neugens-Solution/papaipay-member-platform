@@ -717,6 +717,8 @@ export function ListingForm({
       overview: "Overview saved successfully.",
       publish: "Listing published successfully.",
       unpublish: "Listing unpublished successfully.",
+      pause: "Listing is on hold. Members can no longer see it.",
+      resume: "Listing resumed. Members can see it again.",
     };
     if (!saved || !messages[saved]) return;
     setToast({ message: messages[saved], tone: "success" });
@@ -815,10 +817,16 @@ export function ListingForm({
   const intentStepIndex: Record<string, number> = {
     ...Object.fromEntries(saveIntents.map((intent, index) => [intent, index])),
     unpublish: wizardSteps.length - 1,
+    pause: wizardSteps.length - 1,
+    resume: wizardSteps.length - 1,
   };
   const readiness = state.readiness;
+  const isPublished = initialValues?.publishStatus === "Published";
+  const isOnHold = isPublished && initialValues?.visibility === "InternalOnly";
   const listingStatus =
-    initialValues?.publishStatus === "Published"
+    isOnHold
+      ? "On Hold"
+      : isPublished
       ? "Published"
       : initialValues?.publishStatus === "Ready"
         ? "Draft"
@@ -1686,15 +1694,33 @@ export function ListingForm({
               fieldLabels={fieldLabels}
               onGoToStep={visitStep}
               publishAction={
-                initialValues?.publishStatus === "Published" &&
-                mode === "edit" ? (
-                  <SubmitButton
-                    intent="unpublish"
-                    pendingLabel="Unpublishing..."
-                    className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-black text-amber-800"
-                  >
-                    Unpublish Listing
-                  </SubmitButton>
+                isPublished && mode === "edit" ? (
+                  <div className="flex flex-wrap gap-2">
+                    {isOnHold ? (
+                      <SubmitButton
+                        intent="resume"
+                        pendingLabel="Resuming..."
+                        className="rounded-xl bg-kasset-green px-5 py-3 text-sm font-black text-white shadow-sm"
+                      >
+                        Resume Listing
+                      </SubmitButton>
+                    ) : (
+                      <SubmitButton
+                        intent="pause"
+                        pendingLabel="Putting on hold..."
+                        className="rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-black text-slate-700"
+                      >
+                        Put On Hold
+                      </SubmitButton>
+                    )}
+                    <SubmitButton
+                      intent="unpublish"
+                      pendingLabel="Unpublishing..."
+                      className="rounded-xl border border-amber-200 bg-amber-50 px-5 py-3 text-sm font-black text-amber-800"
+                    >
+                      Unpublish Listing
+                    </SubmitButton>
+                  </div>
                 ) : (
                   <SubmitButton
                     intent="publish"
