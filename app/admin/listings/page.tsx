@@ -2,6 +2,7 @@ import { PendingLink } from "@/components/common/PendingLink";
 import { Badge, PageHeader, ProgressBar, TableWrap, Td, Th } from "@/components/admin/AdminUI";
 import { getAdminListingSummaries } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatEnumLabel } from "@/lib/utils/formatters";
+import { adminListingStatusLabel } from "@/lib/admin/listingStatus";
 
 export const dynamic = "force-dynamic";
 
@@ -95,7 +96,7 @@ export default async function ListingsPage() {
                 </Td>
                 <Td>{formatProperty(listing.propertyDetail)}</Td>
                 <Td>
-                  <Badge>{formatEnumLabel(listing.lifecycleStatus)}</Badge>
+                  <Badge>{adminListingStatusLabel(listing)}</Badge>
                 </Td>
                 <Td>{formatCurrency(target)}</Td>
                 <Td>{formatCurrency(collected)}</Td>

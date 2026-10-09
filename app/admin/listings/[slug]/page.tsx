@@ -4,6 +4,7 @@ import { BackLink, Badge, Card, InfoGrid, PageHeader, ProgressBar, TableWrap, Td
 import { getAdminListingBySlug } from "@/lib/admin/data/listings";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
 import { fileAssetPublicUrl } from "@/lib/storage/fileAssetUrl";
+import { adminListingStatusLabel } from "@/lib/admin/listingStatus";
 
 function DocumentIcon() {
   return <span className="grid h-10 w-10 place-items-center rounded-lg bg-emerald-50 text-sm font-black text-kasset-green ring-1 ring-emerald-100">PDF</span>;
@@ -94,7 +95,7 @@ export default async function ListingDetailPage({ params }: { params: Promise<{ 
               { label: "Resale Price", value: resalePrice ? formatCurrency(resalePrice) : "To be confirmed" },
               { label: "Holding Return", value: estimatedAnnualYield ? `${estimatedAnnualYield.toFixed(2)}% p.a.` : "To be confirmed" },
               { label: "Occupancy Status", value: property?.occupancyStatus || "To be confirmed" },
-              { label: "Status", value: formatEnumLabel(listing.lifecycleStatus) },
+              { label: "Status", value: adminListingStatusLabel(listing) },
               { label: "Participation Target", value: formatCurrency(target) },
               { label: "Collected Amount", value: formatCurrency(collected) },
               { label: "Holding Return Rate", value: `${decimalToNumber(listing.holdingReturnRateMonthly)}% per month` },

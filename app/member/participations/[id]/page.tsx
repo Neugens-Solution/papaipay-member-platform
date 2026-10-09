@@ -5,6 +5,7 @@ import { PaymentReceiptForm } from "@/components/member/PaymentReceiptForm";
 import { getMemberParticipationById } from "@/lib/data/memberParticipations";
 import { decimalToNumber, formatDate } from "@/lib/utils/formatters";
 import { formatRM } from "@/lib/memberMockData";
+import { isVisibleToMembers } from "@/lib/admin/listingStatus";
 
 export default async function ParticipationConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -48,7 +49,9 @@ export default async function ParticipationConfirmationPage({ params }: { params
         ) : null}
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/member/portfolio" className="inline-flex min-h-11 items-center justify-center rounded-md bg-kasset-green px-4 py-2 text-sm font-bold text-white hover:bg-kasset-green/90">View Portfolio</Link>
-          <Link href={`/member/opportunities/${participation.campaign.slug}`} className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-kasset-green hover:text-kasset-green">Back to Listing</Link>
+          {isVisibleToMembers(participation.campaign) ? (
+            <Link href={`/member/opportunities/${participation.campaign.slug}`} className="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 px-4 py-2 text-sm font-bold text-slate-700 hover:border-kasset-green hover:text-kasset-green">Back to Listing</Link>
+          ) : null}
         </div>
       </ContentCard>
     </div>
