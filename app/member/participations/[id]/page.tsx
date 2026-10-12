@@ -6,6 +6,7 @@ import { getMemberParticipationById } from "@/lib/data/memberParticipations";
 import { decimalToNumber, formatDate } from "@/lib/utils/formatters";
 import { formatRM } from "@/lib/memberMockData";
 import { isVisibleToMembers } from "@/lib/admin/listingStatus";
+import { PaymentInstructions } from "@/components/member/PaymentInstructions";
 
 export default async function ParticipationConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,14 +23,14 @@ export default async function ParticipationConfirmationPage({ params }: { params
       <ContentCard className="border-kasset-green/20 shadow-[0_18px_55px_rgba(15,23,42,0.08)]">
         <p className="text-xs font-bold uppercase tracking-wide text-kasset-green">Participation Reserved</p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight text-kasset-ink">Pending Payment</h1>
-        <p className="mt-3 text-sm leading-6 text-slate-600">Your participation has been reserved. Complete the bank transfer using the official PICM Sdn Bhd payment instructions, then upload the receipt below for admin review.</p>
+        <p className="mt-3 text-sm leading-6 text-slate-600">Your participation has been reserved. Pay using the instructions below, then upload your payment receipt for admin review.</p>
         <dl className="mt-5 divide-y divide-slate-100 rounded-xl bg-slate-50/70 px-4">
           <Row label="Participation ID" value={participation.participationRef} />
           <Row label="Campaign" value={`${participation.campaign.campaignRef} • ${participation.campaign.title}`} />
           <Row label="Amount" value={formatRM(decimalToNumber(participation.participationAmount))} />
           <Row label="Status" value="Pending Payment" />
           <Row label="Payment Status" value={paymentStatus} />
-          <Row label="Payment Reference" value={paymentReference} />
+          <Row label="Payment Record" value={paymentReference} />
           <Row label="Manual Payment" value={payment?.submittedAt ? `Receipt submitted ${formatDate(payment.submittedAt)}` : "Receipt not submitted yet"} />
           <Row label="Reserved Until" value={formatDate(participation.reservedUntil)} />
         </dl>
@@ -38,6 +39,16 @@ export default async function ParticipationConfirmationPage({ params }: { params
             <p className="text-sm font-bold text-kasset-green">Payment receipt received</p>
             <p className="mt-1 text-sm text-slate-600">Bank reference: {payment.submittedReference || "Not provided"}</p>
             <Link href={`/files/${payment.receiptFileAsset.id}`} target="_blank" className="mt-3 inline-flex text-sm font-bold text-kasset-green">View submitted receipt ↗</Link>
+          </div>
+        ) : null}
+        {canUploadReceipt ? (
+          <div className="mt-5">
+            <PaymentInstructions
+              amountLabel={formatRM(decimalToNumber(participation.participationAmount))}
+              amountValue={decimalToNumber(participation.participationAmount).toFixed(2)}
+              reference={participation.participationRef}
+              reservedUntil={participation.reservedUntil ? formatDate(participation.reservedUntil) : null}
+            />
           </div>
         ) : null}
         {canUploadReceipt ? (
