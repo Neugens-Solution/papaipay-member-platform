@@ -356,6 +356,7 @@ export async function getAdminProjectWorkspaceBySlug(slug: string) {
             updatedAt: true,
             memberId: true,
             confirmedAt: true,
+            reservedUntil: true,
             member: { select: { memberRef: true, fullName: true, user: { select: { email: true } } } },
             payments: {
               orderBy: { updatedAt: "desc" },

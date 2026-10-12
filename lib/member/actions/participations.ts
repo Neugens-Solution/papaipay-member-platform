@@ -6,6 +6,7 @@ import { redirect } from "next/navigation";
 import { Prisma } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireApprovedMember } from "@/lib/auth/guards";
+import { expireStaleReservations } from "@/lib/participations/expiry";
 
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MYT_OFFSET_MS = 8 * 60 * 60 * 1000;
@@ -244,6 +245,8 @@ export async function createParticipationAction(
   }
 
   let result: Awaited<ReturnType<typeof createParticipationRecord>>;
+
+  await expireStaleReservations({ campaignId });
 
   try {
     result = await createParticipationRecord({
