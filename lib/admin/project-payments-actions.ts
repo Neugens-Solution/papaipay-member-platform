@@ -6,6 +6,7 @@ import { Prisma, PaymentStatus, ParticipationStatus } from "@prisma/client";
 import { db } from "@/lib/db";
 import { requireAdmin } from "@/lib/auth/guards";
 import { formatRinggit, notifyMember } from "@/lib/notifications";
+import { releaseReservation } from "@/lib/participations/expiry";
 
 function makeRef(prefix: string) {
   return `${prefix}-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
@@ -143,4 +144,23 @@ async function confirmManualPayment(formData: FormData, { user, admin }: Awaited
     });
   }
   revalidatePath(`/admin/projects/${projectSlug}`);
+}
+
+/** Admin cancels a pending reservation; its amount returns to the listing's capacity. */
+export async function cancelReservationAction(formData: FormData): Promise<void> {
+  const { user } = await requireAdmin();
+  const slug = typeof formData.get("projectSlug") === "string" ? String(formData.get("projectSlug")) : "";
+  const participationId = typeof formData.get("participationId") === "string" ? String(formData.get("participationId")) : "";
+  let outcome: string;
+  try {
+    if (!participationId) throw new Error("Participation is required.");
+    const released = await releaseReservation(participationId, "admin-cancelled", user.id);
+    if (!released) throw new Error("This reservation is no longer pending. Refresh the project workspace.");
+    outcome = "reservationCancelled=1";
+  } catch (error) {
+    outcome = `paymentError=${encodeURIComponent(error instanceof Error ? error.message : "Reservation could not be cancelled.")}`;
+  }
+  if (!slug) return;
+  revalidatePath(`/admin/projects/${slug}`);
+  redirect(`/admin/projects/${encodeURIComponent(slug)}?${outcome}#participants`);
 }

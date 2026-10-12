@@ -5,11 +5,12 @@ import { FinancialApprovalStatusCard } from "@/components/admin/project-workspac
 import { FinancialSummaryForm } from "@/components/admin/project-workspace/FinancialSummaryForm";
 import { DistributionBatchActionsForm } from "@/components/admin/project-workspace/DistributionBatchActionsForm";
 import { getAdminProjectWorkspaceBySlug } from "@/lib/admin/data/listings";
-import { confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
+import { cancelReservationAction, confirmManualPaymentAction } from "@/lib/admin/project-payments-actions";
 import { createProjectUpdateAction, updateProjectStatusAction } from "@/lib/admin/project-progress/actions";
 import { deriveLifecycleFallbackProjectStatus, isProjectProgressStatus, PROJECT_PROGRESS_BY_STATUS, PROJECT_PROGRESS_STATUSES, progressForProjectStatus, type ProjectProgressStatus } from "@/lib/admin/project-progress/statuses";
 import { calculateDistributionPreview, evaluateParticipationEligibility, type DistributionPreviewResult } from "@/lib/distributions/preview";
 import { decimalToNumber, formatCurrency, formatDate, formatEnumLabel } from "@/lib/utils/formatters";
+import { expireStaleReservations } from "@/lib/participations/expiry";
 
 type ProjectWorkspace = NonNullable<Awaited<ReturnType<typeof getAdminProjectWorkspaceBySlug>>>;
 
@@ -325,13 +326,14 @@ export default async function ProjectWorkspacePage({
   searchParams,
 }: {
   params: Promise<{ slug: string }>;
-  searchParams?: Promise<{ paymentError?: string; paymentConfirmed?: string }>;
+  searchParams?: Promise<{ paymentError?: string; paymentConfirmed?: string; reservationCancelled?: string }>;
 }) {
   const { slug } = await params;
   const notice = (await searchParams) ?? {};
   let project: ProjectWorkspace | null = null;
 
   try {
+    await expireStaleReservations();
     project = await getAdminProjectWorkspaceBySlug(slug);
   } catch (error) {
     console.error("Project workspace unavailable", error);
@@ -477,6 +479,8 @@ export default async function ProjectWorkspacePage({
           <p role="alert" className="mb-4 rounded-xl border border-rose-100 bg-rose-50 p-4 text-sm font-semibold text-rose-700">{notice.paymentError}</p>
         ) : notice.paymentConfirmed ? (
           <p role="status" className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-kasset-green">Manual payment confirmed.</p>
+        ) : notice.reservationCancelled ? (
+          <p role="status" className="mb-4 rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-sm font-semibold text-kasset-green">Reservation cancelled. The amount has been returned to the listing&apos;s remaining capacity.</p>
         ) : null}
         <div className="mb-5 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
           <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-4">
@@ -525,7 +529,14 @@ export default async function ProjectWorkspacePage({
                         <button className="w-full rounded-lg bg-kasset-green px-3 py-2 text-sm font-bold text-white hover:bg-kasset-ink" type="submit">Confirm manual payment</button>
                       </form>
                     </details>
-                  ) : <span className="text-xs font-semibold text-slate-400">{String(p.participationStatus) === "PendingPayment" ? "Receipt required" : "No action"}</span>}</Td>
+                  ) : <span className="text-xs font-semibold text-slate-400">{String(p.participationStatus) === "PendingPayment" ? `Receipt required${"reservedUntil" in p && p.reservedUntil ? ` by ${formatDate(p.reservedUntil)}` : ""}` : "No action"}</span>}
+                  {String(p.participationStatus) === "PendingPayment" ? (
+                    <form action={cancelReservationAction} className="mt-2">
+                      <input type="hidden" name="projectSlug" value={project.slug} />
+                      <input type="hidden" name="participationId" value={p.id} />
+                      <button type="submit" className="text-xs font-bold text-rose-600 underline hover:text-rose-800">Cancel reservation</button>
+                    </form>
+                  ) : null}</Td>
                 </tr>
               );
             })}</tbody>

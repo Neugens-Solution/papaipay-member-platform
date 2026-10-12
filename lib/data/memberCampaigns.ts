@@ -10,6 +10,7 @@ import {
   formatDate,
 } from "@/lib/utils/formatters";
 import { fileAssetPublicUrl } from "@/lib/storage/fileAssetUrl";
+import { expireStaleReservations } from "@/lib/participations/expiry";
 
 type CampaignWithRelations = Awaited<
   ReturnType<typeof getMemberCampaignsRaw>
@@ -285,6 +286,8 @@ async function getMemberCampaignSummariesRaw() {
 }
 
 export async function getMemberCampaignSummaries() {
+  // Release expired, unpaid reservations so remaining capacity is accurate.
+  if (process.env.DATABASE_URL) await expireStaleReservations();
   try {
     const campaigns = await getMemberCampaignSummariesRaw();
 
@@ -316,6 +319,7 @@ function demoCampaignBySlug(slug: string) {
 }
 
 export async function getMemberCampaigns() {
+  if (process.env.DATABASE_URL) await expireStaleReservations();
   try {
     const campaigns = await getMemberCampaignsRaw();
 
@@ -339,6 +343,7 @@ export async function getRealMemberCampaignBySlug(slug: string) {
     assertProductionDatabaseConfigured();
     return null;
   }
+  await expireStaleReservations();
 
   try {
     const campaign = await db.campaign.findFirst({
@@ -400,6 +405,7 @@ export async function getMemberCampaignBySlug(slug: string) {
     assertProductionDatabaseConfigured();
     return demoCampaignBySlug(slug);
   }
+  await expireStaleReservations();
 
   try {
     const campaign = await db.campaign.findFirst({

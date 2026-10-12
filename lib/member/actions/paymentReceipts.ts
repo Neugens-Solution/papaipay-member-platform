@@ -3,6 +3,7 @@
 import { formatRinggit, notifyAdmins } from "@/lib/notifications";
 import { revalidatePath } from "next/cache";
 import { db } from "@/lib/db";
+import { expireStaleReservations } from "@/lib/participations/expiry";
 import { requireApprovedMember } from "@/lib/auth/guards";
 import {
   deletePrivateDocuments,
@@ -34,6 +35,10 @@ export async function submitPaymentReceiptAction(
     const receipt = formData.get("receipt");
     if (!(receipt instanceof File) || receipt.size === 0) throw new Error("Payment receipt is required.");
     validatePrivateDocument(receipt);
+
+    if (await expireStaleReservations({ participationId })) {
+      throw new Error("This reservation has expired because no receipt was uploaded before the deadline. Please make a new reservation.");
+    }
 
     const payment = await db.payment.findFirst({
       where: {
